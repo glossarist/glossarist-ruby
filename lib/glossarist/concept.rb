@@ -5,5 +5,7 @@ module Glossarist
     attribute :id, :string
 
     # attribute :superseded_concepts # TODO
+
+    attribute :localizations, default: []
   end
 end
