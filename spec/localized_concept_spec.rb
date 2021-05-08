@@ -5,6 +5,11 @@ RSpec.describe Glossarist::LocalizedConcept do
 
   let(:attrs) { { language_code: "eng" } }
 
+  it "accepts strings as ids" do
+    expect { subject.id = "456" }
+      .to change { subject.id }.to("456")
+  end
+
   it "accepts strings as language codes" do
     expect { subject.language_code = "deu" }
       .to change { subject.language_code }.to("deu")

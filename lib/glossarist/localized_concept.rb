@@ -1,5 +1,6 @@
 module Glossarist
   class LocalizedConcept < Model
+    attribute :id, :string
     attribute :language_code, :string
 
     attribute :terms, default: []
