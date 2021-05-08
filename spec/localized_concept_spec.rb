@@ -49,4 +49,27 @@ RSpec.describe Glossarist::LocalizedConcept do
     expect { subject.date_amended = "2020-01-01" }
       .to change { subject.date_amended }.to("2020-01-01")
   end
+
+  describe "#terms" do
+    let(:expression) { Glossarist::ExpressionDesignation.new }
+
+    it "is an array of designations" do
+      expect { subject.terms << expression }
+        .to change { subject.terms }.to([expression])
+    end
+  end
+
+  describe "#notes" do
+    it "is an array of strings" do
+      expect { subject.notes << "str" }
+        .to change { subject.notes }.to(["str"])
+    end
+  end
+
+  describe "#examples" do
+    it "is an array of strings" do
+      expect { subject.examples << "str" }
+        .to change { subject.examples }.to(["str"])
+    end
+  end
 end
