@@ -2,10 +2,17 @@
 
 module Glossarist
   class Concept < Model
-    attribute :id, :string
+    attribute :termid, :string
+
+    alias :id :termid
 
     # attribute :superseded_concepts # TODO
 
-    attribute :localizations, default: []
+    attribute :localizations, default: {}
+
+    def to_h
+      h = super
+      h.merge(h.delete("localizations"))
+    end
   end
 end
