@@ -10,9 +10,27 @@ module Glossarist
 
     attribute :localizations, default: {}
 
-    def to_h
-      h = super
-      h.merge(h.delete("localizations"))
+    def attributes
+      {
+        "termid" => termid,
+        "term" => localizations["eng"].terms&.dig(0, "designation"),
+        **localizations.to_h
+      }
+      # require
+      # {
+
+      # super.merge
+      # }
     end
+
+    # def to_h
+    #   attributes
+    # end
+
+    # def to_h
+    #   h = super
+    #   translations =
+    #   h.merge(h.delete("localizations").transform_values(&:to_h))
+    # end
   end
 end
