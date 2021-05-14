@@ -25,11 +25,7 @@ module Glossarist
     def to_serializable
       # require 'pry'
       # binding.pry
-      {
-        "termid" => termid,
-        "term" => localizations["eng"]&.terms&.dig(0, "designation"),
-        **localizations.to_h
-      }
+
       # require
       # {
 
@@ -38,7 +34,13 @@ module Glossarist
     end
 
     def to_yaml
-      to_serializable.to_yaml
+      h = {
+        "termid" => termid,
+        "term" => localizations["eng"]&.terms&.dig(0, "designation"),
+        **localizations.to_h,
+      }
+
+      h.to_yaml
     end
 
     # def to_h
