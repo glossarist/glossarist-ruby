@@ -22,26 +22,17 @@ module Glossarist
     #   # binding.pry
     # end
 
-    def to_serializable
-      # require 'pry'
-      # binding.pry
-
-      # require
-      # {
-
-      # super.merge
-      # }
-    end
-
-    def to_yaml
-      h = {
+    def to_h
+      {
         "termid" => termid,
         "term" => localizations["eng"]&.terms&.dig(0, "designation"),
-        **localizations.to_h,
+        **localizations.transform_values(&:to_h),
       }
-
-      h.to_yaml
     end
+
+    # def to_yaml
+    #   to_serializable.to_yaml
+    # end
 
     # def to_h
     #   attributes
