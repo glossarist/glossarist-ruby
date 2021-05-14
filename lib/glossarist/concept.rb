@@ -13,14 +13,14 @@ module Glossarist
 
     attribute :localizations, default: {}
 
-    def initialize(*)
-      # @localizations = Hash.new
-    # def initialize(*args, **kwargs)
-      require 'pry'
-      # binding.pry
-      super
-      # binding.pry
-    end
+    # def initialize(*)
+    #   # @localizations = Hash.new
+    # # def initialize(*args, **kwargs)
+    #   require 'pry'
+    #   # binding.pry
+    #   super
+    #   # binding.pry
+    # end
 
     def to_parsistence
       # require 'pry'
@@ -47,17 +47,17 @@ module Glossarist
     #   h.merge(h.delete("localizations").transform_values(&:to_h))
     # end
 
-    def add_localization(localization)
-      lang = localization.language_code
-      localizations.store lang, localization
-    end
+    # def add_localization(localization)
+    #   lang = localization.language_code
+    #   localizations.store lang, localization
+    # end
 
-    alias :add_l10n :add_localization
+    # alias :add_l10n :add_localization
 
-    def localization(lang)
-      localizations[lang]
-    end
+    # def localization(lang)
+    #   localizations[lang]
+    # end
 
-    alias :l10n :localization
+    # alias :l10n :localization
   end
 end
