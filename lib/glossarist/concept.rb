@@ -7,27 +7,25 @@ module Glossarist
     alias :id :termid
     alias :id= :termid=
 
-    # attr_reader :localizations
-
     # attribute :superseded_concepts # TODO
 
     attribute :localizations, default: {}
 
-    # def initialize(*)
-    #   # @localizations = Hash.new
-    # # def initialize(*args, **kwargs)
-    #   require 'pry'
-    #   # binding.pry
-    #   super
-    #   # binding.pry
-    # end
-
+    # def attributes
     def to_h
       {
         "termid" => termid,
-        "term" => localizations["eng"]&.terms&.dig(0, "designation"),
+        "term" => default_term,
         **localizations.transform_values(&:to_h),
       }
+    end
+
+    def default_localization
+      localizations["eng"]
+    end
+
+    def default_term
+      default_localization&.terms&.dig(0, "designation")
     end
 
     # def to_yaml
