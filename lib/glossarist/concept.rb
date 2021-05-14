@@ -5,22 +5,29 @@ module Glossarist
     attribute :termid, :string
 
     alias :id :termid
+    alias :id= :termid=
 
-    attr_reader :localizations
+    # attr_reader :localizations
 
     # attribute :superseded_concepts # TODO
 
-    # attribute :localizations, default: {}
+    attribute :localizations, default: {}
 
-    def initialize(*args)
+    def initialize(*)
+      # @localizations = Hash.new
+    # def initialize(*args, **kwargs)
+      require 'pry'
+      # binding.pry
       super
-      @localizations = Hash.new
+      # binding.pry
     end
 
-    def attributes
+    def to_parsistence
+      # require 'pry'
+      # binding.pry
       {
         "termid" => termid,
-        "term" => localizations["eng"].terms&.dig(0, "designation"),
+        "term" => localizations["eng"]&.terms&.dig(0, "designation"),
         **localizations.to_h
       }
       # require
