@@ -22,7 +22,7 @@ module Glossarist
     #   # binding.pry
     # end
 
-    def to_parsistence
+    def to_serializable
       # require 'pry'
       # binding.pry
       {
@@ -35,6 +35,10 @@ module Glossarist
 
       # super.merge
       # }
+    end
+
+    def to_yaml
+      to_serializable.to_yaml
     end
 
     # def to_h
