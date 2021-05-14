@@ -14,7 +14,7 @@ RSpec.describe Glossarist::Concept do
     let(:eng) { Glossarist::LocalizedConcept.new }
 
     it "is an array of localized concepts" do
-      expect { subject.add_localization eng }
+      expect { subject.localizations["eng"] = eng }
         .to change { subject.localizations }.to({ "eng" => eng })
     end
   end
