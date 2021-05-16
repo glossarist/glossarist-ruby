@@ -7,7 +7,7 @@ module Glossarist
     alias :id :termid
     alias :id= :termid=
 
-    # attribute :superseded_concepts # TODO
+    attribute :superseded_concepts, default: [] # TODO
 
     attribute :localizations, default: {}
 
@@ -16,8 +16,9 @@ module Glossarist
       {
         "termid" => termid,
         "term" => default_term,
+        "related" => related_concepts.presence,
         **localizations.transform_values(&:to_h),
-      }
+      }.compact
     end
 
     def default_localization
@@ -26,6 +27,12 @@ module Glossarist
 
     def default_term
       default_localization&.terms&.dig(0, "designation")
+    end
+
+    def related_concepts
+      # TODO someday other relation types too
+      arr = [superseded_concepts].flatten.compact
+      # arr.empty? ? nil : arr
     end
 
     # def to_yaml
