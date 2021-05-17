@@ -2,8 +2,28 @@
 
 module Glossarist
   class Model
-    include ActiveModel::Model
-    include ActiveModel::Attributes
+    # include ActiveModel::Model
+    # include ActiveModel::Attributes
+
+    def initialize
+      super
+      @attributes = {}
+    end
+
+    def self.attribute(name, type = nil, **)
+      define_method(name) { @attributes[name] }
+
+      define_method("#{name.to_s.chomp("?")}=") do |v|
+        v = type.call(v) if type
+        @attributes[name] = v
+      end
+    end
+
+    # def set_attribute(name, value)
+    # end
+
+    # def get_attribute(name, value)
+    # end
 
     def to_h
       attributes.to_h.transform_values { |v| serialize_attibute_value v }
