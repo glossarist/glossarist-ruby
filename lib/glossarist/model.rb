@@ -8,7 +8,6 @@ module Glossarist
     attr_reader :attributes
 
     def initialize(attributes = {})
-      super
       @attributes = {}
       self.attributes = attributes
     end
@@ -25,12 +24,6 @@ module Glossarist
     def attributes=(attr_hash)
       attr_hash.each_pair { |k,v| self.public_send "#{k}=", v }
     end
-
-    # def set_attribute(name, value)
-    # end
-
-    # def get_attribute(name, value)
-    # end
 
     def to_h
       attributes.to_h.transform_values { |v| serialize_attibute_value v }
