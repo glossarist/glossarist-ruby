@@ -2,7 +2,7 @@
 
 module Glossarist
   class Designation < Model
-    attribute :normative_status, Types::String
+    attribute :normative_status, Types::Symbol
   end
 
   class ExpressionDesignation < Designation
