@@ -2,6 +2,10 @@
 
 module Glossarist
   class Model
+    module Types
+      include Dry.Types()
+    end
+
     # include ActiveModel::Model
     # include ActiveModel::Attributes
 

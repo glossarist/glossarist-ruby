@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "dry-types"
+
 require_relative "glossarist/model"
 require_relative "glossarist/version"
 
