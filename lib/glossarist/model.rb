@@ -5,18 +5,25 @@ module Glossarist
     # include ActiveModel::Model
     # include ActiveModel::Attributes
 
-    def initialize
+    attr_reader :attributes
+
+    def initialize(attributes = {})
       super
       @attributes = {}
+      self.attributes = attributes
     end
 
     def self.attribute(name, type = nil, **)
       define_method(name) { @attributes[name] }
 
-      define_method("#{name.to_s.chomp("?")}=") do |v|
+      define_method("#{name}=") do |v|
         v = type.call(v) if type
         @attributes[name] = v
       end
+    end
+
+    def attributes=(attr_hash)
+      attr_hash.each_pair { |k,v| self.public_send "#{k}=", v }
     end
 
     # def set_attribute(name, value)
