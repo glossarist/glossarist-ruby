@@ -2,7 +2,7 @@
 
 module Glossarist
   class Concept < Model
-    attribute :termid, :string
+    attribute :termid, Types::String
 
     alias :id :termid
     alias :id= :termid=
