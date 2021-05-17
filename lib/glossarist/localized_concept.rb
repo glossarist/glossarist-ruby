@@ -1,12 +1,12 @@
 module Glossarist
   class LocalizedConcept < Model
-    attribute :id, :string
-    attribute :language_code, :string
+    attribute :id #, :string
+    attribute :language_code #, :string
 
-    attribute :terms, default: []
+    attribute :terms #, default: []
 
-    attribute :notes, default: []
-    attribute :examples, default: []
+    attribute :notes #, default: []
+    attribute :examples #, default: []
     attribute :definition
     attribute :authoritative_source
 
