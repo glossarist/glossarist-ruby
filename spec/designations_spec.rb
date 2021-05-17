@@ -3,7 +3,7 @@
 RSpec.describe Glossarist::ExpressionDesignation do
   subject { described_class.new attrs }
 
-  let(:attrs) { { designation: "equality", normative_status: :preferred } }
+  let(:attrs) { { designation: "equality", normative_status: "preferred" } }
 
   it "accepts strings as designations" do
     expect { subject.designation = "new one" }

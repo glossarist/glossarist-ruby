@@ -2,7 +2,7 @@
 
 module Glossarist
   class Designation < Model
-    attribute :normative_status, Types::Symbol # TODO ENUM
+    attribute :normative_status, Types::String # TODO ENUM
   end
 
   class ExpressionDesignation < Designation
