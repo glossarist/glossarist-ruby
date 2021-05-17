@@ -2,13 +2,13 @@
 
 module Glossarist
   class Designation < Model
-    attribute :normative_status, :string
+    attribute :normative_status, Types::String
   end
 
   class ExpressionDesignation < Designation
-    attribute :designation, :string
-    attribute :gender, :string
-    attribute :plurality, :string
-    attribute :part_of_speech, :string
+    attribute :designation, Types::String
+    attribute :gender, Types::String
+    attribute :plurality, Types::String
+    attribute :part_of_speech, Types::String
   end
 end
