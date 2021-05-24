@@ -37,5 +37,45 @@ module Glossarist
     end
 
     alias :l10n :localization
+
+    def to_h
+      {
+        "termid" => id,
+        "term" => default_designation,
+        "related" => related_concepts,
+        **localizations.transform_values(&:to_h),
+      }.compact
+    end
+
+    # @deprecated For legacy reasons only.
+    #   Implicit conversion (i.e. {#to_hash} alias) will be removed soon.
+    alias :to_hash :to_h
+
+    # rubocop:disable Metrics/AbcSize, Style/RescueModifier
+    def self.from_h(hash)
+      new.tap do |concept|
+        concept.id = hash.dig("termid")
+
+        hash.values
+          .grep(Hash)
+          .map { |subhash| LocalizedConcept.from_h(subhash) rescue nil }
+          .compact
+          .each { |lc| concept.add_l10n lc }
+
+        concept.l10n("eng")&.superseded_concepts = hash.dig("related_concepts")
+      end
+    end
+    # rubocop:enable Metrics/AbcSize, Style/RescueModifier
+
+    def default_designation
+      localized = localization("eng") || localizations.values.first
+      localized&.terms&.dig(0, "designation")
+    end
+
+    def related_concepts
+      # TODO Someday other relation types too
+      arr = [localization("eng")&.superseded_concepts].flatten.compact
+      arr.empty? ? nil : arr
+    end
   end
 end

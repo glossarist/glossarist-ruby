@@ -74,5 +74,28 @@ module Glossarist
       @designations = []
       super
     end
+
+    def to_h # rubocop:disable Metrics/MethodLength
+      {
+        "id" => id,
+        "terms" => terms,
+        "definition" => definition,
+        "language_code" => language_code,
+        "notes" => notes,
+        "examples" => examples,
+        "entry_status" => entry_status,
+        "classification" => classification,
+        "authoritative_source" => authoritative_source,
+        "date_accepted" => date_accepted,
+        "date_amended" => date_amended,
+        "review_date" => review_date,
+        "review_decision_date" => review_decision_date,
+        "review_decision_event" => review_decision_event,
+      }.compact
+    end
+
+    # @deprecated For legacy reasons only.
+    #   Implicit conversion (i.e. {#to_hash} alias) will be removed soon.
+    alias :to_hash :to_h
   end
 end

@@ -15,5 +15,9 @@ module Glossarist
       raise ArgumentError, "#{self.class.name} does not have " +
         "attribute #{name} defined or the attribute is read only."
     end
+
+    def self.from_h(hash)
+      new(hash)
+    end
   end
 end

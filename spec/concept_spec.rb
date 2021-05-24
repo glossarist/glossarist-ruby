@@ -21,4 +21,35 @@ RSpec.describe Glossarist::Concept do
         .to change { subject.localizations }.to({ "eng" => eng })
     end
   end
+
+  describe "::from_h" do
+    it "loads concept definition from a Hash" do
+      src = {
+        "termid" => "123-45",
+        "term" => "Example Designation",
+        "eng" => {
+          "id" => "123-45",
+          "language_code" => "eng",
+          "terms" => [
+            {
+              "designation" => "Example Designation",
+              "type" => "expression",
+              "normative_status" => "preferred",
+            },
+          ],
+          "definition" => "Example Definition",
+        },
+      }
+
+      retval = described_class.from_h(src)
+      expect(retval).to be_kind_of(Glossarist::Concept)
+      expect(retval.id).to eq("123-45")
+
+      # TODO rather mock
+      eng = retval.l10n("eng")
+      expect(eng).to be_kind_of(Glossarist::LocalizedConcept)
+      expect(eng.definition).to eq("Example Definition")
+      expect(eng.terms.dig(0, "designation")).to eq("Example Designation")
+    end
+  end
 end
