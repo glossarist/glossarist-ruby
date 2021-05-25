@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# (c) Copyright 2021 Ribose Inc.
+#
+
 require "glossarist"
 
 Dir["./spec/support/**/*.rb"].sort.each { |file| require file }
