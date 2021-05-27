@@ -5,6 +5,8 @@
 
 require "glossarist"
 
+Bundler.require(:development)
+
 Dir["./spec/support/**/*.rb"].sort.each { |file| require file }
 
 RSpec.configure do |config|
