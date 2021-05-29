@@ -64,4 +64,43 @@ RSpec.describe Glossarist::Collection do
       expect(subject.each).to be_kind_of(Enumerator)
     end
   end
+
+  # TODO These are integration tests rather than unit tests.  Move them or
+  # rework them.
+  describe "#load_concepts" do
+    before { allow(subject).to receive(:path).and_return("path/to/concepts") }
+
+    it "loads concepts from YAMLs" do
+      allow(Dir).to receive(:glob).and_yield("path1").and_yield("path2")
+
+      allow(File).to receive(:read).with("path1").and_return("data: 1")
+      allow(File).to receive(:read).with("path2").and_return("data: 2")
+
+      expect(Glossarist::Concept)
+        .to receive(:from_h).with({ "data" => 1 }).and_return(double(id: 1))
+      expect(Glossarist::Concept)
+        .to receive(:from_h).with({ "data" => 2 }).and_return(double(id: 2))
+
+      expect { subject.load_concepts }.to change { collection_index.size }.by(2)
+    end
+  end
+
+  describe "#save_concepts" do
+    before { allow(subject).to receive(:path).and_return("concepts/path") }
+
+    before { collection_index["1234"] = concept1234 }
+    before { collection_index["3456"] = concept3456 }
+
+    it "writes concepts to YAMLs" do
+      expect(concept1234).to receive(:to_h).and_return({ data: 1234 })
+      expect(concept3456).to receive(:to_h).and_return({ data: 3456 })
+
+      expect(File).to receive(:write)
+        .with("concepts/path/concept-1234.yaml", /data: 1234/)
+      expect(File).to receive(:write)
+        .with("concepts/path/concept-3456.yaml", /data: 3456/)
+
+      subject.save_concepts
+    end
+  end
 end

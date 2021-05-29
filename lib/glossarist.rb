@@ -3,6 +3,8 @@
 # (c) Copyright 2021 Ribose Inc.
 #
 
+require "psych"
+
 require_relative "glossarist/version"
 
 require_relative "glossarist/model"
