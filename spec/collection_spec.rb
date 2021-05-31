@@ -30,6 +30,31 @@ RSpec.describe Glossarist::Collection do
     end
   end
 
+  describe "#fetch_or_initialize" do
+    before { collection_index["1234"] = concept1234 }
+
+    context "when concept of given ID is present in the collection" do
+      it "returns that concept" do
+        expect(subject.fetch_or_initialize("1234")).to be(concept1234)
+      end
+    end
+
+    context "when concept of given ID is not present in the collection" do
+      it "initializes a new concept and adds it to the collection" do
+        expect { subject.fetch_or_initialize("7890") }
+          .to change { collection_index.size }.by(1)
+          .and change { collection_index["7890"] }
+
+        expect(collection_index["7890"]).to be_kind_of(Glossarist::Concept)
+      end
+
+      it "returns newly added concept" do
+        retval = subject.fetch_or_initialize("7890")
+        expect(retval).to be(collection_index["7890"])
+      end
+    end
+  end
+
   describe "#store" do
     it "adds concept to the collection if it wasn't there before" do
       expect { subject.store(concept1234) }

@@ -36,6 +36,17 @@ module Glossarist
 
     alias :[] :fetch
 
+    # If concept with given ID is present in this collection, returns that
+    # concept.  Otherwise, instantiates a new concept, adds it to
+    # the collection, and returns it.
+    #
+    # @param id [String]
+    #    Concept ID
+    # @return [Concept]
+    def fetch_or_initialize(id)
+      fetch(id) or store(Concept.new(id: id))
+    end
+
     # Adds concept to the collection.  If collection contains a concept with
     # the same ID already, that concept is replaced.
     #
