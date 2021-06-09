@@ -1,0 +1,37 @@
+---
+termid: 123-01
+term: Zeus
+related:
+- type: supersedes
+  ref:
+    source: Mythology
+    id: 123-01
+    version: some older one
+deu:
+  id: 123-01
+  terms:
+  - type: expression
+    normative_status: preferred
+    designation: Zeus
+  definition: Oberste olympische Gott der griechischen Mythologie.
+  language_code: deu
+  notes:
+  - Definition nur zu Testzwecken.
+  examples: []
+  entry_status: valid
+  date_accepted: '2021-05-01T00:00:00+00:00'
+  date_amended: '2021-05-01T00:00:00+00:00'
+eng:
+  id: 123-01
+  terms:
+  - type: expression
+    normative_status: preferred
+    designation: Zeus
+  definition: Supreme god in ancient Greek mythology.
+  language_code: eng
+  notes:
+  - This definition serves for test purposes only.
+  examples: []
+  entry_status: valid
+  date_accepted: '2021-05-01T00:00:00+00:00'
+  date_amended: '2021-05-01T00:00:00+00:00'

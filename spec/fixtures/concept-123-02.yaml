@@ -1,0 +1,31 @@
+---
+termid: 123-02
+term: Hera
+deu:
+  id: 123-02
+  terms:
+  - type: expression
+    normative_status: preferred
+    designation: Hera
+  definition: Die Gattin und gleichzeitig die Schwester von Zeus.
+  language_code: deu
+  notes:
+  - Definition nur zu Testzwecken.
+  examples: []
+  entry_status: valid
+  date_accepted: '2021-05-01T00:00:00+00:00'
+  date_amended: '2021-05-01T00:00:00+00:00'
+eng:
+  id: 123-02
+  terms:
+  - type: expression
+    normative_status: preferred
+    designation: Hera
+  definition: Sister and wife of Zeus.
+  language_code: eng
+  notes:
+  - This definition serves for test purposes only.
+  examples: []
+  entry_status: valid
+  date_accepted: '2021-05-01T00:00:00+00:00'
+  date_amended: '2021-05-01T00:00:00+00:00'
