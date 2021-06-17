@@ -85,4 +85,13 @@ RSpec.describe Glossarist::LocalizedConcept do
         .to change { subject.examples }.to(["str"])
     end
   end
+
+  describe "#superseded_concepts" do
+    let(:sup) { double("supersession") }
+
+    it "is an array" do
+      expect { subject.superseded_concepts << sup }
+        .to change { subject.superseded_concepts }.to([sup])
+    end
+  end
 end
