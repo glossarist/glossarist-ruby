@@ -72,6 +72,7 @@ module Glossarist
       @examples = []
       @notes = []
       @designations = []
+      @superseded_concepts = []
       super
     end
 
