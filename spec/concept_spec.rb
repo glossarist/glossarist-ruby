@@ -27,6 +27,16 @@ RSpec.describe Glossarist::Concept do
       src = {
         "termid" => "123-45",
         "term" => "Example Designation",
+        "related" => [
+          {
+            "type" => "supersedes",
+            "ref" => {
+              "source" => "Example Source",
+              "id" => "12345",
+              "version" => "7",
+            },
+          },
+        ],
         "eng" => {
           "id" => "123-45",
           "language_code" => "eng",
@@ -50,6 +60,8 @@ RSpec.describe Glossarist::Concept do
       expect(eng).to be_kind_of(Glossarist::LocalizedConcept)
       expect(eng.definition).to eq("Example Definition")
       expect(eng.terms.dig(0, "designation")).to eq("Example Designation")
+      expect(eng.superseded_concepts.dig(0, "type")).to eq("supersedes")
+      expect(eng.superseded_concepts.dig(0, "ref", "id")).to eq("12345")
     end
   end
 end
