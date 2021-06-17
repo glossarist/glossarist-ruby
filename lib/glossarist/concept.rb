@@ -62,7 +62,7 @@ module Glossarist
           .compact
           .each { |lc| concept.add_l10n lc }
 
-        concept.l10n("eng")&.superseded_concepts = hash.dig("related")
+        concept.l10n("eng")&.superseded_concepts = hash.dig("related") || []
       end
     end
     # rubocop:enable Metrics/AbcSize, Style/RescueModifier
