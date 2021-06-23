@@ -23,7 +23,7 @@ RSpec.describe Glossarist::Concept do
   end
 
   describe "::from_h" do
-    it "loads concept definition from a Hash" do
+    it "loads concept definition from a hash" do
       src = {
         "termid" => "123-45",
         "term" => "Example Designation",
