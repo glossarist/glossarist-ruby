@@ -94,4 +94,44 @@ RSpec.describe Glossarist::LocalizedConcept do
         .to change { subject.superseded_concepts }.to([sup])
     end
   end
+
+  describe "#to_h" do
+    it "dumps localized concept definition to a hash" do
+      attrs.replace({
+        id: "123",
+        language_code: "lang",
+        examples: ["ex. one"],
+        notes: ["note one"],
+      })
+
+      retval = subject.to_h
+      expect(retval).to be_kind_of(Hash)
+      expect(retval["language_code"]).to eq("lang")
+      expect(retval["id"]).to eq("123")
+      expect(retval["examples"]).to contain_exactly("ex. one")
+      expect(retval["notes"]).to contain_exactly("note one")
+    end
+  end
+
+  describe "::from_h" do
+    it "loads localized concept definition from a hash" do
+      src = {
+        "id" => "123-45",
+        "language_code" => "eng",
+        "terms" => [
+          {
+            "designation" => "Example Designation",
+            "type" => "expression",
+            "normative_status" => "preferred",
+          },
+        ],
+        "definition" => "Example Definition",
+      }
+
+      retval = described_class.from_h(src)
+      expect(retval).to be_kind_of(Glossarist::LocalizedConcept)
+      expect(retval.definition).to eq("Example Definition")
+      expect(retval.terms.dig(0, "designation")).to eq("Example Designation")
+    end
+  end
 end
