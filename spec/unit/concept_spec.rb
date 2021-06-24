@@ -22,6 +22,32 @@ RSpec.describe Glossarist::Concept do
     end
   end
 
+  describe "#to_h" do
+    it "dumps concept definition to a hash" do
+      object = described_class.new(id: "123")
+
+      object.localizations["eng"] = double(
+        to_h: {"some" => "eng translation"},
+        terms: [{"designation" => "term in English"}],
+        superseded_concepts: [{"some" => "supersession"}],
+      )
+
+      object.localizations["deu"] = double(
+        to_h: {"some" => "deu translation"},
+        terms: [{"designation" => "term in German"}],
+        superseded_concepts: [],
+      )
+
+      retval = object.to_h
+      expect(retval).to be_kind_of(Hash)
+      expect(retval["termid"]).to eq("123")
+      expect(retval["term"]).to eq("term in English")
+      expect(retval["related"]).to eq([{"some" => "supersession"}])
+      expect(retval["eng"]).to eq({"some" => "eng translation"})
+      expect(retval["deu"]).to eq({"some" => "deu translation"})
+    end
+  end
+
   describe "::from_h" do
     it "loads concept definition from a hash" do
       src = {
@@ -37,31 +63,29 @@ RSpec.describe Glossarist::Concept do
             },
           },
         ],
-        "eng" => {
-          "id" => "123-45",
-          "language_code" => "eng",
-          "terms" => [
-            {
-              "designation" => "Example Designation",
-              "type" => "expression",
-              "normative_status" => "preferred",
-            },
-          ],
-          "definition" => "Example Definition",
-        },
+        "eng" => { "some" => "English translation" },
+        "deu" => { "some" => "German translation" },
       }
 
+      eng_dbl = double(language_code: "eng", :"superseded_concepts=" => [])
+      deu_dbl = double(language_code: "deu")
+
+      expect(Glossarist::LocalizedConcept)
+        .to receive(:from_h)
+        .with({ "some" => "English translation" })
+        .and_return(eng_dbl)
+
+      expect(Glossarist::LocalizedConcept)
+        .to receive(:from_h)
+        .with({ "some" => "German translation" })
+        .and_return(deu_dbl)
+
       retval = described_class.from_h(src)
+
       expect(retval).to be_kind_of(Glossarist::Concept)
       expect(retval.id).to eq("123-45")
-
-      # TODO rather mock
-      eng = retval.l10n("eng")
-      expect(eng).to be_kind_of(Glossarist::LocalizedConcept)
-      expect(eng.definition).to eq("Example Definition")
-      expect(eng.terms.dig(0, "designation")).to eq("Example Designation")
-      expect(eng.superseded_concepts.dig(0, "type")).to eq("supersedes")
-      expect(eng.superseded_concepts.dig(0, "ref", "id")).to eq("12345")
+      expect(retval.l10n("eng")).to be(eng_dbl)
+      expect(retval.l10n("deu")).to be(deu_dbl)
     end
   end
 end
