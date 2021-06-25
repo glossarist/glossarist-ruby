@@ -43,8 +43,9 @@ module Glossarist
         "termid" => id,
         "term" => default_designation,
         "related" => related_concepts,
-        **localizations.transform_values(&:to_h),
-      }.compact
+      }
+      .compact
+      .merge(localizations.transform_values(&:to_h))
     end
 
     # @deprecated For legacy reasons only.
