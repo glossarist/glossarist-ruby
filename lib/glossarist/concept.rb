@@ -71,7 +71,7 @@ module Glossarist
           .compact
           .each { |lc| concept.add_l10n lc }
 
-        concept.l10n("eng")&.superseded_concepts = hash.dig("related") || []
+        concept.superseded_concepts = hash.dig("related") || []
       end
     end
     # rubocop:enable Metrics/AbcSize, Style/RescueModifier
@@ -83,7 +83,7 @@ module Glossarist
 
     def related_concepts
       # TODO Someday other relation types too
-      arr = [localization("eng")&.superseded_concepts].flatten.compact
+      arr = [superseded_concepts].flatten.compact
       arr.empty? ? nil : arr
     end
   end

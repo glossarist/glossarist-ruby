@@ -77,16 +77,17 @@ RSpec.describe Glossarist::Concept do
 
   describe "#to_h" do
     it "dumps concept definition to a hash" do
-      object = described_class.new(id: "123")
+      object = described_class.new(
+        id: "123",
+        superseded_concepts: [{"some" => "supersession"}],
+      )
 
       object.localizations["eng"] = double(
         to_h: {"some" => "eng translation"},
-        superseded_concepts: [{"some" => "supersession"}],
       )
 
       object.localizations["deu"] = double(
         to_h: {"some" => "deu translation"},
-        superseded_concepts: [],
       )
 
       allow(object).to receive(:default_designation).and_return("default term")
@@ -120,7 +121,7 @@ RSpec.describe Glossarist::Concept do
         "deu" => { "some" => "German translation" },
       }
 
-      eng_dbl = double(language_code: "eng", :"superseded_concepts=" => [])
+      eng_dbl = double(language_code: "eng")
       deu_dbl = double(language_code: "deu")
 
       expect(Glossarist::LocalizedConcept)
@@ -139,6 +140,8 @@ RSpec.describe Glossarist::Concept do
       expect(retval.id).to eq("123-45")
       expect(retval.l10n("eng")).to be(eng_dbl)
       expect(retval.l10n("deu")).to be(deu_dbl)
+      expect(retval.superseded_concepts.dig(0, "type")).to eq("supersedes")
+      expect(retval.superseded_concepts.dig(0, "ref", "id")).to eq("12345")
     end
   end
 end
