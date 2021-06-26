@@ -22,6 +22,15 @@ RSpec.describe Glossarist::Concept do
     end
   end
 
+  describe "#superseded_concepts" do
+    let(:sup) { double("supersession") }
+
+    it "is an array" do
+      expect { subject.superseded_concepts << sup }
+        .to change { subject.superseded_concepts }.to([sup])
+    end
+  end
+
   describe "#default_designation" do
     it "returns first English designation when available" do
       object = described_class.new(id: "123")

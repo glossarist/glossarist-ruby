@@ -95,15 +95,6 @@ RSpec.describe Glossarist::LocalizedConcept do
     end
   end
 
-  describe "#superseded_concepts" do
-    let(:sup) { double("supersession") }
-
-    it "is an array" do
-      expect { subject.superseded_concepts << sup }
-        .to change { subject.superseded_concepts }.to([sup])
-    end
-  end
-
   describe "#to_h" do
     it "dumps localized concept definition to a hash" do
       term1 = double(to_h: {"some" => "designation"})
