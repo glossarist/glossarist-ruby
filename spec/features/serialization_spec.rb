@@ -15,15 +15,15 @@ RSpec.describe "Serialization and deserialization" do
       rook.l10n("eng"), rook.l10n("pol"),
     ]).to all be_kind_of(Glossarist::LocalizedConcept)
 
-    expect(king.l10n("eng").designations.first["designation"]).to eq("King")
-    expect(queen.l10n("eng").designations.first["designation"]).to eq("Queen")
-    expect(rook.l10n("eng").designations.first["designation"]).to eq("Rook")
+    expect(king.l10n("eng").designations.first.designation).to eq("King")
+    expect(queen.l10n("eng").designations.first.designation).to eq("Queen")
+    expect(rook.l10n("eng").designations.first.designation).to eq("Rook")
 
-    expect(king.l10n("eng").designations.last["designation"])
+    expect(king.l10n("eng").designations.last.designation)
       .to match(/\p{Symbol}/)
-    expect(queen.l10n("eng").designations.last["designation"])
+    expect(queen.l10n("eng").designations.last.designation)
       .to match(/\p{Symbol}/)
-    expect(rook.l10n("eng").designations.last["designation"])
+    expect(rook.l10n("eng").designations.last.designation)
       .to match(/\p{Symbol}/)
 
     expect(king.l10n("eng").sources.dig(0, "ref", "source")).to eq("Wikipedia")
