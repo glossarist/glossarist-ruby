@@ -16,9 +16,7 @@ module Glossarist
 
     # Concept designations.
     # @todo Alias +terms+ exists only for legacy reasons and will be removed.
-    # @todo Right now accepts hashes for legacy reasons, but they will be
-    #   replaced with dedicated classes.
-    # @return [Array<Hash>]
+    # @return [Array<Designations::Base>]
     attr_accessor :designations
     alias :terms :designations
     alias :terms= :designations=
@@ -84,7 +82,7 @@ module Glossarist
     def to_h # rubocop:disable Metrics/MethodLength
       {
         "id" => id,
-        "terms" => terms,
+        "terms" => (terms&.map(&:to_h) || []),
         "definition" => definition,
         "language_code" => language_code,
         "notes" => notes,
@@ -98,6 +96,11 @@ module Glossarist
         "review_decision_date" => review_decision_date,
         "review_decision_event" => review_decision_event,
       }.compact
+    end
+
+    def self.from_h(hash)
+      terms = hash["terms"]&.map { |h| Designations::Base.from_h(h) } || []
+      super(hash.merge({"terms" => terms}))
     end
 
     # @deprecated For legacy reasons only.
