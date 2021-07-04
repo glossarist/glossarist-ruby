@@ -32,6 +32,46 @@ RSpec.describe Glossarist::Designations::Expression do
     expect { subject.part_of_speech = "adjective" }
       .to change { subject.part_of_speech }.to("adjective")
   end
+
+  describe "#to_h" do
+    it "dumps designation to a hash" do
+      attrs.replace({
+        designation: "Example designation",
+        normative_status: "preferred",
+        geographical_area: "somewhere",
+        gender: "masculine",
+        part_of_speech: "some part",
+        plurality: "singular",
+        usage_info: "science",
+      })
+
+      retval = subject.to_h
+      expect(retval).to be_kind_of(Hash)
+      expect(retval["type"]).to eq("expression")
+      expect(retval["designation"]).to eq("Example designation")
+      expect(retval["normative_status"]).to eq("preferred")
+      expect(retval["geographical_area"]).to eq("somewhere")
+      expect(retval["gender"]).to eq("masculine")
+      expect(retval["part_of_speech"]).to eq("some part")
+      expect(retval["plurality"]).to eq("singular")
+      expect(retval["usage_info"]).to eq("science")
+    end
+  end
+
+  describe "::from_h" do
+    it "loads localized concept definition from a hash" do
+      src = {
+        "type" => "expression",
+        "designation" => "Example Designation",
+        "normative_status" => "preferred",
+      }
+
+      retval = described_class.from_h(src)
+      expect(retval).to be_kind_of(Glossarist::Designations::Expression)
+      expect(retval.designation).to eq("Example Designation")
+      expect(retval.normative_status).to eq("preferred")
+    end
+  end
 end
 
 RSpec.describe Glossarist::Designations::Symbol do
@@ -47,5 +87,39 @@ RSpec.describe Glossarist::Designations::Symbol do
   it "accepts strings as normative statuses" do
     expect { subject.normative_status = "admitted" }
       .to change { subject.normative_status }.to("admitted")
+  end
+
+  describe "#to_h" do
+    it "dumps designation to a hash" do
+      attrs.replace({
+        designation: "X",
+        normative_status: "preferred",
+        geographical_area: "somewhere",
+        international: true,
+      })
+
+      retval = subject.to_h
+      expect(retval).to be_kind_of(Hash)
+      expect(retval["type"]).to eq("symbol")
+      expect(retval["designation"]).to eq("X")
+      expect(retval["normative_status"]).to eq("preferred")
+      expect(retval["geographical_area"]).to eq("somewhere")
+      expect(retval["international"]).to be(true)
+    end
+  end
+
+  describe "::from_h" do
+    it "loads localized concept definition from a hash" do
+      src = {
+        "type" => "symbol",
+        "designation" => "Example Symbol",
+        "normative_status" => "preferred",
+      }
+
+      retval = described_class.from_h(src)
+      expect(retval).to be_kind_of(Glossarist::Designations::Symbol)
+      expect(retval.designation).to eq("Example Symbol")
+      expect(retval.normative_status).to eq("preferred")
+    end
   end
 end
