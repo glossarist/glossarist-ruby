@@ -70,7 +70,7 @@ module Glossarist
 
     def default_designation
       localized = localization("eng") || localizations.values.first
-      localized&.terms&.dig(0, "designation")
+      localized&.terms&.first&.designation
     end
 
     def related_concepts

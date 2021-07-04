@@ -28,19 +28,19 @@ RSpec.describe Glossarist::Concept do
 
       object.localizations["ara"] = double(
         terms: [
-          {"designation" => "in Arabic"}, {"designation" => "in Arabic 2"}
+          double(designation: "in Arabic"), double(designation: "in Arabic 2")
         ]
       )
 
       object.localizations["eng"] = double(
         terms: [
-          {"designation" => "in English"}, {"designation" => "in English 2"}
+          double(designation: "in English"), double(designation: "in English 2")
         ]
       )
 
       object.localizations["deu"] = double(
         terms: [
-          {"designation" => "in German"}, {"designation" => "in German 2"}
+          double(designation: "in German"), double(designation: "in German 2")
         ]
       )
 
@@ -52,13 +52,13 @@ RSpec.describe Glossarist::Concept do
 
       object.localizations["ara"] = double(
         terms: [
-          {"designation" => "in Arabic"}, {"designation" => "in Arabic 2"}
+          double(designation: "in Arabic"), double(designation: "in Arabic 2")
         ]
       )
 
       object.localizations["deu"] = double(
         terms: [
-          {"designation" => "in German"}, {"designation" => "in German 2"}
+          double(designation: "in German"), double(designation: "in German 2")
         ]
       )
 
