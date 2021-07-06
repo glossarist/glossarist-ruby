@@ -100,6 +100,7 @@ RSpec.describe Glossarist::LocalizedConcept do
       attrs.replace({
         id: "123",
         language_code: "lang",
+        terms: [{"some" => "designation"}, {"another" => "designation"}],
         examples: ["ex. one"],
         notes: ["note one"],
       })
@@ -108,6 +109,8 @@ RSpec.describe Glossarist::LocalizedConcept do
       expect(retval).to be_kind_of(Hash)
       expect(retval["language_code"]).to eq("lang")
       expect(retval["id"]).to eq("123")
+      expect(retval["terms"]).to eq([
+        {"some" => "designation"}, {"another" => "designation"}])
       expect(retval["examples"]).to eq(["ex. one"])
       expect(retval["notes"]).to eq(["note one"])
     end
