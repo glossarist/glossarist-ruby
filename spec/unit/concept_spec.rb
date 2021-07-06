@@ -22,26 +22,70 @@ RSpec.describe Glossarist::Concept do
     end
   end
 
+  describe "#default_designation" do
+    it "returns first English designation when available" do
+      object = described_class.new(id: "123")
+
+      object.localizations["ara"] = double(
+        terms: [
+          {"designation" => "in Arabic"}, {"designation" => "in Arabic 2"}
+        ]
+      )
+
+      object.localizations["eng"] = double(
+        terms: [
+          {"designation" => "in English"}, {"designation" => "in English 2"}
+        ]
+      )
+
+      object.localizations["deu"] = double(
+        terms: [
+          {"designation" => "in German"}, {"designation" => "in German 2"}
+        ]
+      )
+
+      expect(object.default_designation).to eq("in English")
+    end
+
+    it "retunrs any designation when English localization is missing" do
+      object = described_class.new(id: "123")
+
+      object.localizations["ara"] = double(
+        terms: [
+          {"designation" => "in Arabic"}, {"designation" => "in Arabic 2"}
+        ]
+      )
+
+      object.localizations["deu"] = double(
+        terms: [
+          {"designation" => "in German"}, {"designation" => "in German 2"}
+        ]
+      )
+
+      expect(object.default_designation).to eq("in Arabic") || eq("in German")
+    end
+  end
+
   describe "#to_h" do
     it "dumps concept definition to a hash" do
       object = described_class.new(id: "123")
 
       object.localizations["eng"] = double(
         to_h: {"some" => "eng translation"},
-        terms: [{"designation" => "term in English"}],
         superseded_concepts: [{"some" => "supersession"}],
       )
 
       object.localizations["deu"] = double(
         to_h: {"some" => "deu translation"},
-        terms: [{"designation" => "term in German"}],
         superseded_concepts: [],
       )
+
+      allow(object).to receive(:default_designation).and_return("default term")
 
       retval = object.to_h
       expect(retval).to be_kind_of(Hash)
       expect(retval["termid"]).to eq("123")
-      expect(retval["term"]).to eq("term in English")
+      expect(retval["term"]).to eq("default term")
       expect(retval["related"]).to eq([{"some" => "supersession"}])
       expect(retval["eng"]).to eq({"some" => "eng translation"})
       expect(retval["deu"]).to eq({"some" => "deu translation"})
