@@ -108,8 +108,8 @@ RSpec.describe Glossarist::LocalizedConcept do
       expect(retval).to be_kind_of(Hash)
       expect(retval["language_code"]).to eq("lang")
       expect(retval["id"]).to eq("123")
-      expect(retval["examples"]).to contain_exactly("ex. one")
-      expect(retval["notes"]).to contain_exactly("note one")
+      expect(retval["examples"]).to eq(["ex. one"])
+      expect(retval["notes"]).to eq(["note one"])
     end
   end
 
