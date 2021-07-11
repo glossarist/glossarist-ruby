@@ -3,17 +3,25 @@ RSpec.describe "Serialization and deserialization" do
     collection = Glossarist::Collection.new(path: fixtures_path)
     collection.load_concepts
 
-    zeus = collection["123-01"]
-    hera = collection["123-02"]
+    king = collection["chess-02-01"]
+    queen = collection["chess-02-02"]
+    rook = collection["chess-02-03"]
 
-    expect([zeus, hera]).to all be_kind_of(Glossarist::Concept)
-    expect([zeus.l10n("eng"), zeus.l10n("deu"), hera.l10n("eng"),
-      hera.l10n("deu")]).to all be_kind_of(Glossarist::LocalizedConcept)
+    expect([king, queen, rook]).to all be_kind_of(Glossarist::Concept)
 
-    expect(zeus.l10n("eng").designations.first["designation"]).to eq("Zeus")
-    expect(hera.l10n("eng").designations.first["designation"]).to eq("Hera")
-    expect(zeus.l10n("eng").superseded_concepts.size).to eq(1)
-    expect(hera.l10n("eng").superseded_concepts.size).to eq(0)
+    expect([
+      king.l10n("eng"), king.l10n("pol"),
+      queen.l10n("eng"), queen.l10n("pol"),
+      rook.l10n("eng"), rook.l10n("pol"),
+    ]).to all be_kind_of(Glossarist::LocalizedConcept)
+
+    expect(king.l10n("eng").designations.first["designation"]).to eq("King")
+    expect(queen.l10n("eng").designations.first["designation"]).to eq("Queen")
+    expect(rook.l10n("eng").designations.first["designation"]).to eq("Rook")
+
+    expect(king.l10n("eng").superseded_concepts.size).to eq(1)
+    expect(queen.l10n("eng").superseded_concepts.size).to eq(0)
+    expect(rook.l10n("eng").superseded_concepts.size).to eq(0)
 
     Dir.mktmpdir do |tmp_path|
       collection.path = tmp_path
