@@ -19,6 +19,13 @@ RSpec.describe "Serialization and deserialization" do
     expect(queen.l10n("eng").designations.first["designation"]).to eq("Queen")
     expect(rook.l10n("eng").designations.first["designation"]).to eq("Rook")
 
+    expect(king.l10n("eng").designations.last["designation"])
+      .to match(/\p{Symbol}/)
+    expect(queen.l10n("eng").designations.last["designation"])
+      .to match(/\p{Symbol}/)
+    expect(rook.l10n("eng").designations.last["designation"])
+      .to match(/\p{Symbol}/)
+
     expect(king.l10n("eng").superseded_concepts.size).to eq(1)
     expect(queen.l10n("eng").superseded_concepts.size).to eq(0)
     expect(rook.l10n("eng").superseded_concepts.size).to eq(0)
