@@ -1,0 +1,40 @@
+---
+termid: chess-02-03
+term: Rook
+eng:
+  id: chess-02-03
+  terms:
+  - type: expression
+    normative_status: preferred
+    designation: Rook
+  - type: expression
+    normative_status: admitted
+    designation: Castle
+  - type: symbol
+    normative_status: preferred
+    designation: "♖"
+    international: true
+  definition: The second strongest piece in chess.
+  language_code: eng
+  notes: []
+  examples:
+  - Rh1-h8
+  - RQh1-a1
+  entry_status: valid
+  date_accepted: '2021-05-01T00:00:00+00:00'
+  date_amended: '2021-05-01T00:00:00+00:00'
+pol:
+  id: chess-02-03
+  terms:
+  - type: expression
+    normative_status: preferred
+    designation: Wieża
+  definition: Druga najpotężniejsza figura w szachach.
+  language_code: pol
+  notes: []
+  examples:
+  - Rh1-h8
+  - RQh1-a1
+  entry_status: valid
+  date_accepted: '2021-05-01T00:00:00+00:00'
+  date_amended: '2021-05-01T00:00:00+00:00'
