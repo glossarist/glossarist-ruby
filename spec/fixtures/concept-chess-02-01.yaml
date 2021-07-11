@@ -1,0 +1,45 @@
+---
+termid: chess-02-01
+term: King
+related:
+- type: supersedes
+  ref:
+    source: Chess rules
+    id: chess-02-01
+    version: some older definition
+eng:
+  id: chess-02-01
+  terms:
+  - type: expression
+    normative_status: preferred
+    designation: King
+  - type: symbol
+    normative_status: preferred
+    designation: "♔"
+    international: true
+  definition: The most important piece in the game of chess.
+  language_code: eng
+  notes:
+  - Cannot be captured.
+  examples:
+  - Kh6-h7
+  - Kh6-g7
+  entry_status: valid
+  date_accepted: '2021-05-01T00:00:00+00:00'
+  date_amended: '2021-05-01T00:00:00+00:00'
+pol:
+  id: chess-02-01
+  terms:
+  - type: expression
+    normative_status: preferred
+    designation: Król
+  definition: Najważniejsza figura w szachach.
+  language_code: pol
+  notes:
+  - Nie może zostać zbity.
+  examples:
+  - Kh6-h7
+  - Kh6-g7
+  entry_status: valid
+  date_accepted: '2021-05-01T00:00:00+00:00'
+  date_amended: '2021-05-01T00:00:00+00:00'
