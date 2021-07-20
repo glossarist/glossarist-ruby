@@ -12,6 +12,7 @@ require_relative "glossarist/concept"
 require_relative "glossarist/collection"
 require_relative "glossarist/designations"
 require_relative "glossarist/localized_concept"
+require_relative "glossarist/ref"
 
 module Glossarist
   class Error < StandardError; end
