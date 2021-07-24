@@ -54,5 +54,42 @@ module Glossarist
     def structured?
       !plain?
     end
+
+    def to_h
+      {
+        "ref" => ref_to_h,
+        "clause" => clause,
+        "link" => link,
+        "relationship" => relationship_to_h,
+        "original" => original,
+      }.compact
+    end
+
+    def self.from_h(hash)
+      hash = hash.dup
+
+      ref_val = hash.delete("ref")
+      rel_val = hash.delete("relationship")
+      hash.merge!(Hash === ref_val ? ref_val : {"text" => ref_val})
+      hash["status"] = rel_val&.fetch("type")
+      hash["modification"] = rel_val&.fetch("modification")
+      hash.compact!
+
+      super(hash)
+    end
+
+    private
+
+    def ref_to_h
+      if structured?
+        { "source" => source, "id" => id, "version" => version }.compact
+      else
+        text
+      end
+    end
+
+    def relationship_to_h
+      status && { "type" => status, "modification" => modification }.compact
+    end
   end
 end
