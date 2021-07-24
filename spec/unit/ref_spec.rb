@@ -52,4 +52,100 @@ RSpec.describe Glossarist::Ref do
     expect { subject.original = "new one" }
       .to change { subject.original }.to("new one")
   end
+
+  describe "#to_h" do
+    it "dumps plain text ref to a hash" do
+      attrs.replace({
+        text: "Example ref",
+        clause: "12.3",
+        link: "https://example.com",
+        status: "modified",
+        modification: "something changed",
+        original: "original ref text",
+      })
+
+      retval = subject.to_h
+      expect(retval).to be_kind_of(Hash)
+      expect(retval["ref"]).to eq("Example ref")
+      expect(retval["clause"]).to eq("12.3")
+      expect(retval["link"]).to eq("https://example.com")
+      expect(retval["relationship"]["type"]).to eq("modified")
+      expect(retval["relationship"]["modification"]).to eq("something changed")
+      expect(retval["original"]).to eq("original ref text")
+    end
+
+    it "dumps structured ref to a hash" do
+      attrs.replace({
+        source: "Example source",
+        id: "12345",
+        version: "2020",
+        clause: "12.3",
+        link: "https://example.com",
+        status: "modified",
+        modification: "something changed",
+        original: "original ref text",
+      })
+
+      retval = subject.to_h
+      expect(retval).to be_kind_of(Hash)
+      expect(retval["ref"]["source"]).to eq("Example source")
+      expect(retval["ref"]["id"]).to eq("12345")
+      expect(retval["ref"]["version"]).to eq("2020")
+      expect(retval["clause"]).to eq("12.3")
+      expect(retval["link"]).to eq("https://example.com")
+      expect(retval["relationship"]["type"]).to eq("modified")
+      expect(retval["relationship"]["modification"]).to eq("something changed")
+      expect(retval["original"]).to eq("original ref text")
+    end
+  end
+
+  describe "::from_h" do
+    it "loads plain text ref from a hash" do
+      src = {
+        "ref" => "Some Ref",
+        "clause" => "12.3",
+        "link" => "https://example.com",
+        "original" => "original ref text",
+        "relationship" => {
+          "type" => "modified",
+          "modification" => "something changed",
+        }
+      }
+
+      retval = described_class.from_h(src)
+      expect(retval).to be_kind_of(Glossarist::Ref)
+      expect(retval.text).to eq("Some Ref")
+      expect(retval.clause).to eq("12.3")
+      expect(retval.link).to eq("https://example.com")
+      expect(retval.status).to eq("modified")
+      expect(retval.modification).to eq("something changed")
+    end
+
+    it "loads structured ref from a hash" do
+      src = {
+        "ref" => {
+          "source" => "Example source",
+          "id" => "12345",
+          "version" => "2020",
+        },
+        "clause" => "12.3",
+        "link" => "https://example.com",
+        "original" => "original ref text",
+        "relationship" => {
+          "type" => "modified",
+          "modification" => "something changed",
+        }
+      }
+
+      retval = described_class.from_h(src)
+      expect(retval).to be_kind_of(Glossarist::Ref)
+      expect(retval.source).to eq("Example source")
+      expect(retval.id).to eq("12345")
+      expect(retval.version).to eq("2020")
+      expect(retval.clause).to eq("12.3")
+      expect(retval.link).to eq("https://example.com")
+      expect(retval.status).to eq("modified")
+      expect(retval.modification).to eq("something changed")
+    end
+  end
 end
