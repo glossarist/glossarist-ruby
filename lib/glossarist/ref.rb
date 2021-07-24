@@ -42,5 +42,17 @@ module Glossarist
     # @note This attribute is likely to be removed or reworked in future.
     #   It is arguably not relevant to Glossarist itself.
     attr_accessor :original
+
+    # Whether it is a plain text ref.
+    # @return [Boolean]
+    def plain?
+      (source && id && version).nil?
+    end
+
+    # Whether it is a structured ref.
+    # @return [Boolean]
+    def structured?
+      !plain?
+    end
   end
 end
