@@ -19,6 +19,12 @@ eng:
   - Qh1-a1
   - Qh1-a8
   entry_status: valid
+  authoritative_source:
+  - ref:
+      source: Wikipedia
+      id: Queen (chess)
+      version: 2021-07
+    link: https://en.wikipedia.org/wiki/Queen_(chess)
   date_accepted: '2021-05-01T00:00:00+00:00'
   date_amended: '2021-05-01T00:00:00+00:00'
 pol:
