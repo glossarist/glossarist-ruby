@@ -19,7 +19,7 @@ eng:
   notes: []
   examples:
   - Rh1-h8
-  - RQh1-a1
+  - Rh1-a1
   entry_status: valid
   date_accepted: '2021-05-01T00:00:00+00:00'
   date_amended: '2021-05-01T00:00:00+00:00'
@@ -34,7 +34,7 @@ pol:
   notes: []
   examples:
   - Rh1-h8
-  - RQh1-a1
+  - Rh1-a1
   entry_status: valid
   date_accepted: '2021-05-01T00:00:00+00:00'
   date_amended: '2021-05-01T00:00:00+00:00'
