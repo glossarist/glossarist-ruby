@@ -32,11 +32,10 @@ module Glossarist
     # @return [String]
     attr_accessor :definition
 
-    # @todo Right now accepts hashes for legacy reasons, but they will be
-    #   replaced with dedicated classes.
+    # List of authorative sources.
     # @todo Alias +authoritative_source+ exists for legacy reasons and may be
     #   removed.
-    # @return [Array<Hash>]
+    # @return [Array<Ref>]
     attr_accessor :sources
     alias :authoritative_source :sources
     alias :authoritative_source= :sources=
@@ -89,7 +88,7 @@ module Glossarist
         "examples" => examples,
         "entry_status" => entry_status,
         "classification" => classification,
-        "authoritative_source" => (sources if sources&.any?),
+        "authoritative_source" => sources&.map(&:to_h),
         "date_accepted" => date_accepted,
         "date_amended" => date_amended,
         "review_date" => review_date,
@@ -100,7 +99,8 @@ module Glossarist
 
     def self.from_h(hash)
       terms = hash["terms"]&.map { |h| Designations::Base.from_h(h) } || []
-      super(hash.merge({"terms" => terms}))
+      sources = hash["authoritative_source"]&.map { |h| Ref.from_h(h) }
+      super(hash.merge({"terms" => terms, "sources" => sources}))
     end
 
     # @deprecated For legacy reasons only.

@@ -108,13 +108,14 @@ RSpec.describe Glossarist::LocalizedConcept do
     it "dumps localized concept definition to a hash" do
       term1 = double(to_h: {"some" => "designation"})
       term2 = double(to_h: {"another" => "designation"})
+      source = double(to_h: {"source" => "reference"})
       attrs.replace({
         id: "123",
         language_code: "lang",
         terms: [term1, term2],
         examples: ["ex. one"],
         notes: ["note one"],
-        sources: [{"source" => "reference"}],
+        sources: [source],
       })
 
       retval = subject.to_h
@@ -148,17 +149,23 @@ RSpec.describe Glossarist::LocalizedConcept do
       }
 
       expr_dbl = double("expression")
+      source_dbl = double("source")
 
       expect(Glossarist::Designations::Base)
         .to receive(:from_h)
         .with(src["terms"][0])
         .and_return(expr_dbl)
 
+      expect(Glossarist::Ref)
+        .to receive(:from_h)
+        .with({"Example Source" => "Reference"})
+        .and_return(source_dbl)
+
       retval = described_class.from_h(src)
       expect(retval).to be_kind_of(Glossarist::LocalizedConcept)
       expect(retval.definition).to eq("Example Definition")
       expect(retval.terms).to eq([expr_dbl])
-      expect(retval.sources).to eq([{"Example Source" => "Reference"}])
+      expect(retval.sources).to eq([source_dbl])
     end
   end
 end
