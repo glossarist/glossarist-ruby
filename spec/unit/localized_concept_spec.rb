@@ -86,6 +86,15 @@ RSpec.describe Glossarist::LocalizedConcept do
     end
   end
 
+  describe "#authoritative_source" do
+    let(:item) { double("source") }
+
+    it "is an array" do
+      expect { subject.authoritative_source << item }
+        .to change { subject.authoritative_source }.to([item])
+    end
+  end
+
   describe "#superseded_concepts" do
     let(:sup) { double("supersession") }
 
