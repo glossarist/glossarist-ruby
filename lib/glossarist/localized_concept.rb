@@ -36,7 +36,7 @@ module Glossarist
 
     # @todo Right now accepts hashes for legacy reasons, but they will be
     #   replaced with dedicated classes.
-    # @return [Hash]
+    # @return [Array<Hash>]
     attr_accessor :authoritative_source
 
     # Must be one of the following:
