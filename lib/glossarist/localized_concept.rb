@@ -73,6 +73,7 @@ module Glossarist
       @notes = []
       @designations = []
       @superseded_concepts = []
+      @authoritative_source = []
       super
     end
 
