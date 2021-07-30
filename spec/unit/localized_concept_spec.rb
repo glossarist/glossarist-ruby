@@ -112,6 +112,7 @@ RSpec.describe Glossarist::LocalizedConcept do
         terms: [{"some" => "designation"}, {"another" => "designation"}],
         examples: ["ex. one"],
         notes: ["note one"],
+        authoritative_source: [{"source" => "reference"}],
       })
 
       retval = subject.to_h
@@ -122,6 +123,7 @@ RSpec.describe Glossarist::LocalizedConcept do
         {"some" => "designation"}, {"another" => "designation"}])
       expect(retval["examples"]).to eq(["ex. one"])
       expect(retval["notes"]).to eq(["note one"])
+      expect(retval["authoritative_source"]).to eq([{"source" => "reference"}])
     end
   end
 
@@ -138,12 +140,16 @@ RSpec.describe Glossarist::LocalizedConcept do
           },
         ],
         "definition" => "Example Definition",
+        "authoritative_source" => [
+          {"Example Source" => "Reference"},
+        ],
       }
 
       retval = described_class.from_h(src)
       expect(retval).to be_kind_of(Glossarist::LocalizedConcept)
       expect(retval.definition).to eq("Example Definition")
       expect(retval.terms.dig(0, "designation")).to eq("Example Designation")
+      expect(retval.authoritative_source).to eq([{"Example Source" => "Reference"}])
     end
   end
 end
