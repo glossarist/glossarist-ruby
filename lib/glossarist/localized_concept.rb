@@ -36,8 +36,12 @@ module Glossarist
 
     # @todo Right now accepts hashes for legacy reasons, but they will be
     #   replaced with dedicated classes.
+    # @todo Alias +authoritative_source+ exists for legacy reasons and may be
+    #   removed.
     # @return [Array<Hash>]
-    attr_accessor :authoritative_source
+    attr_accessor :sources
+    alias :authoritative_source :sources
+    alias :authoritative_source= :sources=
 
     # Must be one of the following:
     # +notValid+, +valid+, +superseded+, +retired+.
@@ -73,7 +77,7 @@ module Glossarist
       @notes = []
       @designations = []
       @superseded_concepts = []
-      @authoritative_source = []
+      @sources = []
       super
     end
 
