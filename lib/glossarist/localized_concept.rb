@@ -91,8 +91,7 @@ module Glossarist
         "examples" => examples,
         "entry_status" => entry_status,
         "classification" => classification,
-        "authoritative_source" =>
-          (authoritative_source if authoritative_source&.any?),
+        "authoritative_source" => (sources if sources&.any?),
         "date_accepted" => date_accepted,
         "date_amended" => date_amended,
         "review_date" => review_date,
