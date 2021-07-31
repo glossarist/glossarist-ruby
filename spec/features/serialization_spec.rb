@@ -26,12 +26,9 @@ RSpec.describe "Serialization and deserialization" do
     expect(rook.l10n("eng").designations.last["designation"])
       .to match(/\p{Symbol}/)
 
-    expect(king.l10n("eng").authoritative_source.dig(0, "ref", "source"))
-      .to eq("Wikipedia")
-    expect(king.l10n("eng").authoritative_source.dig(0, "ref", "id"))
-      .to eq("King (chess)")
-    expect(king.l10n("eng").authoritative_source.dig(0, "link"))
-      .to start_with("https")
+    expect(king.l10n("eng").sources.dig(0, "ref", "source")).to eq("Wikipedia")
+    expect(king.l10n("eng").sources.dig(0, "ref", "id")).to eq("King (chess)")
+    expect(king.l10n("eng").sources.dig(0, "link")).to start_with("https")
 
     expect(king.l10n("eng").superseded_concepts.size).to eq(1)
     expect(queen.l10n("eng").superseded_concepts.size).to eq(0)
