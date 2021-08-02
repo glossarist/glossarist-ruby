@@ -76,7 +76,7 @@ module Glossarist
       Expression => "expression",
       Symbol => "symbol",
     }
-    .yield_self { |h| h.merge(h.invert) }
+    .tap { |h| h.merge!(h.invert) }
     .freeze
   end
 end
