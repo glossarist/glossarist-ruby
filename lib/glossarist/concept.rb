@@ -15,11 +15,8 @@ module Glossarist
     # @return [Hash<String, LocalizedConcept>]
     attr_reader :localizations
 
-    # @todo Right now is an array of hashes for legacy reasons, but these hashes
-    #    will be replaced with some dedicated class.
-    # @todo Should be read-only, but for now it is not for legacy reasons.
-    #    Don't use the setter.
-    # @return [Array<Hash>]
+    # List of concepts superseded by this one.
+    # @return [Array<Ref>]
     attr_accessor :superseded_concepts
 
     def initialize(*)

@@ -23,9 +23,9 @@ RSpec.describe Glossarist::Concept do
   end
 
   describe "#superseded_concepts" do
-    let(:sup) { double("supersession") }
+    let(:sup) { instance_double(Glossarist::Ref) }
 
-    it "is an array" do
+    it "is an array of refs" do
       expect { subject.superseded_concepts << sup }
         .to change { subject.superseded_concepts }.to([sup])
     end
