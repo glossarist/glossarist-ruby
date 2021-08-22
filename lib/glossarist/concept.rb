@@ -15,13 +15,54 @@ module Glossarist
     # @return [Hash<String, LocalizedConcept>]
     attr_reader :localizations
 
+    # List of concepts deprecated by this one.
+    # @return [Array<Ref>]
+    attr_accessor :deprecated_concepts
+
     # List of concepts superseded by this one.
     # @return [Array<Ref>]
     attr_accessor :superseded_concepts
 
+    # List of concepts narrower than this one.
+    # @return [Array<Ref>]
+    attr_accessor :narrower_concepts
+
+    # List of concepts broader than this one.
+    # @return [Array<Ref>]
+    attr_accessor :broader_concepts
+
+    # List of concepts equivalent to this one.
+    # @return [Array<Ref>]
+    attr_accessor :equivalent_concepts
+
+    # List of concepts comparable to this one.
+    # @todo Maybe attribute name could be improved.
+    # @return [Array<Ref>]
+    attr_accessor :comparable_concepts
+
+    # List of concepts contrasting to this one.
+    # @return [Array<Ref>]
+    attr_accessor :contrasting_concepts
+
+    # List of "see also" concepts related to this one.
+    # @return [Array<Ref>]
+    attr_accessor :see_also_concepts
+
+    # :nodoc:
+    CONCEPT_RELATIONS = {
+      deprecated_concepts: {serialize_as: "deprecates"},
+      superseded_concepts: {serialize_as: "supersedes"},
+      narrower_concepts: {serialize_as: "narrower"},
+      broader_concepts: {serialize_as: "broader"},
+      equivalent_concepts: {serialize_as: "equivalent"},
+      comparable_concepts: {serialize_as: "compare"},
+      contrasting_concepts: {serialize_as: "contrast"},
+      see_also_concepts: {serialize_as: "see"},
+    }.freeze
+
     def initialize(*)
       @localizations = {}
-      @superseded_concepts = []
+      CONCEPT_RELATIONS.keys.each { |cr| set_attribute cr, [] }
       super
     end
 

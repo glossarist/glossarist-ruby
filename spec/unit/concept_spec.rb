@@ -22,12 +22,18 @@ RSpec.describe Glossarist::Concept do
     end
   end
 
-  describe "#superseded_concepts" do
-    let(:sup) { instance_double(Glossarist::Ref) }
+  %w[
+    deprecated_concepts superseded_concepts narrower_concepts broader_concepts
+    equivalent_concepts comparable_concepts contrasting_concepts
+    see_also_concepts
+  ].each do |attr_name|
+    describe "##{attr_name}" do
+      let(:sup) { instance_double(Glossarist::Ref) }
 
-    it "is an array of refs" do
-      expect { subject.superseded_concepts << sup }
-        .to change { subject.superseded_concepts }.to([sup])
+      it "is an array of refs" do
+        expect { subject.send(attr_name) << sup }
+          .to change { subject.send(attr_name) }.to([sup])
+      end
     end
   end
 
