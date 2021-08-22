@@ -35,6 +35,11 @@ RSpec.describe "Serialization and deserialization" do
     expect(queen.superseded_concepts.size).to eq(0)
     expect(rook.superseded_concepts.size).to eq(0)
 
+    expect(king.superseded_concepts[0]).to be_structured
+    expect(king.superseded_concepts[0].source).to eq("Chess rules")
+    expect(king.superseded_concepts[0].id).to eq("chess-02-01")
+    expect(king.superseded_concepts[0].version).to eq("some older definition")
+
     Dir.mktmpdir do |tmp_path|
       collection.path = tmp_path
       collection.save_concepts

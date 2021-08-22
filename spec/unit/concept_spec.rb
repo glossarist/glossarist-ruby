@@ -97,7 +97,8 @@ RSpec.describe Glossarist::Concept do
     it "dumps concept definition to a hash" do
       object = described_class.new(
         id: "123",
-        superseded_concepts: [{"some" => "supersession"}],
+        superseded_concepts: [double(to_h: {"some" => "ref"})],
+        see_also_concepts: [double(to_h: {"another" => "ref"})],
       )
 
       object.localizations["eng"] = double(
@@ -114,7 +115,10 @@ RSpec.describe Glossarist::Concept do
       expect(retval).to be_kind_of(Hash)
       expect(retval["termid"]).to eq("123")
       expect(retval["term"]).to eq("default term")
-      expect(retval["related"]).to eq([{"some" => "supersession"}])
+      expect(retval["related"]).to contain_exactly(
+        {"some" => "ref", "type" => "supersedes"},
+        {"another" => "ref", "type" => "see"},
+      )
       expect(retval["eng"]).to eq({"some" => "eng translation"})
       expect(retval["deu"]).to eq({"some" => "deu translation"})
     end
@@ -128,11 +132,11 @@ RSpec.describe Glossarist::Concept do
         "related" => [
           {
             "type" => "supersedes",
-            "ref" => {
-              "source" => "Example Source",
-              "id" => "12345",
-              "version" => "7",
-            },
+            "ref" => "Example Ref",
+          },
+          {
+            "type" => "see",
+            "ref" => "Another Ref",
           },
         ],
         "eng" => { "some" => "English translation" },
@@ -141,6 +145,8 @@ RSpec.describe Glossarist::Concept do
 
       eng_dbl = double(language_code: "eng")
       deu_dbl = double(language_code: "deu")
+      supersession_ref_dbl = double("superseded")
+      see_also_ref_dbl = double("see also")
 
       expect(Glossarist::LocalizedConcept)
         .to receive(:from_h)
@@ -152,14 +158,24 @@ RSpec.describe Glossarist::Concept do
         .with({ "some" => "German translation" })
         .and_return(deu_dbl)
 
+      expect(Glossarist::Ref)
+        .to receive(:from_h)
+        .with({ "ref" => "Example Ref" })
+        .and_return(supersession_ref_dbl)
+
+      expect(Glossarist::Ref)
+        .to receive(:from_h)
+        .with({ "ref" => "Another Ref" })
+        .and_return(see_also_ref_dbl)
+
       retval = described_class.from_h(src)
 
       expect(retval).to be_kind_of(Glossarist::Concept)
       expect(retval.id).to eq("123-45")
       expect(retval.l10n("eng")).to be(eng_dbl)
       expect(retval.l10n("deu")).to be(deu_dbl)
-      expect(retval.superseded_concepts.dig(0, "type")).to eq("supersedes")
-      expect(retval.superseded_concepts.dig(0, "ref", "id")).to eq("12345")
+      expect(retval.superseded_concepts).to eq([supersession_ref_dbl])
+      expect(retval.see_also_concepts).to eq([see_also_ref_dbl])
     end
   end
 end

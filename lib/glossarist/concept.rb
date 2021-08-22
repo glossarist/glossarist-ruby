@@ -85,10 +85,17 @@ module Glossarist
     alias :l10n :localization
 
     def to_h
+      # serialize related concepts
+      related_arr = CONCEPT_RELATIONS.inject([]) do |acc, (attr, details)|
+        acc += public_send(attr).map do |item|
+          { "type" => details[:serialize_as] }.merge(item.to_h)
+        end
+      end
+
       {
         "termid" => id,
         "term" => default_designation,
-        "related" => related_concepts,
+        "related" => (related_arr.empty? ? nil : related_arr),
       }
       .compact
       .merge(localizations.transform_values(&:to_h))
@@ -109,7 +116,17 @@ module Glossarist
           .compact
           .each { |lc| concept.add_l10n lc }
 
-        concept.superseded_concepts = hash.dig("related") || []
+        # deserialize related concepts
+        hash.fetch("related", []).each do |related|
+          type = related.delete("type")
+          ref = Ref.from_h(related)
+
+          attr_name = CONCEPT_RELATIONS
+            .detect { |rel, details| details[:serialize_as] == type }
+            .first
+
+          concept.public_send(attr_name) << ref
+        end
       end
     end
     # rubocop:enable Metrics/AbcSize, Style/RescueModifier
