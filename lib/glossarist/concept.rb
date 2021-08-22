@@ -119,9 +119,10 @@ module Glossarist
       localized&.terms&.first&.designation
     end
 
+    # All related concepts.
+    # @return [Array<Ref>]
     def related_concepts
-      # TODO Someday other relation types too
-      arr = [superseded_concepts].flatten.compact
+      arr = CONCEPT_RELATIONS.keys.flat_map { |cr| public_send(cr) }
       arr.empty? ? nil : arr
     end
   end

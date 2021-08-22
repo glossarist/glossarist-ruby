@@ -37,6 +37,18 @@ RSpec.describe Glossarist::Concept do
     end
   end
 
+  describe "#related_concepts" do
+    it "returns an array of all related concepts, disregarding relation type" do
+      refs = 4.times.map { |n| instance_double(Glossarist::Ref, "ref #{n}") }
+
+      subject.superseded_concepts << refs[0]
+      subject.narrower_concepts << refs[1]
+      subject.see_also_concepts << refs[2] << refs[3]
+
+      expect(subject.related_concepts).to contain_exactly(*refs)
+    end
+  end
+
   describe "#default_designation" do
     it "returns first English designation when available" do
       object = described_class.new(id: "123")
