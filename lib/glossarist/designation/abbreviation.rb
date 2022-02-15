@@ -29,6 +29,13 @@ module Glossarist
           raise InvalidTypeError, "`#{type}` is not a valid type. Supported types are #{TYPES}"
         end
       end
+
+      def to_h
+        super().merge({
+          "type" => @type.to_s,
+          "international" => international,
+        }).compact
+      end
     end
   end
 end
