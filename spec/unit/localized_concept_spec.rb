@@ -151,7 +151,7 @@ RSpec.describe Glossarist::LocalizedConcept do
       expr_dbl = double("expression")
       source_dbl = double("source")
 
-      expect(Glossarist::Designations::Base)
+      expect(Glossarist::Designation::Base)
         .to receive(:from_h)
         .with(src["terms"][0])
         .and_return(expr_dbl)
