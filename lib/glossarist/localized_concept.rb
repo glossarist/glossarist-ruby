@@ -98,7 +98,7 @@ module Glossarist
     end
 
     def self.from_h(hash)
-      terms = hash["terms"]&.map { |h| Designations::Base.from_h(h) } || []
+      terms = hash["terms"]&.map { |h| Designation::Base.from_h(h) } || []
       sources = hash["authoritative_source"]&.map { |h| Ref.from_h(h) }
       super(hash.merge({"terms" => terms, "sources" => sources}))
     end
