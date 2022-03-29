@@ -9,7 +9,7 @@ module Glossarist
 
       def to_h
         {
-          "type" => "symbol",
+          "type" => Glossarist::Designation::SERIALIZED_TYPES[self.class],
           "normative_status" => normative_status,
           "geographical_area" => geographical_area,
           "designation" => designation,
