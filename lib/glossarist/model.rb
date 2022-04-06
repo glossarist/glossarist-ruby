@@ -5,6 +5,12 @@
 
 module Glossarist
   class Model
+    def self.new(params = {})
+      return params if params.is_a?(self)
+
+      super
+    end
+
     def initialize(attributes = {})
       attributes.each_pair { |k, v| set_attribute(k, v) }
     end

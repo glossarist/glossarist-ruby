@@ -61,19 +61,10 @@ module Glossarist
     attr_accessor :date_accepted
     attr_accessor :date_amended
 
-    # @todo Here for legacy reasons.  Will be moved to Concept.
-    # @todo Right now is an array of hashes for legacy reasons, but these hashes
-    #    will be replaced with some dedicated class.
-    # @todo Should be read-only, but for now it is not for legacy reasons.
-    #    Don't use the setter.
-    # @return [Array<Hash>]
-    attr_accessor :superseded_concepts
-
     def initialize(*)
       @examples = []
       @notes = []
       @designations = []
-      @superseded_concepts = []
       @sources = []
       super
     end
