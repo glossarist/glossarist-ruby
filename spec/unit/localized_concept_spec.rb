@@ -167,5 +167,30 @@ RSpec.describe Glossarist::LocalizedConcept do
       expect(retval.terms).to eq([expr_dbl])
       expect(retval.sources).to eq([source_dbl])
     end
+
+    it "should work iev-data for grammar_info" do
+      src = {
+        "id" => "103-01-12",
+        "language_code" => "eng",
+        "terms" => [
+          {
+            "designation" => "Intervall",
+            "type" => "expression",
+            "normative_status" => "preferred",
+            "part_of_speech" => "adj",
+            "gender" => "n",
+            "plurality" => "singular",
+          },
+        ],
+        "definition" => "set of real numbers such that, for any pair (stem:[x], stem:[y]) of elements of the set, any real number stem:[z] between stem:[x] and stem:[y] belongs to the set",
+      }
+
+      localized_concept = Glossarist::LocalizedConcept.from_h(src)
+      grammar_info = localized_concept.designations.first.grammar_info.first
+
+      expect(grammar_info.n?).to be(true)
+      expect(grammar_info.adj?).to be(true)
+      expect(grammar_info.singular?).to be(true)
+    end
   end
 end

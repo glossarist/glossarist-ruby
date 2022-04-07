@@ -6,7 +6,7 @@
 RSpec.describe Glossarist::Designation::Expression do
   subject { described_class.new attrs }
 
-  let(:attrs) { { designation: "equality", normative_status: :preferred } }
+  let(:attrs) { { designation: "equality", normative_status: :preferred, grammar_info: [{}] } }
 
   it "accepts strings as designations" do
     expect { subject.designation = "new one" }
@@ -19,18 +19,18 @@ RSpec.describe Glossarist::Designation::Expression do
   end
 
   it "accepts strings as plurality values" do
-    expect { subject.plurality = "plural" }
-      .to change { subject.plurality }.to("plural")
+    expect { subject.grammar_info.first.number = "plural" }
+      .to change { subject.grammar_info.first.number }.to([:plural])
   end
 
   it "accepts strings as genders" do
-    expect { subject.gender = "m" }
-      .to change { subject.gender }.to("m")
+    expect { subject.grammar_info.first.gender = "m" }
+      .to change { subject.grammar_info.first.gender }.to([:m])
   end
 
   it "accepts strings as parts of speech" do
-    expect { subject.part_of_speech = "adjective" }
-      .to change { subject.part_of_speech }.to("adjective")
+    expect { subject.grammar_info.first.part_of_speech = "adj" }
+      .to change { subject.grammar_info.first.adj }.to(true)
   end
 
   describe "#to_h" do
@@ -39,9 +39,11 @@ RSpec.describe Glossarist::Designation::Expression do
         designation: "Example designation",
         normative_status: "preferred",
         geographical_area: "somewhere",
-        gender: "masculine",
-        part_of_speech: "some part",
-        plurality: "singular",
+        grammar_info: [{
+          gender: "m",
+          part_of_speech: "adj",
+          number: "singular",
+        }],
         usage_info: "science",
       })
 
@@ -51,9 +53,9 @@ RSpec.describe Glossarist::Designation::Expression do
       expect(retval["designation"]).to eq("Example designation")
       expect(retval["normative_status"]).to eq("preferred")
       expect(retval["geographical_area"]).to eq("somewhere")
-      expect(retval["gender"]).to eq("masculine")
-      expect(retval["part_of_speech"]).to eq("some part")
-      expect(retval["plurality"]).to eq("singular")
+      expect(retval["grammar_info"].first["gender"]).to eq([:m])
+      expect(retval["grammar_info"].first["adj"]).to eq(true)
+      expect(retval["grammar_info"].first["number"]).to eq([:singular])
       expect(retval["usage_info"]).to eq("science")
     end
   end

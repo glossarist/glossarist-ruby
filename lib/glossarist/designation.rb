@@ -6,6 +6,7 @@
 require_relative "designation/abbreviation"
 require_relative "designation/base"
 require_relative "designation/expression"
+require_relative "designation/grammar_info"
 require_relative "designation/symbol"
 
 module Glossarist

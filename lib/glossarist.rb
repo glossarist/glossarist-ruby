@@ -16,5 +16,6 @@ require_relative "glossarist/ref"
 
 module Glossarist
   class Error < StandardError; end
+  class InvalidTypeError < StandardError; end
   # Your code goes here...
 end
