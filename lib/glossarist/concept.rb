@@ -17,7 +17,19 @@ module Glossarist
 
     def initialize(*)
       @localizations = {}
+      @sources = []
+
       super
+    end
+
+    # All sources for this concept.
+    # @return [Array<ConceptSource>]
+    attr_reader :sources
+
+    def sources=(sources)
+      @sources = sources&.map do |source|
+        ConceptSource.new(source)
+      end
     end
 
     # Adds concept localization.
@@ -42,6 +54,7 @@ module Glossarist
       {
         "termid" => id,
         "term" => default_designation,
+        "sources" => sources.map(&:to_h),
         "related" => related_concepts,
       }
       .compact
@@ -56,6 +69,7 @@ module Glossarist
     def self.from_h(hash)
       new.tap do |concept|
         concept.id = hash.dig("termid")
+        concept.sources = hash.dig("sources")
 
         hash.values
           .grep(Hash)

@@ -1,6 +1,7 @@
 ---
 termid: chess-02-01
 term: King
+sources: []
 related:
 - type: supersedes
   ref:
