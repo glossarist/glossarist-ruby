@@ -54,7 +54,7 @@ module Glossarist
       {
         "termid" => id,
         "term" => default_designation,
-        "sources" => sources.map(&:to_h),
+        "sources" => sources&.map(&:to_h),
         "related" => related_concepts,
       }
       .compact
