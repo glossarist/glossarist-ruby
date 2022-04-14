@@ -97,6 +97,13 @@ RSpec.describe Glossarist::Concept do
       src = {
         "termid" => "123-45",
         "term" => "Example Designation",
+        "sources" => [
+          {
+            "type" => "authoritative",
+            "status" => "identical",
+            "origin" => "reference"
+          }
+        ],
         "related" => [
           {
             "type" => "supersedes",
@@ -130,6 +137,10 @@ RSpec.describe Glossarist::Concept do
       expect(retval.id).to eq("123-45")
       expect(retval.l10n("eng")).to be(eng_dbl)
       expect(retval.l10n("deu")).to be(deu_dbl)
+      expect(retval.sources.size).to eq(1)
+      expect(retval.sources.first.type).to eq(:authoritative)
+      expect(retval.sources.first.status).to eq(:identical)
+      expect(retval.sources.first.origin).to eq("reference")
     end
   end
 end
