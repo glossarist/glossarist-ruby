@@ -15,7 +15,8 @@ eng:
     normative_status: preferred
     designation: "♖"
     international: true
-  definition: The second strongest piece in chess.
+  definition:
+  - content: The second strongest piece in chess.
   language_code: eng
   notes: []
   examples:
@@ -36,7 +37,8 @@ pol:
   - type: expression
     normative_status: preferred
     designation: Wieża
-  definition: Druga najpotężniejsza figura w szachach.
+  definition:
+  - content: Druga najpotężniejsza figura w szachach.
   language_code: pol
   notes: []
   examples:

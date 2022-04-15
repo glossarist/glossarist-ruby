@@ -12,7 +12,8 @@ eng:
     normative_status: preferred
     designation: "♕"
     international: true
-  definition: The strongest piece in chess.
+  definition:
+  - content: The strongest piece in chess.
   language_code: eng
   notes: []
   examples:
@@ -37,7 +38,8 @@ pol:
   - type: expression
     normative_status: admitted
     designation: Królowa
-  definition: Najpotężniejsza figura w szachach.
+  definition:
+  - content: Najpotężniejsza figura w szachach.
   language_code: pol
   notes: []
   examples:

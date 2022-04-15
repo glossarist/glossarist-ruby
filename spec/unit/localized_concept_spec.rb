@@ -19,8 +19,10 @@ RSpec.describe Glossarist::LocalizedConcept do
   end
 
   it "accepts strings as definitions" do
-    expect { subject.definition = "this is very important" }
-      .to change { subject.definition }.to("this is very important")
+    definition = Glossarist::DetailedDefinition.new({ content: "this is very important" })
+
+    expect { subject.definition = [ definition ] }
+      .to change { subject.definition }.to([ definition ])
   end
 
   it "accepts strings as entry statuses" do
@@ -133,7 +135,7 @@ RSpec.describe Glossarist::LocalizedConcept do
             "normative_status" => "preferred",
           },
         ],
-        "definition" => "Example Definition",
+        "definition" => [{ content: "Example Definition" }],
         "authoritative_source" => [
           {"Example Source" => "Reference"},
         ],
@@ -154,7 +156,8 @@ RSpec.describe Glossarist::LocalizedConcept do
 
       retval = described_class.from_h(src)
       expect(retval).to be_kind_of(Glossarist::LocalizedConcept)
-      expect(retval.definition).to eq("Example Definition")
+      expect(retval.definition.size).to eq(1)
+      expect(retval.definition.first.content).to eq("Example Definition")
       expect(retval.terms).to eq([expr_dbl])
       expect(retval.sources).to eq([source_dbl])
     end
@@ -173,7 +176,7 @@ RSpec.describe Glossarist::LocalizedConcept do
             "plurality" => "singular",
           },
         ],
-        "definition" => "set of real numbers such that, for any pair (stem:[x], stem:[y]) of elements of the set, any real number stem:[z] between stem:[x] and stem:[y] belongs to the set",
+        "definition" => [{ content: "set of real numbers such that, for any pair (stem:[x], stem:[y]) of elements of the set, any real number stem:[z] between stem:[x] and stem:[y] belongs to the set" }],
       }
 
       localized_concept = Glossarist::LocalizedConcept.from_h(src)

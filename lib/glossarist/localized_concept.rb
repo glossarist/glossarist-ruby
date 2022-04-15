@@ -28,9 +28,8 @@ module Glossarist
     attr_accessor :examples
 
     # Concept definition.
-    # @todo Support multiple definitions.
-    # @return [String]
-    attr_accessor :definition
+    # @return [Array<DetailedDefinition>]
+    attr_reader :definition
 
     # List of authorative sources.
     # @todo Alias +authoritative_source+ exists for legacy reasons and may be
@@ -73,7 +72,7 @@ module Glossarist
       {
         "id" => id,
         "terms" => (terms&.map(&:to_h) || []),
-        "definition" => definition,
+        "definition" => definition&.map(&:to_h),
         "language_code" => language_code,
         "notes" => notes,
         "examples" => examples,
@@ -86,6 +85,10 @@ module Glossarist
         "review_decision_date" => review_decision_date,
         "review_decision_event" => review_decision_event,
       }.compact
+    end
+
+    def definition=(definition)
+      @definition = definition&.map { |d| DetailedDefinition.new(d) }
     end
 
     def self.from_h(hash)
