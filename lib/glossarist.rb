@@ -9,6 +9,7 @@ require_relative "glossarist/utilities"
 require_relative "glossarist/version"
 
 require_relative "glossarist/model"
+require_relative "glossarist/detailed_definition"
 require_relative "glossarist/related_concept"
 require_relative "glossarist/concept"
 require_relative "glossarist/concept_source"
