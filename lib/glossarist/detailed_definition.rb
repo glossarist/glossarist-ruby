@@ -2,8 +2,11 @@
 
 module Glossarist
   class DetailedDefinition < Model
+
+    #@return [String]
     attr_accessor :content
 
+    # @return [Array<ConceptSource>]
     attr_reader :sources
 
     def sources=(sources)
