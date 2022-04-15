@@ -18,6 +18,7 @@ module Glossarist
     def initialize(*)
       @localizations = {}
       @sources = []
+      @related = []
 
       super
     end
@@ -55,7 +56,7 @@ module Glossarist
         "termid" => id,
         "term" => default_designation,
         "sources" => sources&.map(&:to_h),
-        "related" => related_concepts,
+        "related" => related&.map(&:to_h),
       }
       .compact
       .merge(localizations.transform_values(&:to_h))
@@ -77,7 +78,7 @@ module Glossarist
           .compact
           .each { |lc| concept.add_l10n lc }
 
-        concept.l10n("eng")&.superseded_concepts = hash.dig("related") || []
+        concept.related = hash.dig("related") || []
       end
     end
     # rubocop:enable Metrics/AbcSize, Style/RescueModifier
@@ -87,10 +88,22 @@ module Glossarist
       localized&.terms&.first&.designation
     end
 
-    def related_concepts
-      # TODO Someday other relation types too
-      arr = [localization("eng")&.superseded_concepts].flatten.compact
-      arr.empty? ? nil : arr
+    # All Related Concepts
+    # @return [Array<RelatedConcept>]
+    def related
+      @related.empty? ? nil : @related
+    end
+
+    def related=(related)
+      @related = related.map { |r| RelatedConcept.new(r) }
+    end
+
+    Glossarist::RelatedConcept::TYPES.each do |type|
+      # List of related concepts of the specified type.
+      # @return [Array<RelatedConcept>]
+      define_method("#{type}_concepts") do
+        related&.select { |concept| concept.type == type } || []
+      end
     end
   end
 end

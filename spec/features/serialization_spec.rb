@@ -31,9 +31,14 @@ RSpec.describe "Serialization and deserialization" do
     expect(king.l10n("eng").sources[0].id).to eq("King (chess)")
     expect(king.l10n("eng").sources[0].link).to start_with("https")
 
-    expect(king.l10n("eng").superseded_concepts.size).to eq(1)
-    expect(queen.l10n("eng").superseded_concepts.size).to eq(0)
-    expect(rook.l10n("eng").superseded_concepts.size).to eq(0)
+    expect(king.supersedes_concepts.size).to eq(1)
+    expect(queen.supersedes_concepts.size).to eq(0)
+    expect(rook.supersedes_concepts.size).to eq(0)
+
+    expect(king.supersedes_concepts[0].ref).to be_structured
+    expect(king.supersedes_concepts[0].ref.source).to eq("Chess rules")
+    expect(king.supersedes_concepts[0].ref.id).to eq("chess-02-01")
+    expect(king.supersedes_concepts[0].ref.version).to eq("some older definition")
 
     Dir.mktmpdir do |tmp_path|
       collection.path = tmp_path

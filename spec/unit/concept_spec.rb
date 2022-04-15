@@ -68,16 +68,22 @@ RSpec.describe Glossarist::Concept do
 
   describe "#to_h" do
     it "dumps concept definition to a hash" do
-      object = described_class.new(id: "123")
+      object = described_class.new(
+        id: "123",
+        related: [
+          {
+            content: "Test content",
+            type: :supersedes,
+          },
+        ]
+      )
 
       object.localizations["eng"] = double(
         to_h: {"some" => "eng translation"},
-        superseded_concepts: [{"some" => "supersession"}],
       )
 
       object.localizations["deu"] = double(
         to_h: {"some" => "deu translation"},
-        superseded_concepts: [],
       )
 
       allow(object).to receive(:default_designation).and_return("default term")
@@ -86,9 +92,44 @@ RSpec.describe Glossarist::Concept do
       expect(retval).to be_kind_of(Hash)
       expect(retval["termid"]).to eq("123")
       expect(retval["term"]).to eq("default term")
-      expect(retval["related"]).to eq([{"some" => "supersession"}])
+      expect(retval["related"]).to eq([{"content"=>"Test content", "type"=>"supersedes"}])
       expect(retval["eng"]).to eq({"some" => "eng translation"})
       expect(retval["deu"]).to eq({"some" => "deu translation"})
+    end
+  end
+
+  describe "::new" do
+    it "accepts a hash of attributes" do
+      expect { described_class.new(attrs) }
+        .not_to raise_error
+    end
+
+    it "accepts a hash of attributes and create a concept" do
+      related = [
+        {
+          "type" => "supersedes",
+          "ref" => {
+            "source" => "Example Source",
+            "id" => "12345",
+            "version" => "7",
+          },
+        },
+      ]
+
+      expected_hash = [
+        {
+          "type" => "supersedes",
+          "ref" => {
+            "source" => "Example Source",
+            "id" => "12345",
+            "version" => "7",
+          },
+        },
+      ]
+      subject.related = related
+
+      expect(subject.related.first).to be_kind_of(Glossarist::RelatedConcept)
+      expect(subject.related.first.to_h).to eq(expected_hash.first)
     end
   end
 
@@ -118,7 +159,7 @@ RSpec.describe Glossarist::Concept do
         "deu" => { "some" => "German translation" },
       }
 
-      eng_dbl = double(language_code: "eng", :"superseded_concepts=" => [])
+      eng_dbl = double(language_code: "eng", :"related=" => [])
       deu_dbl = double(language_code: "deu")
 
       expect(Glossarist::LocalizedConcept)

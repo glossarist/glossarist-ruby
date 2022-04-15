@@ -26,20 +26,4 @@ RSpec.describe Glossarist::Designation::Abbreviation do
       expect(subject.to_h).to eq(expected_hash)
     end
   end
-
-  describe "#to_h" do
-    it "will convert abbreviation to hash" do
-      subject.designation = "NASA"
-      subject.acronym = true
-      subject.international = true
-
-      expected_hash = {
-        "type" => "acronym",
-        "designation" => "NASA",
-        "international" => true,
-      }
-
-      expect(subject.to_h).to eq(expected_hash)
-    end
-  end
 end

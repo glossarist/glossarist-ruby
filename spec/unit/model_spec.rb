@@ -21,6 +21,12 @@ RSpec.describe Glossarist::Model do
       expect(instance.attr2).to be(2)
     end
 
+    it "return attributes if not a hash" do
+      object = ModelSubclass.new(attr1: 1, attr2: 2)
+      instance = ModelSubclass.new(object)
+      expect(instance).to be(object)
+    end
+
     it "raises error when attribute hash includes unknown attributes" do
       expect { ModelSubclass.new({ attr1: 1, attr2: 2, attr3: 3 }) }
         .to raise_error(ArgumentError, /attr3/)
