@@ -3,7 +3,7 @@
 module Glossarist
   class DetailedDefinition < Model
 
-    #@return [String]
+    # @return [String]
     attr_accessor :content
 
     # @return [Array<ConceptSource>]
