@@ -4,19 +4,7 @@ module Glossarist
   class RelatedConcept < Model
     include Glossarist::Utilities::Enum
 
-    TYPES = %i[
-      deprecates
-      supersedes
-      superseded_by
-      narrower
-      broader
-      equivalent
-      compare
-      contrast
-      see
-    ]
-
-    register_enum :type, TYPES
+    register_enum :type, Glossarist::GlossaryDefinition::RELATED_CONCEPT_TYPES
 
     # @return [String]
     attr_accessor :content

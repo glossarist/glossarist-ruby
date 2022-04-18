@@ -8,32 +8,10 @@ module Glossarist
       include Glossarist::Utilities::Enum
       include Glossarist::Utilities::BooleanAttributes
 
-      BOOLEAN_ATTRIBUTES = %i[
-        preposition
-        participle
-        adj
-        verb
-        adverb
-        noun
-      ]
+      register_enum :gender, Glossarist::GlossaryDefinition::GRAMMAR_INFO_GENDERS, multiple: true
+      register_enum :number, Glossarist::GlossaryDefinition::GRAMMAR_INFO_NUMBERS, multiple: true
 
-      # m => masculine
-      # f => feminine
-      # n => neuter
-      # c => common
-      # using initial letter because this is how it is used in iev-data
-      GENDERS = %i[m f n c]
-
-      NUMBERS = %i[
-        singular
-        dual
-        plural
-      ]
-
-      register_enum :gender, GENDERS, multiple: true
-      register_enum :number, NUMBERS, multiple: true
-
-      register_boolean_attributes BOOLEAN_ATTRIBUTES
+      register_boolean_attributes Glossarist::GlossaryDefinition::GRAMMAR_INFO_BOOLEAN_ATTRIBUTES
 
       def initialize(options = {})
         sanitized_options(options).each do |attr, value|

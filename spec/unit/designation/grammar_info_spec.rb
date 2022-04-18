@@ -5,7 +5,7 @@ require_relative "../../support/shared_examples/boolean_attributes"
 
 RSpec.describe Glossarist::Designation::GrammarInfo do
   it_behaves_like "an Enum"
-  it_behaves_like "having Boolean attributes", described_class::BOOLEAN_ATTRIBUTES
+  it_behaves_like "having Boolean attributes", Glossarist::GlossaryDefinition::GRAMMAR_INFO_BOOLEAN_ATTRIBUTES
 
   describe "#to_h" do
     it "will convert to a hash" do

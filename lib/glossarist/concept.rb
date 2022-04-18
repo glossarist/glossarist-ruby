@@ -98,11 +98,11 @@ module Glossarist
       @related = related.map { |r| RelatedConcept.new(r) }
     end
 
-    Glossarist::RelatedConcept::TYPES.each do |type|
+    Glossarist::GlossaryDefinition::RELATED_CONCEPT_TYPES.each do |type|
       # List of related concepts of the specified type.
       # @return [Array<RelatedConcept>]
       define_method("#{type}_concepts") do
-        related&.select { |concept| concept.type == type } || []
+        related&.select { |concept| concept.type == type.to_sym } || []
       end
     end
   end
