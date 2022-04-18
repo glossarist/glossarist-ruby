@@ -12,6 +12,8 @@ module Glossarist
         end
 
         def register_enum(name, values, options = {})
+          values = standardize_values(values)
+
           enums[name] = { registered_values: values, options: options }
 
           register_type_accessor(name)
@@ -69,6 +71,14 @@ module Glossarist
             else
               deselect_type(name, value)
             end
+          end
+        end
+
+        def standardize_values(values)
+          if values.is_a?(Array)
+            values.map(&:to_sym)
+          else
+            [values.to_sym]
           end
         end
       end

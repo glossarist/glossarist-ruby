@@ -8,9 +8,7 @@ module Glossarist
     class Abbreviation < Expression
       include Glossarist::Utilities::Enum
 
-      TYPES = %i[truncation acronym initialism]
-
-      register_enum :type, TYPES
+      register_enum :type, Glossarist::GlossaryDefinition::ABBREVIATION_TYPES
 
       attr_accessor :international
 

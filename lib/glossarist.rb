@@ -7,6 +7,7 @@ require "psych"
 
 require_relative "glossarist/utilities"
 require_relative "glossarist/version"
+require_relative "glossarist/glossary_definition"
 
 require_relative "glossarist/model"
 require_relative "glossarist/detailed_definition"

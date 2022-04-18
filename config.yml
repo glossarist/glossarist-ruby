@@ -1,0 +1,13 @@
+
+# This file can be used to configure enum attributes in the model.
+# For example to add different allowed values for Abbreviation::Type
+# you need to add the bellow lines in this file:
+#
+# abbreviation:
+#   type:
+#     - truncation
+#     - acronym
+#     - initials
+#     - some_new_value
+#
+# The above will override the default allowd values for the Abbreviation::Type
