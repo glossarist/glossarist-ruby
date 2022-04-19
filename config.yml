@@ -1,13 +1,56 @@
-
 # This file can be used to configure enum attributes in the model.
 # For example to add different allowed values for Abbreviation::Type
-# you need to add the bellow lines in this file:
+# you can change the values under abbreviation => type
 #
-# abbreviation:
-#   type:
-#     - truncation
-#     - acronym
-#     - initials
-#     - some_new_value
-#
-# The above will override the default allowd values for the Abbreviation::Type
+# NOTE: All the keys in this file are needed for the script to run
+#       and should not be removed. You can change the values but atleast
+#       one option should be present in each list.
+
+concept_source:
+  status:
+    - identical
+    - modified
+    - restyle
+    - context-added
+    - generalisation
+    - specialisation
+    - unspecified
+  type:
+    - authoritative
+    - lineage
+
+related_concept:
+  type:
+    - deprecates
+    - supersedes
+    - superseded_by
+    - narrower
+    - broader
+    - equivalent
+    - compare
+    - contrast
+    - see
+
+abbreviation:
+  type:
+    - truncation
+    - acronym
+    - initialism
+
+grammar_info:
+  boolean_attribute:
+    - preposition
+    - participle
+    - adj
+    - verb
+    - adverb
+    - noun
+  gender:
+    - m
+    - f
+    - n
+    - c
+  number:
+    - singular
+    - dual
+    - plural
