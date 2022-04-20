@@ -10,14 +10,7 @@ module Glossarist
       attr_accessor :designation
 
       attr_accessor :geographical_area
-
-      NORMATIVE_STATUSES = %i[
-        preferred
-        deprecated
-        admitted
-      ].freeze
-
-      register_enum :normative_status, NORMATIVE_STATUSES
+      register_enum :normative_status, Glossarist::GlossaryDefinition::DESIGNATION_BASE_NORMATIVE_STATUSES
 
       def self.from_h(hash)
         type = hash["type"]

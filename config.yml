@@ -19,6 +19,13 @@ concept_source:
     - authoritative
     - lineage
 
+designation:
+  base:
+    normative_status:
+      - preferred
+      - deprecated
+      - admitted
+
 related_concept:
   type:
     - deprecates
