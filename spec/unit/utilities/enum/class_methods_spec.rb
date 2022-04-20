@@ -30,7 +30,9 @@ RSpec.describe Glossarist::Utilities::Enum::ClassMethods do
         }
       }
 
-      expect(subject.enums).to eq(expected_enums)
+      expect(subject.enums.registered_enums).to eq(expected_enums.keys)
+      expect(subject.enums[:status]).to eq(expected_enums[:status])
+      expect(subject.enums[:number]).to eq(expected_enums[:number])
     end
   end
 
@@ -89,20 +91,20 @@ RSpec.describe Glossarist::Utilities::Enum::ClassMethods do
     end
   end
 
-  describe ".add_check_method" do
+  describe ".register_check_method" do
     it "adds a <type?> method to class" do
       expect(subject.method_defined?(:male?)).to be(false)
 
-      subject.add_check_method(:foo, :male)
+      subject.register_check_method(:foo, :male)
       expect(subject.method_defined?(:male?)).to be(true)
     end
   end
 
-  describe ".add_set_method" do
+  describe ".register_set_method" do
     it "adds a <type=> method to class" do
       expect(subject.method_defined?(:baz=)).to be(false)
 
-      subject.add_set_method(:baz, :alpha)
+      subject.register_set_method(:baz, :alpha)
       expect(subject.method_defined?(:alpha=)).to be(true)
     end
   end

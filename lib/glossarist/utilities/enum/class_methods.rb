@@ -4,44 +4,54 @@ module Glossarist
   module Utilities
     module Enum
       module ClassMethods
-        # Hash to contain enums with their options
-        # @example
-        #   status: { registered_values: [ :active, :inactive ], options: { multiple: false } }
+        def add_inheritable_attribute(attribute)
+          @inheritable_attributes ||= Set[:inheritable_attributes]
+          @inheritable_attributes << attribute
+        end
+
+        def inherited(subclass)
+          @inheritable_attributes.each do |inheritable_attribute|
+            instance_var = "@#{inheritable_attribute}"
+            subclass.instance_variable_set(instance_var, instance_variable_get(instance_var))
+          end
+        end
+
         def enums
-          @enums ||= {}
+          @enums ||= EnumCollection.new
         end
 
         def register_enum(name, values, options = {})
           values = standardize_values(values)
 
-          enums[name] = { registered_values: values, options: options }
+          enums.add(name, values, options)
 
+          add_inheritable_attribute(:enums)
           register_type_accessor(name)
 
           values.each do |value|
-            add_check_method(name, value)
-            add_set_method(name, value)
+            register_check_method(name, value)
+            register_set_method(name, value)
           end
         end
 
         def registered_enums
-          enums.keys
+          enums.registered_enums
         end
 
         def valid_types(name)
-          enums[name][:registered_values]
+          enums.valid_types(name)
         end
 
         def type_options(name)
-          enums[name][:options]
+          enums.type_options(name)
         end
 
         def register_type_reader(name)
           define_method(name) do
             if self.class.type_options(name)[:multiple]
-              selected_type[name]
+              selected_type[name].map(&:to_s)
             else
-              selected_type[name].first
+              selected_type[name].first&.to_s
             end
           end
         end
@@ -58,13 +68,13 @@ module Glossarist
           register_type_writer(name)
         end
 
-        def add_check_method(name, value)
+        def register_check_method(name, value)
           define_method("#{value}?") do
             !!selected_type[name]&.include?(value.to_sym)
           end
         end
 
-        def add_set_method(name, value)
+        def register_set_method(name, value)
           define_method("#{value}=") do |input|
             if input
               select_type(name, value)

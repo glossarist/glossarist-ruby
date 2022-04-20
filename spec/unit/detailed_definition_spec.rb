@@ -31,8 +31,8 @@ RSpec.describe Glossarist::DetailedDefinition do
 
       expect(detailed_definition.sources.size).to eq(2)
       expect(detailed_definition.sources.first).to be_a(Glossarist::ConceptSource)
-      expect(detailed_definition.sources.first.type).to eq(:lineage)
-      expect(detailed_definition.sources.first.status).to eq(:identical)
+      expect(detailed_definition.sources.first.type).to eq("lineage")
+      expect(detailed_definition.sources.first.status).to eq("identical")
       expect(detailed_definition.sources.first.origin).to eq("url")
       expect(detailed_definition.sources.first.modification).to eq("some modification")
 
