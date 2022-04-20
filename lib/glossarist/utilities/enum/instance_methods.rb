@@ -5,13 +5,7 @@ module Glossarist
     module Enum
       module InstanceMethods
         def selected_type
-          if @selected_type.nil?
-            @selected_type = {}
-
-            self.class.registered_enums.each do |type|
-              @selected_type[type] = []
-            end
-          end
+          initialize_selected_type if @selected_type.nil?
 
           @selected_type
         end
@@ -45,6 +39,14 @@ module Glossarist
               Glossarist::InvalidTypeError,
               "`#{value}` is not a valid #{type_name}. Supported #{type_name} are #{self.class.enums[type_name][:registered_values].to_a.join(", ")}"
             )
+          end
+        end
+
+        def initialize_selected_type
+          @selected_type = {}
+
+          self.class.registered_enums.each do |type|
+            @selected_type[type] = []
           end
         end
       end

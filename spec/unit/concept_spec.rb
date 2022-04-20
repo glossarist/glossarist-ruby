@@ -179,8 +179,8 @@ RSpec.describe Glossarist::Concept do
       expect(retval.l10n("eng")).to be(eng_dbl)
       expect(retval.l10n("deu")).to be(deu_dbl)
       expect(retval.sources.size).to eq(1)
-      expect(retval.sources.first.type).to eq(:authoritative)
-      expect(retval.sources.first.status).to eq(:identical)
+      expect(retval.sources.first.type).to eq("authoritative")
+      expect(retval.sources.first.status).to eq("identical")
       expect(retval.sources.first.origin).to eq("reference")
     end
   end

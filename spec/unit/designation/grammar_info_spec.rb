@@ -27,8 +27,8 @@ RSpec.describe Glossarist::Designation::GrammarInfo do
         "verb" => false,
         "adverb" => false,
         "noun" => false,
-        "gender" => %i[m],
-        "number" => %i[singular plural],
+        "gender" => %w[m],
+        "number" => %w[singular plural],
       }
 
       expect(grammar_info.to_h).to eq(expected_hash)

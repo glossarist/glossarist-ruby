@@ -3,12 +3,21 @@
 module Glossarist
   module Designation
     class Base < Model
+      include Glossarist::Utilities::Enum
+
       # @note This is not entirely aligned with agreed schema and may be
       #   changed.
       attr_accessor :designation
 
-      attr_accessor :normative_status
       attr_accessor :geographical_area
+
+      NORMATIVE_STATUSES = %i[
+        preferred
+        deprecated
+        admitted
+      ].freeze
+
+      register_enum :normative_status, NORMATIVE_STATUSES
 
       def self.from_h(hash)
         type = hash["type"]

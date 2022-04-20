@@ -102,7 +102,7 @@ module Glossarist
       # List of related concepts of the specified type.
       # @return [Array<RelatedConcept>]
       define_method("#{type}_concepts") do
-        related&.select { |concept| concept.type == type.to_sym } || []
+        related&.select { |concept| concept.type == type.to_s } || []
       end
     end
   end

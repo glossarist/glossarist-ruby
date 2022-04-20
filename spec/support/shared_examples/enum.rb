@@ -23,7 +23,7 @@ RSpec.shared_examples "an Enum" do
 
   described_class.registered_enums.each do |type|
     describe "##{type}=" do
-      let!(:valid_type) { described_class.enums[type][:registered_values].first }
+      let!(:valid_type) { described_class.enums[type][:registered_values].first&.to_s }
 
       context "when type is valid" do
         it "will set the type" do

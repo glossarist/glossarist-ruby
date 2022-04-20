@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative "enum/enum_collection"
 require_relative "enum/class_methods"
 require_relative "enum/instance_methods"
 

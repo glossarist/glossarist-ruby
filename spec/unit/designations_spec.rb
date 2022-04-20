@@ -20,12 +20,12 @@ RSpec.describe Glossarist::Designation::Expression do
 
   it "accepts strings as plurality values" do
     expect { subject.grammar_info.first.number = "plural" }
-      .to change { subject.grammar_info.first.number }.to([:plural])
+      .to change { subject.grammar_info.first.number }.to(["plural"])
   end
 
   it "accepts strings as genders" do
     expect { subject.grammar_info.first.gender = "m" }
-      .to change { subject.grammar_info.first.gender }.to([:m])
+      .to change { subject.grammar_info.first.gender }.to(["m"])
   end
 
   it "accepts strings as parts of speech" do
@@ -53,9 +53,9 @@ RSpec.describe Glossarist::Designation::Expression do
       expect(retval["designation"]).to eq("Example designation")
       expect(retval["normative_status"]).to eq("preferred")
       expect(retval["geographical_area"]).to eq("somewhere")
-      expect(retval["grammar_info"].first["gender"]).to eq([:m])
+      expect(retval["grammar_info"].first["gender"]).to eq(["m"])
       expect(retval["grammar_info"].first["adj"]).to eq(true)
-      expect(retval["grammar_info"].first["number"]).to eq([:singular])
+      expect(retval["grammar_info"].first["number"]).to eq(["singular"])
       expect(retval["usage_info"]).to eq("science")
     end
   end
