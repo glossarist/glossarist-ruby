@@ -19,5 +19,7 @@ module Glossarist
     GRAMMAR_INFO_GENDERS = config.dig("grammar_info", "gender").freeze
 
     GRAMMAR_INFO_NUMBERS = config.dig("grammar_info", "number").freeze
+
+    DESIGNATION_BASE_NORMATIVE_STATUSES = config.dig("designation", "base", "normative_status").freeze
   end
 end
