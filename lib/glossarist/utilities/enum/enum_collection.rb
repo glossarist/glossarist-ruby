@@ -6,8 +6,6 @@ module Glossarist
       class EnumCollection
         include Enumerable
 
-        Enumerator = Struct.new(:registered_values, :options, keyword_init: true)
-
         def initialize
           @collection = {}
         end
