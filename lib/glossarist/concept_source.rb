@@ -16,7 +16,7 @@ module Glossarist
         "status" => status.to_s,
         "origin" => origin,
         "modification" => modification,
-      }
+      }.compact
     end
   end
 end
