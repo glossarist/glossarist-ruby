@@ -53,6 +53,10 @@ module Glossarist
     # @return [String]
     attr_accessor :classification
 
+    # Non verbal representation of the concept.
+    # @return [NonVerbRep]
+    attr_accessor :non_verb_rep
+
     attr_accessor :review_date
     attr_accessor :review_decision_date
     attr_accessor :review_decision_event
