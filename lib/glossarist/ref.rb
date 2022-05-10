@@ -29,14 +29,6 @@ module Glossarist
     # @return [String]
     attr_accessor :link
 
-    # @return [String]
-    # @todo Pending documentation.
-    attr_accessor :status
-
-    # @return [String]
-    # @todo Pending documentation.
-    attr_accessor :modification
-
     # Original ref text before parsing.
     # @return [String]
     # @note This attribute is likely to be removed or reworked in future.
@@ -56,26 +48,31 @@ module Glossarist
     end
 
     def to_h
-      {
+      h = {
         "ref" => ref_to_h,
         "clause" => clause,
         "link" => link,
-        "relationship" => relationship_to_h,
         "original" => original,
       }.compact
+
+      return nil if h.empty?
+      h
     end
 
     def self.from_h(hash)
       hash = hash.dup
 
       ref_val = hash.delete("ref")
-      rel_val = hash.delete("relationship")
       hash.merge!(Hash === ref_val ? ref_val : {"text" => ref_val})
-      hash["status"] = rel_val&.fetch("type")
-      hash["modification"] = rel_val&.fetch("modification")
       hash.compact!
 
       super(hash)
+    end
+
+    def ref=(ref)
+      @source = ref["source"]
+      @id = ref["id"]
+      @version = ref["version"]
     end
 
     private
@@ -86,10 +83,6 @@ module Glossarist
       else
         text
       end
-    end
-
-    def relationship_to_h
-      status && { "type" => status, "modification" => modification }.compact
     end
   end
 end

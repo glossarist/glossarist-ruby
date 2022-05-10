@@ -61,3 +61,17 @@ grammar_info:
     - singular
     - dual
     - plural
+
+concept:
+  status:
+    - draft
+    - not_valid
+    - valid
+    - superseded
+    - retired
+
+concept_date:
+  type:
+    - accepted
+    - amended
+    - retired

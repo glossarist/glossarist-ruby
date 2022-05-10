@@ -9,7 +9,7 @@ RSpec.describe Glossarist::ConceptSource do
     {
       type: "authoritative",
       status: "identical",
-      origin: "Test origin",
+      origin: { "id"=> "123", "source" => "wikipedia", "version" => "Test version"},
       modification: "Test modification",
     }
   end
@@ -19,7 +19,7 @@ RSpec.describe Glossarist::ConceptSource do
       expected_hash = {
         "type" => "authoritative",
         "status" => "identical",
-        "origin" => "Test origin",
+        "origin" => { "ref" => {"id"=> "123", "source" => "wikipedia", "version" => "Test version" } },
         "modification" => "Test modification",
       }
 
