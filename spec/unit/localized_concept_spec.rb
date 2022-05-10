@@ -99,9 +99,9 @@ RSpec.describe Glossarist::LocalizedConcept do
 
   describe "#to_h" do
     it "dumps localized concept definition to a hash" do
-      term1 = double(to_h: {"some" => "designation"})
-      term2 = double(to_h: {"another" => "designation"})
-      source = double(to_h: {"source" => "reference"})
+      term1 = { "type" => "expression", "designation" => "term1" }
+      term2 = { "type" => "expression", "designation" => "term2" }
+      source = { "type" => "authoritative", "status" => "modified" }
       attrs.replace({
         id: "123",
         language_code: "lang",
@@ -115,16 +115,17 @@ RSpec.describe Glossarist::LocalizedConcept do
       expect(retval).to be_kind_of(Hash)
       expect(retval["language_code"]).to eq("lang")
       expect(retval["id"]).to eq("123")
-      expect(retval["terms"]).to eq([
-        {"some" => "designation"}, {"another" => "designation"}])
-      expect(retval["examples"]).to eq(["ex. one"])
-      expect(retval["notes"]).to eq(["note one"])
-      expect(retval["authoritative_source"]).to eq([{"source" => "reference"}])
+      expect(retval["terms"]).to eq([term1, term2])
+      expect(retval["examples"]).to eq([{ "content" => "ex. one"}])
+      expect(retval["notes"]).to eq([{ "content" => "note one"}])
+      expect(retval["authoritative_source"]).to eq([source])
     end
   end
 
   describe "::from_h" do
     it "loads localized concept definition from a hash" do
+      source = { "source" => "wikipedia", "id" => "123", "version" => "71" }
+
       src = {
         "id" => "123-45",
         "language_code" => "eng",
@@ -136,30 +137,16 @@ RSpec.describe Glossarist::LocalizedConcept do
           },
         ],
         "definition" => [{ content: "Example Definition" }],
-        "authoritative_source" => [
-          {"Example Source" => "Reference"},
-        ],
+        "authoritative_source" => [source],
       }
 
-      expr_dbl = double("expression")
-      source_dbl = double("source")
-
-      expect(Glossarist::Designation::Base)
-        .to receive(:from_h)
-        .with(src["terms"][0])
-        .and_return(expr_dbl)
-
-      expect(Glossarist::Ref)
-        .to receive(:from_h)
-        .with({"Example Source" => "Reference"})
-        .and_return(source_dbl)
-
       retval = described_class.from_h(src)
+
       expect(retval).to be_kind_of(Glossarist::LocalizedConcept)
       expect(retval.definition.size).to eq(1)
       expect(retval.definition.first.content).to eq("Example Definition")
-      expect(retval.terms).to eq([expr_dbl])
-      expect(retval.sources).to eq([source_dbl])
+      expect(retval.terms).to eq([])
+      expect(retval.sources.map(&:to_h)).to eq([{ "origin" => { "ref" => source }, "status" => "", "type" => "" }])
     end
 
     it "should work iev-data for grammar_info" do
@@ -179,7 +166,7 @@ RSpec.describe Glossarist::LocalizedConcept do
         "definition" => [{ content: "set of real numbers such that, for any pair (stem:[x], stem:[y]) of elements of the set, any real number stem:[z] between stem:[x] and stem:[y] belongs to the set" }],
       }
 
-      localized_concept = Glossarist::LocalizedConcept.from_h(src)
+      localized_concept = Glossarist::LocalizedConcept.new(src)
       grammar_info = localized_concept.designations.first.grammar_info.first
 
       expect(grammar_info.n?).to be(true)

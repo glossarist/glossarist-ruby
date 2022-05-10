@@ -21,5 +21,9 @@ module Glossarist
     GRAMMAR_INFO_NUMBERS = config.dig("grammar_info", "number").freeze
 
     DESIGNATION_BASE_NORMATIVE_STATUSES = config.dig("designation", "base", "normative_status").freeze
+
+    CONCEPT_DATE_TYPES = config.dig("concept_date", "type").freeze
+
+    CONCEPT_STATUSES = config.dig("concept", "status").freeze
   end
 end

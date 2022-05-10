@@ -3,6 +3,14 @@
 module Glossarist
   class DetailedDefinition < Model
 
+    def initialize(attributes = {})
+      if attributes.is_a?(Hash)
+        super
+      else
+        self.content = attributes
+      end
+    end
+
     # @return [String]
     attr_accessor :content
 

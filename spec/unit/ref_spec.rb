@@ -38,16 +38,6 @@ RSpec.describe Glossarist::Ref do
       .to change { subject.link }.to("new one")
   end
 
-  it "accepts strings as status" do
-    expect { subject.status = "new one" }
-      .to change { subject.status }.to("new one")
-  end
-
-  it "accepts strings as modification" do
-    expect { subject.modification = "new one" }
-      .to change { subject.modification }.to("new one")
-  end
-
   it "accepts strings as original" do
     expect { subject.original = "new one" }
       .to change { subject.original }.to("new one")
@@ -59,8 +49,6 @@ RSpec.describe Glossarist::Ref do
         text: "Example ref",
         clause: "12.3",
         link: "https://example.com",
-        status: "modified",
-        modification: "something changed",
         original: "original ref text",
       })
 
@@ -69,8 +57,6 @@ RSpec.describe Glossarist::Ref do
       expect(retval["ref"]).to eq("Example ref")
       expect(retval["clause"]).to eq("12.3")
       expect(retval["link"]).to eq("https://example.com")
-      expect(retval["relationship"]["type"]).to eq("modified")
-      expect(retval["relationship"]["modification"]).to eq("something changed")
       expect(retval["original"]).to eq("original ref text")
     end
 
@@ -81,8 +67,6 @@ RSpec.describe Glossarist::Ref do
         version: "2020",
         clause: "12.3",
         link: "https://example.com",
-        status: "modified",
-        modification: "something changed",
         original: "original ref text",
       })
 
@@ -93,8 +77,6 @@ RSpec.describe Glossarist::Ref do
       expect(retval["ref"]["version"]).to eq("2020")
       expect(retval["clause"]).to eq("12.3")
       expect(retval["link"]).to eq("https://example.com")
-      expect(retval["relationship"]["type"]).to eq("modified")
-      expect(retval["relationship"]["modification"]).to eq("something changed")
       expect(retval["original"]).to eq("original ref text")
     end
   end
@@ -106,10 +88,6 @@ RSpec.describe Glossarist::Ref do
         "clause" => "12.3",
         "link" => "https://example.com",
         "original" => "original ref text",
-        "relationship" => {
-          "type" => "modified",
-          "modification" => "something changed",
-        }
       }
 
       retval = described_class.from_h(src)
@@ -117,8 +95,6 @@ RSpec.describe Glossarist::Ref do
       expect(retval.text).to eq("Some Ref")
       expect(retval.clause).to eq("12.3")
       expect(retval.link).to eq("https://example.com")
-      expect(retval.status).to eq("modified")
-      expect(retval.modification).to eq("something changed")
     end
 
     it "loads structured ref from a hash" do
@@ -131,10 +107,6 @@ RSpec.describe Glossarist::Ref do
         "clause" => "12.3",
         "link" => "https://example.com",
         "original" => "original ref text",
-        "relationship" => {
-          "type" => "modified",
-          "modification" => "something changed",
-        }
       }
 
       retval = described_class.from_h(src)
@@ -144,8 +116,6 @@ RSpec.describe Glossarist::Ref do
       expect(retval.version).to eq("2020")
       expect(retval.clause).to eq("12.3")
       expect(retval.link).to eq("https://example.com")
-      expect(retval.status).to eq("modified")
-      expect(retval.modification).to eq("something changed")
     end
   end
 end

@@ -15,7 +15,7 @@ RSpec.describe Glossarist::DetailedDefinition do
       source = Glossarist::ConceptSource.new({
         "type" => "lineage",
         "status" => "identical",
-        "origin" => "url",
+        "origin" => { "text" => "origin" },
         "modification" => "note",
       })
 
@@ -23,7 +23,7 @@ RSpec.describe Glossarist::DetailedDefinition do
         {
           "type" => "lineage",
           "status" => "identical",
-          "origin" => "url",
+          "origin" => { "text" => "url" },
           "modification" => "some modification",
         },
         source
@@ -33,7 +33,7 @@ RSpec.describe Glossarist::DetailedDefinition do
       expect(detailed_definition.sources.first).to be_a(Glossarist::ConceptSource)
       expect(detailed_definition.sources.first.type).to eq("lineage")
       expect(detailed_definition.sources.first.status).to eq("identical")
-      expect(detailed_definition.sources.first.origin).to eq("url")
+      expect(detailed_definition.sources.first.origin.text).to eq("url")
       expect(detailed_definition.sources.first.modification).to eq("some modification")
 
       expect(detailed_definition.sources[1]).to be(source)
@@ -47,7 +47,7 @@ RSpec.describe Glossarist::DetailedDefinition do
         Glossarist::ConceptSource.new(
           "type" => "lineage",
           "status" => "identical",
-          "origin" => "url",
+          "origin" => { "text" => "origin" },
           "modification" => "some modification",
         ),
       ]
@@ -57,7 +57,7 @@ RSpec.describe Glossarist::DetailedDefinition do
           {
             "type" => "lineage",
             "status" => "identical",
-            "origin" => "url",
+            "origin" => { "ref" => "origin" },
             "modification" => "some modification",
           },
         ],

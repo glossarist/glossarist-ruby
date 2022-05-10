@@ -142,7 +142,7 @@ RSpec.describe Glossarist::Concept do
           {
             "type" => "authoritative",
             "status" => "identical",
-            "origin" => "reference"
+            "origin" => { "text" => "url" },
           }
         ],
         "related" => [
@@ -181,7 +181,7 @@ RSpec.describe Glossarist::Concept do
       expect(retval.sources.size).to eq(1)
       expect(retval.sources.first.type).to eq("authoritative")
       expect(retval.sources.first.status).to eq("identical")
-      expect(retval.sources.first.origin).to eq("reference")
+      expect(retval.sources.first.origin.to_h).to eq({ "ref" => "url" })
     end
   end
 end
