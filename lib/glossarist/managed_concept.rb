@@ -44,7 +44,6 @@ module Glossarist
     end
 
     def related=(related)
-      binding.pry
       @related = related&.map { |r| RelatedConcept.new(r) }
     end
 
@@ -72,20 +71,35 @@ module Glossarist
 
     def to_h
       {
+        "termid" => id,
+        "term" => default_designation,
         "related" => related&.map(&:to_h),
-        "status" => status,
-        "dates" => dates&.map(&:to_h),
-        "localized_concepts" => localized_concepts&.to_h,
-      }.compact
+        "dates" => dates&.empty? ? nil : dates&.map(&:to_h),
+      }.merge(localizations.transform_values(&:to_h)).compact
+    end
+
+    def default_designation
+      localized = localization("eng") || localizations.values.first
+      localized&.terms&.first&.designation
     end
 
     def managed_concept_attributes
       %w[
+        id
         termid
         related
         status
         dates
+        localized_concepts
       ].compact
+    end
+
+    Glossarist::GlossaryDefinition::RELATED_CONCEPT_TYPES.each do |type|
+      # List of related concepts of the specified type.
+      # @return [Array<RelatedConcept>]
+      define_method("#{type}_concepts") do
+        related&.select { |concept| concept.type == type.to_s } || []
+      end
     end
   end
 end

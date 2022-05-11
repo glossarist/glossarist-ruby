@@ -11,14 +11,12 @@ module Glossarist
     end
 
     # Reads all concepts from files.
-    def load_from_files
-      managed_concepts = ManagedConceptCollection.new
+    def load_from_files(collection: nil)
+      collection ||= ManagedConceptCollection.new
 
       Dir.glob(concepts_glob) do |filename|
-        managed_concepts.store(load_concept_from_file(filename))
+        collection.store(load_concept_from_file(filename))
       end
-
-      managed_concepts
     end
 
     # Writes all concepts to files.

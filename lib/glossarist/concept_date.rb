@@ -12,8 +12,8 @@ module Glossarist
 
     def to_h
       {
-        "date" => date,
         "type" => type,
+        "date" => date,
       }.compact
     end
   end
