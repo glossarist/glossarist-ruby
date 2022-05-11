@@ -3,6 +3,7 @@
 module Glossarist
   class ManagedConcept < Model
     include Glossarist::Utilities::Enum
+    include Glossarist::Utilities::CommonFunctions
 
     # @return [String]
     attr_accessor :id
@@ -30,7 +31,7 @@ module Glossarist
       @localizations = {}
       self.localized_concepts = attributes.values.grep(Hash)
 
-      super(attributes.slice(*managed_concept_attributes))
+      super(slice_keys(attributes, managed_concept_attributes))
     end
 
     def localized_concepts=(localized_concepts_hash)

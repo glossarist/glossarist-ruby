@@ -3,6 +3,7 @@
 module Glossarist
   class ConceptSource < Model
     include Glossarist::Utilities::Enum
+    include Glossarist::Utilities::CommonFunctions
 
     register_enum :status, Glossarist::GlossaryDefinition::CONCEPT_SOURCE_STATUSES
     register_enum :type, Glossarist::GlossaryDefinition::CONCEPT_SOURCE_TYPES
@@ -18,7 +19,7 @@ module Glossarist
         self.modification = rel["modification"]
       end
 
-      self.origin = attributes.slice(*ref_param_names)
+      self.origin = slice_keys(attributes, ref_param_names)
 
       remaining_attributes = attributes.dup
       ref_param_names.each { |k| remaining_attributes.delete(k) }
