@@ -1,7 +1,6 @@
 ---
 termid: chess-02-01
 term: King
-sources: []
 related:
 - type: supersedes
   ref:
@@ -20,20 +19,21 @@ eng:
     international: true
   definition:
   - content: The most important piece in the game of chess.
-  language_code: eng
   notes:
-  - Cannot be captured.
+  - content: Cannot be captured.
   examples:
-  - Kh6-h7
-  - Kh6-g7
+  - content: Kh6-h7
+  - content: Kh6-g7
+  language_code: eng
   entry_status: valid
   sources:
-  - ref:
-      source: Wikipedia
-      id: King (chess)
-      version: 2021-07
-    link: https://en.wikipedia.org/wiki/King_(chess)
-    type: authoritative
+  - type: authoritative
+    origin:
+      ref:
+        source: Wikipedia
+        id: King (chess)
+        version: 2021-07
+      link: https://en.wikipedia.org/wiki/King_(chess)
   dates:
   - type: accepted
     date: '2021-05-01T00:00:00+00:00'
@@ -47,12 +47,12 @@ pol:
     designation: Król
   definition:
   - content: Najważniejsza figura w szachach.
-  language_code: pol
   notes:
-  - Nie może zostać zbity.
+  - content: Nie może zostać zbity.
   examples:
-  - Kh6-h7
-  - Kh6-g7
+  - content: Kh6-h7
+  - content: Kh6-g7
+  language_code: pol
   entry_status: valid
   dates:
   - type: accepted

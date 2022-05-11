@@ -1,7 +1,6 @@
 ---
 termid: chess-02-03
 term: Rook
-sources: []
 eng:
   id: chess-02-03
   terms:
@@ -17,20 +16,25 @@ eng:
     international: true
   definition:
   - content: The second strongest piece in chess.
-  language_code: eng
   notes: []
   examples:
-  - Rh1-h8
-  - Rh1-a1
+  - content: Rh1-h8
+  - content: Rh1-a1
+  language_code: eng
   entry_status: valid
-  authoritative_source:
-  - ref:
-      source: Wikipedia
-      id: Rook (chess)
-      version: 2021-07
-    link: https://en.wikipedia.org/wiki/Rook_(chess)
-  date_accepted: '2021-05-01T00:00:00+00:00'
-  date_amended: '2021-05-01T00:00:00+00:00'
+  sources:
+  - type: authoritative
+    origin:
+      ref:
+        source: Wikipedia
+        id: Rook (chess)
+        version: 2021-07
+      link: https://en.wikipedia.org/wiki/Rook_(chess)
+  dates:
+  - type: accepted
+    date: '2021-05-01T00:00:00+00:00'
+  - type: amended
+    date: '2021-05-01T00:00:00+00:00'
 pol:
   id: chess-02-03
   terms:
@@ -39,11 +43,14 @@ pol:
     designation: Wieża
   definition:
   - content: Druga najpotężniejsza figura w szachach.
-  language_code: pol
   notes: []
   examples:
-  - Rh1-h8
-  - Rh1-a1
+  - content: Rh1-h8
+  - content: Rh1-a1
+  language_code: pol
   entry_status: valid
-  date_accepted: '2021-05-01T00:00:00+00:00'
-  date_amended: '2021-05-01T00:00:00+00:00'
+  dates:
+  - type: accepted
+    date: '2021-05-01T00:00:00+00:00'
+  - type: amended
+    date: '2021-05-01T00:00:00+00:00'

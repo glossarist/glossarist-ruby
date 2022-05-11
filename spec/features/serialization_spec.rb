@@ -30,7 +30,7 @@ RSpec.describe "Serialization and deserialization" do
     expect(king.l10n("eng").sources[0].origin.source).to eq("Wikipedia")
     expect(king.l10n("eng").sources[0].origin.id).to eq("King (chess)")
     expect(king.l10n("eng").sources[0].origin.link).to start_with("https")
-binding.pry
+
     expect(king.supersedes_concepts.size).to eq(1)
     expect(queen.supersedes_concepts.size).to eq(0)
     expect(rook.supersedes_concepts.size).to eq(0)
@@ -41,8 +41,7 @@ binding.pry
     expect(king.supersedes_concepts[0].ref.version).to eq("some older definition")
 
     Dir.mktmpdir do |tmp_path|
-      collection.path = tmp_path
-      collection.save_concepts
+      collection.save_to_files(tmp_path)
       system "diff", fixtures_path, tmp_path
       expect($?.exitstatus).to eq(0) # no difference
     end

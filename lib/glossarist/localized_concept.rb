@@ -28,9 +28,6 @@ module Glossarist
     attr_accessor :review_decision_date
     attr_accessor :review_decision_event
 
-    attr_accessor :date_accepted
-    attr_accessor :date_amended
-
     def initialize(*)
       @examples = []
 
@@ -41,10 +38,9 @@ module Glossarist
       super.merge({
         "language_code" => language_code,
         "entry_status" => entry_status,
+        "sources" => sources.empty? ? nil : sources&.map(&:to_h),
         "classification" => classification,
-        "authoritative_source" => sources&.map(&:to_h),
-        "date_accepted" => date_accepted,
-        "date_amended" => date_amended,
+        "dates" => dates&.map(&:to_h),
         "review_date" => review_date,
         "review_decision_date" => review_decision_date,
         "review_decision_event" => review_decision_event,

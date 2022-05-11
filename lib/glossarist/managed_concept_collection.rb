@@ -7,6 +7,7 @@ module Glossarist
     #   concepts directory path, either absolute or relative to CWD
     def initialize
       @managed_concepts = {}
+      @concept_manager = ConceptManager.new
     end
 
     # @return [Array<ManagedConcept>]
@@ -65,11 +66,13 @@ module Glossarist
     alias :<< :store
 
     def load_from_files(path)
-      @managed_concepts = ConceptManager.new(path: path).load_from_files
+      @concept_manager.path = path
+      @concept_manager.load_from_files(collection: self)
     end
 
     def save_to_files(path)
-      ConceptManager.new(path: path).save_to_files(@managed_concepts)
+      @concept_manager.path = path
+      @concept_manager.save_to_files(@managed_concepts)
     end
   end
 end

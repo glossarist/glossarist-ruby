@@ -35,7 +35,7 @@ module Glossarist
     def to_h
       {
         "type" => type.to_s,
-        "status" => status.to_s,
+        "status" => status&.to_s,
         "origin" => origin.to_h,
         "modification" => modification,
       }.compact

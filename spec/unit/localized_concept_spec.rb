@@ -50,16 +50,6 @@ RSpec.describe Glossarist::LocalizedConcept do
       .to change { subject.review_decision_event }.to("published")
   end
 
-  it "accepts strings as dates accepted" do
-    expect { subject.date_accepted = "2020-01-01" }
-      .to change { subject.date_accepted }.to("2020-01-01")
-  end
-
-  it "accepts strings as dates amended" do
-    expect { subject.date_amended = "2020-01-01" }
-      .to change { subject.date_amended }.to("2020-01-01")
-  end
-
   describe "#designations" do
     let(:expression) { double("expression designation") }
 
@@ -118,7 +108,7 @@ RSpec.describe Glossarist::LocalizedConcept do
       expect(retval["terms"]).to eq([term1, term2])
       expect(retval["examples"]).to eq([{ "content" => "ex. one"}])
       expect(retval["notes"]).to eq([{ "content" => "note one"}])
-      expect(retval["authoritative_source"]).to eq([source])
+      expect(retval["sources"]).to eq([source])
     end
   end
 
@@ -146,7 +136,7 @@ RSpec.describe Glossarist::LocalizedConcept do
       expect(retval.definition.size).to eq(1)
       expect(retval.definition.first.content).to eq("Example Definition")
       expect(retval.terms).to eq([])
-      expect(retval.sources.map(&:to_h)).to eq([{ "origin" => { "ref" => source }, "status" => "", "type" => "" }])
+      expect(retval.sources.map(&:to_h)).to eq([{ "origin" => { "ref" => source }, "type" => "" }])
     end
 
     it "should work iev-data for grammar_info" do

@@ -10,12 +10,6 @@ module Glossarist
     attr_accessor :id
     alias :termid= :id=
 
-    # All localizations for this concept.
-    #
-    # Keys are language codes and values are instances of {LocalizedConcept}.
-    # @return [Hash<String, LocalizedConcept>]
-    attr_reader :localizations
-
     # Concept designations.
     # @todo Alias +terms+ exists only for legacy reasons and will be removed.
     # @return [Array<Designations::Base>]
@@ -102,39 +96,16 @@ module Glossarist
       end
     end
 
-    # Adds concept localization.
-    # @param localized_concept [LocalizedConcept]
-    def add_localization(localized_concept)
-      lang = localized_concept.language_code
-      localizations.store(lang, localized_concept)
-    end
-
-    alias :add_l10n :add_localization
-
-    # Returns concept localization.
-    # @param lang [String] language code
-    # @return [LocalizedConcept]
-    def localization(lang)
-      localizations[lang]
-    end
-
-    alias :l10n :localization
-
     def to_h
       {
         "id" => id,
-        "termid" => id,
-        "term" => default_designation,
-        "sources" => sources&.map(&:to_h),
         "related" => related&.map(&:to_h),
-
         "terms" => (terms&.map(&:to_h) || []),
         "definition" => definition&.map(&:to_h),
         "notes" => notes&.map(&:to_h),
         "examples" => examples&.map(&:to_h),
       }
       .compact
-      .merge(localizations.transform_values(&:to_h))
     end
 
     # @deprecated For legacy reasons only.
@@ -153,17 +124,11 @@ module Glossarist
           .grep(Hash)
           .map { |subhash| LocalizedConcept.from_h(subhash) rescue nil }
           .compact
-          .each { |lc| concept.add_l10n lc }
 
         concept.related = hash.dig("related") || []
       end
     end
     # rubocop:enable Metrics/AbcSize, Style/RescueModifier
-
-    def default_designation
-      localized = localization("eng") || localizations.values.first
-      localized&.terms&.first&.designation
-    end
 
     # All Related Concepts
     # @return [Array<RelatedConcept>]
@@ -172,16 +137,7 @@ module Glossarist
     end
 
     def related=(related)
-      binding.pry
       @related = related&.map { |r| RelatedConcept.new(r) }
-    end
-
-    Glossarist::GlossaryDefinition::RELATED_CONCEPT_TYPES.each do |type|
-      # List of related concepts of the specified type.
-      # @return [Array<RelatedConcept>]
-      define_method("#{type}_concepts") do
-        related&.select { |concept| concept.type == type.to_s } || []
-      end
     end
   end
 end
