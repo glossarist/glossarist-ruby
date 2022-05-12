@@ -47,7 +47,6 @@ module Glossarist
       !plain?
     end
 
-    # TODO: need to fix this tomorrow
     def to_h
       {
         "ref" => ref_to_h,
