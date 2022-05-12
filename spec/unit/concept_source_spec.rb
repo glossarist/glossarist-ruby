@@ -26,4 +26,16 @@ RSpec.describe Glossarist::ConceptSource do
       expect(subject.to_h).to eq(expected_hash)
     end
   end
+
+  describe "#type" do
+    it "returns type" do
+      expect(subject.type).to eq("authoritative")
+    end
+  end
+
+  describe "#status" do
+    it "returns status" do
+      expect(subject.status).to eq("identical")
+    end
+  end
 end

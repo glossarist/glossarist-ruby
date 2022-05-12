@@ -3,8 +3,7 @@
 module Glossarist
   class ManagedConceptCollection
     include Enumerable
-    # @param path [String]
-    #   concepts directory path, either absolute or relative to CWD
+
     def initialize
       @managed_concepts = {}
       @concept_manager = ConceptManager.new
@@ -15,15 +14,17 @@ module Glossarist
       @managed_concepts.values
     end
 
-    def managed_concepts=(managed_concepts)
-      @managed_concepts = managed_concepts&.map do |managed_concept|
-        ManagedConcept.new(managed_concept)
+    def managed_concepts=(managed_concepts = [])
+      managed_concepts.each do |managed_concept|
+        store(ManagedConcept.new(managed_concept))
       end
+
+      @managed_concepts.values
     end
 
     def to_h
       {
-        "managed_concepts" => managed_concepts.values&.map(&:to_h),
+        "managed_concepts" => managed_concepts.map(&:to_h),
       }.compact
     end
 

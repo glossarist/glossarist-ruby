@@ -4,7 +4,7 @@
 #
 
 module Glossarist
-  class Ref < Model
+  class Citation < Model
     # Unstructured (plain text) reference.
     # @return [String]
     attr_accessor :text
@@ -47,16 +47,14 @@ module Glossarist
       !plain?
     end
 
+    # TODO: need to fix this tomorrow
     def to_h
-      h = {
+      {
         "ref" => ref_to_h,
         "clause" => clause,
         "link" => link,
         "original" => original,
       }.compact
-
-      return nil if h.empty?
-      h
     end
 
     def self.from_h(hash)

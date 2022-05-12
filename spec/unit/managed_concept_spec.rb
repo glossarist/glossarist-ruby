@@ -27,6 +27,13 @@ RSpec.describe Glossarist::ManagedConcept do
     }
   end
 
+  describe "#id" do
+    it "sets the id of the concept" do
+      expect { subject.id = "1234" }
+        .to change { subject.id }.to("1234")
+    end
+  end
+
   describe "#related=" do
     it "sets the related concepts" do
       subject.related = [{ "type" => "supersedes", "content" => "Example content" }]

@@ -10,11 +10,11 @@ module Glossarist
     attr_accessor :content
 
     # Reference to the related concept.
-    # @return [Ref]
+    # @return [Citation]
     attr_reader :ref
 
     def ref=(ref)
-      @ref = Ref.new(ref)
+      @ref = Citation.new(ref)
     end
 
     def to_h

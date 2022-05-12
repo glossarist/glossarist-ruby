@@ -3,10 +3,10 @@
 # (c) Copyright 2021 Ribose Inc.
 #
 
-RSpec.describe Glossarist::Ref do
+RSpec.describe Glossarist::Citation do
   subject { described_class.new attrs }
 
-  let(:attrs) { { text: "some ref" } }
+  let(:attrs) { { text: "Citation" } }
 
   it "accepts strings as text" do
     expect { subject.text = "new one" }
@@ -84,15 +84,15 @@ RSpec.describe Glossarist::Ref do
   describe "::from_h" do
     it "loads plain text ref from a hash" do
       src = {
-        "ref" => "Some Ref",
+        "ref" => "Citation",
         "clause" => "12.3",
         "link" => "https://example.com",
         "original" => "original ref text",
       }
 
       retval = described_class.from_h(src)
-      expect(retval).to be_kind_of(Glossarist::Ref)
-      expect(retval.text).to eq("Some Ref")
+      expect(retval).to be_kind_of(Glossarist::Citation)
+      expect(retval.text).to eq("Citation")
       expect(retval.clause).to eq("12.3")
       expect(retval.link).to eq("https://example.com")
     end
@@ -110,7 +110,7 @@ RSpec.describe Glossarist::Ref do
       }
 
       retval = described_class.from_h(src)
-      expect(retval).to be_kind_of(Glossarist::Ref)
+      expect(retval).to be_kind_of(Glossarist::Citation)
       expect(retval.source).to eq("Example source")
       expect(retval.id).to eq("12345")
       expect(retval.version).to eq("2020")

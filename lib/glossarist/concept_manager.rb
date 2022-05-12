@@ -6,6 +6,8 @@ module Glossarist
     # @return [String]
     attr_accessor :path
 
+    # @param path [String]
+    #   concepts directory path, either absolute or relative to CWD
     def initialize(path: nil)
       @path = path
     end
