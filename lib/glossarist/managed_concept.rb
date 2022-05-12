@@ -31,6 +31,7 @@ module Glossarist
       @localizations = {}
       self.localized_concepts = attributes.values.grep(Hash)
 
+      attributes = symbolize_keys(attributes)
       super(slice_keys(attributes, managed_concept_attributes))
     end
 
@@ -85,7 +86,7 @@ module Glossarist
     end
 
     def managed_concept_attributes
-      %w[
+      %i[
         id
         termid
         related

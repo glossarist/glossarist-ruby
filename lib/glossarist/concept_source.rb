@@ -28,16 +28,18 @@ module Glossarist
     end
 
     def origin=(origin)
-      @origin = Ref.new(origin)
+      @origin = Citation.new(origin)
     end
 
     alias_method :ref=, :origin=
 
     def to_h
+      origin_hash = self.origin.to_h.empty? ? nil : self.origin.to_h
+
       {
         "type" => type.to_s,
         "status" => status&.to_s,
-        "origin" => origin.to_h,
+        "origin" => origin_hash,
         "modification" => modification,
       }.compact
     end
