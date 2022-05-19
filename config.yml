@@ -9,12 +9,15 @@
 concept_source:
   status:
     - identical
+    - similar # in iev-data
     - modified
     - restyle
     - context-added
     - generalisation
     - specialisation
     - unspecified
+    - related # in iev-data
+    - not_equal # in iev-data
   type:
     - authoritative
     - lineage
@@ -25,6 +28,11 @@ designation:
       - preferred
       - deprecated
       - admitted
+      - obsoleto # in iev-data
+      - напуштен # in iev-data
+      - <símbolo> # in iev-data
+      - 티에스 # in iev-data
+      - prąd startowy # in iev-data
 
 related_concept:
   type:
