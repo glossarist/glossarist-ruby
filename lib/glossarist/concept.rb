@@ -87,7 +87,7 @@ module Glossarist
     def sources=(sources)
       @sources = sources&.map do |source|
         ConceptSource.new(source)
-      end
+      end || []
     end
 
     def authoritative_source=(sources)
@@ -137,7 +137,7 @@ module Glossarist
     end
 
     def related=(related)
-      @related = related&.map { |r| RelatedConcept.new(r) }
+      @related = related&.map { |r| RelatedConcept.new(r) } || []
     end
   end
 end

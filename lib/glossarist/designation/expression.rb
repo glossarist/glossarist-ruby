@@ -28,7 +28,7 @@ module Glossarist
             "gender" => gender,
             "number" => number,
             part_of_speech => part_of_speech,
-          }]
+          }.compact]
         end
 
         super
