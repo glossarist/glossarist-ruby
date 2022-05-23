@@ -9,15 +9,15 @@
 concept_source:
   status:
     - identical
-    - similar # in iev-data
+    - similar
     - modified
     - restyle
-    - context-added
+    - context_added
     - generalisation
     - specialisation
     - unspecified
-    - related # in iev-data
-    - not_equal # in iev-data
+    - related
+    - not_equal
   type:
     - authoritative
     - lineage
@@ -28,11 +28,9 @@ designation:
       - preferred
       - deprecated
       - admitted
-      - obsoleto # in iev-data
-      - напуштен # in iev-data
-      - <símbolo> # in iev-data
-      - 티에스 # in iev-data
-      - prąd startowy # in iev-data
+      - <símbolo> # in iev-data => '<symbol>'
+      - 티에스 # in iev-data => translates to 'TS' I think it is a synonym and not status.
+      - prąd startowy # in iev-data => 'starting current' => preferred
 
 related_concept:
   type:
