@@ -30,7 +30,7 @@ designation:
       - admitted
       - <símbolo> # in iev-data => '<symbol>'
       - 티에스 # in iev-data => translates to 'TS' I think it is a synonym and not status.
-      - prąd startowy # in iev-data => 'starting current' => preferred
+      - prąd startowy # in iev-data => 'starting current' I think it is a synonym and not status.
 
 related_concept:
   type:
