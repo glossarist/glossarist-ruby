@@ -7,7 +7,7 @@ all_files_in_git = Dir.chdir(File.expand_path(__dir__)) do
 end
 
 Gem::Specification.new do |spec|
-  spec.name          = "glossarist"
+  spec.name          = "glossarist-new"
   spec.version       = Glossarist::VERSION
   spec.authors       = ["Ribose"]
   spec.email         = ["open.source@ribose.com"]
