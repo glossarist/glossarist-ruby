@@ -43,6 +43,26 @@ RSpec.describe Glossarist::Citation do
       .to change { subject.original }.to("new one")
   end
 
+  describe "ref=" do
+    it "accepts string as a ref" do
+      expect { subject.ref = "new ref" }
+        .to change { subject.text }.to("new ref")
+    end
+
+    it "accepts Hash as a ref" do
+      ref = {
+        "source" => "new source",
+        "id" => "new id",
+        "version" => "new version",
+      }
+
+      expect { subject.ref = ref }
+        .to change { subject.source }.to("new source")
+        .and change { subject.id }.to("new id")
+        .and change { subject.version }.to("new version")
+    end
+  end
+
   describe "#to_h" do
     it "dumps plain text ref to a hash" do
       attrs.replace({
