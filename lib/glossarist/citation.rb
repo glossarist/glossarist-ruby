@@ -67,9 +67,13 @@ module Glossarist
     end
 
     def ref=(ref)
-      @source = ref["source"]
-      @id = ref["id"]
-      @version = ref["version"]
+      if ref.is_a?(Hash)
+        @source = ref["source"]
+        @id = ref["id"]
+        @version = ref["version"]
+      else
+        @text = ref
+      end
     end
 
     private
