@@ -26,8 +26,6 @@ module Glossarist
       managed_concepts.each_value &method(:save_concept_to_file)
     end
 
-    private
-
     def load_concept_from_file(filename)
       ManagedConcept.new(Psych.safe_load(File.read(filename)))
     end
@@ -36,6 +34,8 @@ module Glossarist
       filename = File.join(path, "concept-#{concept.id}.yaml")
       File.write(filename, Psych.dump(concept.to_h))
     end
+
+    private
 
     def concepts_glob
       File.join(path, "concept-*.{yaml,yml}")
