@@ -1,0 +1,76 @@
+<bibdata type="standard" schema-version="v1.2.1">
+  <fetched>2023-01-23</fetched>
+  <title type="title-intro" format="text/plain" language="en" script="Latn">Intelligent transport systems</title>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Vocabulary</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Intelligent transport systems - Vocabulary</title>
+  <title type="title-intro" format="text/plain" language="fr" script="Latn">Systèmes de transport intelligents</title>
+  <title type="title-main" format="text/plain" language="fr" script="Latn">Vocabulaire</title>
+  <title type="main" format="text/plain" language="fr" script="Latn">Systèmes de transport intelligents - Vocabulaire</title>
+  <uri type="src">https://www.iso.org/standard/79779.html</uri>
+  <uri type="obp">https://www.iso.org/obp/ui/#!iso:std:79779:en</uri>
+  <uri type="rss">https://www.iso.org/contents/data/standard/07/97/79779.detail.rss</uri>
+  <docidentifier type="ISO" primary="true">ISO/TS 14812:2022</docidentifier>
+  <docidentifier type="URN">urn:iso:std:iso:ts:14812:ed-1</docidentifier>
+  <docnumber>14812</docnumber>
+  <date type="published">
+    <on>2022-04</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Organization for Standardization</name>
+      <abbreviation>ISO</abbreviation>
+      <uri>www.iso.org</uri>
+    </organization>
+  </contributor>
+  <edition>1</edition>
+  <language>en</language>
+  <language>fr</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">This document defines terms relating to intelligent transport systems (ITS).</abstract>
+  <abstract format="text/plain" language="fr" script="Latn">This document defines terms relating to intelligent transport systems (ITS).</abstract>
+  <status>
+    <stage>90</stage>
+    <substage>92</substage>
+  </status>
+  <copyright>
+    <from>2022</from>
+    <owner>
+      <organization>
+        <name>ISO/TS</name>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="obsoletes">
+    <bibitem type="standard">
+      <formattedref format="text/plain">ISO/AWI TS 14812</formattedref>
+      <docidentifier type="ISO" primary="true">ISO/AWI TS 14812</docidentifier>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext schema-version="v1.0.0">
+    <doctype>technical-specification</doctype>
+    <editorialgroup>
+      <technical-committee number="204" type="TC" identifier="ISO/TC 204">Intelligent transport systems</technical-committee>
+    </editorialgroup>
+    <ics>
+      <code>01.040.03</code>
+      <text>Services. Company organization, management and quality. Administration. Transport. Sociology. (Vocabularies)</text>
+    </ics>
+    <ics>
+      <code>01.040.35</code>
+      <text>Information technology (Vocabularies)</text>
+    </ics>
+    <ics>
+      <code>03.220.01</code>
+      <text>Transport in general</text>
+    </ics>
+    <ics>
+      <code>35.240.60</code>
+      <text>IT applications in transport</text>
+    </ics>
+    <structuredidentifier type="ISO">
+      <project-number>ISO 14812</project-number>
+    </structuredidentifier>
+  </ext>
+</bibdata>

@@ -16,3 +16,5 @@
 .rubocop-http---*
 .rubocop-https---*
 
+# Relaton local cache directory
+localcache

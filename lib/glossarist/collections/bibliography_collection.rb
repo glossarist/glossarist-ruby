@@ -15,10 +15,10 @@ module Glossarist
 
       def populate_bibliographies(concepts)
         concepts.each do |concept|
-          concept.sources.each do |source|
-            next if soruce.origin.source.nil?
+          concept.localization("eng").sources.each do |source|
+            next if source.origin.text.nil?
 
-            fetch(source.origin.soruce)
+            fetch(source.origin.text)
           end
         end
       end

@@ -1,7 +1,9 @@
 RSpec.describe "Serialization and deserialization" do
+  let(:concept_folder) { "chess_concepts" }
+
   it "correctly loads concepts from files and writes them too" do
     collection = Glossarist::ManagedConceptCollection.new
-    collection.load_from_files(fixtures_path)
+    collection.load_from_files(fixtures_path(concept_folder))
 
     king = collection["chess-02-01"]
     queen = collection["chess-02-02"]
@@ -42,7 +44,7 @@ RSpec.describe "Serialization and deserialization" do
 
     Dir.mktmpdir do |tmp_path|
       collection.save_to_files(tmp_path)
-      system "diff", fixtures_path, tmp_path
+      system "diff", fixtures_path(concept_folder), tmp_path
       expect($?.exitstatus).to eq(0) # no difference
     end
   end
