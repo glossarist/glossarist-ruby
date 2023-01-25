@@ -1,0 +1,2 @@
+require_relative "collections/asset_collection"
+require_relative "collections/bibliography_collection"

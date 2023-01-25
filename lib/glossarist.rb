@@ -9,6 +9,7 @@ require_relative "glossarist/utilities"
 require_relative "glossarist/version"
 require_relative "glossarist/glossary_definition"
 
+require_relative "glossarist/asset"
 require_relative "glossarist/model"
 require_relative "glossarist/concept_date"
 require_relative "glossarist/detailed_definition"
@@ -23,6 +24,8 @@ require_relative "glossarist/managed_concept_collection"
 require_relative "glossarist/concept_manager"
 require_relative "glossarist/managed_concept"
 require_relative "glossarist/non_verb_rep"
+
+require_relative "glossarist/collections"
 
 module Glossarist
   class Error < StandardError; end

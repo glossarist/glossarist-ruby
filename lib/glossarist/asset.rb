@@ -10,5 +10,13 @@ module Glossarist
     def initialize(path)
       @path = path
     end
+
+    def eql?(asset)
+      path == asset.path
+    end
+
+    def hash
+      path.hash
+    end
   end
 end
