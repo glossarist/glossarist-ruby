@@ -16,7 +16,7 @@ Gem::Specification.new do |spec|
     "Concept models for terminology glossaries conforming ISO 10241-1."
   spec.homepage      = "https://github.com/glossarist/glossarist-ruby"
   spec.license       = "BSD-2-Clause"
-  spec.required_ruby_version = Gem::Requirement.new(">= 2.4.0")
+  spec.required_ruby_version = Gem::Requirement.new(">= 2.6.0")
 
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = spec.homepage
@@ -30,7 +30,7 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "relaton"
+  spec.add_dependency "relaton", "~>1.12.0"
 
   spec.add_development_dependency "pry", "~> 0.14.0"
   spec.add_development_dependency "rake", "~> 13.0"
