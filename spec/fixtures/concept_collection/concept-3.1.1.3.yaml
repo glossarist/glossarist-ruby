@@ -7,7 +7,7 @@ eng:
     normative_status: preferred
     designation: material entity
   definition:
-  - content: "{{urn:iso:std:iso:14812:3.1.1.1,entity}} that occupies three-dimensional
+  - content: "{{entity}} that occupies three-dimensional
       space"
   notes:
   - content: All material entities have certain characteristics that can be described

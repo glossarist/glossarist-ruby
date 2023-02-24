@@ -1,13 +1,13 @@
 ---
 termid: 3.1.1.2
-term: immaterial entity
+term: immaterial_entity
 eng:
   terms:
   - type: expression
     normative_status: preferred
-    designation: immaterial entity
+    designation: immaterial_entity
   definition:
-  - content: "{{urn:iso:std:iso:14812:3.1.1.1,entity}} that does not occupy three-dimensional
+  - content: "{{entity}} that does not occupy three-dimensional
       space"
   notes: []
   examples:

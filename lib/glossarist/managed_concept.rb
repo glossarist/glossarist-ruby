@@ -85,6 +85,11 @@ module Glossarist
       localized&.terms&.first&.designation
     end
 
+    def default_definition
+      localized = localization("eng") || localizations.values.first
+      localized&.definition&.first&.content
+    end
+
     def managed_concept_attributes
       %i[
         id
