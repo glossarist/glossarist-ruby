@@ -7,7 +7,7 @@ eng:
     normative_status: preferred
     designation: non-biological entity
   definition:
-  - content: "{{urn:iso:std:iso:14812:3.1.1.3,material entity}} that is not and has
+  - content: "{{material entity}} that is not and has
       never been a living organism"
   notes: []
   examples: []
