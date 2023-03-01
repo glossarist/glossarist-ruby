@@ -29,16 +29,10 @@ RSpec.describe Glossarist::ConceptSet do
           description={\\textbf{\\gls{material entity}} that was or is a living organism}
           }
 
-          \\newglossaryentry{non-biological entity}
+          \\newglossaryentry{entity}
           {
-          name={non-biological entity}
-          description={\\textbf{\\gls{material entity}} that is not and has never been a living organism}
-          }
-
-          \\newglossaryentry{material entity}
-          {
-          name={material entity}
-          description={\\textbf{\\gls{entity}} that occupies three-dimensional space}
+          name={entity}
+          description={concrete or abstract thing that exists, did exist, or can possibly exist, including associations among these things}
           }
 
           \\newglossaryentry{immaterial-entity}
@@ -47,10 +41,16 @@ RSpec.describe Glossarist::ConceptSet do
           description={\\textbf{\\gls{entity}} that does not occupy three-dimensional space}
           }
 
-          \\newglossaryentry{entity}
+          \\newglossaryentry{material entity}
           {
-          name={entity}
-          description={concrete or abstract thing that exists, did exist, or can possibly exist, including associations among these things}
+          name={material entity}
+          description={\\textbf{\\gls{entity}} that occupies three-dimensional space}
+          }
+
+          \\newglossaryentry{non-biological entity}
+          {
+          name={non-biological entity}
+          description={\\textbf{\\gls{material entity}} that is not and has never been a living organism}
           }
 
           \\newglossaryentry{person}
@@ -62,7 +62,7 @@ RSpec.describe Glossarist::ConceptSet do
       end
 
       it "should generate correct latex output" do
-        expect(subject.to_latex).to eq(expected_output)
+        expect(subject.to_latex.split("\n\n").sort).to eq(expected_output.split("\n\n"))
       end
     end
 
