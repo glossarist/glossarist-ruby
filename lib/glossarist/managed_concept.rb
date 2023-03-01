@@ -90,6 +90,10 @@ module Glossarist
       localized&.definition&.first&.content
     end
 
+    def default_lang
+      localization("eng") || localizations.values.first
+    end
+
     def managed_concept_attributes
       %i[
         id

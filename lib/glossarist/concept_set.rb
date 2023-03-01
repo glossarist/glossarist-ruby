@@ -25,15 +25,27 @@ module Glossarist
       )
     end
 
-    def to_latex(entries_file)
-      latex_content = File.readlines(entries_file).map do |concept_name|
-        concept = concept_map[concept_name.strip]
+    def to_latex(filename = nil)
+      return to_latex_from_file(filename) if filename
 
+      @concepts.map do |concept|
         latex_template(concept)
       end.join("\n")
     end
 
     private
+
+    def to_latex_from_file(entries_file)
+      File.readlines(entries_file).map do |concept_name|
+        concept = concept_map[concept_name.strip.downcase]
+
+        if concept.nil?
+           puts "  [Not Found]: #{concept_name.strip}"
+        else
+          latex_template(concept)
+        end
+      end.compact.join("\n")
+    end
 
     def read_concepts(concepts)
       return concepts if concepts.is_a?(Glossarist::ManagedConceptCollection)
@@ -61,7 +73,7 @@ module Glossarist
 
     def concept_map
       @concept_map ||= concepts.managed_concepts.map do |concept|
-        [concept.default_designation, concept]
+        [concept.default_designation.downcase, concept]
       end.to_h
     end
   end
