@@ -22,7 +22,7 @@ RSpec.describe Glossarist::ConceptSet do
   describe "#to_latex" do
     context "when file name is not given" do
       let(:expected_output) do
-        <<~LATEX_OUTPUT
+        <<~LATEX_OUTPUT.strip
           \\newglossaryentry{biological-entity}
           {
           name={biological\\_entity}
@@ -62,7 +62,7 @@ RSpec.describe Glossarist::ConceptSet do
       end
 
       it "should generate correct latex output" do
-        expect(subject.to_latex.split("\n\n").sort).to eq(expected_output.split("\n\n"))
+        expect(subject.to_latex.split("\n\n").sort.map(&:strip)).to eq(expected_output.split("\n\n"))
       end
     end
 
