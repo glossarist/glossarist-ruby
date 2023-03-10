@@ -8,7 +8,6 @@ module Glossarist
 
     DEFAULT_CLASSES = {
       localized_concept: Glossarist::LocalizedConcept,
-      concet_set: Glossarist::ConceptSet,
     }.freeze
 
     attr_reader :registered_classes
