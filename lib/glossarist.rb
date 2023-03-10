@@ -28,8 +28,16 @@ require_relative "glossarist/non_verb_rep"
 
 require_relative "glossarist/collections"
 
+require_relative "glossarist/config"
+
 module Glossarist
   class Error < StandardError; end
   class InvalidTypeError < StandardError; end
   # Your code goes here...
+
+  def self.configure
+    config = Glossarist::Config.instance
+
+    yield(config) if block_given?
+  end
 end

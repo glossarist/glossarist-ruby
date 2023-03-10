@@ -122,7 +122,7 @@ module Glossarist
 
         hash.values
           .grep(Hash)
-          .map { |subhash| LocalizedConcept.from_h(subhash) rescue nil }
+          .map { |subhash| Config.class_for(:localized_concept).from_h(subhash) rescue nil }
           .compact
 
         concept.related = hash.dig("related") || []
