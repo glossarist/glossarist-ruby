@@ -36,7 +36,7 @@ module Glossarist
     end
 
     def localized_concepts=(localized_concepts_hash)
-      @localized_concepts = localized_concepts_hash.map { |l| LocalizedConcept.new(l) }.compact
+      @localized_concepts = localized_concepts_hash.map { |l| Config.class_for(:localized_concept).new(l) }.compact
 
       @localized_concepts.each do |l|
         add_l10n(l)
