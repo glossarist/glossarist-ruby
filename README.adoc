@@ -1,5 +1,28 @@
 = Glossarist
 
+== Commands
+
+generate_latex: Convert Concepts to Latex format
+
+=== Usage:
+  glossarist generate_latex p, --concepts-path=CONCEPTS_PATH
+
+=== Options:
+[cols="1,1"]
+|===
+|p, --concepts-path
+|Path to yaml concepts directory
+
+|l, --latex-concepts
+|File path having list of concepts that should be converted to LATEX format. If not provided all the concepts will be converted to the latex format
+
+|o, --output-file
+|Output file path. By default the output will pe printed to the console
+
+|e, --extra-attributes
+|List of extra attributes that are not in standard Glossarist Concept model. eg -e one two three
+|===
+
 == Credits
 
 This gem is developed, maintained and funded by

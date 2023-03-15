@@ -40,12 +40,16 @@ module Glossarist
     # @return [Array<DetailedDefinition>]
     attr_reader :examples
 
+    # Contains list of extended attributes
+    attr_accessor :extension_attributes
+
     def initialize(*)
       @localizations = {}
       @sources = []
       @related = []
       @notes = []
       @designations = []
+      @extension_attributes = {}
 
       super
     end
