@@ -44,7 +44,7 @@ module Glossarist
         "review_date" => review_date,
         "review_decision_date" => review_decision_date,
         "review_decision_event" => review_decision_event,
-      }.compact)
+      }.compact).merge(@extension_attributes)
     end
 
     def self.from_h(hash)

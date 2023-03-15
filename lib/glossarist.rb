@@ -4,6 +4,7 @@
 #
 
 require "psych"
+require "thor"
 
 require_relative "glossarist/utilities"
 require_relative "glossarist/version"

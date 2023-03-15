@@ -18,8 +18,12 @@ module Glossarist
     def set_attribute(name, value)
       public_send("#{name}=", value)
     rescue NoMethodError
-      raise ArgumentError, "#{self.class.name} does not have " +
-        "attribute #{name} defined or the attribute is read only."
+      if Config.extension_attributes.include?(name)
+        extension_attributes[name] = value
+      else
+        raise ArgumentError, "#{self.class.name} does not have " +
+          "attribute #{name} defined or the attribute is read only."
+      end
     end
 
     def self.from_h(hash)
