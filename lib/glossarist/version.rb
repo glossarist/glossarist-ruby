@@ -4,5 +4,5 @@
 #
 
 module Glossarist
-  VERSION = "1.0.5.--tag.1"
+  VERSION = "1.0.5"
 end
