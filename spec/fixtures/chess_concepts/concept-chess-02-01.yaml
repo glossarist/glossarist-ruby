@@ -39,6 +39,9 @@ eng:
     date: '2021-05-01T00:00:00+00:00'
   - type: amended
     date: '2021-05-01T00:00:00+00:00'
+  group:
+  - chess-piece
+  - king
 pol:
   id: chess-02-01
   terms:
@@ -59,3 +62,6 @@ pol:
     date: '2021-05-01T00:00:00+00:00'
   - type: amended
     date: '2021-05-01T00:00:00+00:00'
+  group:
+  - chess-piece
+  - king

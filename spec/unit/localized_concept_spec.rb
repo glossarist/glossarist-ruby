@@ -50,6 +50,22 @@ RSpec.describe Glossarist::LocalizedConcept do
       .to change { subject.review_decision_event }.to("published")
   end
 
+  describe "#group" do
+    context "when string is given" do
+      it "should change it to array" do
+        expect { subject.group = "group-1" }
+          .to change { subject.group }.to(["group-1"])
+      end
+    end
+
+    context "when array is given" do
+      it "should assign it to group" do
+        expect { subject.group = ["group-1"] }
+          .to change { subject.group }.to(["group-1"])
+      end
+    end
+  end
+
   describe "#designations" do
     let(:expression) { double("expression designation") }
 
