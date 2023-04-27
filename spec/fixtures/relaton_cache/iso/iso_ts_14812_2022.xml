@@ -1,5 +1,5 @@
-<bibdata type="standard">
-  <fetched>2023-02-09</fetched>
+<bibdata type="standard" schema-version="v1.2.3">
+  <fetched>2023-04-27</fetched>
   <title type="title-intro" format="text/plain" language="en" script="Latn">Intelligent transport systems</title>
   <title type="title-main" format="text/plain" language="en" script="Latn">Vocabulary</title>
   <title type="main" format="text/plain" language="en" script="Latn">Intelligent transport systems - Vocabulary</title>
@@ -48,7 +48,7 @@
     </bibitem>
   </relation>
   <place>Geneva</place>
-  <ext>
+  <ext schema-version="v1.0.0">
     <doctype>technical-specification</doctype>
     <editorialgroup>
       <technical-committee number="204" type="TC" identifier="ISO/TC 204">Intelligent transport systems</technical-committee>
