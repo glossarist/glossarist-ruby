@@ -2,7 +2,7 @@
 
 == Commands
 
-generate_latex: Convert Concepts to Latex format
+`generate_latex`: Convert Concepts to Latex format
 
 === Usage:
   glossarist generate_latex p, --concepts-path=CONCEPTS_PATH
