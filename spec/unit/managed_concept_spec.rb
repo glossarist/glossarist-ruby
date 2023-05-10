@@ -24,6 +24,11 @@ RSpec.describe Glossarist::ManagedConcept do
           "date" => "2020-01-01",
         },
       ],
+
+      "groups" => [
+        "foo",
+        "bar"
+      ],
     }
   end
 
@@ -49,6 +54,22 @@ RSpec.describe Glossarist::ManagedConcept do
 
       expect(subject.dates.first.type).to eq("accepted")
       expect(subject.dates.first.date).to eq("2020-01-01")
+    end
+  end
+
+  describe "#groups" do
+    context "when string is given" do
+      it "should convert it to array and set the groups list for the concept" do
+        expect { subject.groups = "foobar" }
+          .to change { subject.groups }.to(["foobar"])
+      end
+    end
+
+    context "when array is given" do
+      it "sets the groups list for the concept" do
+        expect { subject.groups = ["general", "group"] }
+          .to change { subject.groups }.to(["general", "group"])
+      end
     end
   end
 

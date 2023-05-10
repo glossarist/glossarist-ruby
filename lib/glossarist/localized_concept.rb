@@ -24,10 +24,6 @@ module Glossarist
     # @return [String]
     attr_accessor :classification
 
-    # Concept group
-    # @return [Array<String>]
-    attr_reader :group
-
     attr_accessor :review_date
     attr_accessor :review_decision_date
     attr_accessor :review_decision_event
@@ -36,10 +32,6 @@ module Glossarist
       @examples = []
 
       super
-    end
-
-    def group=(groups)
-      @group = groups.is_a?(Array) ? groups : [groups]
     end
 
     def to_h # rubocop:disable Metrics/MethodLength
@@ -52,7 +44,6 @@ module Glossarist
         "review_date" => review_date,
         "review_decision_date" => review_decision_date,
         "review_decision_event" => review_decision_event,
-        "group" => group,
       }.compact).merge(@extension_attributes)
     end
 

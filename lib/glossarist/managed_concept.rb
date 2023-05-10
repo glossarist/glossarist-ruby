@@ -21,6 +21,10 @@ module Glossarist
     # return [Array<LocalizedConcept>]
     attr_reader :localized_concepts
 
+    # Concept group
+    # @return [Array<String>]
+    attr_reader :groups
+
     # All localizations for this concept.
     #
     # Keys are language codes and values are instances of {LocalizedConcept}.
@@ -53,6 +57,12 @@ module Glossarist
       @dates = dates&.map { |d| ConceptDate.new(d) }
     end
 
+    def groups=(groups)
+      return unless groups
+
+      @groups = groups.is_a?(Array) ? groups : [groups]
+    end
+
     # Adds concept localization.
     # @param localized_concept [LocalizedConcept]
     def add_localization(localized_concept)
@@ -77,6 +87,7 @@ module Glossarist
         "term" => default_designation,
         "related" => related&.map(&:to_h),
         "dates" => dates&.empty? ? nil : dates&.map(&:to_h),
+        "groups" => groups,
       }.merge(localizations.transform_values(&:to_h)).compact
     end
 
@@ -102,6 +113,7 @@ module Glossarist
         status
         dates
         localized_concepts
+        groups
       ].compact
     end
 
