@@ -13,10 +13,14 @@ module Glossarist
       attr_accessor :international
 
       def to_h
-        super().merge({
-          "type" => type.to_s,
+        type_hash = {
+          "type" => "abbreviation",
           "international" => international,
-        }).compact
+        }
+
+        type_hash[type.to_s] = true if type
+
+        super().merge(type_hash).compact
       end
     end
   end
