@@ -18,8 +18,9 @@ RSpec.describe Glossarist::Designation::Abbreviation do
   describe "#to_h" do
     it "will convert abbreviation to hash" do
       expected_hash = {
-        "type" => "acronym",
+        "type" => "abbreviation",
         "designation" => "NASA",
+        "acronym" => true,
         "international" => true,
       }
 

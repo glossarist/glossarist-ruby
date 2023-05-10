@@ -37,6 +37,7 @@ module Glossarist
     def to_h # rubocop:disable Metrics/MethodLength
       super.merge({
         "language_code" => language_code,
+        "domain" => domain,
         "entry_status" => entry_status,
         "sources" => sources.empty? ? nil : sources&.map(&:to_h),
         "classification" => classification,
