@@ -13,8 +13,14 @@ module Glossarist
     attr_reader :registered_classes
 
     def initialize
+      if File.exist?("glossarist.yaml")
+        @config = YAML.load_file("glossarist.yaml")
+      end
+
+      @config ||= {}
+
       @registered_classes = DEFAULT_CLASSES.dup
-      @extension_attributes = []
+      @extension_attributes = @config["extension_attributes"]
     end
 
     def class_for(name)
