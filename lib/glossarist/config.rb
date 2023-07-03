@@ -20,7 +20,7 @@ module Glossarist
       @config ||= {}
 
       @registered_classes = DEFAULT_CLASSES.dup
-      @extension_attributes = @config["extension_attributes"]
+      @extension_attributes = @config["extension_attributes"] || []
     end
 
     def class_for(name)
