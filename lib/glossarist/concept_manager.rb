@@ -28,6 +28,8 @@ module Glossarist
 
     def load_concept_from_file(filename)
       ManagedConcept.new(Psych.safe_load(File.read(filename)))
+    rescue Psych::SyntaxError
+      raise(Glossarist::ParseError, "Unable to parse file: #{filename}")
     end
 
     def save_concept_to_file(concept)

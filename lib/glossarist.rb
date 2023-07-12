@@ -33,7 +33,10 @@ require_relative "glossarist/config"
 
 module Glossarist
   class Error < StandardError; end
+
   class InvalidTypeError < StandardError; end
+
+  class ParseError < StandardError; end
   # Your code goes here...
 
   def self.configure

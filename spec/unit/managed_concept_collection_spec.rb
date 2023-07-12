@@ -91,4 +91,32 @@ RSpec.describe Glossarist::ManagedConceptCollection do
       expect(managed_concept_collection.managed_concepts).to eq([managed_concept])
     end
   end
+
+  describe "#load_from_files" do
+    context "Invalid concepts" do
+      let(:invalid_concepts_path) { fixtures_path("invalid_concepts") }
+
+      it "will raise Glossarist::ParseError" do
+        expect do
+          managed_concept_collection.load_from_files(invalid_concepts_path)
+        end.to raise_error(Glossarist::ParseError)
+      end
+    end
+
+    context "Valid concepts" do
+      let(:valid_concepts_path) { fixtures_path("concept_collection") }
+
+      it "will not raise Glossarist::ParseError" do
+        expect do
+          managed_concept_collection.load_from_files(valid_concepts_path)
+        end.not_to raise_error(Glossarist::ParseError)
+      end
+
+      it "will not read concepts correctly from file" do
+        expect do
+          managed_concept_collection.load_from_files(valid_concepts_path)
+        end.to change { managed_concept_collection.count }.by(6)
+      end
+    end
+  end
 end
