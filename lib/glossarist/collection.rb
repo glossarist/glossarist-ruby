@@ -65,21 +65,25 @@ module Glossarist
       end
     end
 
-    private def load_concept_from_file(filename)
-      Concept.from_h(Psych.safe_load(File.read(filename)))
-    end
-
     # Writes all concepts to files.
     def save_concepts
       @index.each_value &method(:save_concept_to_file)
     end
 
-    private def save_concept_to_file(concept)
+    private
+
+    def load_concept_from_file(filename)
+      Concept.from_h(Psych.safe_load(File.read(filename)))
+    rescue Psych::SyntaxError => e
+      raise Glossarist::ParseError.new(filename: filename, line: e.line)
+    end
+
+    def save_concept_to_file(concept)
       filename = File.join(path, "concept-#{concept.id}.yaml")
       File.write(filename, Psych.dump(concept.to_h))
     end
 
-    private def concepts_glob
+    def concepts_glob
       File.join(path, "concept-*.{yaml,yml}")
     end
   end

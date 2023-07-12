@@ -33,7 +33,23 @@ require_relative "glossarist/config"
 
 module Glossarist
   class Error < StandardError; end
+
   class InvalidTypeError < StandardError; end
+
+  class ParseError < StandardError
+    attr_accessor :line, :filename
+
+    def initialize(filename:, line: nil)
+      @filename = filename
+      @line = line
+
+      super()
+    end
+
+    def to_s
+      "Unable to parse file: #{filename}, error on line: #{line}"
+    end
+  end
   # Your code goes here...
 
   def self.configure
