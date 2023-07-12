@@ -112,7 +112,7 @@ RSpec.describe Glossarist::ManagedConceptCollection do
         end.not_to raise_error(Glossarist::ParseError)
       end
 
-      it "will not read concepts correctly from file" do
+      it "will read concepts correctly from file" do
         expect do
           managed_concept_collection.load_from_files(valid_concepts_path)
         end.to change { managed_concept_collection.count }.by(6)
