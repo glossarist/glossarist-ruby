@@ -13,9 +13,19 @@ RSpec.describe Glossarist::LocalizedConcept do
       .to change { subject.id }.to("456")
   end
 
+  it "raises error if id is not a `String`" do
+    expect { subject.id = 1234 }
+      .to raise_error(Glossarist::Error, "id must be a string")
+  end
+
   it "accepts strings as language codes" do
     expect { subject.language_code = "deu" }
       .to change { subject.language_code }.to("deu")
+  end
+
+  it "raises error if language_code is not 3 characters long" do
+    expect { subject.language_code = "urdu" }
+      .to raise_error(Glossarist::InvalidLanguageCodeError)
   end
 
   it "accepts strings as definitions" do
@@ -94,7 +104,7 @@ RSpec.describe Glossarist::LocalizedConcept do
       source = { "type" => "authoritative", "status" => "modified" }
       attrs.replace({
         id: "123",
-        language_code: "lang",
+        language_code: "eng",
         terms: [term1, term2],
         examples: ["ex. one"],
         notes: ["note one"],
@@ -103,7 +113,7 @@ RSpec.describe Glossarist::LocalizedConcept do
 
       retval = subject.to_h
       expect(retval).to be_kind_of(Hash)
-      expect(retval["language_code"]).to eq("lang")
+      expect(retval["language_code"]).to eq("eng")
       expect(retval["id"]).to eq("123")
       expect(retval["terms"]).to eq([term1, term2])
       expect(retval["examples"]).to eq([{ "content" => "ex. one"}])
@@ -133,6 +143,7 @@ RSpec.describe Glossarist::LocalizedConcept do
       retval = described_class.from_h(src)
 
       expect(retval).to be_kind_of(Glossarist::LocalizedConcept)
+      expect(retval.id).to eq("123-45")
       expect(retval.definition.size).to eq(1)
       expect(retval.definition.first.content).to eq("Example Definition")
       expect(retval.terms).to eq([])
