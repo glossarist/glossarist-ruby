@@ -8,7 +8,7 @@ module Glossarist
     # ISO 639-2 code for terminology.
     # @see https://www.loc.gov/standards/iso639-2/php/code_list.php code list
     # @return [String]
-    attr_accessor :language_code
+    attr_reader :language_code
 
     # Must be one of the following:
     # +notValid+, +valid+, +superseded+, +retired+.
@@ -32,6 +32,14 @@ module Glossarist
       @examples = []
 
       super
+    end
+
+    def language_code=(language_code)
+      if language_code.is_a?(String) && language_code.length == 3
+        @language_code = language_code
+      else
+        raise Glossarist::InvalidLanguageCodeError.new(code: language_code)
+      end
     end
 
     def to_h # rubocop:disable Metrics/MethodLength

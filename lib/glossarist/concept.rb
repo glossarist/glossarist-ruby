@@ -7,8 +7,7 @@ module Glossarist
   class Concept < Model
     # Concept ID.
     # @return [String]
-    attr_accessor :id
-    alias :termid= :id=
+    attr_reader :id
 
     # Concept designations.
     # @todo Alias +terms+ exists only for legacy reasons and will be removed.
@@ -53,6 +52,13 @@ module Glossarist
 
       super
     end
+
+    def id=(id)
+      raise(Glossarist::Error, "id must be a string") unless id.is_a?(String) || id.nil?
+
+      @id = id
+    end
+    alias :termid= :id=
 
     # List of authorative sources.
     # @todo Alias +authoritative_source+ exists for legacy reasons and may be
@@ -119,7 +125,7 @@ module Glossarist
     # rubocop:disable Metrics/AbcSize, Style/RescueModifier
     def self.from_h(hash)
       new.tap do |concept|
-        concept.id = hash.dig("termid")
+        concept.id = hash.dig("termid") || hash.dig("id")
         concept.sources = hash.dig("sources")
         concept.related = hash.dig("related")
         concept.definition = hash.dig("definition")
