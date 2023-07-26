@@ -106,6 +106,9 @@ module Glossarist
       end
     end
 
+    # Fix for https://github.com/geolexica/jekyll-geolexica/issues/12
+    alias :authoritativeSource= :authoritative_source=
+
     def to_h
       {
         "id" => id,
