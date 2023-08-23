@@ -80,6 +80,24 @@ RSpec.describe Glossarist::ManagedConcept do
     end
   end
 
+  describe "#sources" do
+    let(:source) do
+      {
+        "status" => "identical",
+        "origin" => { "text" => "Concept level source" },
+      }
+    end
+
+    it "sets the sources list at the concept level" do
+      expect(subject.sources).to be_nil
+
+      subject.sources = [source]
+
+      expect(subject.sources.first.status).to eq(source["status"])
+      expect(subject.sources.first.origin.text).to eq(source["origin"]["text"])
+    end
+  end
+
   describe "#to_h" do
     let(:expected_concept_hash) do
       {
