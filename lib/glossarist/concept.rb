@@ -169,8 +169,7 @@ module Glossarist
     end
 
     Glossarist::GlossaryDefinition::CONCEPT_DATE_TYPES.each do |type|
-      # List of related concepts of the specified type.
-      # @return [Array<RelatedConcept>]
+      # Sets the ConceptDate and add it to dates list of the specified type.
       define_method("date_#{type}=") do |date|
         date_hash = {
           "type" => type,
