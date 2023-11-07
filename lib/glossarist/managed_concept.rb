@@ -8,6 +8,7 @@ module Glossarist
     # @return [String]
     attr_accessor :id
     alias :termid= :id=
+    alias :identifier= :id=
 
     # @return [Array<RelatedConcept>]
     attr_reader :related
@@ -29,24 +30,20 @@ module Glossarist
     #
     # Keys are language codes and values are instances of {LocalizedConcept}.
     # @return [Hash<String, LocalizedConcept>]
-    attr_accessor :localizations
+    attr_reader :localizations
 
     def initialize(attributes = {})
       @localizations = {}
-      self.localized_concepts = attributes.values.grep(Hash)
+      @localized_concept_class = Config.class_for(:localized_concept)
 
       attributes = symbolize_keys(attributes)
+
+      data = attributes.delete(:data) || {}
+      data["groups"] = attributes[:groups]
+
+      attributes = symbolize_keys(data.compact)
+
       super(slice_keys(attributes, managed_concept_attributes))
-    end
-
-    def localized_concepts=(localized_concepts_hash)
-      @localized_concepts = localized_concepts_hash.map { |l| Config.class_for(:localized_concept).new(l) }.compact
-
-      @localized_concepts.each do |l|
-        add_l10n(l)
-      end
-
-      @localized_concepts
     end
 
     def related=(related)
@@ -61,6 +58,46 @@ module Glossarist
       return unless groups
 
       @groups = groups.is_a?(Array) ? groups : [groups]
+    end
+
+    def localized_concepts=(localized_concepts)
+      return unless localized_concepts
+
+      if localized_concepts.is_a?(Hash)
+        @localized_concepts = stringify_keys(localized_concepts)
+      else
+        localized_concepts.each do |localized_concept|
+          lang = localized_concept["language_code"].to_s
+
+          @localized_concepts[lang] = SecureRandom.uuid
+
+          add_localization(
+            @localized_concept_class.new(localized_concept["data"] || localized_concept),
+          )
+        end
+      end
+    end
+
+    def localizations=(localizations)
+      return unless localizations
+
+      @localizations = {}
+
+      localizations.each do |localized_concept|
+        unless localized_concept.is_a?(@localized_concept_class)
+          localized_concept = @localized_concept_class.new(
+            localized_concept["data"] || localized_concept,
+          )
+        end
+
+        add_l10n(localized_concept)
+      end
+    end
+
+    def localizations_hash
+      @localizations.map do |key, localized_concept|
+        [key, localized_concept.to_h]
+      end.to_h
     end
 
     # Adds concept localization.
@@ -83,17 +120,18 @@ module Glossarist
 
     def to_h
       {
-        "termid" => id,
-        "term" => default_designation,
-        "related" => related&.map(&:to_h),
-        "dates" => dates&.empty? ? nil : dates&.map(&:to_h),
-        "groups" => groups,
-      }.merge(localizations.transform_values(&:to_h)).compact
+        "data" => {
+          "identifier" => id,
+          "localized_concepts" => localized_concepts,
+          "groups" => groups,
+        }.compact,
+      }.compact
     end
 
     def default_designation
       localized = localization("eng") || localizations.values.first
-      localized&.terms&.first&.designation
+      terms = localized&.preferred_terms&.first || localized&.terms&.first
+      terms&.designation
     end
 
     def default_definition
@@ -105,14 +143,34 @@ module Glossarist
       localization("eng") || localizations.values.first
     end
 
+    def date_accepted=(date)
+      date_hash = {
+        "type" => "accepted",
+        "date" => date,
+      }
+
+      @dates ||= []
+      @dates << ConceptDate.new(date_hash)
+    end
+
+    def date_accepted
+      @dates.find { |date| date.accepted? }
+    end
+
     def managed_concept_attributes
       %i[
+        data
         id
-        termid
+        identifier
+        uuid
         related
         status
         dates
+        date_accepted
+        dateAccepted
         localized_concepts
+        localizedConcepts
+        localizations
         groups
       ].compact
     end

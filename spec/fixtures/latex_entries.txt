@@ -1,4 +1,4 @@
-entity
-immaterial_entity
-person
+geodetic latitude
+intension
+Cartesian coordinate system
 random_text

@@ -52,7 +52,7 @@ module Glossarist
     #    ManagedConcept ID
     # @return [ManagedConcept]
     def fetch_or_initialize(id)
-      fetch(id) or store(ManagedConcept.new(id: id))
+      fetch(id) or store(ManagedConcept.new(data: { id: id }))
     end
 
     # Adds concept to the collection.  If collection contains a concept with

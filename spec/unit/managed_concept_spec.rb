@@ -1,34 +1,41 @@
 # frozen_string_literal: true
 
 RSpec.describe Glossarist::ManagedConcept do
-  subject { described_class.new attrs }
+  subject { described_class.new(concept) }
 
-  let(:attrs) do
+  let(:concept) do
     {
-      "id" => "123",
-      "localized_concepts" => [
-        {
-          "language_code" => "ara",
-          "terms" => [
-            {
-              "designation" => "Arabic Designation",
-              "type" => "expression",
-            },
-          ],
+      "data" => {
+        "id" => "123",
+        "localized_concepts" => {
+          "ara" => "uuid",
         },
-      ],
+        "localizations" => [localized_concept],
+        "groups" => [
+          "foo",
+          "bar",
+        ],
+      },
+    }
+  end
 
-      "dates" => [
-        {
-          "type" => "accepted",
-          "date" => "2020-01-01",
-        },
-      ],
-
-      "groups" => [
-        "foo",
-        "bar"
-      ],
+  let(:localized_concept) do
+    {
+      "data" => {
+        "language_code" => "ara",
+        "terms" => [
+          {
+            "designation" => "Arabic Designation",
+            "type" => "expression",
+          },
+        ],
+        "dates" => [
+          {
+            "type" => "accepted",
+            "date" => "2020-01-01",
+          },
+        ],
+      },
     }
   end
 
@@ -74,14 +81,53 @@ RSpec.describe Glossarist::ManagedConcept do
   end
 
   describe "#to_h" do
+    let(:expected_concept_hash) do
+      {
+        "data" => {
+          "identifier" => "123",
+          "localized_concepts" => {
+            "ara" => "uuid",
+          },
+          "groups" => [
+            "foo",
+            "bar",
+          ],
+        },
+      }
+    end
+
     it "dumps concept definition to a hash" do
       retval = subject.to_h
 
       expect(retval).to be_kind_of(Hash)
-      expect(retval["termid"]).to eq("123")
-      expect(retval["term"]).to eq("Arabic Designation")
-      expect(retval["ara"]).to eq({"terms"=>[{"type"=>"expression", "designation"=>"Arabic Designation"}], "notes"=>[], "examples"=>[], "language_code"=>"ara"})
-      expect(retval["dates"]).to eq([{"date"=>"2020-01-01", "type"=>"accepted"}])
+      expect(retval).to eq(expected_concept_hash)
+    end
+  end
+
+  describe "#localizations_hash" do
+    let(:expected_localizations_hash) do
+      {
+        "data" => {
+          "identifier" => "123",
+          "localized_concepts" => {
+            "ara" => "uuid",
+          },
+
+          "groups" => [
+            "foo",
+            "bar",
+          ],
+        },
+      }
+    end
+
+    it "dumps localizations to a hash" do
+      localizations = subject.localizations_hash
+      data = localizations["ara"]["data"]
+
+      expect(localizations).to be_kind_of(Hash)
+      expect(data["terms"]).to eq([{ "type" => "expression", "designation" => "Arabic Designation" }])
+      expect(data["dates"]).to eq([{ "type" => "accepted", "date" => "2020-01-01" }])
     end
   end
 
@@ -100,7 +146,7 @@ RSpec.describe Glossarist::ManagedConcept do
       ]
     end
 
-    it "accepts a hash of attributes" do
+    it "accepts a hash" do
       expect { subject.localized_concepts = localized_concepts_hash }
         .not_to raise_error
     end
@@ -108,10 +154,38 @@ RSpec.describe Glossarist::ManagedConcept do
     it "accepts a hash of attributes and create a concept" do
       subject.localized_concepts = localized_concepts_hash
 
-      expect(subject.localized_concepts.first).to be_a(Glossarist::LocalizedConcept)
-      expect(subject.localized_concepts.first.language_code).to eq("eng")
-      expect(subject.localized_concepts.first.definition.first.content).to eq("this is very important")
-      expect(subject.localized_concepts.first.entry_status).to eq("valid")
+      expect(subject.localized_concepts).to be_a(Hash)
+    end
+  end
+
+  describe "#localizations=" do
+    let(:localizations_hash) do
+      [
+        {
+          "id" => "123",
+          "language_code" => "eng",
+          "definition" => [
+            {
+              "content" => "this is very important",
+            },
+          ],
+          "entry_status" => "valid",
+        },
+      ]
+    end
+
+    it "accepts a hash" do
+      expect { subject.localizations = localizations_hash }
+        .not_to raise_error
+    end
+
+    it "accepts a hash of attributes and create a concept" do
+      subject.localized_concepts = localizations_hash
+
+      expect(subject.localizations).to be_a(Hash)
+      expect(subject.localizations["eng"]).to be_a(Glossarist::LocalizedConcept)
+      expect(subject.localizations["eng"].definition.first.content).to eq("this is very important")
+      expect(subject.localizations["eng"].entry_status).to eq("valid")
     end
   end
 
@@ -126,16 +200,14 @@ RSpec.describe Glossarist::ManagedConcept do
           },
         ],
       )
-      object = described_class.new(id: "123")
+      object = described_class.new("data" => { id: "123" })
       object.add_l10n(localized_concept)
 
       expect(object.default_designation).to eq("English Designation")
     end
 
     it "retunrs any designation when English localization is missing" do
-      object = described_class.new(attrs)
-
-      expect(object.default_designation).to eq("Arabic Designation")
+      expect(subject.default_designation).to eq("Arabic Designation")
     end
   end
 end
