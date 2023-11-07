@@ -15,7 +15,7 @@ RSpec.describe Glossarist::LocalizedConcept do
 
   it "raises error if id is not a `String`" do
     expect { subject.id = 1234 }
-      .to raise_error(Glossarist::Error, "id must be a string")
+      .to raise_error(Glossarist::Error, "Expect id to be a string, Got Integer (1234)")
   end
 
   it "accepts strings as language codes" do
@@ -111,7 +111,7 @@ RSpec.describe Glossarist::LocalizedConcept do
         sources: [source],
       })
 
-      retval = subject.to_h
+      retval = subject.to_h["data"]
       expect(retval).to be_kind_of(Hash)
       expect(retval["language_code"]).to eq("eng")
       expect(retval["id"]).to eq("123")

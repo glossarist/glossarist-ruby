@@ -42,7 +42,12 @@ module Glossarist
     # Contains list of extended attributes
     attr_accessor :extension_attributes
 
-    def initialize(*)
+    attr_accessor :lineage_source
+    attr_accessor :lineage_source_similarity
+
+    attr_accessor :release
+
+    def initialize(*args)
       @localizations = {}
       @sources = []
       @related = []
@@ -50,15 +55,18 @@ module Glossarist
       @designations = []
       @extension_attributes = {}
 
+      normalize_args(args)
+
       super
     end
 
     def id=(id)
-      raise(Glossarist::Error, "id must be a string") unless id.is_a?(String) || id.nil?
+      raise(Glossarist::Error, "Expect id to be a string, Got #{id.class} (#{id})") unless id.is_a?(String) || id.nil?
 
       @id = id
     end
     alias :termid= :id=
+    alias :identifier= :id=
 
     # List of authorative sources.
     # @todo Alias +authoritative_source+ exists for legacy reasons and may be
@@ -90,6 +98,11 @@ module Glossarist
 
     alias :terms= :designations=
 
+    def preferred_designations
+      @designations.select(&:preferred?)
+    end
+    alias :preferred_terms :preferred_designations
+
     def dates=(dates)
       @dates = dates&.map { |d| ConceptDate.new(d) }
     end
@@ -108,14 +121,19 @@ module Glossarist
 
     def to_h
       {
-        "id" => id,
-        "related" => related&.map(&:to_h),
-        "terms" => (terms&.map(&:to_h) || []),
-        "definition" => definition&.map(&:to_h),
-        "notes" => notes&.map(&:to_h),
-        "examples" => examples&.map(&:to_h),
-      }
-      .compact
+        "data" => {
+          "id" => id,
+          "dates" => dates&.map(&:to_h),
+          "definition" => definition&.map(&:to_h),
+          "examples" => examples&.map(&:to_h),
+          "lineage_source_similarity" => lineage_source_similarity,
+          "notes" => notes&.map(&:to_h),
+          "release" => release,
+          "sources" => sources.empty? ? nil : sources&.map(&:to_h),
+          "terms" => (terms&.map(&:to_h) || []),
+          "related" => related&.map(&:to_h),
+        }.compact,
+      }.compact
     end
 
     # @deprecated For legacy reasons only.
@@ -148,6 +166,27 @@ module Glossarist
 
     def related=(related)
       @related = related&.map { |r| RelatedConcept.new(r) } || []
+    end
+
+    Glossarist::GlossaryDefinition::CONCEPT_DATE_TYPES.each do |type|
+      # List of related concepts of the specified type.
+      # @return [Array<RelatedConcept>]
+      define_method("date_#{type}=") do |date|
+        date_hash = {
+          "type" => type,
+          "date" => date,
+        }
+        @dates ||= []
+        @dates << ConceptDate.new(date_hash)
+      end
+    end
+
+    def normalize_args(args)
+      args.each do |arg|
+        data = arg.delete("data")
+
+        arg.merge!(data) if data
+      end
     end
   end
 end

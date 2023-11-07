@@ -8,7 +8,7 @@ RSpec.describe Glossarist::Collections::BibliographyCollection do
 
   let(:concepts) do
     collection = Glossarist::ManagedConceptCollection.new
-    collection.load_from_files(fixtures_path("concept_collection"))
+    collection.load_from_files(fixtures_path("concept_collection_v2"))
     collection
   end
 

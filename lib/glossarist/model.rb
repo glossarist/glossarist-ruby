@@ -18,7 +18,11 @@ module Glossarist
     def set_attribute(name, value)
       public_send("#{name}=", value)
     rescue NoMethodError
-      if Config.extension_attributes.include?(name)
+      # adding support for camel case
+      if name.match?(/[A-Z]/)
+        name = snake_case(name.to_s).to_sym
+        retry
+      elsif Config.extension_attributes.include?(name)
         extension_attributes[name] = value
       else
         raise ArgumentError, "#{self.class.name} does not have " +
@@ -28,6 +32,10 @@ module Glossarist
 
     def self.from_h(hash)
       new(hash)
+    end
+
+    def snake_case(str)
+      str.gsub(/([A-Z])/) { "_#{$1.downcase}" }
     end
   end
 end

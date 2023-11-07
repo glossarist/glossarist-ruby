@@ -23,17 +23,17 @@ RSpec.describe Glossarist::ManagedConceptCollection do
 
   describe "#to_h" do
     it "returns a hash" do
-      managed_concept_collection.store(Glossarist::ManagedConcept.new(id: "id"))
+      managed_concept_collection.store(Glossarist::ManagedConcept.new("data" => { id: "id" }))
 
       expect(managed_concept_collection.to_h).to eq(
-        "managed_concepts" => [{ "termid" => "id" }]
+        "managed_concepts" => [{ "data" => { "identifier" => "id" } }],
       )
     end
   end
 
   describe "#each" do
     it "iterates over managed concepts" do
-      managed_concept_collection.store(Glossarist::ManagedConcept.new(id: "id"))
+      managed_concept_collection.store(Glossarist::ManagedConcept.new("data" => { id: "id" }))
 
       expect{ |b| managed_concept_collection.each(&b) }
         .to yield_control.once
@@ -42,7 +42,7 @@ RSpec.describe Glossarist::ManagedConceptCollection do
 
   describe "#fetch" do
     it "returns a managed concept" do
-      managed_concept = Glossarist::ManagedConcept.new(id: "id")
+      managed_concept = Glossarist::ManagedConcept.new("data" => { id: "id" })
       managed_concept_collection.store(managed_concept)
 
       expect(managed_concept_collection.fetch("id")).to eq(managed_concept)
@@ -51,7 +51,7 @@ RSpec.describe Glossarist::ManagedConceptCollection do
 
   describe "#[]" do
     it "returns a managed concept" do
-      managed_concept = Glossarist::ManagedConcept.new(id: "id")
+      managed_concept = Glossarist::ManagedConcept.new("data" => { id: "id" })
       managed_concept_collection.store(managed_concept)
 
       expect(managed_concept_collection["id"]).to eq(managed_concept)
@@ -67,7 +67,7 @@ RSpec.describe Glossarist::ManagedConceptCollection do
     end
 
     it "returns a managed concept when present" do
-      managed_concept_collection.store(Glossarist::ManagedConcept.new(id: "new"))
+      managed_concept_collection.store(Glossarist::ManagedConcept.new(data: { id: "new" }))
 
       expect{ managed_concept_collection.fetch_or_initialize("new") }
         .not_to change { managed_concept_collection.fetch("new") }
@@ -104,7 +104,7 @@ RSpec.describe Glossarist::ManagedConceptCollection do
     end
 
     context "Valid concepts" do
-      let(:valid_concepts_path) { fixtures_path("concept_collection") }
+      let(:valid_concepts_path) { fixtures_path("concept_collection_v2") }
 
       it "will not raise Glossarist::ParseError" do
         expect do
@@ -115,7 +115,7 @@ RSpec.describe Glossarist::ManagedConceptCollection do
       it "will read concepts correctly from file" do
         expect do
           managed_concept_collection.load_from_files(valid_concepts_path)
-        end.to change { managed_concept_collection.count }.by(6)
+        end.to change { managed_concept_collection.count }.by(4)
       end
     end
   end

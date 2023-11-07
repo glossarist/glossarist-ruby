@@ -9,7 +9,7 @@ RSpec.describe Glossarist::ConceptSet do
     )
   end
 
-  let(:concepts) { fixtures_path("concept_collection") }
+  let(:concepts) { fixtures_path("concept_collection_v2") }
 
   let(:assets) do
     [
@@ -22,47 +22,35 @@ RSpec.describe Glossarist::ConceptSet do
   describe "#to_latex" do
     context "when file name is not given" do
       let(:expected_output) do
-        <<~LATEX_OUTPUT.strip
-          \\newglossaryentry{biological-entity}
+        <<~LATEX_OUTPUT
+          \\newglossaryentry{geodetic latitude}
           {
-          name={biological\\_entity}
-          description={\\textbf{\\gls{material entity}} that was or is a living organism}
+          name={geodetic latitude}
+          description={angle from the equatorial plane to the perpendicular to the ellipsoid through a given point, northwards treated as positive}
           }
 
-          \\newglossaryentry{entity}
+          \\newglossaryentry{intension}
           {
-          name={entity}
-          description={concrete or abstract thing that exists, did exist, or can possibly exist, including associations among these things}
+          name={intension}
+          description={set of characteristics which makes up the concept}
           }
 
-          \\newglossaryentry{immaterial-entity}
+          \\newglossaryentry{Cartesian coordinate system}
           {
-          name={immaterial\\_entity}
-          description={\\textbf{\\gls{entity}} that does not occupy three-dimensional space}
+          name={Cartesian coordinate system}
+          description={coordinate system which gives the position of points relative to n mutually perpendicular axes that each has zero curvature}
           }
 
-          \\newglossaryentry{material entity}
+          \\newglossaryentry{component}
           {
-          name={material entity}
-          description={\\textbf{\\gls{entity}} that occupies three-dimensional space}
-          }
-
-          \\newglossaryentry{non-biological entity}
-          {
-          name={non-biological entity}
-          description={\\textbf{\\gls{material entity}} that is not and has never been a living organism}
-          }
-
-          \\newglossaryentry{person}
-          {
-          name={person}
-          description={\\textbf{\\gls{biological-entity}} that is a human being}
+          name={component}
+          description={constituent part of a postal address}
           }
         LATEX_OUTPUT
       end
 
       it "should generate correct latex output" do
-        expect(subject.to_latex.split("\n\n").sort.map(&:strip)).to eq(expected_output.split("\n\n"))
+        expect(subject.to_latex.split("\n\n").sort.map(&:strip)).to eq(expected_output.split("\n\n").sort.map(&:strip))
       end
     end
 
@@ -79,22 +67,22 @@ RSpec.describe Glossarist::ConceptSet do
   describe "#to_latex_from_file" do
     let(:expected_output) do
       <<~LATEX_OUTPUT
-        \\newglossaryentry{entity}
+        \\newglossaryentry{geodetic latitude}
         {
-        name={entity}
-        description={concrete or abstract thing that exists, did exist, or can possibly exist, including associations among these things}
+        name={geodetic latitude}
+        description={angle from the equatorial plane to the perpendicular to the ellipsoid through a given point, northwards treated as positive}
         }
 
-        \\newglossaryentry{immaterial-entity}
+        \\newglossaryentry{intension}
         {
-        name={immaterial\\_entity}
-        description={\\textbf{\\gls{entity}} that does not occupy three-dimensional space}
+        name={intension}
+        description={set of characteristics which makes up the concept}
         }
 
-        \\newglossaryentry{person}
+        \\newglossaryentry{Cartesian coordinate system}
         {
-        name={person}
-        description={\\textbf{\\gls{biological-entity}} that is a human being}
+        name={Cartesian coordinate system}
+        description={coordinate system which gives the position of points relative to n mutually perpendicular axes that each has zero curvature}
         }
       LATEX_OUTPUT
     end
@@ -113,15 +101,15 @@ RSpec.describe Glossarist::ConceptSet do
   describe "#latex_template" do
     let(:expected_output) do
       <<~LATEX_OUTPUT
-        \\newglossaryentry{immaterial-entity}
+        \\newglossaryentry{geodetic latitude}
         {
-        name={immaterial\\_entity}
-        description={\\textbf{\\gls{entity}} that does not occupy three-dimensional space}
+        name={geodetic latitude}
+        description={angle from the equatorial plane to the perpendicular to the ellipsoid through a given point, northwards treated as positive}
         }
       LATEX_OUTPUT
     end
 
-    let(:concept) { subject.concepts.fetch("3.1.1.2") }
+    let(:concept) { subject.concepts.fetch("200") }
 
     it "should output correct latex" do
       expect(subject.send(:latex_template, concept)).to eq(expected_output)

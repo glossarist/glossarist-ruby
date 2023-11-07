@@ -25,7 +25,7 @@ RSpec.describe Glossarist::Concept do
         ]
       )
 
-      retval = object.to_h
+      retval = object.to_h["data"]
       expect(retval).to be_kind_of(Hash)
       expect(retval["id"]).to eq("123")
       expect(retval["related"]).to eq([{"content"=>"Test content", "type"=>"supersedes"}])

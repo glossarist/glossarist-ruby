@@ -71,7 +71,9 @@ grammar_info:
 concept:
   status:
     - draft
+    - submitted
     - not_valid
+    - invalid
     - valid
     - superseded
     - retired

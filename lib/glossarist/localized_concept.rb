@@ -24,9 +24,14 @@ module Glossarist
     # @return [String]
     attr_accessor :classification
 
-    attr_accessor :review_date
-    attr_accessor :review_decision_date
-    attr_accessor :review_decision_event
+    # Temporary fields
+    # @todo Need to remove these once the isotc211-glossary is fixed
+    attr_accessor *%i[
+      review_date
+      review_decision_date
+      review_decision_event
+      review_type
+    ]
 
     def initialize(*)
       @examples = []
@@ -42,8 +47,10 @@ module Glossarist
       end
     end
 
-    def to_h # rubocop:disable Metrics/MethodLength
-      super.merge({
+    def to_h # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
+      hash = super
+
+      hash["data"].merge!({
         "language_code" => language_code,
         "domain" => domain,
         "entry_status" => entry_status,
@@ -54,11 +61,13 @@ module Glossarist
         "review_decision_date" => review_decision_date,
         "review_decision_event" => review_decision_event,
       }.compact).merge(@extension_attributes)
+
+      hash
     end
 
     def self.from_h(hash)
       terms = hash["terms"]&.map { |h| Designation::Base.from_h(h) } || []
-      sources = hash["authoritative_source"]&.each { |source| source.merge({ "type" => "authoritative"}) }
+      sources = hash["authoritative_source"]&.each { |source| source.merge({ "type" => "authoritative" }) }
 
       super(hash.merge({"terms" => terms, "sources" => sources}))
     end
