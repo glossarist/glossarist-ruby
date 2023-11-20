@@ -33,12 +33,6 @@ module Glossarist
       review_type
     ]
 
-    def initialize(*)
-      @examples = []
-
-      super
-    end
-
     def language_code=(language_code)
       if language_code.is_a?(String) && language_code.length == 3
         @language_code = language_code

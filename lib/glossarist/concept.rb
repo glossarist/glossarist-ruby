@@ -49,10 +49,14 @@ module Glossarist
 
     def initialize(*args)
       @localizations = {}
-      @sources = []
-      @related = []
-      @notes = []
-      @designations = []
+      @sources = Glossarist::Collections::Collection.new(klass: ConceptSource)
+      @related = Glossarist::Collections::Collection.new(klass: RelatedConcept)
+      @definition = Glossarist::Collections::Collection.new(klass: DetailedDefinition)
+      @notes = Glossarist::Collections::Collection.new(klass: DetailedDefinition)
+      @examples = Glossarist::Collections::Collection.new(klass: DetailedDefinition)
+      @dates = Glossarist::Collections::Collection.new(klass: ConceptDate)
+
+      @designations = Glossarist::Collections::DesignationCollection.new
       @extension_attributes = {}
 
       normalize_args(args)
@@ -79,21 +83,23 @@ module Glossarist
     attr_reader :dates
 
     def examples=(examples)
-      @examples = examples&.map { |e| DetailedDefinition.new(e) }
+      @examples.clear!
+      examples&.each { |example| @examples << example }
     end
 
     def notes=(notes)
-      @notes = notes&.map { |n| DetailedDefinition.new(n) }
+      @notes.clear!
+      notes&.each { |note| @notes << note }
     end
 
     def definition=(definition)
-      @definition = definition&.map { |d| DetailedDefinition.new(d) }
+      @definition.clear!
+      definition&.each { |definition| @definition << definition }
     end
 
     def designations=(designations)
-      @designations = designations&.map do |designation|
-        Designation::Base.from_h(designation)
-      end
+      @designations.clear!
+      designations&.each { |designation| @designations << designation }
     end
 
     alias :terms= :designations=
@@ -104,13 +110,13 @@ module Glossarist
     alias :preferred_terms :preferred_designations
 
     def dates=(dates)
-      @dates = dates&.map { |d| ConceptDate.new(d) }
+      @dates.clear!
+      dates&.each { |date| @dates << date }
     end
 
     def sources=(sources)
-      @sources = sources&.map do |source|
-        ConceptSource.new(source)
-      end || []
+      @sources.clear!
+      sources&.each { |source| @sources << source }
     end
 
     def authoritative_source=(sources)
@@ -165,7 +171,8 @@ module Glossarist
     end
 
     def related=(related)
-      @related = related&.map { |r| RelatedConcept.new(r) } || []
+      @related.clear!
+      related&.each { |r| @related << r }
     end
 
     Glossarist::GlossaryDefinition::CONCEPT_DATE_TYPES.each do |type|
