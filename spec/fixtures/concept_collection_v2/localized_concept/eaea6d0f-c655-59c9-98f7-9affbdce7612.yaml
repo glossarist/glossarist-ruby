@@ -1,3 +1,4 @@
+---
 data:
   dates:
   - date: '2003-02-15T00:00:00.000Z'
@@ -7,21 +8,21 @@ data:
       et givet punkt, hvor nord regnes positiv
   examples: []
   id: '200'
-  language_code: dan
   lineage_source_similarity: 1
   notes: []
   release: '1'
   sources:
   - origin:
+      ref: ISO 19111:2019
       clause: 3.1.32
       link: https://www.iso.org/standard/74039.html
-      ref: ISO 19111:2019
     type: authoritative
   - origin:
       ref: ISO 19111:2003
     type: lineage
   terms:
-  - designation: ϕ
-    type: abbreviation
-  - designation: geodætisk bredde
-    type: expression
+  - type: abbreviation
+    designation: ϕ
+  - type: expression
+    designation: geodætisk bredde
+  language_code: dan

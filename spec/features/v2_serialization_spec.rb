@@ -20,6 +20,22 @@ RSpec.describe "Serialization and deserialization" do
         expect(localized_concept["data"]).to eq(concept.localizations[lang].to_h["data"])
       end
     end
+
+    Dir.mktmpdir do |tmp_path|
+      collection.save_to_files(tmp_path)
+
+      # check if concept and localized_concept folder exist
+      system "diff", fixtures_path(concept_folder), tmp_path
+      expect($?.exitstatus).to eq(0) # no difference
+
+      # check content of conecept folder
+      system "diff", File.join(fixtures_path(concept_folder), "concept"), File.join(tmp_path, "concept")
+      expect($?.exitstatus).to eq(0) # no difference
+
+      # check content of localized_conecept folder
+      system "diff", File.join(fixtures_path(concept_folder), "localized_concept"), File.join(tmp_path, "localized_concept")
+      expect($?.exitstatus).to eq(0) # no difference
+    end
   end
 
   def load_yaml_file(filename)

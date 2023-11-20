@@ -45,8 +45,8 @@ module Glossarist
       hash = super
 
       hash["data"].merge!({
-        "language_code" => language_code,
         "domain" => domain,
+        "language_code" => language_code,
         "entry_status" => entry_status,
         "sources" => sources.empty? ? nil : sources&.map(&:to_h),
         "classification" => classification,

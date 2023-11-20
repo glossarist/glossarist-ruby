@@ -10,6 +10,8 @@ module Glossarist
     alias :termid= :id=
     alias :identifier= :id=
 
+    attr_accessor :uuid
+
     # @return [Array<RelatedConcept>]
     attr_reader :related
 
@@ -37,13 +39,14 @@ module Glossarist
       @localized_concept_class = Config.class_for(:localized_concept)
 
       attributes = symbolize_keys(attributes)
+      @uuid = attributes[:uuid]
 
       data = attributes.delete(:data) || {}
       data["groups"] = attributes[:groups]
 
-      attributes = symbolize_keys(data.compact)
+      data = symbolize_keys(data.compact)
 
-      super(slice_keys(attributes, managed_concept_attributes))
+      super(slice_keys(data, managed_concept_attributes))
     end
 
     def related=(related)

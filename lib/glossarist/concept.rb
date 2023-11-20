@@ -128,10 +128,10 @@ module Glossarist
     def to_h
       {
         "data" => {
-          "id" => id,
           "dates" => dates&.map(&:to_h),
           "definition" => definition&.map(&:to_h),
           "examples" => examples&.map(&:to_h),
+          "id" => id,
           "lineage_source_similarity" => lineage_source_similarity,
           "notes" => notes&.map(&:to_h),
           "release" => release,
