@@ -57,8 +57,16 @@ RSpec.describe Glossarist::ManagedConceptCollection do
   end
 
   describe "#[]" do
-    it "returns a managed concept" do
-      managed_concept = Glossarist::ManagedConcept.new("data" => { id: "id" })
+    let(:managed_concept) { Glossarist::ManagedConcept.new("data" => { id: "id" }) }
+
+    it "returns a managed concept by uuid" do
+      managed_concept_collection.store(managed_concept)
+      uuid = Glossarist::Utilities::UUID.uuid_v5(Glossarist::Utilities::UUID::OID_NAMESPACE, managed_concept.to_h.to_s)
+
+      expect(managed_concept_collection[uuid]).to eq(managed_concept)
+    end
+
+    it "returns a managed concept by id" do
       managed_concept_collection.store(managed_concept)
 
       expect(managed_concept_collection["id"]).to eq(managed_concept)

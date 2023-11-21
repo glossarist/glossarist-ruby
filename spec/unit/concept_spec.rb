@@ -38,6 +38,22 @@ RSpec.describe Glossarist::Concept do
         .not_to raise_error
     end
 
+    it "generates a uuid if not given" do
+      concept = described_class.new(attrs)
+      uuid = Glossarist::Utilities::UUID.uuid_v5(
+        Glossarist::Utilities::UUID::OID_NAMESPACE,
+        concept.to_h.to_s
+      )
+
+      expect(concept.uuid).to eq(uuid)
+    end
+
+    it "assign a uuid if given" do
+      concept = described_class.new(attrs.merge("uuid" => "abc"))
+
+      expect(concept.uuid).to eq("abc")
+    end
+
     it "accepts a hash of attributes and create a concept" do
       related = [
         {
