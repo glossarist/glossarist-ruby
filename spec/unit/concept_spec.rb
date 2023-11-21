@@ -42,7 +42,7 @@ RSpec.describe Glossarist::Concept do
       concept = described_class.new(attrs)
       uuid = Glossarist::Utilities::UUID.uuid_v5(
         Glossarist::Utilities::UUID::OID_NAMESPACE,
-        concept.to_h.to_s
+        concept.to_h.to_yaml
       )
 
       expect(concept.uuid).to eq(uuid)

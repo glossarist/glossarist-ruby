@@ -52,7 +52,7 @@ module Glossarist
     end
 
     def uuid
-      @uuid ||= Glossarist::Utilities::UUID.uuid_v5(@uuid_namespace, to_h.to_s)
+      @uuid ||= Glossarist::Utilities::UUID.uuid_v5(@uuid_namespace, to_h.to_yaml)
     end
 
     def related=(related)
@@ -78,7 +78,7 @@ module Glossarist
         localized_concepts.each do |localized_concept|
           lang = localized_concept["language_code"].to_s
 
-          @localized_concepts[lang] = Glossarist::Utilities::UUID.uuid_v5(@uuid_namespace, localized_concept.to_h.to_s)
+          @localized_concepts[lang] = Glossarist::Utilities::UUID.uuid_v5(@uuid_namespace, localized_concept.to_h.to_yaml)
 
           add_localization(
             @localized_concept_class.new(localized_concept["data"] || localized_concept),

@@ -69,7 +69,7 @@ module Glossarist
     def uuid
       @uuid ||= Glossarist::Utilities::UUID.uuid_v5(
         Glossarist::Utilities::UUID::OID_NAMESPACE,
-        to_h.to_s,
+        to_h.to_yaml,
       )
     end
 
