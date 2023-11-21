@@ -41,12 +41,13 @@ module Glossarist
     end
 
     def load_localized_concept(id)
-      Config.class_for(:localized_concept).new(
-        Psych.safe_load(
-          File.read(localized_concept_path(id)),
-          permitted_classes: [Date],
-        ),
+      concept_hash = Psych.safe_load(
+        File.read(localized_concept_path(id)),
+        permitted_classes: [Date],
       )
+      concept_hash["uuid"] = id
+
+      Config.class_for(:localized_concept).new(concept_hash)
     rescue Psych::SyntaxError => e
       raise Glossarist::ParseError.new(filename: filename, line: e.line)
     end

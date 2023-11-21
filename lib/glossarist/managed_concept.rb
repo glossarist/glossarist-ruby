@@ -36,7 +36,9 @@ module Glossarist
 
     def initialize(attributes = {})
       @localizations = {}
+      @localized_concepts = {}
       @localized_concept_class = Config.class_for(:localized_concept)
+      @uuid_namespace = Glossarist::Utilities::UUID::OID_NAMESPACE
 
       attributes = symbolize_keys(attributes)
       @uuid = attributes[:uuid]
@@ -47,6 +49,10 @@ module Glossarist
       data = symbolize_keys(data.compact)
 
       super(slice_keys(data, managed_concept_attributes))
+    end
+
+    def uuid
+      @uuid ||= Glossarist::Utilities::UUID.uuid_v5(@uuid_namespace, to_h.to_s)
     end
 
     def related=(related)
@@ -72,7 +78,7 @@ module Glossarist
         localized_concepts.each do |localized_concept|
           lang = localized_concept["language_code"].to_s
 
-          @localized_concepts[lang] = SecureRandom.uuid
+          @localized_concepts[lang] = Glossarist::Utilities::UUID.uuid_v5(@uuid_namespace, localized_concept.to_h.to_s)
 
           add_localization(
             @localized_concept_class.new(localized_concept["data"] || localized_concept),
@@ -107,6 +113,7 @@ module Glossarist
     # @param localized_concept [LocalizedConcept]
     def add_localization(localized_concept)
       lang = localized_concept.language_code
+      @localized_concepts[lang] = @localized_concepts[lang] || localized_concept.uuid
       localizations.store(lang, localized_concept)
     end
 
@@ -125,7 +132,7 @@ module Glossarist
       {
         "data" => {
           "identifier" => id,
-          "localized_concepts" => localized_concepts,
+          "localized_concepts" => localized_concepts.empty? ? nil : localized_concepts,
           "groups" => groups,
         }.compact,
       }.compact

@@ -9,6 +9,8 @@ module Glossarist
     # @return [String]
     attr_reader :id
 
+    attr_writer :uuid
+
     # Concept designations.
     # @todo Alias +terms+ exists only for legacy reasons and will be removed.
     # @return [Array<Designations::Base>]
@@ -62,6 +64,13 @@ module Glossarist
       normalize_args(args)
 
       super
+    end
+
+    def uuid
+      @uuid ||= Glossarist::Utilities::UUID.uuid_v5(
+        Glossarist::Utilities::UUID::OID_NAMESPACE,
+        to_h.to_s,
+      )
     end
 
     def id=(id)
