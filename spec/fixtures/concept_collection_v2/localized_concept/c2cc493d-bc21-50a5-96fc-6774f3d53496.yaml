@@ -1,3 +1,4 @@
+---
 data:
   dates:
   - date: '2003-02-15T00:00:00.000Z'
@@ -7,24 +8,24 @@ data:
       Punkt; nordwärts mit positiven Werten
   examples: []
   id: '200'
-  language_code: deu
   lineage_source_similarity: 1
   notes: []
   release: '1'
   sources:
   - origin:
+      ref: ISO 19111:2019
       clause: 3.1.32
       link: https://www.iso.org/standard/74039.html
-      ref: ISO 19111:2019
     type: authoritative
   - origin:
       ref: ISO 19111:2003
     type: lineage
   terms:
-  - designation: j
-    type: abbreviation
-  - designation: geodätische Breite
+  - type: abbreviation
+    designation: j
+  - type: expression
     normative_status: preferred
-    type: expression
-  - designation: ellipsoidal latitude
-    type: expression
+    designation: geodätische Breite
+  - type: expression
+    designation: ellipsoidal latitude
+  language_code: deu

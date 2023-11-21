@@ -33,25 +33,39 @@ module Glossarist
     end
 
     def load_concept_from_file(filename)
-      ManagedConcept.new(Psych.safe_load(File.read(filename), permitted_classes: [Date]))
+      concept_hash = Psych.safe_load(File.read(filename), permitted_classes: [Date])
+      concept_hash["uuid"] = concept_hash["id"] || File.basename(filename, ".*")
+      ManagedConcept.new(concept_hash)
     rescue Psych::SyntaxError => e
       raise Glossarist::ParseError.new(filename: filename, line: e.line)
     end
 
     def load_localized_concept(id)
-      Config.class_for(:localized_concept).new(
-        Psych.safe_load(
-          File.read(localized_concept_path(id)),
-          permitted_classes: [Date],
-        ),
+      concept_hash = Psych.safe_load(
+        File.read(localized_concept_path(id)),
+        permitted_classes: [Date],
       )
+      concept_hash["uuid"] = id
+
+      Config.class_for(:localized_concept).new(concept_hash)
     rescue Psych::SyntaxError => e
       raise Glossarist::ParseError.new(filename: filename, line: e.line)
     end
 
     def save_concept_to_file(concept)
-      filename = File.join(path, "concept-#{concept.id}.yaml")
+      concept_dir = File.join(path, "concept")
+      localized_concept_dir = File.join(path, "localized_concept")
+
+      Dir.mkdir(concept_dir) unless Dir.exist?(concept_dir)
+      Dir.mkdir(localized_concept_dir) unless Dir.exist?(localized_concept_dir)
+
+      filename = File.join(concept_dir, "#{concept.uuid}.yaml")
       File.write(filename, Psych.dump(concept.to_h))
+
+      concept.localized_concepts.each do |lang, uuid|
+        filename = File.join(localized_concept_dir, "#{uuid}.yaml")
+        File.write(filename, Psych.dump(concept.localization(lang).to_h))
+      end
     end
 
     private

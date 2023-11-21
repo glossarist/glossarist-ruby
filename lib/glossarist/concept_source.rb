@@ -37,9 +37,9 @@ module Glossarist
       origin_hash = self.origin.to_h.empty? ? nil : self.origin.to_h
 
       {
+        "origin" => origin_hash,
         "type" => type.to_s,
         "status" => status&.to_s,
-        "origin" => origin_hash,
         "modification" => modification,
       }.compact
     end

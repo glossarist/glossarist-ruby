@@ -33,12 +33,6 @@ module Glossarist
       review_type
     ]
 
-    def initialize(*)
-      @examples = []
-
-      super
-    end
-
     def language_code=(language_code)
       if language_code.is_a?(String) && language_code.length == 3
         @language_code = language_code
@@ -51,8 +45,8 @@ module Glossarist
       hash = super
 
       hash["data"].merge!({
-        "language_code" => language_code,
         "domain" => domain,
+        "language_code" => language_code,
         "entry_status" => entry_status,
         "sources" => sources.empty? ? nil : sources&.map(&:to_h),
         "classification" => classification,

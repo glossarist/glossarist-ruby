@@ -32,7 +32,7 @@ RSpec.describe Glossarist::LocalizedConcept do
     definition = Glossarist::DetailedDefinition.new({ content: "this is very important" })
 
     expect { subject.definition = [ definition ] }
-      .to change { subject.definition }.to([ definition ])
+      .to change { subject.definition.count }.from(0).to(1)
   end
 
   it "accepts strings as entry statuses" do
@@ -61,39 +61,41 @@ RSpec.describe Glossarist::LocalizedConcept do
   end
 
   describe "#designations" do
-    let(:expression) { double("expression designation") }
+    let(:expression) { { "type" => "expression", designation: "expression designation" } }
 
-    it "is an array of designations" do
+    it "is a collection of designations" do
       expect { subject.designations << expression }
-        .to change { subject.designations }.to([expression])
+        .to change { subject.designations.count }.from(0).to(1)
     end
 
     it "is aliased as 'terms'" do
       expect { subject.designations << expression }
-        .to change { subject.terms }.to([expression])
+        .to change { subject.terms.count }.from(0).to(1)
     end
   end
 
   describe "#notes" do
-    it "is an array of strings" do
+    it "adds a note of type DetailedDefinition" do
       expect { subject.notes << "str" }
-        .to change { subject.notes }.to(["str"])
+        .to change { subject.notes.count }.from(0).to(1)
+        .and change { subject.notes.first.class }.from(NilClass).to(Glossarist::DetailedDefinition)
     end
   end
 
   describe "#examples" do
-    it "is an array of strings" do
-      expect { subject.examples << "str" }
-        .to change { subject.examples }.to(["str"])
+    it "adds an example of type DetailedDefinition" do
+      expect { subject.examples << "example" }
+        .to change { subject.examples.count }.from(0).to(1)
+        .and change { subject.examples.first.class }.from(NilClass).to(Glossarist::DetailedDefinition)
     end
   end
 
   describe "#sources" do
-    let(:item) { double("source") }
+    let(:item) { { "text" => "source" } }
 
     it "is an array" do
       expect { subject.sources << item }
-        .to change { subject.sources }.to([item])
+        .to change { subject.sources.count }.from(0).to(1)
     end
   end
 
@@ -146,7 +148,7 @@ RSpec.describe Glossarist::LocalizedConcept do
       expect(retval.id).to eq("123-45")
       expect(retval.definition.size).to eq(1)
       expect(retval.definition.first.content).to eq("Example Definition")
-      expect(retval.terms).to eq([])
+      expect(retval.terms.collection).to eq([])
       expect(retval.sources.map(&:to_h)).to eq([{ "origin" => { "ref" => source }, "type" => "" }])
     end
 

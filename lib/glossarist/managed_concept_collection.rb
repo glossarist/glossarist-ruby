@@ -6,6 +6,7 @@ module Glossarist
 
     def initialize
       @managed_concepts = {}
+      @managed_concepts_ids = {}
       @concept_manager = ConceptManager.new
     end
 
@@ -39,7 +40,7 @@ module Glossarist
     #    ManagedConcept ID
     # @return [ManagedConcept, nil]
     def fetch(id)
-      @managed_concepts[id]
+      @managed_concepts[id] || @managed_concepts[@managed_concepts_ids[id]]
     end
 
     alias :[] :fetch
@@ -55,13 +56,14 @@ module Glossarist
       fetch(id) or store(ManagedConcept.new(data: { id: id }))
     end
 
-    # Adds concept to the collection.  If collection contains a concept with
+    # Adds concept to the collection. If collection contains a concept with
     # the same ID already, that concept is replaced.
     #
     # @param managed_concept [ManagedConcept]
     #   ManagedConcept about to be added
     def store(managed_concept)
-      @managed_concepts[managed_concept.id] = managed_concept
+      @managed_concepts[managed_concept.uuid] = managed_concept
+      @managed_concepts_ids[managed_concept.id] = managed_concept.uuid if managed_concept.id
     end
 
     alias :<< :store

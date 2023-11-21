@@ -1,3 +1,4 @@
+---
 data:
   dates:
   - date: '2017-11-15T00:00:00.000Z'
@@ -7,7 +8,6 @@ data:
   examples:
   - content: Locality, postcode, thoroughfare, premises identifier
   id: '2119'
-  language_code: eng
   notes:
   - content: The components of postal addresses are defined in 6.2, 6.3 and 6.4.
   - content: A postal address component may be, but is not limited to, an element,
@@ -17,14 +17,15 @@ data:
   release: '5'
   sources:
   - origin:
+      ref: ISO 19160-4:2017
       clause: '3.12'
       link: https://www.iso.org/standard/64242.html
-      ref: ISO 19160-4:2017
     type: authoritative
   terms:
-  - designation: component
+  - type: expression
     normative_status: admitted
-    type: expression
-  - designation: postal address component
-    type: expression
+    designation: component
+  - type: expression
+    designation: postal address component
   domain: postal address
+  language_code: eng
