@@ -1,0 +1,19 @@
+---
+data:
+  dates: []
+  definition:
+  - content: "{{material entity}} that was or is a living organism"
+  examples: []
+  notes: []
+  sources:
+  - origin:
+      ref: ISO/TS 14812:2022
+      clause: 3.1.1.5
+      link: https://www.iso.org/standard/79779.html
+    type: authoritative
+  terms:
+  - type: expression
+    normative_status: preferred
+    designation: biological_entity
+  language_code: eng
+  entry_status: valid

@@ -26,6 +26,7 @@ require_relative "glossarist/managed_concept_collection"
 require_relative "glossarist/concept_manager"
 require_relative "glossarist/managed_concept"
 require_relative "glossarist/non_verb_rep"
+require_relative "glossarist/v1_reader"
 
 require_relative "glossarist/collections"
 
