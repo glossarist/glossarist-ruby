@@ -17,11 +17,11 @@ module Glossarist
       collection ||= ManagedConceptCollection.new
 
       Dir.glob(concepts_glob) do |filename|
-        concept = load_concept_from_file(filename)
-        concept.localized_concepts.each do |_lang, id|
-          localized_concept = load_localized_concept(id)
-          concept.add_l10n(localized_concept)
-        end
+        concept = if v1_collection?
+                    Glossarist::V1Reader.load_concept_from_file(filename)
+                  else
+                    load_concept_from_file(filename)
+                  end
 
         collection.store(concept)
       end
@@ -35,7 +35,14 @@ module Glossarist
     def load_concept_from_file(filename)
       concept_hash = Psych.safe_load(File.read(filename), permitted_classes: [Date])
       concept_hash["uuid"] = concept_hash["id"] || File.basename(filename, ".*")
-      ManagedConcept.new(concept_hash)
+
+      concept = ManagedConcept.new(concept_hash)
+      concept.localized_concepts.each do |_lang, id|
+        localized_concept = load_localized_concept(id)
+        concept.add_l10n(localized_concept)
+      end
+
+      concept
     rescue Psych::SyntaxError => e
       raise Glossarist::ParseError.new(filename: filename, line: e.line)
     end
@@ -71,11 +78,19 @@ module Glossarist
     private
 
     def concepts_glob
-      File.join(path, "concept", "*.{yaml,yml}")
+      if v1_collection?
+        File.join(path, "concept-*.{yaml,yml}")
+      else
+        File.join(path, "concept", "*.{yaml,yml}")
+      end
     end
 
     def localized_concept_path(id)
       Dir.glob(File.join(path, "localized_concept", "#{id}.{yaml,yml}"))&.first
+    end
+
+    def v1_collection?
+      @v1_collection ||= !Dir.glob(File.join(path, "concept-*.{yaml,yml}")).empty?
     end
   end
 end

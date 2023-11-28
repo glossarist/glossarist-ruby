@@ -1,0 +1,20 @@
+---
+data:
+  dates: []
+  definition:
+  - content: "{{entity}} that does not occupy three-dimensional space"
+  examples:
+  - content: Idea, process, organization, etc.
+  notes: []
+  sources:
+  - origin:
+      ref: ISO/TS 14812:2022
+      clause: 3.1.1.2
+      link: https://www.iso.org/standard/79779.html
+    type: authoritative
+  terms:
+  - type: expression
+    normative_status: preferred
+    designation: immaterial_entity
+  language_code: eng
+  entry_status: valid

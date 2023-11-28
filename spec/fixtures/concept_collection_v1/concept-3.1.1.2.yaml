@@ -1,0 +1,22 @@
+---
+termid: 3.1.1.2
+term: immaterial_entity
+eng:
+  terms:
+  - type: expression
+    normative_status: preferred
+    designation: immaterial_entity
+  definition:
+  - content: "{{entity}} that does not occupy three-dimensional
+      space"
+  notes: []
+  examples:
+  - content: Idea, process, organization, etc.
+  language_code: eng
+  entry_status: valid
+  sources:
+  - type: authoritative
+    origin:
+      ref: ISO/TS 14812:2022
+      clause: 3.1.1.2
+      link: https://www.iso.org/standard/79779.html
