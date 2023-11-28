@@ -30,7 +30,7 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "relaton"
+  spec.add_dependency "relaton", "~> 1.16"
   spec.add_dependency "thor"
 
   spec.add_development_dependency "pry", "~> 0.14.0"
