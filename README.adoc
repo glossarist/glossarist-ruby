@@ -1,4 +1,249 @@
+:glossarist_model_url: https://github.com/glossarist/concept-model/tree/main
+:glossarist_model_v2_schema_url: https://github.com/glossarist/concept-model/tree/main/yaml_schemas
+
 = Glossarist
+
+Glossarist gem implements the {glossarist_model_url}[Glossarist model] in ruby. All the entities in the model are available as classes and all the attributes are available as methods of those classes.
+This gem also allows you to read/write data to concept dataset or create your own collection and save that to glossarist model V2 dataset.
+
+== Installation
+
+Add this line to your application's Gemfile:
+
+```ruby
+gem 'glossarist'
+```
+
+And then execute:
+  `$ bundle install`
+
+Or install it yourself as:
+  `$ gem install glossarist`
+
+== Usage
+
+=== Reading a Glossarist model V2 from files
+
+To load the glossarist model V2 dataset
+
+```ruby
+collection = Glossarist::ManagedConceptCollection.new
+collection.load_from_files("path/to/glossarist-v2-dataset")
+```
+
+=== Writing a Glossarist model V2 to files
+
+To wite the glossarist model V2 dataset to files
+
+```ruby
+collection = Glossarist::ManagedConceptCollection.new
+collection.load_from_files("path/to/glossarist-v2-dataset")
+
+# ... Update the collection ...
+
+collection.save_to_files("path/to/glossarist-v2-dataset")
+```
+
+=== ManagedConceptCollection
+
+This is a collection for <<managed-concept,managed concepts>>
+
+```ruby
+collection = Glossarist::ManagedConceptCollection.new
+```
+
+[[id,managed-concept]]
+=== ManagedConcept
+
+Following fields are available for ManagedConcept:
+
+- id: String identifier for the concept
+- uuid: UUID for the concept
+- related: Array of <<related-concept,RelatedConcept>>
+- status: Enum for the normative status of the term.
+- dates: Array of <<concept-date,ConceptDate>>
+- localized_concepts: Hash of all localizations where keys are language codes and values are uuid of the localized concept.
+- groups: Array of groups in string format
+- localizations: Hash of all localizations for this concept where keys are language codes and values are instances of <<localized-concept,LocalizedConcept>>.
+
+There are two ways to initialize and populate a managed concept
+
+1. Setting the fields by using a hash while initializing
++
+```ruby
+concept = Glossarist::ManagedConcept.new({
+  "data" => {
+    "id" => "123",
+    "localized_concepts" => {
+      "ara" => "<uuid>",
+      "eng" => "<uuid>"
+    },
+    "localizations" => <Array of localized concepts or localized concept hashes>,
+    "groups" => [
+      "foo",
+      "bar",
+    ],
+  },
+})
+```
+
+2. Setting the fields after creating an object
++
+```ruby
+concept = Glossarist::ManagedConcept.new
+concept.id = "123"
+concept.groups = ["foo", "bar"]
+concept.localizations = <Array of localized concepts or localized concept hashes>
+```
+
+[[id,localized-concept]]
+=== LocalizedConcept
+
+Localizations of the term to different languages.
+
+Localized concept has the following fields
+
+- id: An optional identifier for the term, to be used in cross-references.
+- uuid: UUID for the concept
+- designations: Array of <<designation,Designation>> under which the term being defined is known.
+- domain: An optional semantic domain for the term being defined, in case the term is ambiguous between several semantic domains.
+- subject: Subject of the term.
+- definition: Array of <<detailed-definition,Detailed Definition>> of the term.
+- non_verb_rep: Array of <<non-verbal,non-verbal>> representations used to help define the term.
+- notes: Zero or more notes about the term in
+- examples: Zero or more examples of how the term is to be used.
+- language_code: The language of the localization, as an ISO-639 3-letter code.
+- entry_status: Entry status of the concept. Must be one of the following: +notValid+, +valid+, +superseded+, +retired+.
+- classification: Classification of the concept. Must be one of the following: +preferred+, +admitted+, +deprecated+.
+
+[[id,designation]]
+=== Designation
+
+A name under which a managed term is known.
+
+Designation has the following attributes
+
+- type: Type of the designation. Can be `expression`, `symbol`, `abbreviation`, `graphical_symbol`, `letter_symbol`.
+
+[[id,related-concept]]
+=== RelatedConcept
+
+A term related to the current term.
+
+Following fields are available for the Related Concept
+
+- type: An enum to denote the relation of the term to the current term.
+- content: The designation of the related term.
+- ref: A <<citation, citation>> of the related term, in a Termbase.
+
+There are two ways to initialize and populate a related concept
+
+1. Setting the fields by using a hash while initializing
++
+```ruby
+related_concept = Glossarist::RelatedConcept.new({
+  content: "Test content",
+  type: :supersedes,
+  ref: <concept citation>
+})
+```
+
+2. Setting the fields after creating an object
++
+```ruby
+related_concept = Glossarist::RelatedConcept.new
+related_concept.type = "supersedes"
+related_concept.content = "designation of the related concept"
+related_concept.ref = <Citation object>
+```
+
+[[id,concept-date]]
+=== Concept Date
+
+A date relevant to the lifecycle of the managed term.
+
+Following fields are available for the Concept Date
+
+- date: The date associated with the managed term in Iso8601Date format.
+- type: An enum to denote the event which occured on the given date and associated with the lifecycle of the managed term.
+
+There are two ways to initialize and populate a concept date
+
+1. Setting the fields by using a hash while initializing
++
+```ruby
+concept_date = Glossarist::ConceptDate.new({
+  date: "2010-11-01T00:00:00.000Z",
+  type: :accepted,
+})
+```
+
+2. Setting the fields after creating an object
++
+```ruby
+concept_date = Glossarist::ConceptDate.new
+concept_date.type = :accepted
+concept_date.date = "2010-11-01T00:00:00.000Z"
+```
+
+[[id,citation]]
+=== Citation
+
+Citation can be either structured or unstructured. A citation is structured if its reference contains one or all of the following keys `{ id: "id", source: "source", version: "version"}` and is unstructured if its reference is plain text. This also has 2 methods `structured?` and `plain?` to check if citation is structured or not.
+
+Citation has the following attributes.
+
+- ref: A hash or string based on type of citation. Hash if citation is structured or string if citation is plain.
+- clause: Referred clause of the document.
+- link: Link to document.
+
+There are two ways to initialize and populate a Citation
+
+1. Setting the fields by using a hash while initializing
++
+```ruby
+# Unstructured Citation
+citation = Glossarist::Citation.new({
+  ref: "plain text reference",
+  clause: "clause",
+  link: "link",
+})
+
+# Structured Citation
+citation = Glossarist::Citation.new({
+  ref: { id: "123", source: "source", version: "1.1" },
+  clause: "clause",
+  link: "link",
+})
+```
+
+2. Setting the fields after creating an object
++
+```ruby
+citation = Glossarist::Citation.new
+citation.ref = <plain or structured ref>
+citation.clause = "some clause"
+```
+
+=== NonVerbRep
+
+Non-verbal Representation have the following fields
+
+- image: An image used to help define a term.
+- table: A table used to help define a term.
+- formula: A formula used to help define a term.
+- sources: Bibliographic <<concept-source,concept source>> for the non-verbal representation of the term.
+
+[[id,concept-source]]
+=== ConceptSource
+
+Concept Source has the following fields
+
+- status: The status of the managed term in the present context, relative to the term as found in the bibliographic source.
+- type: The type of the managed term in the present context.
+- origin: The bibliographic <<citation,citation>> for the managed term. This is also aliased as `ref`.
+- modification: A description of the modification to the cited definition of the term, if any, as it is to be applied in the present context.
+
 
 == Commands
 
