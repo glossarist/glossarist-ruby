@@ -46,7 +46,7 @@ collection.save_to_files("path/to/glossarist-v2-dataset")
 
 === ManagedConceptCollection
 
-This is a collection for <<managed-concept,managed concepts>>
+This is a collection for <<managed-concept,managed concepts>>. It includes the ruby 'Enumerable' module.
 
 ```ruby
 collection = Glossarist::ManagedConceptCollection.new
@@ -105,25 +105,44 @@ Localized concept has the following fields
 
 - id: An optional identifier for the term, to be used in cross-references.
 - uuid: UUID for the concept
-- designations: Array of <<designation,Designation>> under which the term being defined is known.
+- designations: Array of <<designation,Designations>> under which the term being defined is known. This method will also accept an array of hashes for designation and will convert them to their respective classes.
 - domain: An optional semantic domain for the term being defined, in case the term is ambiguous between several semantic domains.
 - subject: Subject of the term.
 - definition: Array of <<detailed-definition,Detailed Definition>> of the term.
 - non_verb_rep: Array of <<non-verbal,non-verbal>> representations used to help define the term.
-- notes: Zero or more notes about the term in
-- examples: Zero or more examples of how the term is to be used.
+- notes: Zero or more notes about the term. A note is in <<detailed-definition,Detailed Definition>> format.
+- examples: Zero or more examples of how the term is to be used in <<detailed-definition,Detailed Definition>> format.
 - language_code: The language of the localization, as an ISO-639 3-letter code.
 - entry_status: Entry status of the concept. Must be one of the following: +notValid+, +valid+, +superseded+, +retired+.
 - classification: Classification of the concept. Must be one of the following: +preferred+, +admitted+, +deprecated+.
 
 [[id,designation]]
-=== Designation
+=== Designation::Base
 
 A name under which a managed term is known.
 
-Designation has the following attributes
+Designation::Base Class
 
-- type: Type of the designation. Can be `expression`, `symbol`, `abbreviation`, `graphical_symbol`, `letter_symbol`.
+`from_h(options)`: Creates a new designation instance based on the specified type.
+
+- Parameters:
+  - options (Hash) - The options for creating the designation.
+  - "type" (String) - The type of designation (expression, symbol, abbreviation, graphical_symbol, letter_symbol). Note: type key should be string and not a symbol so { type: "expression" } will not work.
+  - Additional options depend on the specific designation type.
+- Returns:
+  Designation::{type} - A new instance of specified type. e.g `Glossarist::Designation::Base.from_h("type" => "expression")` will return `Glossarist::Designation::Expression`
+
+Example
+```ruby
+# Example usage of Designation::Base class
+
+attributes_for_expression = { designation: "foobar", geographical_area: "abc", normative_status: "status" }
+designation_expression = Designation::Base.from_h({ "type" => "expression" }.merge(attributes_for_expression))
+
+attributes_for_abbreviation = { designation: "foobar", geographical_area: "abc", normative_status: "status", international: true }
+designation_abbreviation = Designation::Base.from_h({ "type" => "abbreviation" }.merge(attributes_for_abbreviation))
+
+```
 
 [[id,related-concept]]
 === RelatedConcept
@@ -184,6 +203,35 @@ concept_date = Glossarist::ConceptDate.new({
 concept_date = Glossarist::ConceptDate.new
 concept_date.type = :accepted
 concept_date.date = "2010-11-01T00:00:00.000Z"
+```
+
+[[id,detailed-definition]]
+=== DetailedDefinition
+
+A definition of the managed term.
+
+It has the following attributes:
+
+- content: The text of the definition of the managed term.
+- sources: List of Bibliographic references(<<citation,Citation>>) for this particular definition of the managed term.
+
+There are two ways to initialize and populate a detailed definition
+
+1. Setting the fields by using a hash while initializing
++
+```ruby
+detailed_definition = Glossarist::DetailedDefinition.new({
+  content: "plain text reference",
+  sources: [<list of citations>],
+})
+```
+
+2. Setting the fields after creating an object
++
+```ruby
+detailed_definition = Glossarist::DetailedDefinition.new
+detailed_definition.content = "plain text reference",
+detailed_definition.sources = [<list of citations>]
 ```
 
 [[id,citation]]
