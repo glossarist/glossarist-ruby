@@ -74,11 +74,16 @@ RSpec.describe Glossarist::ManagedConceptCollection do
   end
 
   describe "#fetch_or_initialize" do
-    it "add and return a managed concept when not present" do
+    it "add a managed concept when not present" do
       expect{ managed_concept_collection.fetch_or_initialize("new") }
         .to change { managed_concept_collection.fetch("new") }
         .from(nil)
         .to(Glossarist::ManagedConcept)
+    end
+
+    it "add and return a managed concept when not present" do
+      expect(managed_concept_collection.fetch_or_initialize("new"))
+        .to be_an_instance_of(Glossarist::ManagedConcept)
     end
 
     it "returns a managed concept when present" do

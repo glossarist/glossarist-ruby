@@ -64,6 +64,8 @@ module Glossarist
     def store(managed_concept)
       @managed_concepts[managed_concept.uuid] = managed_concept
       @managed_concepts_ids[managed_concept.id] = managed_concept.uuid if managed_concept.id
+
+      managed_concept
     end
 
     alias :<< :store
