@@ -33,7 +33,7 @@ module Glossarist
     end
 
     def load_concept_from_file(filename)
-      concept_hash = Psych.safe_load(File.read(filename), permitted_classes: [Date])
+      concept_hash = Psych.safe_load(File.read(filename), permitted_classes: [Date, Time])
       concept_hash["uuid"] = concept_hash["id"] || File.basename(filename, ".*")
 
       concept = ManagedConcept.new(concept_hash)
@@ -50,7 +50,7 @@ module Glossarist
     def load_localized_concept(id)
       concept_hash = Psych.safe_load(
         File.read(localized_concept_path(id)),
-        permitted_classes: [Date],
+        permitted_classes: [Date, Time],
       )
       concept_hash["uuid"] = id
 
