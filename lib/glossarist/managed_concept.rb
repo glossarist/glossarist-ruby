@@ -28,6 +28,10 @@ module Glossarist
     # @return [Array<String>]
     attr_reader :groups
 
+    # List of authorative sources.
+    # @return [Array<ConceptSource>]
+    attr_reader :sources
+
     # All localizations for this concept.
     #
     # Keys are language codes and values are instances of {LocalizedConcept}.
@@ -87,6 +91,12 @@ module Glossarist
       end
     end
 
+    def sources=(sources)
+      @sources = sources&.map do |source|
+        ConceptSource.new(source)
+      end || []
+    end
+
     def localizations=(localizations)
       return unless localizations
 
@@ -134,6 +144,7 @@ module Glossarist
           "identifier" => id,
           "localized_concepts" => localized_concepts.empty? ? nil : localized_concepts,
           "groups" => groups,
+          "sources" => sources&.map(&:to_h),
         }.compact,
       }.compact
     end
@@ -182,6 +193,7 @@ module Glossarist
         localizedConcepts
         localizations
         groups
+        sources
       ].compact
     end
 
