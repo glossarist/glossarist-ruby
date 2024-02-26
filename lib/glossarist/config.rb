@@ -28,7 +28,7 @@ module Glossarist
     end
 
     def register_class(class_name, klass)
-      @registered_classes[class_name] = klass
+      @registered_classes[class_name.to_sym] = klass
     end
 
     def extension_attributes
@@ -53,7 +53,7 @@ module Glossarist
       end
 
       def register_extension_attributes(attributes)
-        self.register_extension_attributes(attributes)
+        self.instance.register_extension_attributes(attributes)
       end
     end
   end
