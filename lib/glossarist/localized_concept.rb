@@ -54,7 +54,7 @@ module Glossarist
         "review_date" => review_date,
         "review_decision_date" => review_decision_date,
         "review_decision_event" => review_decision_event,
-      }.compact).merge(@extension_attributes)
+      }.compact).merge!(@extension_attributes)
 
       hash
     end

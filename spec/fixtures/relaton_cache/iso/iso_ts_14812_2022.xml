@@ -1,5 +1,5 @@
-<bibdata type="standard" schema-version="v1.2.7">
-  <fetched>2023-12-12</fetched>
+<bibdata type="standard" schema-version="v1.2.8">
+  <fetched>2024-02-26</fetched>
   <title type="title-intro" format="text/plain" language="en" script="Latn">Intelligent transport systems</title>
   <title type="title-main" format="text/plain" language="en" script="Latn">Vocabulary</title>
   <title type="main" format="text/plain" language="en" script="Latn">Intelligent transport systems - Vocabulary</title>
@@ -10,8 +10,8 @@
   <uri type="obp">https://www.iso.org/obp/ui/en/#!iso:std:79779:en</uri>
   <uri type="rss">https://www.iso.org/contents/data/standard/07/97/79779.detail.rss</uri>
   <docidentifier type="ISO" primary="true">ISO/TS 14812:2022</docidentifier>
-  <docidentifier type="iso-reference">ISO 14812:2022(E)</docidentifier>
-  <docidentifier type="URN">urn:iso:std:iso:ts:14812:stage-90.92:ed-1</docidentifier>
+  <docidentifier type="iso-reference">ISO/TS 14812:2022(E)</docidentifier>
+  <docidentifier type="URN">urn:iso:std:iso:ts:14812:stage-90.92</docidentifier>
   <docnumber>14812</docnumber>
   <date type="published">
     <on>2022-04</on>

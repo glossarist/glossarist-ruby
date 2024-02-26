@@ -18,12 +18,11 @@ module Glossarist
     def set_attribute(name, value)
       public_send("#{name}=", value)
     rescue NoMethodError
-      # adding support for camel case
-      if name.match?(/[A-Z]/)
+      if Config.extension_attributes.include?(name)
+        extension_attributes[name] = value
+      elsif name.match?(/[A-Z]/) # adding support for camel case
         name = snake_case(name.to_s).to_sym
         retry
-      elsif Config.extension_attributes.include?(name)
-        extension_attributes[name] = value
       else
         raise ArgumentError, "#{self.class.name} does not have " +
           "attribute #{name} defined or the attribute is read only."
