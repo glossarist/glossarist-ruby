@@ -43,6 +43,13 @@ RSpec.describe Glossarist::Config do
         .to(Array)
     end
 
+    it "registers custom class for managed_concept" do
+      expect { described_class.register_class("managed_concept", Array) }
+        .to change { described_class.class_for("managed_concept") }
+        .from(Glossarist::ManagedConcept)
+        .to(Array)
+    end
+
     it "registers custom classes with symbol names" do
       expect { described_class.register_class(:foo, Array) }
         .to change { described_class.class_for(:foo) }

@@ -17,7 +17,7 @@ module Glossarist
 
     def managed_concepts=(managed_concepts = [])
       managed_concepts.each do |managed_concept|
-        store(ManagedConcept.new(managed_concept))
+        store(Config.class_for(:managed_concept).new(managed_concept))
       end
 
       @managed_concepts.values
@@ -53,7 +53,7 @@ module Glossarist
     #    ManagedConcept ID
     # @return [ManagedConcept]
     def fetch_or_initialize(id)
-      fetch(id) or store(ManagedConcept.new(data: { id: id }))
+      fetch(id) or store(Config.class_for(:managed_concept).new(data: { id: id }))
     end
 
     # Adds concept to the collection. If collection contains a concept with

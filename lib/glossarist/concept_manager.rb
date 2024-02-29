@@ -36,7 +36,7 @@ module Glossarist
       concept_hash = Psych.safe_load(File.read(filename), permitted_classes: [Date, Time])
       concept_hash["uuid"] = concept_hash["id"] || File.basename(filename, ".*")
 
-      concept = ManagedConcept.new(concept_hash)
+      concept = Config.class_for(:managed_concept).new(concept_hash)
       concept.localized_concepts.each do |_lang, id|
         localized_concept = load_localized_concept(id)
         concept.add_l10n(localized_concept)
