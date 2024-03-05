@@ -18,6 +18,7 @@ eng:
       process, etc."
   language_code: eng
   entry_status: valid
+  date_accepted: 2008-11-15 00:00:00.000000000 +08:00
   sources:
   - type: authoritative
     origin:

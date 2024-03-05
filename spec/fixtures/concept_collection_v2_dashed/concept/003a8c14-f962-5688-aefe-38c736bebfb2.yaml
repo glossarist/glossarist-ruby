@@ -1,0 +1,11 @@
+---
+data:
+  identifier: '2119'
+  localized_concepts:
+    eng: da24b782-1551-5128-a043-ba6135a25acf
+  sources:
+  - origin:
+      ref: ISO 1087-1:2000
+      clause: 3.2.9
+      link: https://www.iso.org/standard/20057.html
+    type: authoritative
