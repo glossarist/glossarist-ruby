@@ -5,6 +5,7 @@ module Glossarist
     # Path to concepts directory.
     # @return [String]
     attr_accessor :path
+    attr_accessor :localized_concepts_path
 
     # @param path [String]
     #   concepts directory path, either absolute or relative to CWD
@@ -60,8 +61,10 @@ module Glossarist
     end
 
     def save_concept_to_file(concept)
+      @localized_concepts_path ||= "localized_concept"
       concept_dir = File.join(path, "concept")
-      localized_concept_dir = File.join(path, "localized_concept")
+
+      localized_concept_dir = File.join(path, @localized_concepts_path)
 
       Dir.mkdir(concept_dir) unless Dir.exist?(concept_dir)
       Dir.mkdir(localized_concept_dir) unless Dir.exist?(localized_concept_dir)
@@ -86,7 +89,30 @@ module Glossarist
     end
 
     def localized_concept_path(id)
-      Dir.glob(File.join(path, "localized_concept", "#{id}.{yaml,yml}"))&.first
+      localized_concept_possible_dir = {
+        "localized_concept" => File.join(
+          path,
+          "localized_concept",
+          "#{id}.{yaml,yml}",
+        ),
+
+        "localized-concept" => File.join(
+          path,
+          "localized-concept",
+          "#{id}.{yaml,yml}",
+        ),
+      }
+
+      localized_concept_possible_dir.each do |dir_name, file_path|
+        actual_path = Dir.glob(file_path)&.first
+
+        if actual_path
+          @localized_concepts_path = dir_name
+          return actual_path
+        end
+      end
+
+      actual_path
     end
 
     def v1_collection?
