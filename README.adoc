@@ -6,6 +6,8 @@
 Glossarist gem implements the {glossarist_model_url}[Glossarist model] in ruby. All the entities in the model are available as classes and all the attributes are available as methods of those classes.
 This gem also allows you to read/write data to concept dataset or create your own collection and save that to glossarist model V2 dataset.
 
+The YAML schema for `concept` and `localized_concept` is available at {glossarist_model_v2_schema_url}[Concept model/yaml_schemas]
+
 == Installation
 
 Add this line to your application's Gemfile:
