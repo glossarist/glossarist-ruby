@@ -16,7 +16,7 @@ RSpec.describe Glossarist::Collections::BibliographyCollection do
 
   it "populated bibliography correctly" do
     items = subject.fetch_all
-    expect(items.size).to be 1
+    expect(items.size).to be 5
     expect(items[0]).to be_instance_of RelatonIsoBib::IsoBibliographicItem
   end
 
