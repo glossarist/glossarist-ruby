@@ -15,6 +15,7 @@ RSpec.describe Glossarist::ManagedConcept do
           "foo",
           "bar",
         ],
+        "status" => "valid",
       },
     }
   end
@@ -43,6 +44,13 @@ RSpec.describe Glossarist::ManagedConcept do
     it "sets the id of the concept" do
       expect { subject.id = "1234" }
         .to change { subject.id }.to("1234")
+    end
+  end
+
+  describe "#status" do
+    it "sets the status of the concept" do
+      expect { subject.status = "superseded" }
+        .to change { subject.status }.from("valid").to("superseded")
     end
   end
 

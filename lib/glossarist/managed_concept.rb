@@ -49,6 +49,7 @@ module Glossarist
 
       data = attributes.delete(:data) || {}
       data["groups"] = attributes[:groups]
+      data["status"] = attributes[:status]
 
       data = symbolize_keys(data.compact)
 
