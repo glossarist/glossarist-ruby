@@ -74,6 +74,8 @@ module Glossarist
     end
 
     def id=(id)
+      # Some of the glossaries that are not generated using glossarist, contains ids that are integers 
+      # so adding a temporary check until every glossary is updated using glossarist.
       if !id.nil? && (id.is_a?(String) || id.is_a?(Integer))
         @id = id
       else
