@@ -74,9 +74,13 @@ module Glossarist
     end
 
     def id=(id)
-      raise(Glossarist::Error, "Expect id to be a string, Got #{id.class} (#{id})") unless id.is_a?(String) || id.nil?
-
-      @id = id
+      # Some of the glossaries that are not generated using glossarist, contains ids that are integers 
+      # so adding a temporary check until every glossary is updated using glossarist.
+      if !id.nil? && (id.is_a?(String) || id.is_a?(Integer))
+        @id = id
+      else
+        raise(Glossarist::Error, "Expect id to be a String or Integer, Got #{id.class} (#{id})")
+      end
     end
     alias :termid= :id=
     alias :identifier= :id=
