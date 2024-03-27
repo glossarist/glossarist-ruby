@@ -13,9 +13,19 @@ RSpec.describe Glossarist::LocalizedConcept do
       .to change { subject.id }.to("456")
   end
 
-  it "raises error if id is not a `String`" do
-    expect { subject.id = 1234 }
-      .to raise_error(Glossarist::Error, "Expect id to be a string, Got Integer (1234)")
+  it "accepts integers as ids" do
+    expect { subject.id = 456 }
+      .to change { subject.id }.to(456)
+  end
+
+  it "raises error if id is nil" do
+    expect { subject.id = nil }
+      .to raise_error(Glossarist::Error, "Expect id to be a String or Integer, Got NilClass ()")
+  end
+
+  it "raises error if id is not a `String` or `Integer`" do
+    expect { subject.id = false }
+      .to raise_error(Glossarist::Error, "Expect id to be a String or Integer, Got FalseClass (false)")
   end
 
   it "accepts strings as language codes" do
