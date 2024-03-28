@@ -86,6 +86,40 @@ RSpec.describe Glossarist::Concept do
       expect(subject.related.first).to be_kind_of(Glossarist::RelatedConcept)
       expect(subject.related.first.to_h).to eq(expected_hash.first)
     end
+
+    describe "when authoritative_source and source both present" do
+      let(:sources) do
+        [
+          {
+            "type" => "authoritative",
+            "status" => "identical",
+            "origin" => { "ref" => "url" },
+          },
+          {
+            "type" => "lineage",
+            "status" => "identical",
+            "origin" => { "ref" => "url" },
+          },
+        ]
+      end
+
+      let(:attrs) do
+        {
+          "id" => "123",
+          "sources" => sources,
+          "authoritative_source" => [
+            { "link" => "source url" },
+          ],
+          "authoritativeSource" => [
+            { "link" => "source url" },
+          ],
+        }
+      end
+
+      it "should skip authoritative_source" do
+        expect(subject.sources.map(&:to_h)).to eq(sources)
+      end
+    end
   end
 
   describe "::from_h" do
