@@ -208,6 +208,7 @@ module Glossarist
         data = arg.delete("data")
 
         arg.merge!(data) if data
+        arg.delete("authoritative_source") if arg["sources"]
       end
     end
   end
