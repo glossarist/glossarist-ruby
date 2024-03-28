@@ -186,23 +186,20 @@ RSpec.describe Glossarist::Concept do
     end
 
     let(:authoritative_source) do
-      [
-        {
-          "type" => "authoritative",
-          "status" => "identical",
-          "origin" => {
-            "ref" => "new url",
-          },
+      {
+        "status" => "identical",
+        "origin" => {
+          "ref" => "new url",
         },
-      ]
+      }
     end
 
     it "should add to sources hash" do
 
-      expect { subject.authoritative_source = authoritative_source }
+      expect { subject.authoritative_source = [authoritative_source] }
         .to change { subject.sources.map(&:to_h) }
         .from(sources)
-        .to(sources + authoritative_source)
+        .to(sources + [authoritative_source.merge("type" => "authoritative")])
     end
   end
 end

@@ -137,9 +137,7 @@ module Glossarist
 
     def authoritative_source=(sources)
       sources&.each do |source|
-        source.merge({ "type" => "authoritative" })
-
-        @sources << source
+        @sources << source.merge({ "type" => "authoritative" })
       end
     end
 
