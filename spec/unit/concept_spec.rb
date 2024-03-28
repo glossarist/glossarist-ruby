@@ -13,6 +13,11 @@ RSpec.describe Glossarist::Concept do
       .to change { subject.id }.to("456")
   end
 
+  it "accepts integers as ids" do
+    expect { subject.id = 456 }
+      .to change { subject.id }.to(456)
+  end
+
   describe "#to_h" do
     it "dumps concept definition to a hash" do
       object = described_class.new(
@@ -117,6 +122,84 @@ RSpec.describe Glossarist::Concept do
       expect(retval.sources.first.type).to eq("authoritative")
       expect(retval.sources.first.status).to eq("identical")
       expect(retval.sources.first.origin.to_h).to eq({ "ref" => "url" })
+    end
+  end
+
+  describe "#authoritative_source" do
+    let(:attrs) do
+      {
+        id: "123",
+        "sources" => [
+          {
+            "type" => "authoritative",
+            "status" => "identical",
+            "origin" => { "text" => "url" },
+          },
+          {
+            "type" => "lineage",
+            "status" => "identical",
+            "origin" => { "text" => "url" },
+          },
+        ],
+      }
+    end
+
+    let(:authoritative_source) do
+      [
+        {
+          "type" => "authoritative",
+          "status" => "identical",
+          "origin" => {
+            "ref" => "url",
+          },
+        },
+      ]
+    end
+
+    it "should return only authoritative_sources" do
+      expect(subject.authoritative_source.map(&:to_h))
+        .to eq(authoritative_source)
+    end
+  end
+
+  describe "#authoritative_source=" do
+    let(:sources) do
+      [
+        {
+          "type" => "authoritative",
+          "status" => "identical",
+          "origin" => { "ref" => "url" },
+        },
+        {
+          "type" => "lineage",
+          "status" => "identical",
+          "origin" => { "ref" => "url" },
+        },
+      ]
+    end
+
+    let(:attrs) do
+      {
+        id: "123",
+        "sources" => sources,
+      }
+    end
+
+    let(:authoritative_source) do
+      {
+        "status" => "identical",
+        "origin" => {
+          "ref" => "new url",
+        },
+      }
+    end
+
+    it "should add to sources hash" do
+
+      expect { subject.authoritative_source = [authoritative_source] }
+        .to change { subject.sources.map(&:to_h) }
+        .from(sources)
+        .to(sources + [authoritative_source.merge("type" => "authoritative")])
     end
   end
 end

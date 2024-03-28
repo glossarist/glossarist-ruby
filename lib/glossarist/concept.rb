@@ -90,7 +90,6 @@ module Glossarist
     #   removed.
     # @return [Array<ConceptSource>]
     attr_reader :sources
-    alias :authoritative_source :sources
 
     # return [Array<ConceptDate>]
     attr_reader :dates
@@ -132,9 +131,13 @@ module Glossarist
       sources&.each { |source| @sources << source }
     end
 
+    def authoritative_source
+      @sources.select { |source| source.authoritative? }
+    end
+
     def authoritative_source=(sources)
-      self.sources = sources&.map do |source|
-        source.merge({ "type" => "authoritative" })
+      sources&.each do |source|
+        @sources << source.merge({ "type" => "authoritative" })
       end
     end
 
@@ -205,6 +208,7 @@ module Glossarist
         data = arg.delete("data")
 
         arg.merge!(data) if data
+        arg.delete("authoritative_source") if arg["sources"]
       end
     end
   end
