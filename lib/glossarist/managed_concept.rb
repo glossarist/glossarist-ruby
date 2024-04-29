@@ -80,14 +80,16 @@ module Glossarist
       if localized_concepts.is_a?(Hash)
         @localized_concepts = stringify_keys(localized_concepts)
       else
-        localized_concepts.each do |localized_concept|
-          lang = localized_concept["language_code"].to_s
+        localized_concepts.each do |localized_concept_hash|
+          lang = localized_concept_hash["language_code"].to_s
 
-          @localized_concepts[lang] = Glossarist::Utilities::UUID.uuid_v5(@uuid_namespace, localized_concept.to_h.to_yaml)
-
-          add_localization(
-            @localized_concept_class.new(localized_concept["data"] || localized_concept),
+          localized_concept = add_localization(
+            @localized_concept_class.new(localized_concept_hash["data"] || localized_concept_hash),
           )
+
+          @localized_concepts[lang] = localization(lang).uuid
+
+          localized_concept
         end
       end
     end

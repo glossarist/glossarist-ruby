@@ -182,6 +182,12 @@ RSpec.describe Glossarist::ManagedConcept do
 
       expect(subject.localized_concepts).to be_a(Hash)
     end
+
+    it "should have same uuid in localized concept hash and the localized concept" do
+      subject.localized_concepts = localized_concepts_hash
+
+      expect(subject.localization("eng").uuid).to eq(subject.localized_concepts["eng"])
+    end
   end
 
   describe "#localizations=" do
