@@ -69,12 +69,12 @@ module Glossarist
     def uuid
       @uuid ||= Glossarist::Utilities::UUID.uuid_v5(
         Glossarist::Utilities::UUID::OID_NAMESPACE,
-        to_h.to_yaml,
+        to_h_no_uuid.to_yaml,
       )
     end
 
     def id=(id)
-      # Some of the glossaries that are not generated using glossarist, contains ids that are integers 
+      # Some of the glossaries that are not generated using glossarist, contains ids that are integers
       # so adding a temporary check until every glossary is updated using glossarist.
       if !id.nil? && (id.is_a?(String) || id.is_a?(Integer))
         @id = id
@@ -82,6 +82,7 @@ module Glossarist
         raise(Glossarist::Error, "Expect id to be a String or Integer, Got #{id.class} (#{id})")
       end
     end
+
     alias :termid= :id=
     alias :identifier= :id=
 
@@ -119,6 +120,7 @@ module Glossarist
     def preferred_designations
       @designations.select(&:preferred?)
     end
+
     alias :preferred_terms :preferred_designations
 
     def dates=(dates)
@@ -141,7 +143,7 @@ module Glossarist
       end
     end
 
-    def to_h
+    def to_h_no_uuid
       {
         "data" => {
           "dates" => dates&.map(&:to_h),
@@ -154,8 +156,13 @@ module Glossarist
           "sources" => sources.empty? ? nil : sources&.map(&:to_h),
           "terms" => (terms&.map(&:to_h) || []),
           "related" => related&.map(&:to_h),
+          "domain" => domain,
         }.compact,
       }.compact
+    end
+
+    def to_h
+      to_h_no_uuid.merge("id" => uuid)
     end
 
     # @deprecated For legacy reasons only.

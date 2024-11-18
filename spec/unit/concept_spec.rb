@@ -9,13 +9,11 @@ RSpec.describe Glossarist::Concept do
   let(:attrs) { { id: "123" } }
 
   it "accepts strings as ids" do
-    expect { subject.id = "456" }
-      .to change { subject.id }.to("456")
+    expect { subject.id = "456" }.to change { subject.id }.to("456")
   end
 
   it "accepts integers as ids" do
-    expect { subject.id = 456 }
-      .to change { subject.id }.to(456)
+    expect { subject.id = 456 }.to change { subject.id }.to(456)
   end
 
   describe "#to_h" do
@@ -27,27 +25,26 @@ RSpec.describe Glossarist::Concept do
             content: "Test content",
             type: :supersedes,
           },
-        ]
+        ],
       )
 
       retval = object.to_h["data"]
       expect(retval).to be_kind_of(Hash)
       expect(retval["id"]).to eq("123")
-      expect(retval["related"]).to eq([{"content"=>"Test content", "type"=>"supersedes"}])
+      expect(retval["related"]).to eq([{ "content" => "Test content", "type" => "supersedes" }])
     end
   end
 
   describe "::new" do
     it "accepts a hash of attributes" do
-      expect { described_class.new(attrs) }
-        .not_to raise_error
+      expect { described_class.new(attrs) }.not_to raise_error
     end
 
     it "generates a uuid if not given" do
       concept = described_class.new(attrs)
       uuid = Glossarist::Utilities::UUID.uuid_v5(
         Glossarist::Utilities::UUID::OID_NAMESPACE,
-        concept.to_h.to_yaml
+        concept.to_h_no_uuid.to_yaml
       )
 
       expect(concept.uuid).to eq(uuid)
@@ -132,7 +129,7 @@ RSpec.describe Glossarist::Concept do
             "type" => "authoritative",
             "status" => "identical",
             "origin" => { "text" => "url" },
-          }
+          },
         ],
         "related" => [
           {
@@ -191,8 +188,7 @@ RSpec.describe Glossarist::Concept do
     end
 
     it "should return only authoritative_sources" do
-      expect(subject.authoritative_source.map(&:to_h))
-        .to eq(authoritative_source)
+      expect(subject.authoritative_source.map(&:to_h)).to eq(authoritative_source)
     end
   end
 
@@ -229,11 +225,9 @@ RSpec.describe Glossarist::Concept do
     end
 
     it "should add to sources hash" do
-
-      expect { subject.authoritative_source = [authoritative_source] }
-        .to change { subject.sources.map(&:to_h) }
-        .from(sources)
-        .to(sources + [authoritative_source.merge("type" => "authoritative")])
+      expect { subject.authoritative_source = [authoritative_source] }.to change { subject.sources.map(&:to_h) }
+          .from(sources)
+          .to(sources + [authoritative_source.merge("type" => "authoritative")])
     end
   end
 end
