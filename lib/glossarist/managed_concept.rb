@@ -57,7 +57,7 @@ module Glossarist
     end
 
     def uuid
-      @uuid ||= Glossarist::Utilities::UUID.uuid_v5(@uuid_namespace, to_h.to_yaml)
+      @uuid ||= Glossarist::Utilities::UUID.uuid_v5(@uuid_namespace, to_h_no_uuid.to_yaml)
     end
 
     def related=(related)
@@ -141,7 +141,7 @@ module Glossarist
 
     alias :l10n :localization
 
-    def to_h
+    def to_h_no_uuid
       {
         "data" => {
           "identifier" => id,
@@ -149,7 +149,14 @@ module Glossarist
           "groups" => groups,
           "sources" => sources&.map(&:to_h),
         }.compact,
+        "related" => related&.map(&:to_h),
+        "date_accepted" => date_accepted&.date,
+        "status" => status,
       }.compact
+    end
+
+    def to_h
+      to_h_no_uuid.merge("id" => uuid)
     end
 
     def default_designation
@@ -178,6 +185,7 @@ module Glossarist
     end
 
     def date_accepted
+      return nil unless @dates
       @dates.find { |date| date.accepted? }
     end
 
