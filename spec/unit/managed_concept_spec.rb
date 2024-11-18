@@ -119,6 +119,8 @@ RSpec.describe Glossarist::ManagedConcept do
             "bar",
           ],
         },
+        "id" => "ebb21fa2-87a9-5895-84f6-37f022f4f550",
+        "status" => "valid",
       }
     end
 

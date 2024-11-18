@@ -26,7 +26,12 @@ RSpec.describe Glossarist::ManagedConceptCollection do
       managed_concept_collection.store(Glossarist::ManagedConcept.new("data" => { id: "id" }))
 
       expect(managed_concept_collection.to_h).to eq(
-        "managed_concepts" => [{ "data" => { "identifier" => "id" } }],
+        "managed_concepts" => [
+          {
+            "data" => { "identifier" => "id" },
+            "id" => "f05ee7c5-ba30-5162-9a63-0831726ca83e",
+          },
+        ],
       )
     end
   end
@@ -50,7 +55,7 @@ RSpec.describe Glossarist::ManagedConceptCollection do
 
     it "fetches a managed concept by uuid" do
       managed_concept_collection.store(managed_concept)
-      uuid = Glossarist::Utilities::UUID.uuid_v5(Glossarist::Utilities::UUID::OID_NAMESPACE, managed_concept.to_h.to_yaml)
+      uuid = Glossarist::Utilities::UUID.uuid_v5(Glossarist::Utilities::UUID::OID_NAMESPACE, managed_concept.to_h_no_uuid.to_yaml)
 
       expect(managed_concept_collection.fetch(uuid)).to eq(managed_concept)
     end
@@ -61,7 +66,7 @@ RSpec.describe Glossarist::ManagedConceptCollection do
 
     it "returns a managed concept by uuid" do
       managed_concept_collection.store(managed_concept)
-      uuid = Glossarist::Utilities::UUID.uuid_v5(Glossarist::Utilities::UUID::OID_NAMESPACE, managed_concept.to_h.to_yaml)
+      uuid = Glossarist::Utilities::UUID.uuid_v5(Glossarist::Utilities::UUID::OID_NAMESPACE, managed_concept.to_h_no_uuid.to_yaml)
 
       expect(managed_concept_collection[uuid]).to eq(managed_concept)
     end
