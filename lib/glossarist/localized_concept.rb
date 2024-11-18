@@ -27,11 +27,11 @@ module Glossarist
     # Temporary fields
     # @todo Need to remove these once the isotc211-glossary is fixed
     attr_accessor *%i[
-      review_date
-      review_decision_date
-      review_decision_event
-      review_type
-    ]
+                    review_date
+                    review_decision_date
+                    review_decision_event
+                    review_type
+                  ]
 
     def language_code=(language_code)
       if language_code.is_a?(String) && language_code.length == 3
@@ -41,11 +41,10 @@ module Glossarist
       end
     end
 
-    def to_h # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
+    def to_h_no_uuid # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
       hash = super
 
       hash["data"].merge!({
-        "domain" => domain,
         "language_code" => language_code,
         "entry_status" => entry_status,
         "sources" => sources.empty? ? nil : sources&.map(&:to_h),
@@ -63,7 +62,7 @@ module Glossarist
       terms = hash["terms"]&.map { |h| Designation::Base.from_h(h) } || []
       sources = hash["authoritative_source"]&.each { |source| source.merge({ "type" => "authoritative" }) }
 
-      super(hash.merge({"terms" => terms, "sources" => sources}))
+      super(hash.merge({ "terms" => terms, "sources" => sources }))
     end
 
     # @deprecated For legacy reasons only.

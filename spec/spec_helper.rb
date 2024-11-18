@@ -4,6 +4,7 @@
 #
 
 require "glossarist"
+require "tmpdir"
 
 Bundler.require(:development)
 

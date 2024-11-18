@@ -17,7 +17,7 @@ RSpec.describe "Serialization and deserialization" do
         localized_concept_path = File.join(localized_concepts_folder, "#{id}.yaml")
         localized_concept = load_yaml_file(localized_concept_path)
 
-        expect(localized_concept["data"]).to eq(concept.localizations[lang].to_h["data"])
+        expect(localized_concept["data"]).to eq(concept.localizations[lang].to_h_no_uuid["data"])
       end
     end
 
