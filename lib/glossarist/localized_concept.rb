@@ -16,6 +16,7 @@ module Glossarist
     # @note Works with strings, but soon they may be replaced with symbols.
     # @return [String]
     attr_accessor :entry_status
+    alias_method :status=, :entry_status=
 
     # Must be one of the following:
     # +preferred+, +admitted+, +deprecated+.
