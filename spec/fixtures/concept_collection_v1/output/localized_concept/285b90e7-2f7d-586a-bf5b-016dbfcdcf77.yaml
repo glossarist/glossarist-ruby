@@ -2,19 +2,20 @@
 data:
   dates: []
   definition:
-  - content: "{{biological_entity}} that is a human being"
+  - content: "{{material entity}} that was or is a living organism"
   examples: []
   notes: []
   sources:
   - origin:
       ref: ISO/TS 14812:2022
-      clause: 3.1.1.6
+      clause: 3.1.1.5
       link: https://www.iso.org/standard/79779.html
     type: authoritative
   terms:
   - type: expression
     normative_status: preferred
-    designation: person
+    designation: biological_entity
   language_code: eng
   entry_status: valid
-id: 9c15f53f-b4b1-5e29-b27b-e971fbe85740
+status: valid
+id: 285b90e7-2f7d-586a-bf5b-016dbfcdcf77

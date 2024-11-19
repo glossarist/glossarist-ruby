@@ -1,9 +1,0 @@
----
-data:
-  identifier: 3.1.1.1
-  localized_concepts:
-    eng: cb3f57c3-f67f-56b8-a0d2-4d16349ed89b
-  groups:
-  - foo
-  - bar
-id: a83fbbf6-da2a-53b6-877a-6c47cb460448
