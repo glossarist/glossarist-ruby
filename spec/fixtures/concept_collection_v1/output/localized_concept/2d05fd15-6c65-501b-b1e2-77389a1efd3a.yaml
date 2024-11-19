@@ -1,7 +1,7 @@
 ---
 data:
   dates:
-  - date: 2008-11-15 00:00:00.000000000 +08:00
+  - date: &1 2008-11-15 00:00:00.000000000 +08:00
     type: accepted
   definition:
   - content: concrete or abstract thing that exists, did exist, or can possibly exist,
@@ -21,4 +21,6 @@ data:
     designation: entity
   language_code: eng
   entry_status: valid
-id: cb3f57c3-f67f-56b8-a0d2-4d16349ed89b
+date_accepted: *1
+status: valid
+id: 2d05fd15-6c65-501b-b1e2-77389a1efd3a

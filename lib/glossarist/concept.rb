@@ -143,6 +143,21 @@ module Glossarist
       end
     end
 
+    def date_accepted=(date)
+      date_hash = {
+        "type" => "accepted",
+        "date" => date,
+      }
+
+      @dates ||= []
+      @dates << ConceptDate.new(date_hash)
+    end
+
+    def date_accepted
+      return nil unless @dates
+      @dates.find { |date| date.accepted? }
+    end
+
     def to_h_no_uuid
       {
         "data" => {
@@ -158,6 +173,9 @@ module Glossarist
           "related" => related&.map(&:to_h),
           "domain" => domain,
         }.compact,
+
+        "date_accepted" => date_accepted&.date,
+
       }.compact
     end
 

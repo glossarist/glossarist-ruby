@@ -55,6 +55,8 @@ module Glossarist
         "review_decision_event" => review_decision_event,
       }.compact).merge!(@extension_attributes)
 
+      hash["status"] = entry_status if entry_status
+
       hash
     end
 
