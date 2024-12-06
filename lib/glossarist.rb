@@ -7,8 +7,6 @@ require "psych"
 require "thor"
 require "lutaml/model"
 
-require_relative "glossarist/lutaml_models"
-
 require_relative "glossarist/utilities"
 require_relative "glossarist/version"
 require_relative "glossarist/glossary_definition"
@@ -35,6 +33,8 @@ require_relative "glossarist/collections"
 
 require_relative "glossarist/config"
 require_relative "glossarist/error"
+
+require_relative "glossarist/lutaml_models"
 
 module Glossarist
   def self.configure

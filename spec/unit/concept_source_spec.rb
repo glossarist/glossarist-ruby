@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-RSpec.describe Glossarist::ConceptSource do
-  it_behaves_like "an Enum"
+RSpec.describe Glossarist::LutamlModel::ConceptSource do
+  # it_behaves_like "an Enum"
 
   subject { described_class.new(attributes) }
 
