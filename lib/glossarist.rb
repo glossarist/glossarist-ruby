@@ -5,6 +5,9 @@
 
 require "psych"
 require "thor"
+require "lutaml/model"
+
+require_relative "glossarist/lutaml_models"
 
 require_relative "glossarist/utilities"
 require_relative "glossarist/version"

@@ -3,7 +3,7 @@
 # (c) Copyright 2021 Ribose Inc.
 #
 
-RSpec.describe Glossarist::Citation do
+RSpec.describe Glossarist::LutamlModel::Citation do
   subject { described_class.new attrs }
 
   let(:attrs) { { text: "Citation" } }
@@ -108,10 +108,11 @@ RSpec.describe Glossarist::Citation do
         "clause" => "12.3",
         "link" => "https://example.com",
         "original" => "original ref text",
-      }
+      }.to_yaml
 
-      retval = described_class.from_h(src)
-      expect(retval).to be_kind_of(Glossarist::Citation)
+      retval = described_class.from_yaml(src)
+
+      expect(retval).to be_kind_of(Glossarist::LutamlModel::Citation)
       expect(retval.text).to eq("Citation")
       expect(retval.clause).to eq("12.3")
       expect(retval.link).to eq("https://example.com")
@@ -127,10 +128,11 @@ RSpec.describe Glossarist::Citation do
         "clause" => "12.3",
         "link" => "https://example.com",
         "original" => "original ref text",
-      }
+      }.to_yaml
 
-      retval = described_class.from_h(src)
-      expect(retval).to be_kind_of(Glossarist::Citation)
+      retval = described_class.from_yaml(src)
+require "pry"; binding.pry
+      expect(retval).to be_kind_of(Glossarist::LutamlModel::Citation)
       expect(retval.source).to eq("Example source")
       expect(retval.id).to eq("12345")
       expect(retval.version).to eq("2020")
