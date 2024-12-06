@@ -72,7 +72,7 @@ RSpec.describe Glossarist::LutamlModel::Citation do
         original: "original ref text",
       })
 
-      retval = subject.to_h
+      retval = YAML.load(subject.to_yaml)
       expect(retval).to be_kind_of(Hash)
       expect(retval["ref"]).to eq("Example ref")
       expect(retval["clause"]).to eq("12.3")
@@ -90,7 +90,8 @@ RSpec.describe Glossarist::LutamlModel::Citation do
         original: "original ref text",
       })
 
-      retval = subject.to_h
+      retval = YAML.load(subject.to_yaml)
+
       expect(retval).to be_kind_of(Hash)
       expect(retval["ref"]["source"]).to eq("Example source")
       expect(retval["ref"]["id"]).to eq("12345")
@@ -131,7 +132,7 @@ RSpec.describe Glossarist::LutamlModel::Citation do
       }.to_yaml
 
       retval = described_class.from_yaml(src)
-require "pry"; binding.pry
+
       expect(retval).to be_kind_of(Glossarist::LutamlModel::Citation)
       expect(retval.source).to eq("Example source")
       expect(retval.id).to eq("12345")

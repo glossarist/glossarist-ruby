@@ -57,24 +57,24 @@ module Glossarist
                      end
       end
 
-      def id_from_hash(_model, _value)
-        # skip, will be handled in ref
+      def id_from_hash(model, value)
+        model.id = value
       end
 
       def id_to_hash(_model, _doc)
         # skip, will be handled in ref
       end
 
-      def source_from_hash(_model, _value)
-        # skip, will be handled in ref
+      def source_from_hash(model, value)
+        model.source = value
       end
 
       def source_to_hash(_model, _doc)
         # skip, will be handled in ref
       end
 
-      def version_from_hash(_model, _value)
-        # skip, will be handled in ref
+      def version_from_hash(model, value)
+        model.version = value
       end
 
       def version_to_hash(_model, _doc)
