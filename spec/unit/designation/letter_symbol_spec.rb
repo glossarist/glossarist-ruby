@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-RSpec.describe Glossarist::Designation::LetterSymbol do
-  subject { described_class.from_h(attributes) }
+RSpec.describe Glossarist::LutamlModel::Designation::LetterSymbol do
+  subject { described_class.from_yaml(attributes) }
 
   let(:attributes) do
     {
@@ -11,12 +11,12 @@ RSpec.describe Glossarist::Designation::LetterSymbol do
       "text" => "A",
       "language" => "en",
       "script" => "Latn",
-    }
+    }.to_yaml
   end
 
-  describe "#to_h" do
-    it "will convert letter symbol to hash" do
-      expected_hash = {
+  describe "#to_yaml" do
+    it "will convert letter symbol to yaml" do
+      expected_yaml = {
         "type" => "letter_symbol",
         "designation" => "A",
         "international" => true,
@@ -25,7 +25,7 @@ RSpec.describe Glossarist::Designation::LetterSymbol do
         "script" => "Latn",
       }
 
-      expect(subject.to_h).to eq(expected_hash)
+      expect(YAML.load(subject.to_yaml)).to eq(expected_yaml)
     end
   end
 end

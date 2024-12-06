@@ -3,7 +3,7 @@
 # (c) Copyright 2021 Ribose Inc.
 #
 
-RSpec.describe Glossarist::Collection do
+RSpec.describe Glossarist::LutamlModel::Collection do
   let(:collection_index) { subject.instance_variable_get "@index" }
 
   let(:concept1234) { double("concept 1234", id: "1234") }
@@ -45,7 +45,7 @@ RSpec.describe Glossarist::Collection do
           .to change { collection_index.size }.by(1)
           .and change { collection_index["7890"] }
 
-        expect(collection_index["7890"]).to be_kind_of(Glossarist::Concept)
+        expect(collection_index["7890"]).to be_kind_of(Glossarist::LutamlModel::Concept)
       end
 
       it "returns newly added concept" do
@@ -101,10 +101,10 @@ RSpec.describe Glossarist::Collection do
       allow(File).to receive(:read).with("path1").and_return("data: 1")
       allow(File).to receive(:read).with("path2").and_return("data: 2")
 
-      expect(Glossarist::Concept)
-        .to receive(:from_h).with({ "data" => 1 }).and_return(double(id: 1))
-      expect(Glossarist::Concept)
-        .to receive(:from_h).with({ "data" => 2 }).and_return(double(id: 2))
+      expect(Glossarist::LutamlModel::Concept)
+        .to receive(:from_yaml).with("data: 1").and_return(double(id: 1))
+      expect(Glossarist::LutamlModel::Concept)
+        .to receive(:from_yaml).with("data: 2").and_return(double(id: 2))
 
       expect { subject.load_concepts }.to change { collection_index.size }.by(2)
     end

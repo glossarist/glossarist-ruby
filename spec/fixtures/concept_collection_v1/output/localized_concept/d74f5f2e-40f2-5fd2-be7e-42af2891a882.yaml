@@ -2,20 +2,21 @@
 data:
   dates: []
   definition:
-  - content: "{{biological_entity}} that is a human being"
-  examples: []
+  - content: "{{entity}} that does not occupy three-dimensional space"
+  examples:
+  - content: Idea, process, organization, etc.
   notes: []
   sources:
   - origin:
       ref: ISO/TS 14812:2022
-      clause: 3.1.1.6
+      clause: 3.1.1.2
       link: https://www.iso.org/standard/79779.html
     type: authoritative
   terms:
   - type: expression
     normative_status: preferred
-    designation: person
+    designation: immaterial_entity
   language_code: eng
   entry_status: valid
+id: d74f5f2e-40f2-5fd2-be7e-42af2891a882
 status: valid
-id: b69609eb-0b27-50bf-86a0-634409e25872

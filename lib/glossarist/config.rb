@@ -7,8 +7,8 @@ module Glossarist
     include Singleton
 
     DEFAULT_CLASSES = {
-      localized_concept: Glossarist::LocalizedConcept,
-      managed_concept: Glossarist::ManagedConcept,
+      localized_concept: Glossarist::LutamlModel::LocalizedConcept,
+      managed_concept: Glossarist::LutamlModel::ManagedConcept,
     }.freeze
 
     attr_reader :registered_classes

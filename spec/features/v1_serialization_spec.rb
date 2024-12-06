@@ -4,7 +4,7 @@ RSpec.describe "Serialization and deserialization" do
   let(:concept_files) { Dir.glob(File.join(fixtures_path(output_folder), "concept-*.{yaml,yml}")) }
 
   it "correctly loads concepts from files" do
-    collection = Glossarist::ManagedConceptCollection.new
+    collection = Glossarist::LutamlModel::ManagedConceptCollection.new
     collection.load_from_files(fixtures_path(concept_folder))
 
     concept_files.each do |filename|

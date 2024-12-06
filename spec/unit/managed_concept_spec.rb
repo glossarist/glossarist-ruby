@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-RSpec.describe Glossarist::ManagedConcept do
-  subject { described_class.new(concept) }
+RSpec.describe Glossarist::LutamlModel::ManagedConcept do
+  subject { described_class.from_yaml(concept.to_yaml) }
 
   let(:concept) do
     {
@@ -68,7 +68,7 @@ RSpec.describe Glossarist::ManagedConcept do
       subject.dates = [{ "type" => "accepted", "date" => "2020-01-01" }]
 
       expect(subject.dates.first.type).to eq("accepted")
-      expect(subject.dates.first.date).to eq("2020-01-01")
+      expect(subject.dates.first.date).to eq(Date.parse("2020-01-01"))
     end
   end
 
@@ -106,7 +106,7 @@ RSpec.describe Glossarist::ManagedConcept do
     end
   end
 
-  describe "#to_h" do
+  describe "#to_yaml" do
     let(:expected_concept_hash) do
       {
         "data" => {
@@ -124,8 +124,8 @@ RSpec.describe Glossarist::ManagedConcept do
       }
     end
 
-    it "dumps concept definition to a hash" do
-      retval = subject.to_h
+    it "dumps concept definition to a yaml" do
+      retval = YAML.load(subject.to_yaml)
 
       expect(retval).to be_kind_of(Hash)
       expect(retval).to eq(expected_concept_hash)
@@ -155,7 +155,7 @@ RSpec.describe Glossarist::ManagedConcept do
 
       expect(localizations).to be_kind_of(Hash)
       expect(data["terms"]).to eq([{ "type" => "expression", "designation" => "Arabic Designation" }])
-      expect(data["dates"]).to eq([{ "type" => "accepted", "date" => "2020-01-01" }])
+      expect(data["dates"]).to eq([{ "type" => "accepted", "date" => "2020-01-01T00:00:00+00:00" }])
     end
   end
 
@@ -217,7 +217,7 @@ RSpec.describe Glossarist::ManagedConcept do
       subject.localized_concepts = localizations_hash
 
       expect(subject.localizations).to be_a(Hash)
-      expect(subject.localizations["eng"]).to be_a(Glossarist::LocalizedConcept)
+      expect(subject.localizations["eng"]).to be_a(Glossarist::LutamlModel::LocalizedConcept)
       expect(subject.localizations["eng"].definition.first.content).to eq("this is very important")
       expect(subject.localizations["eng"].entry_status).to eq("valid")
     end
@@ -225,7 +225,7 @@ RSpec.describe Glossarist::ManagedConcept do
 
   describe "#default_designation" do
     it "returns first English designation when available" do
-      localized_concept = Glossarist::LocalizedConcept.new(
+      localized_concept = Glossarist::LutamlModel::LocalizedConcept.new(
         "language_code" => "eng",
         "terms" => [
           {

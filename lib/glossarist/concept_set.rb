@@ -48,9 +48,9 @@ module Glossarist
     end
 
     def read_concepts(concepts)
-      return concepts if concepts.is_a?(Glossarist::ManagedConceptCollection)
+      return concepts if concepts.is_a?(Glossarist::LutamlModel::ManagedConceptCollection)
 
-      collection = Glossarist::ManagedConceptCollection.new
+      collection = Glossarist::LutamlModel::ManagedConceptCollection.new
       collection.load_from_files(concepts)
       collection
     end

@@ -38,6 +38,7 @@ module Glossarist
       concept_hash["uuid"] = concept_hash["id"] || File.basename(filename, ".*")
 
       concept = Config.class_for(:managed_concept).new(concept_hash)
+
       concept.localized_concepts.each do |_lang, id|
         localized_concept = load_localized_concept(id)
         concept.add_l10n(localized_concept)
@@ -55,7 +56,7 @@ module Glossarist
       )
       concept_hash["uuid"] = id
 
-      Config.class_for(:localized_concept).new(concept_hash)
+      Config.class_for(:localized_concept).of_yaml(concept_hash)
     rescue Psych::SyntaxError => e
       raise Glossarist::ParseError.new(filename: filename, line: e.line)
     end

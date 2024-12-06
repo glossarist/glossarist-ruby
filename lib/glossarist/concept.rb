@@ -49,6 +49,8 @@ module Glossarist
 
     attr_accessor :release
 
+    attr_accessor :localizations
+
     def initialize(*args)
       @localizations = {}
       @sources = Glossarist::Collections::Collection.new(klass: ConceptSource)
@@ -78,7 +80,7 @@ module Glossarist
       # so adding a temporary check until every glossary is updated using glossarist.
       if !id.nil? && (id.is_a?(String) || id.is_a?(Integer))
         @id = id
-      else
+      elsif !id.nil?
         raise(Glossarist::Error, "Expect id to be a String or Integer, Got #{id.class} (#{id})")
       end
     end

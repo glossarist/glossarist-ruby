@@ -3,10 +3,10 @@
 # (c) Copyright 2021 Ribose Inc.
 #
 
-RSpec.describe Glossarist::Citation do
-  subject { described_class.new attrs }
+RSpec.describe Glossarist::LutamlModel::Citation do
+  subject { described_class.from_yaml(attrs) }
 
-  let(:attrs) { { text: "Citation" } }
+  let(:attrs) { { text: "Citation" }.to_yaml }
 
   it "accepts strings as text" do
     expect { subject.text = "new one" }
@@ -70,9 +70,9 @@ RSpec.describe Glossarist::Citation do
         clause: "12.3",
         link: "https://example.com",
         original: "original ref text",
-      })
+    }.to_yaml)
 
-      retval = subject.to_h
+      retval = YAML.load(subject.to_yaml)
       expect(retval).to be_kind_of(Hash)
       expect(retval["ref"]).to eq("Example ref")
       expect(retval["clause"]).to eq("12.3")
@@ -88,9 +88,10 @@ RSpec.describe Glossarist::Citation do
         clause: "12.3",
         link: "https://example.com",
         original: "original ref text",
-      })
+    }.to_yaml)
 
-      retval = subject.to_h
+      retval = YAML.load(subject.to_yaml)
+
       expect(retval).to be_kind_of(Hash)
       expect(retval["ref"]["source"]).to eq("Example source")
       expect(retval["ref"]["id"]).to eq("12345")
@@ -108,10 +109,11 @@ RSpec.describe Glossarist::Citation do
         "clause" => "12.3",
         "link" => "https://example.com",
         "original" => "original ref text",
-      }
+      }.to_yaml
 
-      retval = described_class.from_h(src)
-      expect(retval).to be_kind_of(Glossarist::Citation)
+      retval = described_class.from_yaml(src)
+
+      expect(retval).to be_kind_of(Glossarist::LutamlModel::Citation)
       expect(retval.text).to eq("Citation")
       expect(retval.clause).to eq("12.3")
       expect(retval.link).to eq("https://example.com")
@@ -127,10 +129,11 @@ RSpec.describe Glossarist::Citation do
         "clause" => "12.3",
         "link" => "https://example.com",
         "original" => "original ref text",
-      }
+      }.to_yaml
 
-      retval = described_class.from_h(src)
-      expect(retval).to be_kind_of(Glossarist::Citation)
+      retval = described_class.from_yaml(src)
+
+      expect(retval).to be_kind_of(Glossarist::LutamlModel::Citation)
       expect(retval.source).to eq("Example source")
       expect(retval.id).to eq("12345")
       expect(retval.version).to eq("2020")

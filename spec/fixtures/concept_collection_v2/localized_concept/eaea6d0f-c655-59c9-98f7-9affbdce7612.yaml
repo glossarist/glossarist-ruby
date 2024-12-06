@@ -1,7 +1,7 @@
 ---
 data:
   dates:
-  - date: '2003-02-15T00:00:00.000Z'
+  - date: '2003-02-15T00:00:00+00:00'
     type: accepted
   definition:
   - content: vinkel mellem ækvitorialfladen og den vinkelrette på ellipsoiden gennem
@@ -26,5 +26,5 @@ data:
   - type: expression
     designation: geodætisk bredde
   language_code: dan
-date_accepted: '2003-02-15T00:00:00.000Z'
+date_accepted: '2003-02-15T00:00:00+00:00'
 id: eaea6d0f-c655-59c9-98f7-9affbdce7612

@@ -10,7 +10,7 @@ module Glossarist
 
     def load_concept_from_file(filename)
       concept_hash = Psych.safe_load(File.read(filename), permitted_classes: [Date, Time])
-      Config.class_for(:managed_concept).new(generate_v2_concept_hash(concept_hash))
+      Config.class_for(:managed_concept).of_yaml(generate_v2_concept_hash(concept_hash.dup).dup)
     end
 
     private
