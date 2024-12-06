@@ -46,15 +46,7 @@ module Glossarist
       end
 
       def ref_from_hash(model, value)
-        if value.is_a?(Hash)
-          model.source = value["source"]
-          model.id = value["id"]
-          model.version = value["version"]
-          model.ref = ref_hash(model)
-        else
-          model.text = value
-          model.ref = value
-        end
+        model.ref = value
       end
 
       def ref_to_hash(model, doc)
@@ -96,6 +88,16 @@ module Glossarist
           "id" => model.id,
           "version" => model.version
         }.compact
+      end
+
+      def ref=(ref)
+        if ref.is_a?(Hash)
+          @source = ref["source"]
+          @id = ref["id"]
+          @version = ref["version"]
+        else
+          @text = ref
+        end
       end
 
       def plain?
