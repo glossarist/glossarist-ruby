@@ -18,6 +18,7 @@ RSpec.describe Glossarist::LutamlModel::Collection do
     before { collection_index["1234"] = concept1234 }
 
     it "returns concept of given ID if it's present in the collection" do
+      binding.irb
       expect(subject.fetch("1234")).to be(concept1234)
     end
 

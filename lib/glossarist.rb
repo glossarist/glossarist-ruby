@@ -33,7 +33,6 @@ require_relative "glossarist/collections"
 
 require_relative "glossarist/config"
 require_relative "glossarist/error"
-
 require_relative "glossarist/lutaml_models"
 
 module Glossarist

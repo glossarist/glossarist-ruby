@@ -17,7 +17,7 @@ RSpec.describe Glossarist::LutamlModel::GraphicalSymbol do
       expected_yaml = <<~YAML
         ---
         type: graphical_symbol
-        international: 'true'
+        international: true
         text: king
         image: "♔"
       YAML

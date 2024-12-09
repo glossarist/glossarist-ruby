@@ -1,8 +1,10 @@
 module Glossarist
   module LutamlModel
     class Collection < Lutaml::Model::Serializable
+      include Enumerable
+
       attribute :path, :string
-      attribute :index, :string
+      attribute :index, :hash
       attribute :fetch, :string
       attribute :store, :string
 
@@ -53,7 +55,7 @@ module Glossarist
         filename = File.join(path, "concept-#{concept.id}.yaml")
         File.write(filename, Psych.dump(concept.to_h))
       end
-  
+
       def concepts_glob
         File.join(path, "concept-*.{yaml,yml}")
       end
