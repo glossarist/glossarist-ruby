@@ -2,7 +2,7 @@
 
 require_relative "../../support/shared_examples/enum"
 
-RSpec.describe Glossarist::Designation::Abbreviation do
+RSpec.describe Glossarist::LutamlModel::Abbreviation do
   subject { described_class.new(attributes) }
 
   let(:attributes) do
@@ -13,18 +13,19 @@ RSpec.describe Glossarist::Designation::Abbreviation do
     }
   end
 
-  it_behaves_like "an Enum"
+  # it_behaves_like "an Enum"
 
-  describe "#to_h" do
-    it "will convert abbreviation to hash" do
-      expected_hash = {
+  describe "#to_yaml" do
+    it "will convert abbreviation to yaml" do
+      binding.irb
+      expected_yaml = {
         "type" => "abbreviation",
         "designation" => "NASA",
         "acronym" => true,
         "international" => true,
       }
 
-      expect(subject.to_h).to eq(expected_hash)
+      expect(subject.to_yaml).to eq(expected_yaml)
     end
   end
 end

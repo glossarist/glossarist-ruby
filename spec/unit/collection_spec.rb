@@ -3,7 +3,7 @@
 # (c) Copyright 2021 Ribose Inc.
 #
 
-RSpec.describe Glossarist::Collection do
+RSpec.describe Glossarist::LutamlModel::Collection do
   let(:collection_index) { subject.instance_variable_get "@index" }
 
   let(:concept1234) { double("concept 1234", id: "1234") }
@@ -45,7 +45,7 @@ RSpec.describe Glossarist::Collection do
           .to change { collection_index.size }.by(1)
           .and change { collection_index["7890"] }
 
-        expect(collection_index["7890"]).to be_kind_of(Glossarist::Concept)
+        expect(collection_index["7890"]).to be_kind_of(Glossarist::LutamlModel::Concept)
       end
 
       it "returns newly added concept" do

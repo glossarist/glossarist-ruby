@@ -34,12 +34,12 @@ module Glossarist
       attribute :ref, :string
 
       yaml do
-        map :text, to: :text
         map :clause, to: :clause
         map :link, to: :link
         map :original, to: :original
 
         map :id, to: :id, with: { from: :id_from_hash, to: :id_to_hash }
+        map :text, to: :text, with: { from: :text_from_hash, to: :text_to_hash }
         map :source, to: :source, with: { from: :source_from_hash, to: :source_to_hash }
         map :version, to: :version, with: { from: :version_from_hash, to: :version_to_hash }
         map :ref, to: :ref, with: { from: :ref_from_hash, to: :ref_to_hash }
@@ -62,6 +62,14 @@ module Glossarist
       end
 
       def id_to_hash(_model, _doc)
+        # skip, will be handled in ref
+      end
+
+      def text_from_hash(model, value)
+        model.text = value
+      end
+
+      def text_to_hash(_model, _doc)
         # skip, will be handled in ref
       end
 

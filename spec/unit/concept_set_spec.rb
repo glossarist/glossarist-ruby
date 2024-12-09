@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Glossarist::ConceptSet do
+RSpec.describe Glossarist::LutamlModel::ConceptSet do
   subject do
     described_class.new(
       concepts,

@@ -3,7 +3,7 @@
 # (c) Copyright 2021 Ribose Inc.
 #
 
-RSpec.describe Glossarist::Concept do
+RSpec.describe Glossarist::LutamlModel::Concept do
   subject { described_class.new attrs }
 
   let(:attrs) { { id: "123" } }
@@ -80,7 +80,7 @@ RSpec.describe Glossarist::Concept do
       ]
       subject.related = related
 
-      expect(subject.related.first).to be_kind_of(Glossarist::RelatedConcept)
+      expect(subject.related.first).to be_kind_of(Glossarist::LutamlModel::RelatedConcept)
       expect(subject.related.first.to_h).to eq(expected_hash.first)
     end
 
@@ -147,7 +147,7 @@ RSpec.describe Glossarist::Concept do
 
       retval = described_class.from_h(src)
 
-      expect(retval).to be_kind_of(Glossarist::Concept)
+      expect(retval).to be_kind_of(Glossarist::LutamlModel::Concept)
       expect(retval.id).to eq("123-45")
       expect(retval.sources.size).to eq(1)
       expect(retval.sources.first.type).to eq("authoritative")

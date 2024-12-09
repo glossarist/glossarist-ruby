@@ -3,7 +3,7 @@
 # (c) Copyright 2021 Ribose Inc.
 #
 
-RSpec.describe Glossarist::Designation::Expression do
+RSpec.describe Glossarist::LutamlModel::Expression do
   subject { described_class.new attrs }
 
   let(:attrs) { { designation: "equality", normative_status: :preferred, grammar_info: [{}] } }
@@ -69,14 +69,14 @@ RSpec.describe Glossarist::Designation::Expression do
       }
 
       retval = described_class.from_h(src)
-      expect(retval).to be_kind_of(Glossarist::Designation::Expression)
+      expect(retval).to be_kind_of(Glossarist::LutamlModel::Expression)
       expect(retval.designation).to eq("Example Designation")
       expect(retval.normative_status).to eq("preferred")
     end
   end
 end
 
-RSpec.describe Glossarist::Designation::Symbol do
+RSpec.describe Glossarist::LutamlModel::Symbol do
   subject { described_class.new attrs }
 
   let(:attrs) { { designation: "sym", normative_status: :preferred } }
@@ -119,7 +119,7 @@ RSpec.describe Glossarist::Designation::Symbol do
       }
 
       retval = described_class.from_h(src)
-      expect(retval).to be_kind_of(Glossarist::Designation::Symbol)
+      expect(retval).to be_kind_of(Glossarist::LutamlModel::Symbol)
       expect(retval.designation).to eq("Example Symbol")
       expect(retval.normative_status).to eq("preferred")
     end

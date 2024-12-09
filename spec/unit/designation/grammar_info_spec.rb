@@ -3,7 +3,7 @@
 require_relative "../../support/shared_examples/enum"
 require_relative "../../support/shared_examples/boolean_attributes"
 
-RSpec.describe Glossarist::Designation::GrammarInfo do
+RSpec.describe Glossarist::LutamlModel::GrammarInfo do
   it_behaves_like "an Enum"
   it_behaves_like "having Boolean attributes", Glossarist::GlossaryDefinition::GRAMMAR_INFO_BOOLEAN_ATTRIBUTES
 

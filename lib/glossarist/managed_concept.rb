@@ -22,7 +22,7 @@ module Glossarist
     attr_reader :dates
 
     # return [Array<LocalizedConcept>]
-    attr_reader :localized_concepts
+    attr_reader :localized_concept
 
     # Concept group
     # @return [Array<String>]

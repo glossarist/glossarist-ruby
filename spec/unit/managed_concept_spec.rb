@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-RSpec.describe Glossarist::ManagedConcept do
-  subject { described_class.new(concept) }
+RSpec.describe Glossarist::LutamlModel::ManagedConcept do
+  subject { described_class.from_yaml(concept) }
 
   let(:concept) do
     {
@@ -17,7 +17,7 @@ RSpec.describe Glossarist::ManagedConcept do
         ],
         "status" => "valid",
       },
-    }
+    }.to_yaml
   end
 
   let(:localized_concept) do
@@ -37,7 +37,7 @@ RSpec.describe Glossarist::ManagedConcept do
           },
         ],
       },
-    }
+    }.to_yaml
   end
 
   describe "#id" do
@@ -217,7 +217,7 @@ RSpec.describe Glossarist::ManagedConcept do
       subject.localized_concepts = localizations_hash
 
       expect(subject.localizations).to be_a(Hash)
-      expect(subject.localizations["eng"]).to be_a(Glossarist::LocalizedConcept)
+      expect(subject.localizations["eng"]).to be_a(Glossarist::LutamlModel::LocalizedConcept)
       expect(subject.localizations["eng"].definition.first.content).to eq("this is very important")
       expect(subject.localizations["eng"].entry_status).to eq("valid")
     end
@@ -225,7 +225,7 @@ RSpec.describe Glossarist::ManagedConcept do
 
   describe "#default_designation" do
     it "returns first English designation when available" do
-      localized_concept = Glossarist::LocalizedConcept.new(
+      localized_concept = Glossarist::LutamlModel::LocalizedConcept.new(
         "language_code" => "eng",
         "terms" => [
           {

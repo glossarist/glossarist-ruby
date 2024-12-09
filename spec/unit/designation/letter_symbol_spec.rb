@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Glossarist::Designation::LetterSymbol do
+RSpec.describe Glossarist::LutamlModel::LetterSymbol do
   subject { described_class.from_h(attributes) }
 
   let(:attributes) do
