@@ -33,8 +33,9 @@ RSpec.describe Glossarist::LutamlModel::Expression do
       .to change { subject.grammar_info.first.adj }.to(true)
   end
 
-  describe "#to_h" do
+  describe "#to_yaml" do
     it "dumps designation to a hash" do
+
       attrs.replace({
         designation: "Example designation",
         normative_status: "preferred",
@@ -47,7 +48,8 @@ RSpec.describe Glossarist::LutamlModel::Expression do
         usage_info: "science",
       })
 
-      retval = subject.to_h
+      retval = YAML.load(subject.to_yaml)
+
       expect(retval).to be_kind_of(Hash)
       expect(retval["type"]).to eq("expression")
       expect(retval["designation"]).to eq("Example designation")
@@ -60,15 +62,16 @@ RSpec.describe Glossarist::LutamlModel::Expression do
     end
   end
 
-  describe "::from_h" do
+  describe "::from_yaml" do
     it "loads localized concept definition from a hash" do
       src = {
         "type" => "expression",
         "designation" => "Example Designation",
         "normative_status" => "preferred",
-      }
+    }.to_yaml
 
-      retval = described_class.from_h(src)
+      retval = described_class.from_yaml(src)
+
       expect(retval).to be_kind_of(Glossarist::LutamlModel::Expression)
       expect(retval.designation).to eq("Example Designation")
       expect(retval.normative_status).to eq("preferred")
@@ -91,7 +94,7 @@ RSpec.describe Glossarist::LutamlModel::Symbol do
       .to change { subject.normative_status }.to("admitted")
   end
 
-  describe "#to_h" do
+  describe "#to_yaml" do
     it "dumps designation to a hash" do
       attrs.replace({
         designation: "X",
@@ -100,7 +103,7 @@ RSpec.describe Glossarist::LutamlModel::Symbol do
         international: true,
       })
 
-      retval = subject.to_h
+      retval = YAML.load(subject.to_yaml)
       expect(retval).to be_kind_of(Hash)
       expect(retval["type"]).to eq("symbol")
       expect(retval["designation"]).to eq("X")
@@ -110,15 +113,15 @@ RSpec.describe Glossarist::LutamlModel::Symbol do
     end
   end
 
-  describe "::from_h" do
+  describe "::from_yaml" do
     it "loads localized concept definition from a hash" do
       src = {
         "type" => "symbol",
         "designation" => "Example Symbol",
         "normative_status" => "preferred",
-      }
+    }.to_yaml
 
-      retval = described_class.from_h(src)
+      retval = described_class.from_yaml(src)
       expect(retval).to be_kind_of(Glossarist::LutamlModel::Symbol)
       expect(retval.designation).to eq("Example Symbol")
       expect(retval.normative_status).to eq("preferred")

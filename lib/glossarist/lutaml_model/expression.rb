@@ -1,18 +1,18 @@
+require_relative "grammar_info"
+
 module Glossarist
   module LutamlModel
-    class Expression < Lutaml::Model::Serializable
+    class Expression < Base
       attribute :prefix, :string
       attribute :usage_info, :string
-      attribute :grammer_info, GrammerInfo
+      attribute :grammar_info, GrammarInfo
+      attribute :type, :string, default: -> { "expression" }
 
       yaml do
         map :prefix, to: :prefix
         map :usage_info, to: :usage_info
-        map :grammer_info, to: :grammer_info
-      end
-
-      def grammar_info=(grammar_info)
-        @grammar_info = grammar_info.map { |g| GrammarInfo.new(g) }
+        map :grammar_info, to: :grammar_info
+        map :type, to: :type, render_default: true
       end
     end
   end

@@ -17,7 +17,6 @@ RSpec.describe Glossarist::LutamlModel::Abbreviation do
 
   describe "#to_yaml" do
     it "will convert abbreviation to yaml" do
-      binding.irb
       expected_yaml = {
         "type" => "abbreviation",
         "designation" => "NASA",

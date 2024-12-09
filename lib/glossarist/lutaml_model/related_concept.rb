@@ -10,17 +10,16 @@ module Glossarist
       yaml do
         map :content, to: :content
         map :type, to: :type
-        map :ref, to: :ref
+        map :ref, to: :ref, with: { from: :ref_from_yaml, to: :ref_to_yaml }
       end
 
-      # def ref_to_yaml(model, doc)
-      #   binding.irb
-      #   doc
-      # end
+      def ref_to_yaml(model, doc)
+        doc["ref"] = model.ref
+      end
     
-      # def ref_from_yaml(model, value)
-      #   model.ref = value
-      # end
+      def ref_from_yaml(model, value)
+        model.ref = Citation.new(value).ref_hash
+      end
     end
   end
 end

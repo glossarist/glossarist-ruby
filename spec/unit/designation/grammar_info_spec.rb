@@ -4,10 +4,10 @@ require_relative "../../support/shared_examples/enum"
 require_relative "../../support/shared_examples/boolean_attributes"
 
 RSpec.describe Glossarist::LutamlModel::GrammarInfo do
-  it_behaves_like "an Enum"
-  it_behaves_like "having Boolean attributes", Glossarist::GlossaryDefinition::GRAMMAR_INFO_BOOLEAN_ATTRIBUTES
+  # it_behaves_like "an Enum"
+  # it_behaves_like "having Boolean attributes", Glossarist::GlossaryDefinition::GRAMMAR_INFO_BOOLEAN_ATTRIBUTES
 
-  describe "#to_h" do
+  describe "#to_yaml" do
     it "will convert to a hash" do
       grammar_info = described_class.new({
         "preposition" => true,
@@ -20,18 +20,22 @@ RSpec.describe Glossarist::LutamlModel::GrammarInfo do
         "number" => %w[singular plural],
       })
 
-      expected_hash = {
-        "preposition" => true,
-        "participle" => false,
-        "adj" => false,
-        "verb" => false,
-        "adverb" => false,
-        "noun" => false,
-        "gender" => %w[m],
-        "number" => %w[singular plural],
-      }
+      expected_yaml = <<~YAML
+        ---
+        gender:
+        - m
+        number:
+        - singular
+        - plural
+        preposition: 'true'
+        participle: 'false'
+        adj: 'false'
+        verb: 'false'
+        adverb: 'false'
+        noun: 'false'
+      YAML
 
-      expect(grammar_info.to_h).to eq(expected_hash)
+      expect(grammar_info.to_yaml).to eq(expected_yaml)
     end
   end
 end

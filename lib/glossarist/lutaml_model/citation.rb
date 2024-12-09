@@ -90,7 +90,7 @@ module Glossarist
       end
 
 
-      def ref_hash(model)
+      def ref_hash(model = self)
         {
           "source" => model.source,
           "id" => model.id,

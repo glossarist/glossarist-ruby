@@ -1,14 +1,12 @@
 module Glossarist
   module LutamlModel
-    class Symbol < Lutaml::Model::Serializable
-      attribute :international, :string
-      attribute :base, Base
-      attribute :type, :string, values: Glossarist::Designation::SERIALIZED_TYPES[self.class]
+    class Symbol < Base
+      attribute :international, :boolean
+      attribute :type, :string, default: -> { "symbol" }
 
       yaml do
         map :international, to: :international
-        map :base, to: :base
-        map :type, to: :type
+        map :type, to: :type, render_default: true
       end
     end
   end

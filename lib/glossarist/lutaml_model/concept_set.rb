@@ -2,12 +2,8 @@ module Glossarist
   module LutamlModel
     class ConceptSet < Lutaml::Model::Serializable
       attribute :concepts, :string
-      attribute :bibliographies, :string, values: Glossarist::Collections::BibliographyCollection.new(
-        @concepts,
-        options.dig(:bibliography, :global_cache),
-        options.dig(:bibliography, :local_cache),
-      )
-      attribute :assets, :string, values: Glossarist::Collections::AssetCollection.new(assets)
+      attribute :bibliographies, :string
+      attribute :assets, :string
       attribute :options, :hash
 
       yaml do

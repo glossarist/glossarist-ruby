@@ -1,3 +1,5 @@
+require_relative "localized_concept"
+
 module Glossarist
   module LutamlModel
     class ManagedConcept < Lutaml::Model::Serializable
@@ -12,8 +14,8 @@ module Glossarist
       attribute :localizations, :hash
       attribute :localization, :string
       attribute :add_localization, :string
-      attribute :localized_concept_class, LocalizedConcept
-      attribute :uuid_namespace, :string, values: Glossarist::Utilities::UUID::OID_NAMESPACE
+      # attribute :localized_concept_class, LocalizedConcept
+      # attribute :uuid_namespace, :string, values: Glossarist::Utilities::UUID::OID_NAMESPACE
       attribute :attributes, :hash
       attribute :data, :hash
 
@@ -34,7 +36,7 @@ module Glossarist
         map :localizations, to: :localizations
         map :localization, to: :localization
         map :add_localization, to: :add_localization
-        map :localized_concept_class, :localized_concept_class
+        # map :localized_concept_class, :localized_concept_class
         map :uuid_namespace, to: :uuid_namespace
         map :attributes, to: :attributes
         map :data, to: :data
