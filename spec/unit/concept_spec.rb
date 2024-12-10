@@ -4,9 +4,9 @@
 #
 
 RSpec.describe Glossarist::LutamlModel::Concept do
-  subject { described_class.new attrs }
+  subject { described_class.from_yaml(attrs) }
 
-  let(:attrs) { { id: "123" } }
+  let(:attrs) { { id: "123" }.to_yaml }
 
   it "accepts strings as ids" do
     expect { subject.id = "456" }.to change { subject.id }.to("456")
@@ -16,8 +16,9 @@ RSpec.describe Glossarist::LutamlModel::Concept do
     expect { subject.id = 456 }.to change { subject.id }.to(456)
   end
 
-  describe "#to_h" do
+  describe "#to_yaml" do
     it "dumps concept definition to a hash" do
+      # binding.irb
       object = described_class.new(
         id: "123",
         related: [
@@ -28,7 +29,8 @@ RSpec.describe Glossarist::LutamlModel::Concept do
         ],
       )
 
-      retval = object.to_h["data"]
+      retval = YAML.load(object.to_yaml)["data"]
+
       expect(retval).to be_kind_of(Hash)
       expect(retval["id"]).to eq("123")
       expect(retval["related"]).to eq([{ "content" => "Test content", "type" => "supersedes" }])
@@ -37,21 +39,22 @@ RSpec.describe Glossarist::LutamlModel::Concept do
 
   describe "::new" do
     it "accepts a hash of attributes" do
-      expect { described_class.new(attrs) }.not_to raise_error
+      expect { described_class.new(YAML.load(attrs)) }.not_to raise_error
     end
 
     it "generates a uuid if not given" do
-      concept = described_class.new(attrs)
+      concept = described_class.new(YAML.load(attrs))
+
       uuid = Glossarist::Utilities::UUID.uuid_v5(
         Glossarist::Utilities::UUID::OID_NAMESPACE,
-        concept.to_h_no_uuid.to_yaml
+        concept.to_yaml
       )
 
       expect(concept.uuid).to eq(uuid)
     end
 
     it "assign a uuid if given" do
-      concept = described_class.new(attrs.merge("uuid" => "abc"))
+      concept = described_class.new(YAML.load(attrs).merge("uuid" => "abc"))
 
       expect(concept.uuid).to eq("abc")
     end
@@ -66,7 +69,7 @@ RSpec.describe Glossarist::LutamlModel::Concept do
             "version" => "7",
           },
         },
-      ]
+      ].to_yaml
 
       expected_hash = [
         {
@@ -81,7 +84,7 @@ RSpec.describe Glossarist::LutamlModel::Concept do
       subject.related = related
 
       expect(subject.related.first).to be_kind_of(Glossarist::LutamlModel::RelatedConcept)
-      expect(subject.related.first.to_h).to eq(expected_hash.first)
+      expect(YAML.load(subject.related.first.to_yaml)).to eq(expected_hash.first)
     end
 
     describe "when authoritative_source and source both present" do
@@ -114,12 +117,12 @@ RSpec.describe Glossarist::LutamlModel::Concept do
       end
 
       it "should skip authoritative_source" do
-        expect(subject.sources.map(&:to_h)).to eq(sources)
+        expect(subject.sources.map(&:to_yaml)).to eq(sources)
       end
     end
   end
 
-  describe "::from_h" do
+  describe "::from_yaml" do
     it "loads concept definition from a hash" do
       src = {
         "termid" => "123-45",
@@ -143,16 +146,16 @@ RSpec.describe Glossarist::LutamlModel::Concept do
         ],
         "eng" => { "some" => "English translation" },
         "deu" => { "some" => "German translation" },
-      }
-
-      retval = described_class.from_h(src)
+      }.to_yaml
+      # binding.irb
+      retval = described_class.from_yaml(src)
 
       expect(retval).to be_kind_of(Glossarist::LutamlModel::Concept)
       expect(retval.id).to eq("123-45")
       expect(retval.sources.size).to eq(1)
       expect(retval.sources.first.type).to eq("authoritative")
       expect(retval.sources.first.status).to eq("identical")
-      expect(retval.sources.first.origin.to_h).to eq({ "ref" => "url" })
+      expect(retval.sources.first.origin.to_yaml).to eq({ "ref" => "url" })
     end
   end
 
@@ -188,7 +191,7 @@ RSpec.describe Glossarist::LutamlModel::Concept do
     end
 
     it "should return only authoritative_sources" do
-      expect(subject.authoritative_source.map(&:to_h)).to eq(authoritative_source)
+      expect(subject.authoritative_source.map(&:to_yaml)).to eq(authoritative_source)
     end
   end
 
@@ -225,7 +228,7 @@ RSpec.describe Glossarist::LutamlModel::Concept do
     end
 
     it "should add to sources hash" do
-      expect { subject.authoritative_source = [authoritative_source] }.to change { subject.sources.map(&:to_h) }
+      expect { subject.authoritative_source = [authoritative_source] }.to change { subject.sources.map(&:to_yaml) }
           .from(sources)
           .to(sources + [authoritative_source.merge("type" => "authoritative")])
     end

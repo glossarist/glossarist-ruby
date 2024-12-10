@@ -7,10 +7,18 @@ module Glossarist
       attribute :options, :hash
 
       yaml do
-        map :concepts, to: :concepts
+        map :concepts, to: :concepts, with: { to: :concepts_to_hash, from: :concepts_from_hash }
         map :bibliographies, to: :bibliographies
         map :assets, to: :assets
         map :options, to: :options
+      end
+
+      def concepts_to_hash(model, doc)
+
+      end
+
+      def concepts_from_hash(model, value)
+        
       end
 
       def to_latex(filename = nil)

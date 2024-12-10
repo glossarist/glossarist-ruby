@@ -1,6 +1,6 @@
 module Glossarist
   module LutamlModel
-    class LocalizedConcept < Lutaml::Model::Serializable
+    class LocalizedConcept < Concept
       attribute :language_code, :string
       attribute :classification, :string
       attribute :review_date, :date

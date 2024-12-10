@@ -4,9 +4,9 @@
 #
 
 RSpec.describe Glossarist::LutamlModel::LocalizedConcept do
-  subject { described_class.new attrs }
+  subject { described_class.from_yaml(attrs) }
 
-  let(:attrs) { { language_code: "eng" } }
+  let(:attrs) { { language_code: "eng" }.to_yaml }
 
   it "accepts strings as ids" do
     expect { subject.id = "456" }

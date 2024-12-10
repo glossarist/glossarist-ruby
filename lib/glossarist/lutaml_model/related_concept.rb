@@ -14,9 +14,9 @@ module Glossarist
       end
 
       def ref_to_yaml(model, doc)
-        doc["ref"] = model.ref
+        doc["ref"] = model.ref if model.ref
       end
-    
+
       def ref_from_yaml(model, value)
         model.ref = Citation.new(value).ref_hash
       end
