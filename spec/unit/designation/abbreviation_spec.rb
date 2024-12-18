@@ -2,7 +2,7 @@
 
 require_relative "../../support/shared_examples/enum"
 
-RSpec.describe Glossarist::LutamlModel::Designation::Abbreviation do
+RSpec.describe Glossarist::Designation::Abbreviation do
   subject { described_class.from_yaml(attributes) }
 
   let(:attributes) do

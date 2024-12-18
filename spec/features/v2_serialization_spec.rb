@@ -5,7 +5,7 @@ RSpec.describe "Serialization and deserialization" do
     let(:localized_concepts_folder) { File.join(fixtures_path(concept_folder), "localized_concept") }
 
     it "correctly loads concepts from files" do
-      collection = Glossarist::LutamlModel::ManagedConceptCollection.new
+      collection = Glossarist::ManagedConceptCollection.new
       collection.load_from_files(fixtures_path(concept_folder))
 
       concept_files.each do |filename|
@@ -46,7 +46,7 @@ RSpec.describe "Serialization and deserialization" do
     let(:localized_concepts_folder) { File.join(fixtures_path(concept_folder), "localized-concept") }
 
     it "correctly loads concepts from files" do
-      collection = Glossarist::LutamlModel::ManagedConceptCollection.new
+      collection = Glossarist::ManagedConceptCollection.new
       collection.load_from_files(fixtures_path(concept_folder))
 
       concept_files.each do |filename|

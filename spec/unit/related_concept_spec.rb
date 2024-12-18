@@ -3,7 +3,7 @@
 # (c) Copyright 2021 Ribose Inc.
 #
 
-RSpec.describe Glossarist::LutamlModel::RelatedConcept do
+RSpec.describe Glossarist::RelatedConcept do
   # it_behaves_like "an Enum"
 
   subject { described_class.from_yaml(attributes) }

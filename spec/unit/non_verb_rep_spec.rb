@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Glossarist::LutamlModel::NonVerbRep do
+RSpec.describe Glossarist::NonVerbRep do
   let(:subject) { described_class.new }
   let(:attributes) do
     {
@@ -10,7 +10,7 @@ RSpec.describe Glossarist::LutamlModel::NonVerbRep do
   end
 
   let(:source) do
-    Glossarist::LutamlModel::ConceptSource.from_yaml(attributes)
+    Glossarist::ConceptSource.from_yaml(attributes)
   end
 
   describe "#image=" do

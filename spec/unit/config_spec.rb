@@ -46,7 +46,7 @@ RSpec.describe Glossarist::Config do
     it "registers custom class for managed_concept" do
       expect { described_class.register_class("managed_concept", Array) }
         .to change { described_class.class_for("managed_concept") }
-        .from(Glossarist::LutamlModel::ManagedConcept)
+        .from(Glossarist::ManagedConcept)
         .to(Array)
     end
 

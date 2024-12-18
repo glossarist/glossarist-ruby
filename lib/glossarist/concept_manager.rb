@@ -1,19 +1,13 @@
-# frozen_string_literal: true
-
 module Glossarist
-  class ConceptManager
-    # Path to concepts directory.
-    # @return [String]
-    attr_accessor :path
-    attr_accessor :localized_concepts_path
+  class ConceptManager < Lutaml::Model::Serializable
+    attribute :path, :string
+    attribute :localized_concepts_path, :string
 
-    # @param path [String]
-    #   concepts directory path, either absolute or relative to CWD
-    def initialize(path: nil)
-      @path = path
+    yaml do
+      map :path, to: :path
+      map :localized_concepts_path, to: :localized_concepts_path
     end
 
-    # Reads all concepts from files.
     def load_from_files(collection: nil)
       collection ||= ManagedConceptCollection.new
 
@@ -28,7 +22,6 @@ module Glossarist
       end
     end
 
-    # Writes all concepts to files.
     def save_to_files(managed_concepts)
       managed_concepts.each_value &method(:save_concept_to_file)
     end
@@ -37,7 +30,7 @@ module Glossarist
       concept_hash = Psych.safe_load(File.read(filename), permitted_classes: [Date, Time])
       concept_hash["uuid"] = concept_hash["id"] || File.basename(filename, ".*")
 
-      concept = Config.class_for(:managed_concept).new(concept_hash)
+      concept = Config.class_for(:managed_concept).of_yaml(concept_hash)
 
       concept.localized_concepts.each do |_lang, id|
         localized_concept = load_localized_concept(id)
@@ -71,15 +64,13 @@ module Glossarist
       Dir.mkdir(localized_concept_dir) unless Dir.exist?(localized_concept_dir)
 
       filename = File.join(concept_dir, "#{concept.uuid}.yaml")
-      File.write(filename, Psych.dump(concept.to_h))
+      File.write(filename, concept.to_yaml)
 
       concept.localized_concepts.each do |lang, uuid|
         filename = File.join(localized_concept_dir, "#{uuid}.yaml")
-        File.write(filename, Psych.dump(concept.localization(lang).to_h))
+        File.write(filename, concept.localization(lang).to_yaml)
       end
     end
-
-    private
 
     def concepts_glob
       if v1_collection?

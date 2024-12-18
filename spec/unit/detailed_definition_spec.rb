@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-RSpec.describe Glossarist::LutamlModel::DetailedDefinition do
-  let(:detailed_definition) { Glossarist::LutamlModel::DetailedDefinition.new }
+RSpec.describe Glossarist::DetailedDefinition do
+  let(:detailed_definition) { Glossarist::DetailedDefinition.new }
 
   describe "#content" do
     it "returns the content" do
@@ -12,7 +12,7 @@ RSpec.describe Glossarist::LutamlModel::DetailedDefinition do
 
   describe "#sources" do
     it "returns the sources" do
-      source = Glossarist::LutamlModel::ConceptSource.from_yaml({
+      source = Glossarist::ConceptSource.from_yaml({
         "type" => "lineage",
         "status" => "identical",
         "origin" => { "text" => "origin" },
@@ -20,7 +20,7 @@ RSpec.describe Glossarist::LutamlModel::DetailedDefinition do
       }.to_yaml)
 
       detailed_definition.sources = [
-        Glossarist::LutamlModel::ConceptSource.from_yaml({
+        Glossarist::ConceptSource.from_yaml({
           "type" => "lineage",
           "status" => "identical",
           "origin" => { "text" => "url" },
@@ -30,7 +30,7 @@ RSpec.describe Glossarist::LutamlModel::DetailedDefinition do
       ]
 
       expect(detailed_definition.sources.size).to eq(2)
-      expect(detailed_definition.sources.first).to be_a(Glossarist::LutamlModel::ConceptSource)
+      expect(detailed_definition.sources.first).to be_a(Glossarist::ConceptSource)
       expect(detailed_definition.sources.first.type).to eq("lineage")
       expect(detailed_definition.sources.first.status).to eq("identical")
       expect(detailed_definition.sources.first.origin.text).to eq("url")
@@ -44,7 +44,7 @@ RSpec.describe Glossarist::LutamlModel::DetailedDefinition do
     it "returns the yaml representation" do
       detailed_definition.content = "content"
       detailed_definition.sources = [
-        Glossarist::LutamlModel::ConceptSource.from_yaml({
+        Glossarist::ConceptSource.from_yaml({
           type: "lineage",
           status: "identical",
           origin: { "text" => "origin" },

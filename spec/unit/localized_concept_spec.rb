@@ -3,7 +3,7 @@
 # (c) Copyright 2021 Ribose Inc.
 #
 
-RSpec.describe Glossarist::LutamlModel::LocalizedConcept do
+RSpec.describe Glossarist::LocalizedConcept do
   subject { described_class.from_yaml(attrs) }
 
   let(:attrs) { { language_code: "eng" }.to_yaml }
@@ -35,7 +35,7 @@ RSpec.describe Glossarist::LutamlModel::LocalizedConcept do
   end
 
   it "accepts strings as definitions" do
-    definition = Glossarist::LutamlModel::DetailedDefinition.new({ content: "this is very important" })
+    definition = Glossarist::DetailedDefinition.new({ content: "this is very important" })
 
     expect { subject.definition = [ definition ] }
       .to change { subject.definition.count }.from(0).to(1)
@@ -84,7 +84,7 @@ RSpec.describe Glossarist::LutamlModel::LocalizedConcept do
     it "adds a note of type DetailedDefinition" do
       expect { subject.notes << "str" }
         .to change { subject.notes.count }.from(0).to(1)
-        .and change { subject.notes.first.class }.from(NilClass).to(Glossarist::LutamlModel::DetailedDefinition)
+        .and change { subject.notes.first.class }.from(NilClass).to(Glossarist::DetailedDefinition)
     end
   end
 
@@ -92,7 +92,7 @@ RSpec.describe Glossarist::LutamlModel::LocalizedConcept do
     it "adds an example of type DetailedDefinition" do
       expect { subject.examples << "example" }
         .to change { subject.examples.count }.from(0).to(1)
-        .and change { subject.examples.first.class }.from(NilClass).to(Glossarist::LutamlModel::DetailedDefinition)
+        .and change { subject.examples.first.class }.from(NilClass).to(Glossarist::DetailedDefinition)
     end
   end
 
@@ -102,7 +102,7 @@ RSpec.describe Glossarist::LutamlModel::LocalizedConcept do
     it "is an array" do
       expect { subject.sources << item }
         .to change { subject.sources.count }.from(0).to(1)
-        .and change { subject.sources.first.class }.from(NilClass).to(Glossarist::LutamlModel::ConceptSource)
+        .and change { subject.sources.first.class }.from(NilClass).to(Glossarist::ConceptSource)
     end
   end
 
@@ -152,12 +152,12 @@ RSpec.describe Glossarist::LutamlModel::LocalizedConcept do
 
       retval = described_class.from_yaml(src)
 
-      expect(retval).to be_kind_of(Glossarist::LutamlModel::LocalizedConcept)
+      expect(retval).to be_kind_of(Glossarist::LocalizedConcept)
       expect(retval.id).to eq("123-45")
       expect(retval.definition.size).to eq(1)
       expect(retval.definition.first.content).to eq("Example Definition")
       expect(retval.terms.size).to eq(1)
-      expect(retval.terms.first.class).to eq(Glossarist::LutamlModel::Designation::Expression)
+      expect(retval.terms.first.class).to eq(Glossarist::Designation::Expression)
       expect(retval.terms.first.normative_status).to eq("preferred")
       expect(retval.terms.first.designation).to eq("Example Designation")
       expect(retval.sources.map(&:to_yaml_hash)).to eq([{ "origin" => { "ref" => source }, "type" => "authoritative" }])
@@ -180,7 +180,7 @@ RSpec.describe Glossarist::LutamlModel::LocalizedConcept do
         "definition" => [{ content: "set of real numbers such that, for any pair (stem:[x], stem:[y]) of elements of the set, any real number stem:[z] between stem:[x] and stem:[y] belongs to the set" }],
       }.to_yaml
 
-      localized_concept = Glossarist::LutamlModel::LocalizedConcept.from_yaml(src)
+      localized_concept = Glossarist::LocalizedConcept.from_yaml(src)
       grammar_info = localized_concept.designations.first.grammar_info.first
 
       expect(grammar_info.n?).to be(true)
