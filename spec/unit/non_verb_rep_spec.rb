@@ -2,6 +2,16 @@
 
 RSpec.describe Glossarist::NonVerbRep do
   let(:subject) { described_class.new }
+  let(:attributes) do
+    {
+      type: "authoritative",
+      status: "identical",
+    }.to_yaml
+  end
+
+  let(:source) do
+    Glossarist::ConceptSource.from_yaml(attributes)
+  end
 
   describe "#image=" do
     it "sets the image" do
@@ -26,18 +36,16 @@ RSpec.describe Glossarist::NonVerbRep do
 
   describe "#sources=" do
     it "sets the sources" do
-      subject.sources = [{
-        type: "authoritative",
-        status: "identical",
-      }]
+      subject.sources = [source]
 
-      expected_hash = {
-        "type" => "authoritative",
-        "status" => "identical",
-      }
+      expected_yaml = <<~YAML
+        ---
+        status: identical
+        type: authoritative
+      YAML
 
       expect(subject.sources.size).to eq(1)
-      expect(subject.sources.first.to_h).to eq(expected_hash)
+      expect(subject.sources.first.to_yaml).to eq(expected_yaml)
     end
   end
 end

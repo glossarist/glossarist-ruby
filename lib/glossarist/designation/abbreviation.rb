@@ -1,26 +1,25 @@
-# frozen_string_literal: true
-
-require_relative "expression"
-require_relative "../utilities"
-
 module Glossarist
   module Designation
     class Abbreviation < Expression
-      include Glossarist::Utilities::Enum
+      attribute :international, :boolean
+      attribute :type, :string, default: -> { "abbreviation" }
 
-      register_enum :type, Glossarist::GlossaryDefinition::ABBREVIATION_TYPES
+      Glossarist::GlossaryDefinition::ABBREVIATION_TYPES.each do |name|
+        attribute name.to_sym, :boolean
+      end
 
-      attr_accessor :international
+      yaml do
+        map :international, to: :international
+        map :type, to: :type, render_default: true
+        Glossarist::GlossaryDefinition::ABBREVIATION_TYPES.each do |name|
+          map name.to_sym, to: name.to_sym
+        end
+      end
 
-      def to_h
-        type_hash = {
-          "type" => "abbreviation",
-          "international" => international,
-        }
+      def self.of_yaml(hash, options = {})
+        hash["type"] = "abbreviation" unless hash["type"]
 
-        type_hash[type.to_s] = true if type
-
-        super().merge(type_hash).compact
+        super
       end
     end
   end

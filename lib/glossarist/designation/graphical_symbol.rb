@@ -1,16 +1,20 @@
-# frozen_string_literal: true
+require_relative "symbol"
 
 module Glossarist
   module Designation
     class GraphicalSymbol < Symbol
-      attr_accessor :text
-      attr_accessor :image
+      attribute :text, :string
+      attribute :image, :string
 
-      def to_h
-        super.merge(
-          "text" => text,
-          "image" => image,
-        )
+      yaml do
+        map :text, to: :text
+        map :image, to: :image
+      end
+
+      def self.of_yaml(hash, options = {})
+        hash["type"] = "graphical_symbol"
+
+        super
       end
     end
   end

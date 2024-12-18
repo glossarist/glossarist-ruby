@@ -1,9 +1,9 @@
 ---
 data:
   dates:
-  - date: '2015-08-15T00:00:00.000Z'
+  - date: '2015-08-15T00:00:00+00:00'
     type: accepted
-  - date: '2019-07-11T00:00:00.000Z'
+  - date: '2019-07-11T00:00:00+00:00'
     type: amended
   definition:
   - content: coordinate system which gives the position of points relative to n mutually
@@ -23,5 +23,5 @@ data:
   - type: expression
     designation: Cartesian coordinate system
   language_code: eng
-date_accepted: '2015-08-15T00:00:00.000Z'
+date_accepted: '2015-08-15T00:00:00+00:00'
 id: c87dfcd1-c38a-55f9-87bd-9da33bfede80

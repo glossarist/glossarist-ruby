@@ -1,7 +1,7 @@
 ---
 data:
   dates:
-  - date: '2017-11-15T00:00:00.000Z'
+  - date: '2017-11-15T00:00:00+00:00'
     type: accepted
   definition:
   - content: constituent part of a postal address
@@ -29,5 +29,5 @@ data:
     designation: postal address component
   domain: postal address
   language_code: eng
-date_accepted: '2017-11-15T00:00:00.000Z'
+date_accepted: '2017-11-15T00:00:00+00:00'
 id: da24b782-1551-5128-a043-ba6135a25acf

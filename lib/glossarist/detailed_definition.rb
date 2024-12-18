@@ -1,31 +1,27 @@
 # frozen_string_literal: true
 
 module Glossarist
-  class DetailedDefinition < Model
-
+  class DetailedDefinition < Lutaml::Model::Serializable
     def initialize(attributes = {})
-      if attributes.is_a?(Hash)
-        super
-      else
-        self.content = attributes
-      end
+      attributes = { content: attributes } unless attributes.is_a?(Hash)
+
+      super(attributes)
     end
 
-    # @return [String]
-    attr_accessor :content
+    attribute :content, :string
+    attribute :sources, ConceptSource, collection: true
 
-    # @return [Array<ConceptSource>]
-    attr_reader :sources
-
-    def sources=(sources)
-      @sources = sources.map { |s| ConceptSource.new(s) }
+    yaml do
+      map :content, to: :content
+      map :sources, to: :sources
     end
 
-    def to_h
-      {
-        "content" => content,
-        "sources" => sources&.map(&:to_h),
-      }.compact
+    def self.as_yaml(instance)
+      hash_rep = super
+
+      hash_rep.delete("sources") if instance.sources.empty?
+
+      hash_rep
     end
   end
 end

@@ -8,9 +8,9 @@ RSpec.describe Glossarist::Collections::AssetCollection do
 
   let(:assets) do
     [
-      Glossarist::Asset.new("some/random/path"),
-      Glossarist::Asset.new("some/random/path/2"),
-      Glossarist::Asset.new("another/random/path"),
+      Glossarist::Asset.new({ path: "some/random/path" }),
+      Glossarist::Asset.new({ path: "some/random/path/2" }),
+      Glossarist::Asset.new({ path: "another/random/path" }),
     ]
   end
 
@@ -23,7 +23,7 @@ RSpec.describe Glossarist::Collections::AssetCollection do
   end
 
   context "adding unique asset" do
-    let(:asset) { Glossarist::Asset.new("some/random/path/3") }
+    let(:asset) { Glossarist::Asset.new({ path: "some/random/path/3" }) }
 
     it { expect { subject << asset }.to change { subject.count }.from(3).to(4) }
   end

@@ -1,7 +1,7 @@
 ---
 data:
   dates:
-  - date: '2003-02-15T00:00:00.000Z'
+  - date: '2003-02-15T00:00:00+00:00'
     type: accepted
   definition:
   - content: الزاوية من مستوى خط الاستواء إلى الخط المتعامد مع القطع الناقص عبر نقطة
@@ -29,5 +29,5 @@ data:
   - type: expression
     designation: ellipsoidal latitude
   language_code: ara
-date_accepted: '2003-02-15T00:00:00.000Z'
+date_accepted: '2003-02-15T00:00:00+00:00'
 id: e4ee4f5c-07b0-577e-8bc0-37e0f98d7a2b

@@ -4,9 +4,9 @@
 #
 
 RSpec.describe Glossarist::Designation::Expression do
-  subject { described_class.new attrs }
+  subject { described_class.from_yaml(attrs) }
 
-  let(:attrs) { { designation: "equality", normative_status: :preferred, grammar_info: [{}] } }
+  let(:attrs) { { designation: "equality", normative_status: :preferred, grammar_info: [{}] }.to_yaml }
 
   it "accepts strings as designations" do
     expect { subject.designation = "new one" }
@@ -33,8 +33,9 @@ RSpec.describe Glossarist::Designation::Expression do
       .to change { subject.grammar_info.first.adj }.to(true)
   end
 
-  describe "#to_h" do
+  describe "#to_yaml" do
     it "dumps designation to a hash" do
+
       attrs.replace({
         designation: "Example designation",
         normative_status: "preferred",
@@ -45,9 +46,10 @@ RSpec.describe Glossarist::Designation::Expression do
           number: "singular",
         }],
         usage_info: "science",
-      })
+      }.to_yaml)
 
-      retval = subject.to_h
+      retval = YAML.load(subject.to_yaml)
+
       expect(retval).to be_kind_of(Hash)
       expect(retval["type"]).to eq("expression")
       expect(retval["designation"]).to eq("Example designation")
@@ -60,15 +62,16 @@ RSpec.describe Glossarist::Designation::Expression do
     end
   end
 
-  describe "::from_h" do
+  describe "::from_yaml" do
     it "loads localized concept definition from a hash" do
       src = {
         "type" => "expression",
         "designation" => "Example Designation",
         "normative_status" => "preferred",
-      }
+    }.to_yaml
 
-      retval = described_class.from_h(src)
+      retval = described_class.from_yaml(src)
+
       expect(retval).to be_kind_of(Glossarist::Designation::Expression)
       expect(retval.designation).to eq("Example Designation")
       expect(retval.normative_status).to eq("preferred")
@@ -77,7 +80,7 @@ RSpec.describe Glossarist::Designation::Expression do
 end
 
 RSpec.describe Glossarist::Designation::Symbol do
-  subject { described_class.new attrs }
+  subject { described_class.from_yaml attrs.to_yaml }
 
   let(:attrs) { { designation: "sym", normative_status: :preferred } }
 
@@ -91,7 +94,7 @@ RSpec.describe Glossarist::Designation::Symbol do
       .to change { subject.normative_status }.to("admitted")
   end
 
-  describe "#to_h" do
+  describe "#to_yaml" do
     it "dumps designation to a hash" do
       attrs.replace({
         designation: "X",
@@ -100,7 +103,7 @@ RSpec.describe Glossarist::Designation::Symbol do
         international: true,
       })
 
-      retval = subject.to_h
+      retval = YAML.load(subject.to_yaml)
       expect(retval).to be_kind_of(Hash)
       expect(retval["type"]).to eq("symbol")
       expect(retval["designation"]).to eq("X")
@@ -110,15 +113,15 @@ RSpec.describe Glossarist::Designation::Symbol do
     end
   end
 
-  describe "::from_h" do
+  describe "::from_yaml" do
     it "loads localized concept definition from a hash" do
       src = {
         "type" => "symbol",
         "designation" => "Example Symbol",
         "normative_status" => "preferred",
-      }
+      }.to_yaml
 
-      retval = described_class.from_h(src)
+      retval = described_class.from_yaml(src)
       expect(retval).to be_kind_of(Glossarist::Designation::Symbol)
       expect(retval.designation).to eq("Example Symbol")
       expect(retval.normative_status).to eq("preferred")

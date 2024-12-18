@@ -12,20 +12,20 @@ RSpec.describe Glossarist::DetailedDefinition do
 
   describe "#sources" do
     it "returns the sources" do
-      source = Glossarist::ConceptSource.new({
+      source = Glossarist::ConceptSource.from_yaml({
         "type" => "lineage",
         "status" => "identical",
         "origin" => { "text" => "origin" },
         "modification" => "note",
-      })
+      }.to_yaml)
 
       detailed_definition.sources = [
-        {
+        Glossarist::ConceptSource.from_yaml({
           "type" => "lineage",
           "status" => "identical",
           "origin" => { "text" => "url" },
           "modification" => "some modification",
-        },
+        }.to_yaml),
         source
       ]
 
@@ -40,28 +40,30 @@ RSpec.describe Glossarist::DetailedDefinition do
     end
   end
 
-  describe "#to_h" do
-    it "returns the hash representation" do
+  describe "#to_yaml" do
+    it "returns the yaml representation" do
       detailed_definition.content = "content"
       detailed_definition.sources = [
-        Glossarist::ConceptSource.new(
-          "type" => "lineage",
-          "status" => "identical",
-          "origin" => { "text" => "origin" },
-          "modification" => "some modification",
-        ),
+        Glossarist::ConceptSource.from_yaml({
+          type: "lineage",
+          status: "identical",
+          origin: { "text" => "origin" },
+          modification: "some modification",
+        }.to_yaml),
       ]
-      expect(detailed_definition.to_h).to eq({
-        "content" => "content",
-        "sources" => [
-          {
-            "type" => "lineage",
-            "status" => "identical",
-            "origin" => { "ref" => "origin" },
-            "modification" => "some modification",
-          },
-        ],
-      })
+
+      expected_yaml = <<~YAML
+        ---
+        content: content
+        sources:
+        - origin:
+            ref: origin
+          status: identical
+          type: lineage
+          modification: some modification
+      YAML
+
+      expect(detailed_definition.to_yaml).to eq(expected_yaml)
     end
   end
 end

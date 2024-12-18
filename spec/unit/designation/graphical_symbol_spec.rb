@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Glossarist::Designation::GraphicalSymbol do
-  subject { described_class.from_h(attributes) }
+  subject { described_class.from_yaml(attributes) }
 
   let(:attributes) do
     {
@@ -9,19 +9,20 @@ RSpec.describe Glossarist::Designation::GraphicalSymbol do
       "image" => "♔",
       "text" => "king",
       "international" => true,
-    }
+  }.to_yaml
   end
 
-  describe "#to_h" do
-    it "will convert graphical symbol to hash" do
-      expected_hash = {
-        "type" => "graphical_symbol",
-        "image" => "♔",
-        "text" => "king",
-        "international" => true,
-      }
+  describe "#to_yaml" do
+    it "will convert graphical symbol to yaml" do
+      expected_yaml = <<~YAML
+        ---
+        type: graphical_symbol
+        international: true
+        text: king
+        image: "♔"
+      YAML
 
-      expect(subject.to_h).to eq(expected_hash)
+      expect(subject.to_yaml).to eq(expected_yaml)
     end
   end
 end

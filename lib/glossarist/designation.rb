@@ -3,9 +3,9 @@
 # (c) Copyright 2021 Ribose Inc.
 #
 
-require_relative "designation/abbreviation"
 require_relative "designation/base"
 require_relative "designation/expression"
+require_relative "designation/abbreviation"
 require_relative "designation/grammar_info"
 require_relative "designation/symbol"
 require_relative "designation/graphical_symbol"

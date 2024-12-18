@@ -1,20 +1,15 @@
 # frozen_string_literal: true
 
 module Glossarist
-  class ConceptDate < Model
-    include Glossarist::Utilities::Enum
-
+  class ConceptDate < Lutaml::Model::Serializable
     # Iso8601 date
     # @return [String]
-    attr_accessor :date
+    attribute :date, :date_time
+    attribute :type, :string, values: Glossarist::GlossaryDefinition::CONCEPT_DATE_TYPES
 
-    register_enum :type, Glossarist::GlossaryDefinition::CONCEPT_DATE_TYPES
-
-    def to_h
-      {
-        "date" => date,
-        "type" => type,
-      }.compact
+    yaml do
+      map :date, to: :date
+      map :type, to: :type
     end
   end
 end

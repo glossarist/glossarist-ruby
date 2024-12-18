@@ -55,7 +55,7 @@ RSpec.describe Glossarist::ManagedConceptCollection do
 
     it "fetches a managed concept by uuid" do
       managed_concept_collection.store(managed_concept)
-      uuid = Glossarist::Utilities::UUID.uuid_v5(Glossarist::Utilities::UUID::OID_NAMESPACE, managed_concept.to_h_no_uuid.to_yaml)
+      uuid = Glossarist::Utilities::UUID.uuid_v5(Glossarist::Utilities::UUID::OID_NAMESPACE, managed_concept.to_yaml(except: [:uuid]))
 
       expect(managed_concept_collection.fetch(uuid)).to eq(managed_concept)
     end
@@ -66,7 +66,7 @@ RSpec.describe Glossarist::ManagedConceptCollection do
 
     it "returns a managed concept by uuid" do
       managed_concept_collection.store(managed_concept)
-      uuid = Glossarist::Utilities::UUID.uuid_v5(Glossarist::Utilities::UUID::OID_NAMESPACE, managed_concept.to_h_no_uuid.to_yaml)
+      uuid = Glossarist::Utilities::UUID.uuid_v5(Glossarist::Utilities::UUID::OID_NAMESPACE, managed_concept.to_yaml(except: [:uuid]))
 
       expect(managed_concept_collection[uuid]).to eq(managed_concept)
     end
@@ -134,7 +134,7 @@ RSpec.describe Glossarist::ManagedConceptCollection do
       it "will not raise Glossarist::ParseError" do
         expect do
           managed_concept_collection.load_from_files(valid_concepts_path)
-        end.not_to raise_error(Glossarist::ParseError)
+        end.not_to raise_error
       end
 
       it "will read concepts correctly from file" do

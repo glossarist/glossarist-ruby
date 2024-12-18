@@ -1,20 +1,18 @@
-# frozen_string_literal: true
-
-require_relative "base"
-
 module Glossarist
   module Designation
     class Symbol < Base
-      attr_accessor :international
+      attribute :international, :boolean
+      attribute :type, :string
 
-      def to_h
-        {
-          "type" => Glossarist::Designation::SERIALIZED_TYPES[self.class],
-          "normative_status" => normative_status,
-          "geographical_area" => geographical_area,
-          "designation" => designation,
-          "international" => international,
-        }.compact
+      yaml do
+        map :international, to: :international
+        map :type, to: :type, render_default: true
+      end
+
+      def self.of_yaml(hash, options = {})
+        hash["type"] = "symbol" unless hash["type"]
+
+        super
       end
     end
   end

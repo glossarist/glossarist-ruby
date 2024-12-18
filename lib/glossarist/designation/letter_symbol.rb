@@ -1,18 +1,20 @@
-# frozen_string_literal: true
-
 module Glossarist
   module Designation
     class LetterSymbol < Symbol
-      attr_accessor :text
-      attr_accessor :language
-      attr_accessor :script
+      attribute :text, :string
+      attribute :language, :string
+      attribute :script, :string
 
-      def to_h
-        super.merge(
-          "text" => text,
-          "language" => language,
-          "script" => script,
-        )
+      yaml do
+        map :text, to: :text
+        map :language, to: :language
+        map :script, to: :script
+      end
+
+      def self.of_yaml(hash, options = {})
+        hash["type"] = "letter_symbol"
+
+        super
       end
     end
   end

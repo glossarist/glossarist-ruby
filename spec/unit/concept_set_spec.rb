@@ -13,9 +13,9 @@ RSpec.describe Glossarist::ConceptSet do
 
   let(:assets) do
     [
-      Glossarist::Asset.new("some/random/path"),
-      Glossarist::Asset.new("some/random/path/2"),
-      Glossarist::Asset.new("another/random/path"),
+      Glossarist::Asset.new({ path: "some/random/path" }),
+      Glossarist::Asset.new({ path: "some/random/path/2" }),
+      Glossarist::Asset.new({ path: "another/random/path" }),
     ]
   end
 

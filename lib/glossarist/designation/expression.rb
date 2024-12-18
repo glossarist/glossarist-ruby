@@ -1,24 +1,30 @@
-# frozen_string_literal: true
-
 require_relative "base"
+require_relative "grammar_info"
 
 module Glossarist
   module Designation
     class Expression < Base
-      attr_accessor :prefix
-      attr_accessor :usage_info
+      attribute :prefix, :string
+      attribute :usage_info, :string
 
-      # List of grammar info.
-      # @return [Array<GrammarInfo>]
-      attr_reader :grammar_info
+      attribute :gender, :string
+      attribute :plurality, :string
+      attribute :part_of_speech, :string
+      attribute :grammar_info, GrammarInfo, collection: true
+      attribute :type, :string, default: -> { "expression" }
 
-      def grammar_info=(grammar_info)
-        @grammar_info = grammar_info.map { |g| GrammarInfo.new(g) }
+      yaml do
+        map :type, to: :type, render_default: true
+        map :prefix, to: :prefix
+        map :usage_info, to: :usage_info
+        map :grammar_info, to: :grammar_info
       end
 
-      # @todo Added to cater for current iev-data implementation,
-      #   might be removed in the future.
-      def self.from_h(hash)
+      def grammar_info
+        @grammar_info.empty? ? nil : @grammar_info
+      end
+
+      def self.of_yaml(hash, options = {})
         gender = hash.delete("gender") || hash.delete(:gender)
         number = hash.delete("plurality") || hash.delete(:plurality)
         part_of_speech = hash.delete("part_of_speech") || hash.delete(:part_of_speech)
@@ -31,19 +37,9 @@ module Glossarist
           }.compact]
         end
 
-        super
-      end
+        hash["type"] = "expression" unless hash["type"]
 
-      def to_h
-        {
-          "type" => "expression",
-          "prefix" => prefix,
-          "normative_status" => normative_status,
-          "usage_info" => usage_info,
-          "designation" => designation,
-          "geographical_area" => geographical_area,
-          "grammar_info" => grammar_info&.map(&:to_h),
-        }.compact
+        super(hash, options = {})
       end
     end
   end
