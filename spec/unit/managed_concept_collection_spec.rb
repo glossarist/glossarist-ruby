@@ -5,7 +5,7 @@ RSpec.describe Glossarist::ManagedConceptCollection do
 
   describe "#managed_concepts" do
     it "returns an array of managed concepts" do
-      managed_concept = Glossarist::ManagedConcept.new(id: "id")
+      managed_concept = Glossarist::ManagedConcept.of_yaml("data" => { id: "id" })
       managed_concept_collection.store(managed_concept)
 
       expect(managed_concept_collection.managed_concepts).to eq([managed_concept])
@@ -14,7 +14,7 @@ RSpec.describe Glossarist::ManagedConceptCollection do
 
   describe "#managed_concepts=" do
     it "sets managed concepts" do
-      managed_concept = Glossarist::ManagedConcept.new(id: "id")
+      managed_concept = Glossarist::ManagedConcept.of_yaml("data" => { id: "id" })
       managed_concept_collection.managed_concepts = [managed_concept]
 
       expect(managed_concept_collection.managed_concepts).to eq([managed_concept])
@@ -23,7 +23,7 @@ RSpec.describe Glossarist::ManagedConceptCollection do
 
   describe "#to_h" do
     it "returns a hash" do
-      managed_concept_collection.store(Glossarist::ManagedConcept.new("data" => { id: "id" }))
+      managed_concept_collection.store(Glossarist::ManagedConcept.of_yaml("data" => { id: "id" }))
 
       expect(managed_concept_collection.to_h).to eq(
         "managed_concepts" => [
@@ -38,7 +38,7 @@ RSpec.describe Glossarist::ManagedConceptCollection do
 
   describe "#each" do
     it "iterates over managed concepts" do
-      managed_concept_collection.store(Glossarist::ManagedConcept.new("data" => { id: "id" }))
+      managed_concept_collection.store(Glossarist::ManagedConcept.of_yaml("data" => { id: "id" }))
 
       expect{ |b| managed_concept_collection.each(&b) }
         .to yield_control.once
@@ -46,7 +46,7 @@ RSpec.describe Glossarist::ManagedConceptCollection do
   end
 
   describe "#fetch" do
-    let(:managed_concept) { Glossarist::ManagedConcept.new("data" => { id: "id" }) }
+    let(:managed_concept) { Glossarist::ManagedConcept.of_yaml("data" => { id: "id" }) }
 
     it "fetches a managed concept by id" do
       managed_concept_collection.store(managed_concept)
@@ -62,7 +62,7 @@ RSpec.describe Glossarist::ManagedConceptCollection do
   end
 
   describe "#[]" do
-    let(:managed_concept) { Glossarist::ManagedConcept.new("data" => { id: "id" }) }
+    let(:managed_concept) { Glossarist::ManagedConcept.of_yaml("data" => { id: "id" }) }
 
     it "returns a managed concept by uuid" do
       managed_concept_collection.store(managed_concept)
@@ -92,7 +92,7 @@ RSpec.describe Glossarist::ManagedConceptCollection do
     end
 
     it "returns a managed concept when present" do
-      managed_concept_collection.store(Glossarist::ManagedConcept.new(data: { id: "new" }))
+      managed_concept_collection.store(Glossarist::ManagedConcept.of_yaml(data: { id: "new" }))
 
       expect{ managed_concept_collection.fetch_or_initialize("new") }
         .not_to change { managed_concept_collection.fetch("new") }
@@ -101,7 +101,7 @@ RSpec.describe Glossarist::ManagedConceptCollection do
 
   describe "#store" do
     it "adds a managed concept" do
-      managed_concept = Glossarist::ManagedConcept.new(id: "id")
+      managed_concept = Glossarist::ManagedConcept.of_yaml("data" => { id: "id" })
       managed_concept_collection.store(managed_concept)
 
       expect(managed_concept_collection.managed_concepts).to eq([managed_concept])
@@ -110,7 +110,9 @@ RSpec.describe Glossarist::ManagedConceptCollection do
 
   describe "#<<" do
     it "adds a managed concept" do
-      managed_concept = Glossarist::ManagedConcept.new(id: "id")
+      managed_concept = Glossarist::ManagedConcept.of_yaml({
+        "data" => { "id" => "id" },
+      })
       managed_concept_collection << managed_concept
 
       expect(managed_concept_collection.managed_concepts).to eq([managed_concept])

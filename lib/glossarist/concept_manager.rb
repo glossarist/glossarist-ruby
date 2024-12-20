@@ -12,18 +12,14 @@ module Glossarist
       collection ||= ManagedConceptCollection.new
 
       Dir.glob(concepts_glob) do |filename|
-        concept = if v1_collection?
-                    Glossarist::V1Reader.load_concept_from_file(filename)
-                  else
-                    load_concept_from_file(filename)
-                  end
+        concept = load_concept_from_file(filename)
 
         collection.store(concept)
       end
     end
 
     def save_to_files(managed_concepts)
-      managed_concepts.each_value &method(:save_concept_to_file)
+      managed_concepts.each &method(:save_concept_to_file)
     end
 
     def load_concept_from_file(filename)
@@ -32,7 +28,7 @@ module Glossarist
 
       concept = Config.class_for(:managed_concept).of_yaml(concept_hash)
 
-      concept.localized_concepts.each do |_lang, id|
+      concept.data.localized_concepts.each do |_lang, id|
         localized_concept = load_localized_concept(id)
         concept.add_l10n(localized_concept)
       end

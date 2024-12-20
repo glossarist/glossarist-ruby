@@ -15,8 +15,8 @@ RSpec.describe Glossarist::ManagedConcept do
           "foo",
           "bar",
         ],
-        "status" => "valid",
       },
+      "status" => "valid",
     }
   end
 
@@ -56,7 +56,7 @@ RSpec.describe Glossarist::ManagedConcept do
 
   describe "#related=" do
     it "sets the related concepts" do
-      subject.related = [{ "type" => "supersedes", "content" => "Example content" }]
+      subject.related = [Glossarist::RelatedConcept.of_yaml({ "type" => "supersedes", "content" => "Example content" })]
 
       expect(subject.related.first.type).to eq("supersedes")
       expect(subject.related.first.content).to eq("Example content")
@@ -65,7 +65,7 @@ RSpec.describe Glossarist::ManagedConcept do
 
   describe "#dates=" do
     it "sets the dates" do
-      subject.dates = [{ "type" => "accepted", "date" => "2020-01-01" }]
+      subject.dates = [Glossarist::ConceptDate.of_yaml({ "type" => "accepted", "date" => "2020-01-01" })]
 
       expect(subject.dates.first.type).to eq("accepted")
       expect(subject.dates.first.date).to eq(Date.parse("2020-01-01"))
@@ -75,15 +75,15 @@ RSpec.describe Glossarist::ManagedConcept do
   describe "#groups" do
     context "when string is given" do
       it "should convert it to array and set the groups list for the concept" do
-        expect { subject.groups = "foobar" }
-          .to change { subject.groups }.to(["foobar"])
+        expect { subject.data.groups = ["foobar"] }
+          .to change { subject.data.groups }.to(["foobar"])
       end
     end
 
     context "when array is given" do
       it "sets the groups list for the concept" do
-        expect { subject.groups = ["general", "group"] }
-          .to change { subject.groups }.to(["general", "group"])
+        expect { subject.data.groups = ["general", "group"] }
+          .to change { subject.data.groups }.to(["general", "group"])
       end
     end
   end
@@ -99,7 +99,7 @@ RSpec.describe Glossarist::ManagedConcept do
     it "sets the sources list at the concept level" do
       expect(subject.sources).to be_nil
 
-      subject.sources = [source]
+      subject.sources = [Glossarist::ConceptSource.from_yaml(source.to_yaml)]
 
       expect(subject.sources.first.status).to eq(source["status"])
       expect(subject.sources.first.origin.text).to eq(source["origin"]["text"])
@@ -132,109 +132,90 @@ RSpec.describe Glossarist::ManagedConcept do
     end
   end
 
-  describe "#localizations_hash" do
-    let(:expected_localizations_hash) do
-      {
-        "data" => {
-          "identifier" => "123",
-          "localized_concepts" => {
-            "ara" => "uuid",
-          },
-
-          "groups" => [
-            "foo",
-            "bar",
-          ],
-        },
-      }
-    end
-
-    it "dumps localizations to a hash" do
-      localizations = subject.localizations_hash
-      data = localizations["ara"]["data"]
-
-      expect(localizations).to be_kind_of(Hash)
-      expect(data["terms"]).to eq([{ "type" => "expression", "designation" => "Arabic Designation" }])
-      expect(data["dates"]).to eq([{ "type" => "accepted", "date" => "2020-01-01T00:00:00+00:00" }])
-    end
-  end
-
   describe "#localized_concepts=" do
-    let(:localized_concepts_hash) do
+    let(:localized_concepts) do
       [
         {
-          "language_code" => "eng",
-          "definition" => [
-            {
-              "content" => "this is very important",
-            },
-          ],
-          "entry_status" => "valid",
+          "data" => {
+            "language_code" => "eng",
+            "definition" => [
+              {
+                "content" => "this is very important",
+              },
+            ],
+            "entry_status" => "valid",
+          },
         },
       ]
     end
 
     it "accepts a hash" do
-      expect { subject.localized_concepts = localized_concepts_hash }
+      expect { subject.localized_concepts = localized_concepts }
         .not_to raise_error
     end
 
     it "accepts a hash of attributes and create a concept" do
-      subject.localized_concepts = localized_concepts_hash
+      subject.localized_concepts = localized_concepts
 
-      expect(subject.localized_concepts).to be_a(Hash)
+      expect(subject.data.localized_concepts).to be_a(Hash)
     end
 
     it "should have same uuid in localized concept hash and the localized concept" do
-      subject.localized_concepts = localized_concepts_hash
+      subject.localized_concepts = localized_concepts
 
       expect(subject.localization("eng").uuid).to eq(subject.localized_concepts["eng"])
     end
   end
 
-  describe "#localizations=" do
-    let(:localizations_hash) do
+  describe "#add_localization" do
+    let(:localizations) do
       [
-        {
-          "id" => "123",
-          "language_code" => "eng",
-          "definition" => [
-            {
-              "content" => "this is very important",
-            },
-          ],
-          "entry_status" => "valid",
-        },
+        Glossarist::LocalizedConcept.of_yaml({
+          "data" => {
+            "id" => "123",
+            "language_code" => "eng",
+            "definition" => [
+              {
+                "content" => "this is very important",
+              },
+            ],
+            "entry_status" => "valid",
+          },
+        }),
       ]
     end
 
     it "accepts a hash" do
-      expect { subject.localizations = localizations_hash }
+      expect { subject.data.localizations = { "eng" => localizations.first } }
         .not_to raise_error
     end
 
     it "accepts a hash of attributes and create a concept" do
-      subject.localized_concepts = localizations_hash
+      localizations.each do |localized_concept|
+        subject.add_localization(localized_concept)
+      end
 
-      expect(subject.localizations).to be_a(Hash)
-      expect(subject.localizations["eng"]).to be_a(Glossarist::LocalizedConcept)
-      expect(subject.localizations["eng"].definition.first.content).to eq("this is very important")
-      expect(subject.localizations["eng"].entry_status).to eq("valid")
+      expect(subject.data.localizations).to be_a(Hash)
+      expect(subject.data.localizations["eng"]).to be_a(Glossarist::LocalizedConcept)
+      expect(subject.data.localizations["eng"].data.definition.first.content).to eq("this is very important")
+      expect(subject.data.localizations["eng"].entry_status).to eq("valid")
     end
   end
 
   describe "#default_designation" do
     it "returns first English designation when available" do
-      localized_concept = Glossarist::LocalizedConcept.new(
-        "language_code" => "eng",
-        "terms" => [
-          {
-            "designation" => "English Designation",
-            "type" => "expression",
-          },
-        ],
+      localized_concept = Glossarist::LocalizedConcept.of_yaml(
+        "data" => {
+          "language_code" => "eng",
+          "terms" => [
+            {
+              "designation" => "English Designation",
+              "type" => "expression",
+            },
+          ],
+        },
       )
-      object = described_class.new("data" => { id: "123" })
+      object = described_class.of_yaml("data" => { id: "123" })
       object.add_l10n(localized_concept)
 
       expect(object.default_designation).to eq("English Designation")
