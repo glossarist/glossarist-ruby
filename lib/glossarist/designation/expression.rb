@@ -20,10 +20,6 @@ module Glossarist
         map :grammar_info, to: :grammar_info
       end
 
-      def grammar_info
-        @grammar_info.empty? ? nil : @grammar_info
-      end
-
       def self.of_yaml(hash, options = {})
         gender = hash.delete("gender") || hash.delete(:gender)
         number = hash.delete("plurality") || hash.delete(:plurality)

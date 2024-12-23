@@ -9,5 +9,9 @@ module Glossarist
     def eql?(asset)
       path == asset.path
     end
+
+    def hash
+      path.hash
+    end
   end
 end
