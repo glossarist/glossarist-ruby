@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "set"
+
 module Glossarist
   class ConceptSet
     # a `Glossarist::ManagedConceptCollection` object
