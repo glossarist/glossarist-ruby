@@ -29,18 +29,18 @@ module Glossarist
       map :notes, to: :notes, render_nil: true
       map :release, to: :release
       map :sources, to: :sources
-      map :terms, to: :terms, with: { from: :terms_from_hash, to: :terms_to_hash }
+      map :terms, to: :terms, with: { from: :terms_from_yaml, to: :terms_to_yaml }
       map :related, to: :related
       map :domain, to: :domain
       map :language_code, to: :language_code
       map :entry_status, to: :entry_status
     end
 
-    def terms_from_hash(model, value)
+    def terms_from_yaml(model, value)
       model.terms = value.map { |v| Designation::Base.of_yaml(v) }
     end
 
-    def terms_to_hash(model, doc)
+    def terms_to_yaml(model, doc)
       doc["terms"] = model.terms.map(&:to_yaml_hash)
     end
 

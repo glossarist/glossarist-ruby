@@ -22,9 +22,9 @@ module Glossarist
       map :extension_attributes, to: :extension_attributes
 
       map :date_accepted, with: { from: :date_accepted_from_yaml, to: :date_accepted_to_yaml }
-      map :uuid, to: :uuid, with: { to: :uuid_to_hash, from: :uuid_from_hash }
-      map :id, to: :id, with: { to: :id_to_hash, from: :id_from_hash }
-      map :identifier, to: :id, with: { to: :id_to_hash, from: :id_from_hash }
+      map :uuid, to: :uuid, with: { to: :uuid_to_yaml, from: :uuid_from_yaml }
+      map :id, to: :id, with: { to: :id_to_yaml, from: :id_from_yaml }
+      map :identifier, to: :id, with: { to: :id_to_yaml, from: :id_from_yaml }
     end
 
     def designations
@@ -65,18 +65,18 @@ module Glossarist
       data.authoritative_source
     end
 
-    def uuid_to_hash(model, doc)
+    def uuid_to_yaml(model, doc)
       doc["id"] = model.uuid if model.uuid
     end
 
-    def uuid_from_hash(model, value)
+    def uuid_from_yaml(model, value)
       model.uuid = value
     end
 
-    def id_to_hash(model, doc)
+    def id_to_yaml(model, doc)
     end
 
-    def id_from_hash(model, value)
+    def id_from_yaml(model, value)
       model.id = value
     end
 

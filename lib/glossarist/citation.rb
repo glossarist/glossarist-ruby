@@ -33,22 +33,22 @@ module Glossarist
     attribute :ref, :string
 
     yaml do
-      map :id, to: :id, with: { from: :id_from_hash, to: :id_to_hash }
-      map :text, to: :text, with: { from: :text_from_hash, to: :text_to_hash }
-      map :source, to: :source, with: { from: :source_from_hash, to: :source_to_hash }
-      map :version, to: :version, with: { from: :version_from_hash, to: :version_to_hash }
-      map :ref, to: :ref, with: { from: :ref_from_hash, to: :ref_to_hash }
+      map :id, to: :id, with: { from: :id_from_yaml, to: :id_to_yaml }
+      map :text, to: :text, with: { from: :text_from_yaml, to: :text_to_yaml }
+      map :source, to: :source, with: { from: :source_from_yaml, to: :source_to_yaml }
+      map :version, to: :version, with: { from: :version_from_yaml, to: :version_to_yaml }
+      map :ref, to: :ref, with: { from: :ref_from_yaml, to: :ref_to_yaml }
 
       map :clause, to: :clause
       map :link, to: :link
       map :original, to: :original
     end
 
-    def ref_from_hash(model, value)
+    def ref_from_yaml(model, value)
       model.ref = value
     end
 
-    def ref_to_hash(model, doc)
+    def ref_to_yaml(model, doc)
       doc["ref"] = if model.structured?
                      ref_hash(model)
                    else
@@ -56,35 +56,35 @@ module Glossarist
                    end
     end
 
-    def id_from_hash(model, value)
+    def id_from_yaml(model, value)
       model.id = value
     end
 
-    def id_to_hash(_model, _doc)
+    def id_to_yaml(_model, _doc)
       # skip, will be handled in ref
     end
 
-    def text_from_hash(model, value)
+    def text_from_yaml(model, value)
       model.text = value
     end
 
-    def text_to_hash(_model, _doc)
+    def text_to_yaml(_model, _doc)
       # skip, will be handled in ref
     end
 
-    def source_from_hash(model, value)
+    def source_from_yaml(model, value)
       model.source = value
     end
 
-    def source_to_hash(_model, _doc)
+    def source_to_yaml(_model, _doc)
       # skip, will be handled in ref
     end
 
-    def version_from_hash(model, value)
+    def version_from_yaml(model, value)
       model.version = value
     end
 
-    def version_to_hash(_model, _doc)
+    def version_to_yaml(_model, _doc)
       # skip, will be handled in ref
     end
 
