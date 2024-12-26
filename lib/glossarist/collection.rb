@@ -1,8 +1,3 @@
-# frozen_string_literal: true
-
-# (c) Copyright 2021 Ribose Inc.
-#
-
 module Glossarist
   # @todo Add support for lazy concept loading.
   # @todo Consider extracting persistence backend to a separate class.
@@ -33,7 +28,6 @@ module Glossarist
     def fetch(id)
       @index[id]
     end
-
     alias :[] :fetch
 
     # If concept with given ID is present in this collection, returns that
@@ -44,7 +38,7 @@ module Glossarist
     #    Concept ID
     # @return [Concept]
     def fetch_or_initialize(id)
-      fetch(id) or store(Concept.new(id: id))
+      fetch(id) or store(Concept.of_yaml({ id: id }))
     end
 
     # Adds concept to the collection.  If collection contains a concept with
@@ -55,7 +49,6 @@ module Glossarist
     def store(concept)
       @index[concept.id] = concept
     end
-
     alias :<< :store
 
     # Reads all concepts from files.
@@ -70,10 +63,8 @@ module Glossarist
       @index.each_value &method(:save_concept_to_file)
     end
 
-    private
-
     def load_concept_from_file(filename)
-      Concept.from_h(Psych.safe_load(File.read(filename)))
+      Concept.from_yaml(File.read(filename))
     rescue Psych::SyntaxError => e
       raise Glossarist::ParseError.new(filename: filename, line: e.line)
     end

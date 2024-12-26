@@ -2,20 +2,20 @@
 data:
   dates: []
   definition:
-  - content: "{{material entity}} that is not and has never been a living organism"
+  - content: "{{biological_entity}} that is a human being"
   examples: []
   notes: []
   sources:
   - origin:
       ref: ISO/TS 14812:2022
-      clause: 3.1.1.4
+      clause: 3.1.1.6
       link: https://www.iso.org/standard/79779.html
     type: authoritative
   terms:
   - type: expression
     normative_status: preferred
-    designation: non-biological entity
+    designation: person
   language_code: eng
   entry_status: valid
+id: 9c15f53f-b4b1-5e29-b27b-e971fbe85740
 status: valid
-id: b90879f4-9627-5c09-a660-827b44f4fb24

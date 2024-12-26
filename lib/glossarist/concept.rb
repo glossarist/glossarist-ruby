@@ -1,244 +1,101 @@
-# frozen_string_literal: true
-
-# (c) Copyright 2021 Ribose Inc.
-#
-
 module Glossarist
-  class Concept < Model
-    # Concept ID.
-    # @return [String]
-    attr_reader :id
+  class Concept < Lutaml::Model::Serializable
+    attribute :data, ConceptData, default: -> { ConceptData.new }
+    attribute :id, :string
+    attribute :uuid, :string
+    attribute :subject, :string
+    attribute :non_verb_rep, :string
+    attribute :extension_attributes, :string
+    attribute :lineage_source, :string
+    attribute :localizations, :hash
+    attribute :extension_attributes, :hash
+    attribute :termid, :string
 
-    attr_writer :uuid
+    yaml do
+      map :data, to: :data
+      map :termid, to: :termid
+      map :subject, to: :subject
+      map :non_verb_rep, to: :non_verb_rep
+      map :extension_attributes, to: :extension_attributes
+      map :lineage_source, to: :lineage_source
+      map :localizations, to: :localizations
+      map :extension_attributes, to: :extension_attributes
 
-    # Concept designations.
-    # @todo Alias +terms+ exists only for legacy reasons and will be removed.
-    # @return [Array<Designations::Base>]
-    attr_reader :designations
+      map :date_accepted, with: { from: :date_accepted_from_yaml, to: :date_accepted_to_yaml }
+      map :uuid, to: :uuid, with: { to: :uuid_to_yaml, from: :uuid_from_yaml }
+      map :id, to: :id, with: { to: :id_to_yaml, from: :id_from_yaml }
+      map :identifier, to: :id, with: { to: :id_to_yaml, from: :id_from_yaml }
+    end
+
+    def designations
+      data.terms
+    end
     alias :terms :designations
 
-    # <<BasicDocument>>LocalizedString
-    # @return [String]
-    attr_accessor :domain
+    def definition
+      data.definition
+    end
 
-    # <<BasicDocument>>LocalizedString
-    # @return [String]
-    attr_accessor :subject
+    def definition=(value)
+      data.definition = value
+    end
 
-    # Concept definition.
-    # @return [Array<DetailedDefinition>]
-    attr_reader :definition
+    def sources
+      data.sources
+    end
 
-    # Non verbal representation of the concept.
-    # @return [NonVerbRep]
-    attr_accessor :non_verb_rep
+    def examples
+      data.examples
+    end
 
-    # Concept notes
-    # @return [Array<DetailedDefinition>]
-    attr_reader :notes
+    def notes
+      data.notes
+    end
 
-    # Concept examples
-    # @return [Array<DetailedDefinition>]
-    attr_reader :examples
+    def preferred_designations
+      data.terms.select(&:preferred?)
+    end
+    alias :preferred_terms :preferred_designations
 
-    # Contains list of extended attributes
-    attr_accessor :extension_attributes
+    def date_accepted
+      data.date_accepted
+    end
 
-    attr_accessor :lineage_source
-    attr_accessor :lineage_source_similarity
+    def authoritative_source
+      data.authoritative_source
+    end
 
-    attr_accessor :release
+    def uuid_to_yaml(model, doc)
+      doc["id"] = model.uuid if model.uuid
+    end
 
-    def initialize(*args)
-      @localizations = {}
-      @sources = Glossarist::Collections::Collection.new(klass: ConceptSource)
-      @related = Glossarist::Collections::Collection.new(klass: RelatedConcept)
-      @definition = Glossarist::Collections::Collection.new(klass: DetailedDefinition)
-      @notes = Glossarist::Collections::Collection.new(klass: DetailedDefinition)
-      @examples = Glossarist::Collections::Collection.new(klass: DetailedDefinition)
-      @dates = Glossarist::Collections::Collection.new(klass: ConceptDate)
+    def uuid_from_yaml(model, value)
+      model.uuid = value
+    end
 
-      @designations = Glossarist::Collections::DesignationCollection.new
-      @extension_attributes = {}
+    def id_to_yaml(model, doc)
+    end
 
-      normalize_args(args)
+    def id_from_yaml(model, value)
+      model.id = value
+    end
 
-      super
+    def date_accepted_to_yaml(model, doc)
+      doc["date_accepted"] = model.date_accepted.date.iso8601 if model.date_accepted
+    end
+
+    def date_accepted_from_yaml(model, value)
+      return if model.date_accepted
+
+      model.data.dates ||= []
+      model.data.dates << ConceptDate.of_yaml({ "date" => value, "type" => "accepted" })
     end
 
     def uuid
       @uuid ||= Glossarist::Utilities::UUID.uuid_v5(
         Glossarist::Utilities::UUID::OID_NAMESPACE,
-        to_h_no_uuid.to_yaml,
+        data.to_yaml,
       )
-    end
-
-    def id=(id)
-      # Some of the glossaries that are not generated using glossarist, contains ids that are integers
-      # so adding a temporary check until every glossary is updated using glossarist.
-      if !id.nil? && (id.is_a?(String) || id.is_a?(Integer))
-        @id = id
-      else
-        raise(Glossarist::Error, "Expect id to be a String or Integer, Got #{id.class} (#{id})")
-      end
-    end
-
-    alias :termid= :id=
-    alias :identifier= :id=
-
-    # List of authorative sources.
-    # @todo Alias +authoritative_source+ exists for legacy reasons and may be
-    #   removed.
-    # @return [Array<ConceptSource>]
-    attr_reader :sources
-
-    # return [Array<ConceptDate>]
-    attr_reader :dates
-
-    def examples=(examples)
-      @examples.clear!
-      examples&.each { |example| @examples << example }
-    end
-
-    def notes=(notes)
-      @notes.clear!
-      notes&.each { |note| @notes << note }
-    end
-
-    def definition=(definition)
-      @definition.clear!
-      definition&.each { |definition| @definition << definition }
-    end
-
-    def designations=(designations)
-      @designations.clear!
-      designations&.each { |designation| @designations << designation }
-    end
-
-    alias :terms= :designations=
-
-    def preferred_designations
-      @designations.select(&:preferred?)
-    end
-
-    alias :preferred_terms :preferred_designations
-
-    def dates=(dates)
-      @dates.clear!
-      dates&.each { |date| @dates << date }
-    end
-
-    def sources=(sources)
-      @sources.clear!
-      sources&.each { |source| @sources << source }
-    end
-
-    def authoritative_source
-      @sources.select { |source| source.authoritative? }
-    end
-
-    def authoritative_source=(sources)
-      sources&.each do |source|
-        @sources << source.merge({ "type" => "authoritative" })
-      end
-    end
-
-    def date_accepted=(date)
-      date_hash = {
-        "type" => "accepted",
-        "date" => date,
-      }
-
-      @dates ||= []
-      @dates << ConceptDate.new(date_hash)
-    end
-
-    def date_accepted
-      return nil unless @dates
-      @dates.find { |date| date.accepted? }
-    end
-
-    def to_h_no_uuid
-      {
-        "data" => {
-          "dates" => dates&.map(&:to_h),
-          "definition" => definition&.map(&:to_h),
-          "examples" => examples&.map(&:to_h),
-          "id" => id,
-          "lineage_source_similarity" => lineage_source_similarity,
-          "notes" => notes&.map(&:to_h),
-          "release" => release,
-          "sources" => sources.empty? ? nil : sources&.map(&:to_h),
-          "terms" => (terms&.map(&:to_h) || []),
-          "related" => related&.map(&:to_h),
-          "domain" => domain,
-        }.compact,
-
-        "date_accepted" => date_accepted&.date,
-
-      }.compact
-    end
-
-    def to_h
-      to_h_no_uuid.merge("id" => uuid)
-    end
-
-    # @deprecated For legacy reasons only.
-    #   Implicit conversion (i.e. {#to_hash} alias) will be removed soon.
-    alias :to_hash :to_h
-
-    # rubocop:disable Metrics/AbcSize, Style/RescueModifier
-    def self.from_h(hash)
-      new.tap do |concept|
-        concept.id = hash.dig("termid") || hash.dig("id")
-        concept.sources = hash.dig("sources")
-        concept.related = hash.dig("related")
-        concept.definition = hash.dig("definition")
-
-        hash.values
-          .grep(Hash)
-          .map { |subhash| Config.class_for(:localized_concept).from_h(subhash) rescue nil }
-          .compact
-
-        concept.related = hash.dig("related") || []
-      end
-    end
-    # rubocop:enable Metrics/AbcSize, Style/RescueModifier
-
-    # All Related Concepts
-    # @return [Array<RelatedConcept>]
-    def related
-      @related.empty? ? nil : @related
-    end
-
-    def related=(related)
-      @related.clear!
-      related&.each { |r| @related << r }
-    end
-
-    Glossarist::GlossaryDefinition::CONCEPT_DATE_TYPES.each do |type|
-      # Sets the ConceptDate and add it to dates list of the specified type.
-      define_method("date_#{type}=") do |date|
-        date_hash = {
-          "type" => type,
-          "date" => date,
-        }
-        @dates ||= []
-        @dates << ConceptDate.new(date_hash)
-      end
-    end
-
-    def normalize_args(args)
-      args.each do |arg|
-        data = arg.delete("data")
-
-        arg.merge!(data) if data
-
-        if arg["sources"]
-          arg.delete("authoritative_source")
-          arg.delete("authoritativeSource")
-        end
-      end
     end
   end
 end

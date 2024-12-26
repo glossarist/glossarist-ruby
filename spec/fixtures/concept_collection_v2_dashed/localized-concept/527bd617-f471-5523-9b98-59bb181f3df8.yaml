@@ -1,7 +1,7 @@
 ---
 data:
   dates:
-  - date: '2010-11-01T00:00:00.000Z'
+  - date: '2010-11-01T00:00:00+00:00'
     type: accepted
   definition: []
   examples: []
@@ -23,5 +23,5 @@ data:
     normative_status: preferred
     designation: Intension
   language_code: deu
-date_accepted: '2010-11-01T00:00:00.000Z'
+date_accepted: '2010-11-01T00:00:00+00:00'
 id: 527bd617-f471-5523-9b98-59bb181f3df8

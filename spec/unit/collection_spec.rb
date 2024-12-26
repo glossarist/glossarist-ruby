@@ -102,9 +102,9 @@ RSpec.describe Glossarist::Collection do
       allow(File).to receive(:read).with("path2").and_return("data: 2")
 
       expect(Glossarist::Concept)
-        .to receive(:from_h).with({ "data" => 1 }).and_return(double(id: 1))
+        .to receive(:from_yaml).with("data: 1").and_return(double(id: 1))
       expect(Glossarist::Concept)
-        .to receive(:from_h).with({ "data" => 2 }).and_return(double(id: 2))
+        .to receive(:from_yaml).with("data: 2").and_return(double(id: 2))
 
       expect { subject.load_concepts }.to change { collection_index.size }.by(2)
     end

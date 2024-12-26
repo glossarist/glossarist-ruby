@@ -3,7 +3,7 @@
 RSpec.describe Glossarist::ConceptSource do
   it_behaves_like "an Enum"
 
-  subject { described_class.new(attributes) }
+  subject { described_class.from_yaml(attributes) }
 
   let(:attributes) do
     {
@@ -11,19 +11,24 @@ RSpec.describe Glossarist::ConceptSource do
       status: "identical",
       origin: { "id"=> "123", "source" => "wikipedia", "version" => "Test version"},
       modification: "Test modification",
-    }
+    }.to_yaml
   end
 
-  describe "#to_h" do
+  describe "#to_yaml" do
     it "will convert concept source to hash" do
-      expected_hash = {
-        "type" => "authoritative",
-        "status" => "identical",
-        "origin" => { "ref" => {"id"=> "123", "source" => "wikipedia", "version" => "Test version" } },
-        "modification" => "Test modification",
-      }
+      expected_yaml = <<~YAML
+        ---
+        origin:
+          ref:
+            source: wikipedia
+            id: '123'
+            version: Test version
+        status: identical
+        type: authoritative
+        modification: Test modification
+      YAML
 
-      expect(subject.to_h).to eq(expected_hash)
+      expect(subject.to_yaml).to eq(expected_yaml)
     end
   end
 

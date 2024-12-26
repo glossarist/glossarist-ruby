@@ -4,9 +4,9 @@
 #
 
 RSpec.describe Glossarist::RelatedConcept do
-  it_behaves_like "an Enum"
+  # it_behaves_like "an Enum"
 
-  subject { described_class.new(attributes) }
+  subject { described_class.from_yaml(attributes) }
   let(:attributes) do
     {
       content: "Test content",
@@ -16,22 +16,22 @@ RSpec.describe Glossarist::RelatedConcept do
         id: "Test id",
         version: "Test version",
       }
-    }
+    }.to_yaml
   end
 
-  describe "#to_h" do
-    it "will convert related concept to hash" do
-      expected_hash = {
-        "content" => "Test content",
-        "type" => "supersedes",
-        "ref" => {
-          "source" => "Test source",
-          "id" => "Test id",
-          "version" => "Test version",
-        },
-      }
+  describe "#to_yaml" do
+    it "will convert related concept to yaml" do
+      expected_yaml = <<~YAML
+        ---
+        content: Test content
+        type: supersedes
+        ref:
+          source: Test source
+          id: Test id
+          version: Test version
+      YAML
 
-      expect(subject.to_h).to eq(expected_hash)
+      expect(subject.to_yaml).to eq(expected_yaml)
     end
   end
 end

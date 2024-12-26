@@ -2,21 +2,20 @@
 data:
   dates: []
   definition:
-  - content: "{{entity}} that does not occupy three-dimensional space"
-  examples:
-  - content: Idea, process, organization, etc.
+  - content: "{{material entity}} that is not and has never been a living organism"
+  examples: []
   notes: []
   sources:
   - origin:
       ref: ISO/TS 14812:2022
-      clause: 3.1.1.2
+      clause: 3.1.1.4
       link: https://www.iso.org/standard/79779.html
     type: authoritative
   terms:
   - type: expression
     normative_status: preferred
-    designation: immaterial_entity
+    designation: non-biological entity
   language_code: eng
   entry_status: valid
+id: cd5b9b55-4d46-5a17-840d-ac315074c909
 status: valid
-id: 6660ed79-d78b-5940-887f-9c86597eed26

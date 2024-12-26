@@ -1,7 +1,7 @@
 ---
 data:
   dates:
-  - date: '2003-02-15T00:00:00.000Z'
+  - date: '2003-02-15T00:00:00+00:00'
     type: accepted
   definition:
   - content: angle from the equatorial plane to the perpendicular to the ellipsoid
@@ -29,5 +29,5 @@ data:
   - type: expression
     designation: ellipsoidal latitude
   language_code: eng
-date_accepted: '2003-02-15T00:00:00.000Z'
+date_accepted: '2003-02-15T00:00:00+00:00'
 id: 27457e38-89b5-5694-8d19-0dd3973ec71d

@@ -1,31 +1,23 @@
 # frozen_string_literal: true
 
 module Glossarist
-  class RelatedConcept < Model
-    include Glossarist::Utilities::Enum
+  class RelatedConcept < Lutaml::Model::Serializable
+    attribute :content, :string
+    attribute :type, :string, values: Glossarist::GlossaryDefinition::RELATED_CONCEPT_TYPES
+    attribute :ref, Citation
 
-    register_enum :type, Glossarist::GlossaryDefinition::RELATED_CONCEPT_TYPES
-
-    # @return [String]
-    attr_accessor :content
-
-    # Reference to the related concept.
-    # @return [Citation]
-    attr_reader :ref
-
-    def ref=(ref)
-      @ref = Citation.new(ref)
+    yaml do
+      map :content, to: :content
+      map :type, to: :type
+      map :ref, with: { from: :ref_from_yaml, to: :ref_to_yaml }
     end
 
-    def to_h
-      reference = ref&.to_h
-      reference&.merge!(reference&.delete("ref"))
+    def ref_to_yaml(model, doc)
+      doc["ref"] = Citation.as_yaml(model.ref)["ref"] if model.ref
+    end
 
-      {
-        "type" => type.to_s,
-        "content" => content,
-        "ref" => reference,
-      }.compact
+    def ref_from_yaml(model, value)
+      model.ref = Citation.of_yaml(value)
     end
   end
 end

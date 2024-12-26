@@ -1,90 +1,98 @@
-# frozen_string_literal: true
+require_relative "localized_concept"
 
 module Glossarist
-  class ManagedConcept < Model
-    include Glossarist::Utilities::Enum
+  class ManagedConcept < Lutaml::Model::Serializable
     include Glossarist::Utilities::CommonFunctions
 
-    # @return [String]
-    attr_accessor :id
-    alias :termid= :id=
-    alias :identifier= :id=
+    attribute :data, ManagedConceptData
 
-    attr_accessor :uuid
+    attribute :related, RelatedConcept
+    attribute :dates, ConceptDate, collection: true
+    attribute :sources, ConceptSource
+    attribute :date_accepted, ConceptDate
+    # TODO: convert to LocalizedConceptCollection when custom
+    #       collections are implemented in lutaml-model
+    attribute :status, :string, values: Glossarist::GlossaryDefinition::CONCEPT_STATUSES
 
-    # @return [Array<RelatedConcept>]
-    attr_reader :related
+    attribute :identifier, :string
+    alias :id :identifier
+    alias :id= :identifier=
 
-    # @return [String]
-    register_enum :status, Glossarist::GlossaryDefinition::CONCEPT_STATUSES
+    attribute :uuid, :string
 
-    # return [Array<ConceptDate>]
-    attr_reader :dates
+    yaml do
+      map :data, to: :data
+      map :id, with: { to: :identifier_to_yaml, from: :identifier_from_yaml }
+      map :identifier, with: { to: :identifier_to_yaml, from: :identifier_from_yaml }
+      map :related, to: :related
+      map :dates, to: :dates
+      map :date_accepted, with: { from: :date_accepted_from_yaml, to: :date_accepted_to_yaml }
+      map :status, to: :status
 
-    # return [Array<LocalizedConcept>]
-    attr_reader :localized_concepts
+      map :uuid, to: :uuid, with: { from: :uuid_from_yaml, to: :uuid_to_yaml }
+    end
 
-    # Concept group
-    # @return [Array<String>]
-    attr_reader :groups
+    def localized_concepts
+      data.localized_concepts
+    end
 
-    # List of authorative sources.
-    # @return [Array<ConceptSource>]
-    attr_reader :sources
+    def localized_concepts=(val)
+      data.localized_concepts = val
+    end
 
-    # All localizations for this concept.
-    #
-    # Keys are language codes and values are instances of {LocalizedConcept}.
-    # @return [Hash<String, LocalizedConcept>]
-    attr_reader :localizations
+    def localizations
+      data.localizations
+    end
 
-    def initialize(attributes = {})
-      @localizations = {}
-      @localized_concepts = {}
-      @localized_concept_class = Config.class_for(:localized_concept)
-      @uuid_namespace = Glossarist::Utilities::UUID::OID_NAMESPACE
+    def localization(lang)
+      localizations[lang]
+    end
+    alias :l10n :localization
 
-      attributes = symbolize_keys(attributes)
-      @uuid = attributes[:uuid]
+    def date_accepted_from_yaml(model, value)
+      model.dates ||= []
+      model.dates << ConceptDate.of_yaml({ "date" => value, "type" => "accepted" })
+    end
 
-      data = attributes.delete(:data) || {}
-      data["groups"] = attributes[:groups]
-      data["status"] = attributes[:status]
+    def date_accepted_to_yaml(model, doc)
+      doc["date_accepted"] = model.date_accepted.date if model.date_accepted
+    end
 
-      data = symbolize_keys(data.compact)
+    def uuid_to_yaml(model, doc)
+      doc["id"] = model.uuid if model.uuid
+    end
 
-      super(slice_keys(data, managed_concept_attributes))
+    def uuid_from_yaml(model, value)
+      model.uuid = value if value
     end
 
     def uuid
-      @uuid ||= Glossarist::Utilities::UUID.uuid_v5(@uuid_namespace, to_h_no_uuid.to_yaml)
+      @uuid ||= Glossarist::Utilities::UUID.uuid_v5(
+        Glossarist::Utilities::UUID::OID_NAMESPACE,
+        to_yaml(except: [:uuid])
+      )
     end
 
-    def related=(related)
-      @related = related&.map { |r| RelatedConcept.new(r) }
+    def identifier_to_yaml(model, doc)
+      value = model.identifier || model.id
+      doc["id"] = value if value && !doc["id"]
     end
 
-    def dates=(dates)
-      @dates = dates&.map { |d| ConceptDate.new(d) }
+    def identifier_from_yaml(model, value)
+      model.identifier = value || model.identifier
     end
 
-    def groups=(groups)
-      return unless groups
+    def localized_concepts=(localized_concepts_collection)
+      return unless localized_concepts_collection
 
-      @groups = groups.is_a?(Array) ? groups : [groups]
-    end
-
-    def localized_concepts=(localized_concepts)
-      return unless localized_concepts
-
-      if localized_concepts.is_a?(Hash)
-        @localized_concepts = stringify_keys(localized_concepts)
+      if localized_concepts_collection.is_a?(Hash)
+        @localized_concepts = stringify_keys(localized_concepts_collection)
       else
-        localized_concepts.each do |localized_concept_hash|
-          lang = localized_concept_hash["language_code"].to_s
+        localized_concepts_collection.each do |localized_concept_hash|
+          lang = localized_concept_hash.dig("data", "language_code").to_s
 
           localized_concept = add_localization(
-            @localized_concept_class.new(localized_concept_hash["data"] || localized_concept_hash),
+            Config.class_for(:localized_concept).of_yaml(localized_concept_hash),
           )
 
           @localized_concepts[lang] = localization(lang).uuid
@@ -93,72 +101,21 @@ module Glossarist
         end
       end
     end
-
-    def sources=(sources)
-      @sources = sources&.map do |source|
-        ConceptSource.new(source)
-      end || []
-    end
-
-    def localizations=(localizations)
-      return unless localizations
-
-      @localizations = {}
-
-      localizations.each do |localized_concept|
-        unless localized_concept.is_a?(@localized_concept_class)
-          localized_concept = @localized_concept_class.new(
-            localized_concept["data"] || localized_concept,
-          )
-        end
-
-        add_l10n(localized_concept)
-      end
-    end
-
-    def localizations_hash
-      @localizations.map do |key, localized_concept|
-        [key, localized_concept.to_h]
-      end.to_h
-    end
+    attr_reader :localized_concepts
 
     # Adds concept localization.
     # @param localized_concept [LocalizedConcept]
     def add_localization(localized_concept)
       lang = localized_concept.language_code
+      @localized_concepts ||= {}
       @localized_concepts[lang] = @localized_concepts[lang] || localized_concept.uuid
       localizations.store(lang, localized_concept)
     end
-
     alias :add_l10n :add_localization
 
     # Returns concept localization.
     # @param lang [String] language code
     # @return [LocalizedConcept]
-    def localization(lang)
-      localizations[lang]
-    end
-
-    alias :l10n :localization
-
-    def to_h_no_uuid
-      {
-        "data" => {
-          "identifier" => id,
-          "localized_concepts" => localized_concepts.empty? ? nil : localized_concepts,
-          "groups" => groups,
-          "sources" => sources&.map(&:to_h),
-        }.compact,
-        "related" => related&.map(&:to_h),
-        "date_accepted" => date_accepted&.date,
-        "status" => status,
-      }.compact
-    end
-
-    def to_h
-      to_h_no_uuid.merge("id" => uuid)
-    end
-
     def default_designation
       localized = localization("eng") || localizations.values.first
       terms = localized&.preferred_terms&.first || localized&.terms&.first
@@ -167,45 +124,11 @@ module Glossarist
 
     def default_definition
       localized = localization("eng") || localizations.values.first
-      localized&.definition&.first&.content
+      localized&.data&.definition&.first&.content
     end
 
     def default_lang
       localization("eng") || localizations.values.first
-    end
-
-    def date_accepted=(date)
-      date_hash = {
-        "type" => "accepted",
-        "date" => date,
-      }
-
-      @dates ||= []
-      @dates << ConceptDate.new(date_hash)
-    end
-
-    def date_accepted
-      return nil unless @dates
-      @dates.find { |date| date.accepted? }
-    end
-
-    def managed_concept_attributes
-      %i[
-        data
-        id
-        identifier
-        uuid
-        related
-        status
-        dates
-        date_accepted
-        dateAccepted
-        localized_concepts
-        localizedConcepts
-        localizations
-        groups
-        sources
-      ].compact
     end
 
     Glossarist::GlossaryDefinition::RELATED_CONCEPT_TYPES.each do |type|

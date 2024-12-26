@@ -1,57 +1,35 @@
-# frozen_string_literal: true
-
-require_relative "../utilities"
-
 module Glossarist
   module Designation
-    class GrammarInfo
-      include Glossarist::Utilities::Enum
-      include Glossarist::Utilities::BooleanAttributes
-      include Glossarist::Utilities::CommonFunctions
+    class GrammarInfo < Lutaml::Model::Serializable
+      attribute :gender, :string, values: Glossarist::GlossaryDefinition::GRAMMAR_INFO_GENDERS, collection: true
+      attribute :number, :string, values: Glossarist::GlossaryDefinition::GRAMMAR_INFO_NUMBERS, collection: true
+      attribute :part_of_speech, :string, values: Glossarist::GlossaryDefinition::GRAMMAR_INFO_BOOLEAN_ATTRIBUTES
 
-      register_enum :gender, Glossarist::GlossaryDefinition::GRAMMAR_INFO_GENDERS, multiple: true
-      register_enum :number, Glossarist::GlossaryDefinition::GRAMMAR_INFO_NUMBERS, multiple: true
+      yaml do
+        map :gender, to: :gender
+        map :number, to: :number
 
-      register_boolean_attributes Glossarist::GlossaryDefinition::GRAMMAR_INFO_BOOLEAN_ATTRIBUTES
-
-      def initialize(options = {})
-        sanitized_options(options).each do |attr, value|
-          public_send("#{attr}=", value)
+        map :part_of_speech, with: { to: :part_of_speech_to_yaml, from: :part_of_speech_from_yaml }
+        Glossarist::GlossaryDefinition::GRAMMAR_INFO_BOOLEAN_ATTRIBUTES.each do |bool_attr|
+          map bool_attr, with: { to: :"part_of_speech_#{bool_attr}_to_yaml", from: :"part_of_speech_#{bool_attr}_from_yaml" }
         end
       end
 
-      def part_of_speech=(pos)
-        public_send("#{pos}=", pos)
+      def part_of_speech_from_yaml(model, value)
+        model.part_of_speech = value
       end
 
-      def to_h
-        {
-          "preposition" => preposition?,
-          "participle" => participle?,
-          "adj" => adj?,
-          "verb" => verb?,
-          "adverb" => adverb?,
-          "noun" => noun?,
-          "gender" => gender,
-          "number" => number,
-        }
+      def part_of_speech_to_yaml(model, doc)
       end
 
-      private
+      Glossarist::GlossaryDefinition::GRAMMAR_INFO_BOOLEAN_ATTRIBUTES.each do |bool_attr|
+        define_method(:"part_of_speech_#{bool_attr}_from_yaml") do |model, value|
+          model.public_send("#{bool_attr}=", value)
+        end
 
-      def sanitized_options(options)
-        hash = symbolize_keys(options)
-        slice_keys(hash, [
-          :gender,
-          :number,
-          :preposition,
-          :participle,
-          :adj,
-          :verb,
-          :adverb,
-          :noun,
-          :part_of_speech,
-        ])
+        define_method(:"part_of_speech_#{bool_attr}_to_yaml") do |model, doc|
+          doc[bool_attr] = model.public_send("#{bool_attr}?")
+        end
       end
     end
   end

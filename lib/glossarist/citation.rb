@@ -1,69 +1,99 @@
-# frozen_string_literal: true
-
-# (c) Copyright 2021 Ribose Inc.
-#
-
 module Glossarist
-  class Citation < Model
+  class Citation < Lutaml::Model::Serializable
     # Unstructured (plain text) reference.
     # @return [String]
-    attr_accessor :text
+    attribute :text, :string
 
     # Source in structured reference.
     # @return [String]
-    attr_accessor :source
+    attribute :source, :string
 
     # Document ID in structured reference.
     # @return [String]
-    attr_accessor :id
+    attribute :id, :string
 
     # Document version in structured reference.
     # @return [String]
-    attr_accessor :version
+    attribute :version, :string
 
     # @return [String]
     # Referred clause of the document.
-    attr_accessor :clause
+    attribute :clause, :string
 
     # Link to document.
     # @return [String]
-    attr_accessor :link
+    attribute :link, :string
 
     # Original ref text before parsing.
     # @return [String]
     # @note This attribute is likely to be removed or reworked in future.
     #   It is arguably not relevant to Glossarist itself.
-    attr_accessor :original
+    attribute :original, :string
 
-    # Whether it is a plain text ref.
-    # @return [Boolean]
-    def plain?
-      (source && id && version).nil?
+    attribute :ref, :string
+
+    yaml do
+      map :id, to: :id, with: { from: :id_from_yaml, to: :id_to_yaml }
+      map :text, to: :text, with: { from: :text_from_yaml, to: :text_to_yaml }
+      map :source, to: :source, with: { from: :source_from_yaml, to: :source_to_yaml }
+      map :version, to: :version, with: { from: :version_from_yaml, to: :version_to_yaml }
+      map :ref, to: :ref, with: { from: :ref_from_yaml, to: :ref_to_yaml }
+
+      map :clause, to: :clause
+      map :link, to: :link
+      map :original, to: :original
     end
 
-    # Whether it is a structured ref.
-    # @return [Boolean]
-    def structured?
-      !plain?
+    def ref_from_yaml(model, value)
+      model.ref = value
     end
 
-    def to_h
+    def ref_to_yaml(model, doc)
+      doc["ref"] = if model.structured?
+                     ref_hash(model)
+                   else
+                     model.text
+                   end
+    end
+
+    def id_from_yaml(model, value)
+      model.id = value
+    end
+
+    def id_to_yaml(_model, _doc)
+      # skip, will be handled in ref
+    end
+
+    def text_from_yaml(model, value)
+      model.text = value
+    end
+
+    def text_to_yaml(_model, _doc)
+      # skip, will be handled in ref
+    end
+
+    def source_from_yaml(model, value)
+      model.source = value
+    end
+
+    def source_to_yaml(_model, _doc)
+      # skip, will be handled in ref
+    end
+
+    def version_from_yaml(model, value)
+      model.version = value
+    end
+
+    def version_to_yaml(_model, _doc)
+      # skip, will be handled in ref
+    end
+
+    def ref_hash(model = self)
       {
-        "ref" => ref_to_h,
-        "clause" => clause,
-        "link" => link,
-        "original" => original,
+        "source" => model.source,
+        "id" => model.id,
+        "version" => model.version
       }.compact
-    end
-
-    def self.from_h(hash)
-      hash = hash.dup
-
-      ref_val = hash.delete("ref")
-      hash.merge!(Hash === ref_val ? ref_val : {"text" => ref_val})
-      hash.compact!
-
-      super(hash)
     end
 
     def ref=(ref)
@@ -76,14 +106,14 @@ module Glossarist
       end
     end
 
-    private
+    def plain?
+      (source && id && version).nil?
+    end
 
-    def ref_to_h
-      if structured?
-        { "source" => source, "id" => id, "version" => version }.compact
-      else
-        text
-      end
+    # Whether it is a structured ref.
+    # @return [Boolean]
+    def structured?
+      !plain?
     end
   end
 end

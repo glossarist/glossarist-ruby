@@ -1,18 +1,19 @@
-# frozen_string_literal: true
-
 module Glossarist
   module Designation
-    class Base < Model
-      include Glossarist::Utilities::Enum
+    class Base < Lutaml::Model::Serializable
+      attribute :designation, :string
+      attribute :geographical_area, :string
+      attribute :normative_status, :string, values: Glossarist::GlossaryDefinition::DESIGNATION_BASE_NORMATIVE_STATUSES
+      attribute :type, :string
 
-      # @note This is not entirely aligned with agreed schema and may be
-      #   changed.
-      attr_accessor :designation
+      yaml do
+        map :type, to: :type
+        map :normative_status, to: :normative_status
+        map :geographical_area, to: :geographical_area
+        map :designation, to: :designation
+      end
 
-      attr_accessor :geographical_area
-      register_enum :normative_status, Glossarist::GlossaryDefinition::DESIGNATION_BASE_NORMATIVE_STATUSES
-
-      def self.from_h(hash)
+      def self.of_yaml(hash, options = {})
         type = hash["type"]
 
         if type.nil? || /\w/ !~ type
@@ -23,13 +24,14 @@ module Glossarist
 
         if self == Base
           # called on Base class, delegate it to proper subclass
-          SERIALIZED_TYPES[type].from_h(hash)
+          SERIALIZED_TYPES[type].of_yaml(hash)
         else
           # called on subclass, instantiate object
           unless SERIALIZED_TYPES[self] == type
             raise ArgumentError, "unexpected designation type: #{type}"
           end
-          super(hash.reject { |k, _| k == "type" })
+
+          super(hash, options)
         end
       end
     end
