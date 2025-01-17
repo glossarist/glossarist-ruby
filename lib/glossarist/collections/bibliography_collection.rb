@@ -5,7 +5,7 @@ require "relaton"
 module Glossarist
   module Collections
     class BibliographyCollection < Relaton::Db
-      def initialize(concepts, global_cache, local_cache)
+      def initialize(_concepts, global_cache, local_cache)
         super(global_cache, local_cache)
       end
 

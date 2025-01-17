@@ -43,7 +43,7 @@ RSpec.describe Glossarist::Collection do
       it "initializes a new concept and adds it to the collection" do
         expect { subject.fetch_or_initialize("7890") }
           .to change { collection_index.size }.by(1)
-          .and change { collection_index["7890"] }
+          .and(change { collection_index["7890"] })
 
         expect(collection_index["7890"]).to be_kind_of(Glossarist::Concept)
       end

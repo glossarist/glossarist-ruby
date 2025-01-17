@@ -21,12 +21,13 @@ module Glossarist
       #
       # See RFC 4122 for details of UUID at: https://www.ietf.org/rfc/rfc4122.txt
       def self.uuid_from_hash(hash_class, namespace, name)
-        if hash_class == Digest::MD5 || hash_class == OpenSSL::Digest::MD5
+        if [Digest::MD5, OpenSSL::Digest::MD5].include?(hash_class)
           version = 3
-        elsif hash_class == Digest::SHA1 || hash_class == OpenSSL::Digest::SHA1
+        elsif [Digest::SHA1, OpenSSL::Digest::SHA1].include?(hash_class)
           version = 5
         else
-          raise ArgumentError, "Expected OpenSSL::Digest::SHA1 or OpenSSL::Digest::MD5, got #{hash_class.name}."
+          raise ArgumentError,
+                "Expected OpenSSL::Digest::SHA1 or OpenSSL::Digest::MD5, got #{hash_class.name}."
         end
 
         uuid_namespace = pack_uuid_namespace(namespace)
@@ -58,12 +59,16 @@ module Glossarist
       end
 
       def self.pack_uuid_namespace(namespace)
-        if [DNS_NAMESPACE, OID_NAMESPACE, URL_NAMESPACE, X500_NAMESPACE].include?(namespace)
+        if [DNS_NAMESPACE, OID_NAMESPACE, URL_NAMESPACE,
+            X500_NAMESPACE].include?(namespace)
           namespace
         else
           match_data = namespace.match(/\A(\h{8})-(\h{4})-(\h{4})-(\h{4})-(\h{4})(\h{8})\z/)
 
-          raise ArgumentError, "Only UUIDs are valid namespace identifiers" unless match_data.present?
+          unless match_data.present?
+            raise ArgumentError,
+                  "Only UUIDs are valid namespace identifiers"
+          end
 
           match_data.captures.map { |s| s.to_i(16) }.pack("NnnnnN")
         end

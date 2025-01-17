@@ -25,7 +25,7 @@ RSpec.describe Glossarist::Designation::LetterSymbol do
         "script" => "Latn",
       }
 
-      expect(YAML.load(subject.to_yaml)).to eq(expected_yaml)
+      expect(YAML.safe_load(subject.to_yaml)).to eq(expected_yaml)
     end
   end
 end

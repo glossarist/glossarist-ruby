@@ -88,7 +88,8 @@ RSpec.describe Glossarist::ConceptSet do
     end
 
     it "should generate correct latex output" do
-      expect(subject.send(:to_latex_from_file, fixtures_path("latex_entries.txt"))).to eq(expected_output)
+      expect(subject.send(:to_latex_from_file,
+                          fixtures_path("latex_entries.txt"))).to eq(expected_output)
     end
 
     it "should display the name of the concept if it is not found" do
@@ -124,7 +125,8 @@ RSpec.describe Glossarist::ConceptSet do
     end
 
     it "should convert the definition to latex format" do
-      expect(subject.send(:normalize_definition, definition)).to eq(expected_definition)
+      expect(subject.send(:normalize_definition,
+                          definition)).to eq(expected_definition)
     end
   end
 end

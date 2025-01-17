@@ -3,7 +3,8 @@ module Glossarist
     class Base < Lutaml::Model::Serializable
       attribute :designation, :string
       attribute :geographical_area, :string
-      attribute :normative_status, :string, values: Glossarist::GlossaryDefinition::DESIGNATION_BASE_NORMATIVE_STATUSES
+      attribute :normative_status, :string,
+                values: Glossarist::GlossaryDefinition::DESIGNATION_BASE_NORMATIVE_STATUSES
       attribute :type, :string
 
       yaml do
@@ -19,8 +20,6 @@ module Glossarist
         if type.nil? || /\w/ !~ type
           raise ArgumentError, "designation type is missing"
         end
-
-        designation_subclass = SERIALIZED_TYPES[type]
 
         if self == Base
           # called on Base class, delegate it to proper subclass

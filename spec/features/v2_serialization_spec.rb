@@ -1,8 +1,13 @@
 RSpec.describe "Serialization and deserialization" do
   context "when localized_concept (with underscore as separator)" do
     let(:concept_folder) { "concept_collection_v2" }
-    let(:concept_files) { Dir.glob(File.join(fixtures_path(concept_folder), "concept", "*.{yaml,yml}")) }
-    let(:localized_concepts_folder) { File.join(fixtures_path(concept_folder), "localized_concept") }
+    let(:concept_files) do
+      Dir.glob(File.join(fixtures_path(concept_folder), "concept",
+                         "*.{yaml,yml}"))
+    end
+    let(:localized_concepts_folder) do
+      File.join(fixtures_path(concept_folder), "localized_concept")
+    end
 
     it "correctly loads concepts from files" do
       collection = Glossarist::ManagedConceptCollection.new
@@ -15,7 +20,8 @@ RSpec.describe "Serialization and deserialization" do
         expect(concept.to_yaml_hash["data"]).to eq(concept_from_file["data"])
 
         concept.localized_concepts.each do |lang, id|
-          localized_concept_path = File.join(localized_concepts_folder, "#{id}.yaml")
+          localized_concept_path = File.join(localized_concepts_folder,
+                                             "#{id}.yaml")
           localized_concept = load_yaml_file(localized_concept_path)
 
           expect(localized_concept["data"]).to eq(concept.localizations[lang].to_yaml_hash["data"])
@@ -30,11 +36,13 @@ RSpec.describe "Serialization and deserialization" do
         expect($?.exitstatus).to eq(0) # no difference
 
         # check content of conecept folder
-        system "diff", File.join(fixtures_path(concept_folder), "concept"), File.join(tmp_path, "concept")
+        system "diff", File.join(fixtures_path(concept_folder), "concept"),
+               File.join(tmp_path, "concept")
         expect($?.exitstatus).to eq(0) # no difference
 
         # check content of localized_conecept folder
-        system "diff", File.join(fixtures_path(concept_folder), "localized_concept"), File.join(tmp_path, "localized_concept")
+        system "diff",
+               File.join(fixtures_path(concept_folder), "localized_concept"), File.join(tmp_path, "localized_concept")
         expect($?.exitstatus).to eq(0) # no difference
       end
     end
@@ -42,8 +50,13 @@ RSpec.describe "Serialization and deserialization" do
 
   context "when localized-concept (with dash as separator)" do
     let(:concept_folder) { "concept_collection_v2_dashed" }
-    let(:concept_files) { Dir.glob(File.join(fixtures_path(concept_folder), "concept", "*.{yaml,yml}")) }
-    let(:localized_concepts_folder) { File.join(fixtures_path(concept_folder), "localized-concept") }
+    let(:concept_files) do
+      Dir.glob(File.join(fixtures_path(concept_folder), "concept",
+                         "*.{yaml,yml}"))
+    end
+    let(:localized_concepts_folder) do
+      File.join(fixtures_path(concept_folder), "localized-concept")
+    end
 
     it "correctly loads concepts from files" do
       collection = Glossarist::ManagedConceptCollection.new
@@ -56,7 +69,8 @@ RSpec.describe "Serialization and deserialization" do
         expect(concept.to_yaml_hash["data"]).to eq(concept_from_file["data"])
 
         concept.localized_concepts.each do |lang, id|
-          localized_concept_path = File.join(localized_concepts_folder, "#{id}.yaml")
+          localized_concept_path = File.join(localized_concepts_folder,
+                                             "#{id}.yaml")
           localized_concept = load_yaml_file(localized_concept_path)
 
           expect(localized_concept["data"]).to eq(concept.localizations[lang].to_yaml_hash["data"])
@@ -71,11 +85,13 @@ RSpec.describe "Serialization and deserialization" do
         expect($?.exitstatus).to eq(0) # no difference
 
         # check content of conecept folder
-        system "diff", File.join(fixtures_path(concept_folder), "concept"), File.join(tmp_path, "concept")
+        system "diff", File.join(fixtures_path(concept_folder), "concept"),
+               File.join(tmp_path, "concept")
         expect($?.exitstatus).to eq(0) # no difference
 
         # check content of localized-conecept folder
-        system "diff", File.join(fixtures_path(concept_folder), "localized-concept"), File.join(tmp_path, "localized-concept")
+        system "diff",
+               File.join(fixtures_path(concept_folder), "localized-concept"), File.join(tmp_path, "localized-concept")
         expect($?.exitstatus).to eq(0) # no difference
       end
     end

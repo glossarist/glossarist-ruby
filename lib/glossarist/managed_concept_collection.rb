@@ -27,7 +27,9 @@ module Glossarist
     #    ManagedConcept ID
     # @return [ManagedConcept, nil]
     def fetch(id)
-      @managed_concepts.find { |c| c.uuid == id || c.uuid == @managed_concepts_ids[id] }
+      @managed_concepts.find do |c|
+        c.uuid == id || c.uuid == @managed_concepts_ids[id]
+      end
     end
     alias :[] :fetch
 
@@ -50,7 +52,10 @@ module Glossarist
     def store(managed_concept)
       @managed_concepts ||= []
       @managed_concepts << managed_concept
-      @managed_concepts_ids[managed_concept.data.id] = managed_concept.uuid if managed_concept.data.id
+      if managed_concept.data.id
+        @managed_concepts_ids[managed_concept.data.id] =
+          managed_concept.uuid
+      end
 
       managed_concept
     end

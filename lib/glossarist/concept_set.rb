@@ -42,7 +42,7 @@ module Glossarist
         concept = concept_map[concept_name.strip.downcase]
 
         if concept.nil?
-           puts "  [Not Found]: #{concept_name.strip}"
+          puts "  [Not Found]: #{concept_name.strip}"
         else
           latex_template(concept)
         end
@@ -59,7 +59,7 @@ module Glossarist
 
     def latex_template(concept)
       <<~TEMPLATE
-        \\newglossaryentry{#{concept.default_designation.gsub('_', '-')}}
+        \\newglossaryentry{#{concept.default_designation.tr('_', '-')}}
         {
         name={#{concept.default_designation.gsub('_', '\_')}}
         description={#{normalize_definition(concept.default_definition)}}
@@ -68,8 +68,8 @@ module Glossarist
     end
 
     def normalize_definition(definition)
-      definition.gsub(/{{([^}]*)}}/) do |match|
-        "\\textbf{\\gls{#{Regexp.last_match[1].gsub('_', '-')}}}"
+      definition.gsub(/{{([^}]*)}}/) do |_match|
+        "\\textbf{\\gls{#{Regexp.last_match[1].tr('_', '-')}}}"
       end
     end
 

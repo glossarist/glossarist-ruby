@@ -16,10 +16,10 @@ RSpec.describe Glossarist::Utilities::CommonFunctions do
       }
 
       output_hash = {
-        :one => "one",
-        :two => {
-          :two_one => "two_one",
-          :two_two => "two_two",
+        one: "one",
+        two: {
+          two_one: "two_one",
+          two_two: "two_two",
         },
       }
 

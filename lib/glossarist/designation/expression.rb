@@ -35,7 +35,7 @@ module Glossarist
 
         hash["type"] = "expression" unless hash["type"]
 
-        super(hash, options = {})
+        super(hash, options)
       end
     end
   end

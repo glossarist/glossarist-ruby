@@ -32,7 +32,8 @@ module Glossarist
       map :notes, to: :notes, render_nil: true
       map :release, to: :release
       map :sources, to: :sources
-      map :terms, to: :terms, with: { from: :terms_from_yaml, to: :terms_to_yaml }
+      map :terms, to: :terms,
+                  with: { from: :terms_from_yaml, to: :terms_to_yaml }
       map :related, to: :related
       map :domain, to: :domain
       map :language_code, to: :language_code
@@ -53,13 +54,13 @@ module Glossarist
     def date_accepted
       return nil unless dates
 
-      dates.find { |date| date.accepted? }
+      dates.find(&:accepted?)
     end
 
     def authoritative_source
       return [] unless sources
 
-      sources.select { |source| source.authoritative? }
+      sources.select(&:authoritative?)
     end
   end
 end

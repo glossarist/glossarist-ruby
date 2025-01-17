@@ -3,7 +3,8 @@
 module Glossarist
   class RelatedConcept < Lutaml::Model::Serializable
     attribute :content, :string
-    attribute :type, :string, values: Glossarist::GlossaryDefinition::RELATED_CONCEPT_TYPES
+    attribute :type, :string,
+              values: Glossarist::GlossaryDefinition::RELATED_CONCEPT_TYPES
     attribute :ref, Citation
 
     yaml do

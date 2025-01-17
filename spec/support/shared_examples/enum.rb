@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples "an Enum" do
-  described_class.enums.each do |name, attribute|
+  described_class.enums.each_value do |attribute|
     attribute.enum_values.each do |value|
       describe "##{value}?" do
         context "when #{value} is set to `true`" do
@@ -31,9 +31,9 @@ RSpec.shared_examples "an Enum" do
 
           expect(subject.public_send("#{valid_type}?")).to eq(true)
           if described_class.enums[type].collection?
-            expect(subject.public_send("#{type}")).to eq([valid_type])
+            expect(subject.public_send(type.to_s)).to eq([valid_type])
           else
-            expect(subject.public_send("#{type}")).to eq(valid_type)
+            expect(subject.public_send(type.to_s)).to eq(valid_type)
           end
         end
       end
@@ -41,7 +41,9 @@ RSpec.shared_examples "an Enum" do
       context "when type is invalid" do
         it "will raise error" do
           subject.public_send("#{type}=", "invalid type")
-          expect { subject.validate! }.to raise_error(Lutaml::Model::ValidationError)
+          expect do
+            subject.validate!
+          end.to raise_error(Lutaml::Model::ValidationError)
         end
       end
     end

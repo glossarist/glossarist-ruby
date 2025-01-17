@@ -56,7 +56,9 @@ RSpec.describe Glossarist::ManagedConcept do
 
   describe "#related=" do
     it "sets the related concepts" do
-      subject.related = [Glossarist::RelatedConcept.of_yaml({ "type" => "supersedes", "content" => "Example content" })]
+      subject.related = [Glossarist::RelatedConcept.of_yaml({
+                                                              "type" => "supersedes", "content" => "Example content"
+                                                            })]
 
       expect(subject.related.first.type).to eq("supersedes")
       expect(subject.related.first.content).to eq("Example content")
@@ -65,7 +67,8 @@ RSpec.describe Glossarist::ManagedConcept do
 
   describe "#dates=" do
     it "sets the dates" do
-      subject.dates = [Glossarist::ConceptDate.of_yaml({ "type" => "accepted", "date" => "2020-01-01" })]
+      subject.dates = [Glossarist::ConceptDate.of_yaml({ "type" => "accepted",
+                                                         "date" => "2020-01-01" })]
 
       expect(subject.dates.first.type).to eq("accepted")
       expect(subject.dates.first.date).to eq(Date.parse("2020-01-01"))
@@ -125,7 +128,7 @@ RSpec.describe Glossarist::ManagedConcept do
     end
 
     it "dumps concept definition to a yaml" do
-      retval = YAML.load(subject.to_yaml)
+      retval = YAML.safe_load(subject.to_yaml)
 
       expect(retval).to be_kind_of(Hash)
       expect(retval).to eq(expected_concept_hash)
@@ -171,17 +174,17 @@ RSpec.describe Glossarist::ManagedConcept do
     let(:localizations) do
       [
         Glossarist::LocalizedConcept.of_yaml({
-          "data" => {
-            "id" => "123",
-            "language_code" => "eng",
-            "definition" => [
-              {
-                "content" => "this is very important",
-              },
-            ],
-            "entry_status" => "valid",
-          },
-        }),
+                                               "data" => {
+                                                 "id" => "123",
+                                                 "language_code" => "eng",
+                                                 "definition" => [
+                                                   {
+                                                     "content" => "this is very important",
+                                                   },
+                                                 ],
+                                                 "entry_status" => "valid",
+                                               },
+                                             }),
       ]
     end
 

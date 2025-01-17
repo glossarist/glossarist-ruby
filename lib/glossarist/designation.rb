@@ -21,7 +21,7 @@ module Glossarist
       GraphicalSymbol => "graphical_symbol",
       LetterSymbol => "letter_symbol",
     }
-    .tap { |h| h.merge!(h.invert) }
-    .freeze
+      .tap { |h| h.merge!(h.invert) }
+      .freeze
   end
 end

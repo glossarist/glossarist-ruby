@@ -2,18 +2,18 @@
 
 RSpec.shared_examples "having Boolean attributes" do |boolean_attributes|
   boolean_attributes.each do |attribute|
-    context "#{attribute}" do
+    context attribute.to_s do
       describe "##{attribute}=" do
         it "will set #{attribute} to true" do
           subject.public_send("#{attribute}=", true)
 
-          expect(subject.public_send("#{attribute}")).to eq(true)
+          expect(subject.public_send(attribute.to_s)).to eq(true)
         end
 
         it "will set #{attribute} to false" do
           subject.public_send("#{attribute}=", false)
 
-          expect(subject.public_send("#{attribute}")).to eq(false)
+          expect(subject.public_send(attribute.to_s)).to eq(false)
         end
       end
 
