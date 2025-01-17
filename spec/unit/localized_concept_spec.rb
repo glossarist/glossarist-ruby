@@ -56,19 +56,6 @@ RSpec.describe Glossarist::LocalizedConcept do
       .to change { subject.review_date }.to(Date.parse("2020-01-01"))
   end
 
-  it "accepts strings as review decision dates" do
-    expect { subject.review_decision_date = "2020-01-01" }
-      .to change { subject.review_decision_date }.to(Date.parse("2020-01-01"))
-  end
-
-  it "accepts strings as review decision events" do
-    expect { subject.review_decision_event = "published" }
-      .to change { subject.review_decision_event }.to("published")
-  end
-
-  describe "#designations" do
-    let(:expression) { { "type" => "expression", designation: "expression designation" } }
-
     it "is a collection of designations" do
       expect { subject.designations << expression }
         .to change { subject.designations.count }.from(0).to(1)

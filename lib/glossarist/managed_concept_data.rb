@@ -9,11 +9,9 @@ module Glossarist
     attribute :localizations, :hash, collection: true, default: -> { {} }
 
     yaml do
-      # TODO: convert to map [:id, :identifier], to: :id
-      #       once that is implemented in lutaml-model
-      map :id, to: :id, with: { to: :id_to_yaml, from: :id_from_yaml }
-      map :identifier, to: :id, with: { to: :id_to_yaml, from: :id_from_yaml }
-      map :localized_concepts, to: :localized_concepts
+      map %i[id identifier], to: :id,
+                             with: { to: :id_to_yaml, from: :id_from_yaml }
+      map %i[localized_concepts localizedConcepts], to: :localized_concepts
       map :groups, to: :groups
       map :sources, to: :sources
       map :localizations, to: :localizations, with: { from: :localizations_from_yaml, to: :localizations_to_yaml }

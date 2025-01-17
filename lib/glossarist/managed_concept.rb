@@ -6,7 +6,7 @@ module Glossarist
 
     attribute :data, ManagedConceptData
 
-    attribute :related, RelatedConcept
+    attribute :related, RelatedConcept, collection: true
     attribute :dates, ConceptDate, collection: true
     attribute :sources, ConceptSource
     attribute :date_accepted, ConceptDate

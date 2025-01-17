@@ -13,6 +13,9 @@ module Glossarist
     attribute :terms, Designation::Base, collection: true
     attribute :related, RelatedConcept, collection: true
     attribute :domain, :string
+    attribute :review_date, :date_time
+    attribute :review_decision_date, :date_time
+    attribute :review_decision_event, :string
 
     # Concept Methods
     # Language code should be exactly 3 char long.
@@ -34,6 +37,9 @@ module Glossarist
       map :domain, to: :domain
       map :language_code, to: :language_code
       map :entry_status, to: :entry_status
+      map :review_date, to: :review_date
+      map :review_decision_date, to: :review_decision_date
+      map :review_decision_event, to: :review_decision_event
     end
 
     def terms_from_yaml(model, value)
