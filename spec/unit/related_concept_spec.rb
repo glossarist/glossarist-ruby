@@ -15,7 +15,7 @@ RSpec.describe Glossarist::RelatedConcept do
         source: "Test source",
         id: "Test id",
         version: "Test version",
-      }
+      },
     }.to_yaml
   end
 

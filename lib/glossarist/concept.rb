@@ -21,7 +21,8 @@ module Glossarist
       map :localizations, to: :localizations
       map :extension_attributes, to: :extension_attributes
 
-      map :date_accepted, with: { from: :date_accepted_from_yaml, to: :date_accepted_to_yaml }
+      map :date_accepted,
+          with: { from: :date_accepted_from_yaml, to: :date_accepted_to_yaml }
       map :uuid, to: :uuid, with: { to: :uuid_to_yaml, from: :uuid_from_yaml }
       map :id, to: :id, with: { to: :id_to_yaml, from: :id_from_yaml }
       map :identifier, to: :id, with: { to: :id_to_yaml, from: :id_from_yaml }
@@ -73,22 +74,25 @@ module Glossarist
       model.uuid = value
     end
 
-    def id_to_yaml(model, doc)
-    end
+    def id_to_yaml(model, doc); end
 
     def id_from_yaml(model, value)
       model.id = value
     end
 
     def date_accepted_to_yaml(model, doc)
-      doc["date_accepted"] = model.date_accepted.date.iso8601 if model.date_accepted
+      if model.date_accepted
+        doc["date_accepted"] =
+          model.date_accepted.date.iso8601
+      end
     end
 
     def date_accepted_from_yaml(model, value)
       return if model.date_accepted
 
       model.data.dates ||= []
-      model.data.dates << ConceptDate.of_yaml({ "date" => value, "type" => "accepted" })
+      model.data.dates << ConceptDate.of_yaml({ "date" => value,
+                                                "type" => "accepted" })
     end
 
     def uuid

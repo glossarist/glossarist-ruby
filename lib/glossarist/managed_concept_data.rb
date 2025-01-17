@@ -14,7 +14,8 @@ module Glossarist
       map %i[localized_concepts localizedConcepts], to: :localized_concepts
       map :groups, to: :groups
       map :sources, to: :sources
-      map :localizations, to: :localizations, with: { from: :localizations_from_yaml, to: :localizations_to_yaml }
+      map :localizations, to: :localizations,
+                          with: { from: :localizations_from_yaml, to: :localizations_to_yaml }
     end
 
     def id_to_yaml(model, doc)
@@ -35,13 +36,12 @@ module Glossarist
       end
     end
 
-    def localizations_to_yaml(model, doc)
-    end
+    def localizations_to_yaml(model, doc); end
 
     def authoritative_source
       return [] unless sources
 
-      sources.select { |source| source.authoritative? }
+      sources.select(&:authoritative?)
     end
   end
 end

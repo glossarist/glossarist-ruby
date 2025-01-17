@@ -52,12 +52,12 @@ abbreviation:
 
 grammar_info:
   boolean_attribute:
-    - preposition
     - participle
     - adj
     - verb
     - adverb
     - noun
+    - preposition
   gender:
     - m
     - f

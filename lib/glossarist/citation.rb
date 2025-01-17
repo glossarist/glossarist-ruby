@@ -35,8 +35,10 @@ module Glossarist
     yaml do
       map :id, to: :id, with: { from: :id_from_yaml, to: :id_to_yaml }
       map :text, to: :text, with: { from: :text_from_yaml, to: :text_to_yaml }
-      map :source, to: :source, with: { from: :source_from_yaml, to: :source_to_yaml }
-      map :version, to: :version, with: { from: :version_from_yaml, to: :version_to_yaml }
+      map :source, to: :source,
+                   with: { from: :source_from_yaml, to: :source_to_yaml }
+      map :version, to: :version,
+                    with: { from: :version_from_yaml, to: :version_to_yaml }
       map :ref, to: :ref, with: { from: :ref_from_yaml, to: :ref_to_yaml }
 
       map :clause, to: :clause
@@ -92,7 +94,7 @@ module Glossarist
       {
         "source" => model.source,
         "id" => model.id,
-        "version" => model.version
+        "version" => model.version,
       }.compact
     end
 

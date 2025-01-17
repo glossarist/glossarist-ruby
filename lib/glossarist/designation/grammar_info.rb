@@ -1,17 +1,24 @@
 module Glossarist
   module Designation
     class GrammarInfo < Lutaml::Model::Serializable
-      attribute :gender, :string, values: Glossarist::GlossaryDefinition::GRAMMAR_INFO_GENDERS, collection: true
-      attribute :number, :string, values: Glossarist::GlossaryDefinition::GRAMMAR_INFO_NUMBERS, collection: true
-      attribute :part_of_speech, :string, values: Glossarist::GlossaryDefinition::GRAMMAR_INFO_BOOLEAN_ATTRIBUTES
+      attribute :gender, :string,
+                values: Glossarist::GlossaryDefinition::GRAMMAR_INFO_GENDERS, collection: true
+      attribute :number, :string,
+                values: Glossarist::GlossaryDefinition::GRAMMAR_INFO_NUMBERS, collection: true
+      attribute :part_of_speech, :string,
+                values: Glossarist::GlossaryDefinition::GRAMMAR_INFO_BOOLEAN_ATTRIBUTES
 
       yaml do
         map :gender, to: :gender
         map :number, to: :number
 
-        map :part_of_speech, with: { to: :part_of_speech_to_yaml, from: :part_of_speech_from_yaml }
+        map :part_of_speech,
+            with: { to: :part_of_speech_to_yaml,
+                    from: :part_of_speech_from_yaml }
         Glossarist::GlossaryDefinition::GRAMMAR_INFO_BOOLEAN_ATTRIBUTES.each do |bool_attr|
-          map bool_attr, with: { to: :"part_of_speech_#{bool_attr}_to_yaml", from: :"part_of_speech_#{bool_attr}_from_yaml" }
+          map bool_attr,
+              with: { to: :"part_of_speech_#{bool_attr}_to_yaml",
+                      from: :"part_of_speech_#{bool_attr}_from_yaml" }
         end
       end
 
@@ -19,8 +26,7 @@ module Glossarist
         model.part_of_speech = value
       end
 
-      def part_of_speech_to_yaml(model, doc)
-      end
+      def part_of_speech_to_yaml(model, doc); end
 
       Glossarist::GlossaryDefinition::GRAMMAR_INFO_BOOLEAN_ATTRIBUTES.each do |bool_attr|
         define_method(:"part_of_speech_#{bool_attr}_from_yaml") do |model, value|

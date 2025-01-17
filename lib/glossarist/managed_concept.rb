@@ -12,7 +12,8 @@ module Glossarist
     attribute :date_accepted, ConceptDate
     # TODO: convert to LocalizedConceptCollection when custom
     #       collections are implemented in lutaml-model
-    attribute :status, :string, values: Glossarist::GlossaryDefinition::CONCEPT_STATUSES
+    attribute :status, :string,
+              values: Glossarist::GlossaryDefinition::CONCEPT_STATUSES
 
     attribute :identifier, :string
     alias :id :identifier
@@ -23,10 +24,12 @@ module Glossarist
     yaml do
       map :data, to: :data
       map :id, with: { to: :identifier_to_yaml, from: :identifier_from_yaml }
-      map :identifier, with: { to: :identifier_to_yaml, from: :identifier_from_yaml }
+      map :identifier,
+          with: { to: :identifier_to_yaml, from: :identifier_from_yaml }
       map :related, to: :related
       map :dates, to: :dates
-      map :date_accepted, with: { from: :date_accepted_from_yaml, to: :date_accepted_to_yaml }
+      map :date_accepted,
+          with: { from: :date_accepted_from_yaml, to: :date_accepted_to_yaml }
       map :status, to: :status
 
       map :uuid, to: :uuid, with: { from: :uuid_from_yaml, to: :uuid_to_yaml }
@@ -51,7 +54,8 @@ module Glossarist
 
     def date_accepted_from_yaml(model, value)
       model.dates ||= []
-      model.dates << ConceptDate.of_yaml({ "date" => value, "type" => "accepted" })
+      model.dates << ConceptDate.of_yaml({ "date" => value,
+                                           "type" => "accepted" })
     end
 
     def date_accepted_to_yaml(model, doc)
@@ -69,7 +73,7 @@ module Glossarist
     def uuid
       @uuid ||= Glossarist::Utilities::UUID.uuid_v5(
         Glossarist::Utilities::UUID::OID_NAMESPACE,
-        to_yaml(except: [:uuid])
+        to_yaml(except: [:uuid]),
       )
     end
 
@@ -108,7 +112,8 @@ module Glossarist
     def add_localization(localized_concept)
       lang = localized_concept.language_code
       @localized_concepts ||= {}
-      @localized_concepts[lang] = @localized_concepts[lang] || localized_concept.uuid
+      @localized_concepts[lang] =
+        @localized_concepts[lang] || localized_concept.uuid
       localizations.store(lang, localized_concept)
     end
     alias :add_l10n :add_localization

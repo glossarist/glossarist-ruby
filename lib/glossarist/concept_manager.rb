@@ -23,12 +23,13 @@ module Glossarist
     end
 
     def load_concept_from_file(filename)
-      concept_hash = Psych.safe_load(File.read(filename), permitted_classes: [Date, Time])
+      concept_hash = Psych.safe_load(File.read(filename),
+                                     permitted_classes: [Date, Time])
       concept_hash["uuid"] = concept_hash["id"] || File.basename(filename, ".*")
 
       concept = Config.class_for(:managed_concept).of_yaml(concept_hash)
 
-      concept.data.localized_concepts.each do |_lang, id|
+      concept.data.localized_concepts.each_value do |id|
         localized_concept = load_localized_concept(id)
         concept.add_l10n(localized_concept)
       end
@@ -104,7 +105,8 @@ module Glossarist
     end
 
     def v1_collection?
-      @v1_collection ||= !Dir.glob(File.join(path, "concept-*.{yaml,yml}")).empty?
+      @v1_collection ||= !Dir.glob(File.join(path,
+                                             "concept-*.{yaml,yml}")).empty?
     end
   end
 end

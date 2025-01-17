@@ -70,9 +70,9 @@ RSpec.describe Glossarist::Citation do
         clause: "12.3",
         link: "https://example.com",
         original: "original ref text",
-    }.to_yaml)
+      }.to_yaml)
 
-      retval = YAML.load(subject.to_yaml)
+      retval = YAML.safe_load(subject.to_yaml)
       expect(retval).to be_kind_of(Hash)
       expect(retval["ref"]).to eq("Example ref")
       expect(retval["clause"]).to eq("12.3")
@@ -88,9 +88,9 @@ RSpec.describe Glossarist::Citation do
         clause: "12.3",
         link: "https://example.com",
         original: "original ref text",
-    }.to_yaml)
+      }.to_yaml)
 
-      retval = YAML.load(subject.to_yaml)
+      retval = YAML.safe_load(subject.to_yaml)
 
       expect(retval).to be_kind_of(Hash)
       expect(retval["ref"]["source"]).to eq("Example source")

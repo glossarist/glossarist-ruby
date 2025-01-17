@@ -1,7 +1,9 @@
 module Glossarist
   class ConceptSource < Lutaml::Model::Serializable
-    attribute :status, :string, values: Glossarist::GlossaryDefinition::CONCEPT_SOURCE_STATUSES
-    attribute :type, :string, values: Glossarist::GlossaryDefinition::CONCEPT_SOURCE_TYPES
+    attribute :status, :string,
+              values: Glossarist::GlossaryDefinition::CONCEPT_SOURCE_STATUSES
+    attribute :type, :string,
+              values: Glossarist::GlossaryDefinition::CONCEPT_SOURCE_TYPES
     attribute :origin, Citation
     attribute :modification, :string
 

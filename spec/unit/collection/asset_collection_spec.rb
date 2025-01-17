@@ -19,7 +19,7 @@ RSpec.describe Glossarist::Collections::AssetCollection do
   end
 
   context "adding duplicate asset" do
-    it { expect { subject << assets[0] }.not_to change { subject.count } }
+    it { expect { subject << assets[0] }.not_to(change { subject.count }) }
   end
 
   context "adding unique asset" do

@@ -2,6 +2,7 @@
 # See https://github.com/metanorma/cimas
 inherit_from:
   - https://raw.githubusercontent.com/riboseinc/oss-guides/master/ci/rubocop.yml
+  - .rubocop_todo.yml
 
 # local repo-specific modifications
 # ...

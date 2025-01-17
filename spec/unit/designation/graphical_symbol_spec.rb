@@ -9,7 +9,7 @@ RSpec.describe Glossarist::Designation::GraphicalSymbol do
       "image" => "♔",
       "text" => "king",
       "international" => true,
-  }.to_yaml
+    }.to_yaml
   end
 
   describe "#to_yaml" do

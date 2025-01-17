@@ -24,7 +24,7 @@ RSpec.describe Glossarist::Designation::Abbreviation do
         "international" => true,
       }
 
-      expect(YAML.load(subject.to_yaml)).to eq(expected_yaml)
+      expect(YAML.safe_load(subject.to_yaml)).to eq(expected_yaml)
     end
   end
 end

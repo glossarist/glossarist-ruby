@@ -29,14 +29,15 @@ RSpec.describe Glossarist::Concept do
               },
             ],
           },
-        }.to_yaml
+        }.to_yaml,
       )
 
-      retval = YAML.load(object.to_yaml)["data"]
+      retval = YAML.safe_load(object.to_yaml)["data"]
 
       expect(retval).to be_kind_of(Hash)
       expect(retval["id"]).to eq("123")
-      expect(retval["related"]).to eq([{ "content" => "Test content", "type" => "supersedes" }])
+      expect(retval["related"]).to eq([{ "content" => "Test content",
+                                         "type" => "supersedes" }])
     end
   end
 
@@ -50,7 +51,7 @@ RSpec.describe Glossarist::Concept do
 
       uuid = Glossarist::Utilities::UUID.uuid_v5(
         Glossarist::Utilities::UUID::OID_NAMESPACE,
-        concept.data.to_yaml
+        concept.data.to_yaml,
       )
 
       expect(concept.uuid).to eq(uuid)
@@ -129,7 +130,7 @@ RSpec.describe Glossarist::Concept do
       expect(retval.sources.size).to eq(1)
       expect(retval.sources.first.type).to eq("authoritative")
       expect(retval.sources.first.status).to eq("identical")
-      expect(YAML.load(retval.sources.first.origin.to_yaml)).to eq({ "ref" => "url" })
+      expect(YAML.safe_load(retval.sources.first.origin.to_yaml)).to eq({ "ref" => "url" })
     end
   end
 
@@ -167,7 +168,9 @@ RSpec.describe Glossarist::Concept do
     end
 
     it "should return only authoritative_sources" do
-      expect(subject.authoritative_source.map { |auth_source| YAML.load(auth_source.to_yaml) }).to eq(authoritative_source)
+      expect(subject.authoritative_source.map do |auth_source|
+        YAML.safe_load(auth_source.to_yaml)
+      end).to eq(authoritative_source)
     end
   end
 end

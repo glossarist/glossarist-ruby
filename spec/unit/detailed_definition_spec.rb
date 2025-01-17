@@ -26,7 +26,7 @@ RSpec.describe Glossarist::DetailedDefinition do
           "origin" => { "text" => "url" },
           "modification" => "some modification",
         }.to_yaml),
-        source
+        source,
       ]
 
       expect(detailed_definition.sources.size).to eq(2)

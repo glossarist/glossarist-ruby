@@ -6,7 +6,10 @@
 RSpec.describe Glossarist::Designation::Expression do
   subject { described_class.from_yaml(attrs) }
 
-  let(:attrs) { { designation: "equality", normative_status: :preferred, grammar_info: [{}] }.to_yaml }
+  let(:attrs) do
+    { designation: "equality", normative_status: :preferred,
+      grammar_info: [{}] }.to_yaml
+  end
 
   it "accepts strings as designations" do
     expect { subject.designation = "new one" }
@@ -35,7 +38,6 @@ RSpec.describe Glossarist::Designation::Expression do
 
   describe "#to_yaml" do
     it "dumps designation to a hash" do
-
       attrs.replace({
         designation: "Example designation",
         normative_status: "preferred",
@@ -48,7 +50,7 @@ RSpec.describe Glossarist::Designation::Expression do
         usage_info: "science",
       }.to_yaml)
 
-      retval = YAML.load(subject.to_yaml)
+      retval = YAML.safe_load(subject.to_yaml)
 
       expect(retval).to be_kind_of(Hash)
       expect(retval["type"]).to eq("expression")
@@ -68,7 +70,7 @@ RSpec.describe Glossarist::Designation::Expression do
         "type" => "expression",
         "designation" => "Example Designation",
         "normative_status" => "preferred",
-    }.to_yaml
+      }.to_yaml
 
       retval = described_class.from_yaml(src)
 
@@ -97,13 +99,13 @@ RSpec.describe Glossarist::Designation::Symbol do
   describe "#to_yaml" do
     it "dumps designation to a hash" do
       attrs.replace({
-        designation: "X",
-        normative_status: "preferred",
-        geographical_area: "somewhere",
-        international: true,
-      })
+                      designation: "X",
+                      normative_status: "preferred",
+                      geographical_area: "somewhere",
+                      international: true,
+                    })
 
-      retval = YAML.load(subject.to_yaml)
+      retval = YAML.safe_load(subject.to_yaml)
       expect(retval).to be_kind_of(Hash)
       expect(retval["type"]).to eq("symbol")
       expect(retval["designation"]).to eq("X")

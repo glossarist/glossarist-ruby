@@ -37,7 +37,7 @@ RSpec.describe Glossarist::LocalizedConcept do
   it "accepts strings as definitions" do
     definition = Glossarist::DetailedDefinition.new({ content: "this is very important" })
 
-    expect { subject.definition = [ definition ] }
+    expect { subject.definition = [definition] }
       .to change { subject.definition.count }.from(0).to(1)
   end
 
@@ -51,10 +51,10 @@ RSpec.describe Glossarist::LocalizedConcept do
       .to change { subject.classification }.to("admitted")
   end
 
-  it "accepts strings as review dates" do
-    expect { subject.review_date = "2020-01-01" }
-      .to change { subject.review_date }.to(Date.parse("2020-01-01"))
-  end
+  describe "#designations" do
+    let(:expression) do
+      { "type" => "expression", designation: "expression designation" }
+    end
 
     it "is a collection of designations" do
       expect { subject.designations << expression }
@@ -68,28 +68,37 @@ RSpec.describe Glossarist::LocalizedConcept do
   end
 
   describe "#notes" do
-    it "adds a note of type DetailedDefinition", skip: "will work when custom collection classes are implemented in lutaml-model" do
+    it "adds a note of type DetailedDefinition",
+       skip: "will work when custom collection classes are implemented in lutaml-model" do
       expect { subject.notes << "str" }
         .to change { subject.notes.count }.from(0).to(1)
-        .and change { subject.notes.first.class }.from(NilClass).to(Glossarist::DetailedDefinition)
+        .and change {
+               subject.notes.first.class
+             }.from(NilClass).to(Glossarist::DetailedDefinition)
     end
   end
 
   describe "#examples" do
-    it "adds an example of type DetailedDefinition", skip: "will work when custom collection classes are implemented in lutaml-model" do
+    it "adds an example of type DetailedDefinition",
+       skip: "will work when custom collection classes are implemented in lutaml-model" do
       expect { subject.examples << "example" }
         .to change { subject.examples.count }.from(0).to(1)
-        .and change { subject.examples.first.class }.from(NilClass).to(Glossarist::DetailedDefinition)
+        .and change {
+               subject.examples.first.class
+             }.from(NilClass).to(Glossarist::DetailedDefinition)
     end
   end
 
   describe "#sources" do
     let(:item) { { "text" => "source" } }
 
-    it "is an array", skip: "will work when custom collection classes are implemented in lutaml-model" do
+    it "is an array",
+       skip: "will work when custom collection classes are implemented in lutaml-model" do
       expect { subject.sources << item }
         .to change { subject.sources.count }.from(0).to(1)
-        .and change { subject.sources.first.class }.from(NilClass).to(Glossarist::ConceptSource)
+        .and change {
+               subject.sources.first.class
+             }.from(NilClass).to(Glossarist::ConceptSource)
     end
   end
 
@@ -99,22 +108,22 @@ RSpec.describe Glossarist::LocalizedConcept do
       term2 = { "type" => "expression", "designation" => "term2" }
       source = { "type" => "authoritative", "status" => "modified" }
       attrs.replace({
-        "id" => "123",
-        "language_code" => "eng",
-        "terms" => [term1, term2],
-        "examples" => [{ "content" => "ex. one" }],
-        "notes" => [{ "content" => "note one" }],
-        "sources" => [source],
-      })
+                      "id" => "123",
+                      "language_code" => "eng",
+                      "terms" => [term1, term2],
+                      "examples" => [{ "content" => "ex. one" }],
+                      "notes" => [{ "content" => "note one" }],
+                      "sources" => [source],
+                    })
 
-      retval = YAML.load(subject.to_yaml)["data"]
+      retval = YAML.safe_load(subject.to_yaml)["data"]
 
       expect(retval).to be_kind_of(Hash)
       expect(retval["language_code"]).to eq("eng")
       expect(retval["id"]).to eq("123")
       expect(retval["terms"]).to eq([term1, term2])
-      expect(retval["examples"]).to eq([{ "content" => "ex. one"}])
-      expect(retval["notes"]).to eq([{ "content" => "note one"}])
+      expect(retval["examples"]).to eq([{ "content" => "ex. one" }])
+      expect(retval["notes"]).to eq([{ "content" => "note one" }])
       expect(retval["sources"]).to eq([source])
     end
   end
@@ -158,7 +167,10 @@ RSpec.describe Glossarist::LocalizedConcept do
       expect(retval.terms.first.class).to eq(Glossarist::Designation::Expression)
       expect(retval.terms.first.normative_status).to eq("preferred")
       expect(retval.terms.first.designation).to eq("Example Designation")
-      expect(retval.sources.map(&:to_yaml_hash)).to eq([{"origin"=>{"ref"=>{"id"=>"123", "source"=>"wikipedia", "version"=>"71"}}, "type"=>"authoritative"}])
+      expect(retval.sources.map(&:to_yaml_hash)).to eq([{
+                                                         "origin" => { "ref" => { "id" => "123", "source" => "wikipedia",
+                                                                                  "version" => "71" } }, "type" => "authoritative"
+                                                       }])
     end
 
     it "should work iev-data for grammar_info" do

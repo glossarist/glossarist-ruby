@@ -5,7 +5,8 @@ require_relative "../../support/shared_examples/boolean_attributes"
 
 RSpec.describe Glossarist::Designation::GrammarInfo do
   it_behaves_like "an Enum"
-  it_behaves_like "having Boolean attributes", Glossarist::GlossaryDefinition::GRAMMAR_INFO_BOOLEAN_ATTRIBUTES
+  it_behaves_like "having Boolean attributes",
+                  Glossarist::GlossaryDefinition::GRAMMAR_INFO_BOOLEAN_ATTRIBUTES
 
   describe "#to_yaml" do
     it "will convert to a yaml" do
@@ -31,7 +32,7 @@ RSpec.describe Glossarist::Designation::GrammarInfo do
         "number" => %w[singular plural],
       }
 
-      expect(YAML.load(grammar_info.to_yaml)).to eq(expected_yaml)
+      expect(YAML.safe_load(grammar_info.to_yaml)).to eq(expected_yaml)
     end
   end
 end
