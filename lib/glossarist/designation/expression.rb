@@ -16,8 +16,8 @@ module Glossarist
       yaml do
         map :type, to: :type, render_default: true
         map :prefix, to: :prefix
-        map :usage_info, to: :usage_info
-        map :grammar_info, to: :grammar_info
+        map %i[usage_info usageInfo], to: :usage_info
+        map %i[grammar_info grammarInfo], to: :grammar_info
       end
 
       def self.of_yaml(hash, options = {})

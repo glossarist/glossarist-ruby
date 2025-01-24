@@ -12,9 +12,7 @@ module Glossarist
         map :gender, to: :gender
         map :number, to: :number
 
-        map :part_of_speech,
-            with: { to: :part_of_speech_to_yaml,
-                    from: :part_of_speech_from_yaml }
+        map %i[part_of_speech partOfSpeech], with: { to: :part_of_speech_to_yaml, from: :part_of_speech_from_yaml }
         Glossarist::GlossaryDefinition::GRAMMAR_INFO_BOOLEAN_ATTRIBUTES.each do |bool_attr|
           map bool_attr,
               with: { to: :"part_of_speech_#{bool_attr}_to_yaml",

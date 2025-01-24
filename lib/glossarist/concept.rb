@@ -15,14 +15,13 @@ module Glossarist
       map :data, to: :data
       map :termid, to: :termid
       map :subject, to: :subject
-      map :non_verb_rep, to: :non_verb_rep
-      map :extension_attributes, to: :extension_attributes
-      map :lineage_source, to: :lineage_source
+      map %i[non_verb_rep nonVerbRep], to: :non_verb_rep
+      map %i[extension_attributes extensionAttributes], to: :extension_attributes
+      map %i[lineage_source lineageSource], to: :lineage_source
       map :localizations, to: :localizations
-      map :extension_attributes, to: :extension_attributes
+      map %i[extension_attributes extensionAttributes], to: :extension_attributes
 
-      map :date_accepted,
-          with: { from: :date_accepted_from_yaml, to: :date_accepted_to_yaml }
+      map %i[date_accepted dateAccepted], with: { from: :date_accepted_from_yaml, to: :date_accepted_to_yaml }
       map :uuid, to: :uuid, with: { to: :uuid_to_yaml, from: :uuid_from_yaml }
       map :id, to: :id, with: { to: :id_to_yaml, from: :id_from_yaml }
       map :identifier, to: :id, with: { to: :id_to_yaml, from: :id_from_yaml }
