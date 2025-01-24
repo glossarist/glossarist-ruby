@@ -6,7 +6,7 @@ module Glossarist
 
     yaml do
       map :classification, to: :classification
-      map :review_type, to: :review_type
+      map %i[review_type reviewType], to: :review_type
     end
 
     alias_method :status=, :entry_status=

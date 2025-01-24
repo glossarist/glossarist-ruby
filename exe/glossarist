@@ -21,12 +21,14 @@ class GlossaristCommand < Thor
 
     concept_set = Glossarist::ConceptSet.new(options[:concepts_path], assets)
     latex_str = concept_set.to_latex(latex_concepts_file)
+    output_latex(latex_str)
+  end
 
+  def output_latex(latex_str)
     output_file_path = options[:output_file]
+
     if output_file_path
-      File.open(output_file_path, "w") do |file|
-        file.puts latex_str
-      end
+      File.open(output_file_path, "w") { |file| file.puts latex_str }
     else
       puts latex_str
     end

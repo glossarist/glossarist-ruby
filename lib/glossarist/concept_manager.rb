@@ -5,7 +5,7 @@ module Glossarist
 
     yaml do
       map :path, to: :path
-      map :localized_concepts_path, to: :localized_concepts_path
+      map %i[localized_concepts_path localizedConceptsPath], to: :localized_concepts_path
     end
 
     def load_from_files(collection: nil)

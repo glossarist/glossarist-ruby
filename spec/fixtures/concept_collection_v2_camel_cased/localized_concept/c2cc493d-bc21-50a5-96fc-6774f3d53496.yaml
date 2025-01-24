@@ -1,0 +1,33 @@
+---
+data:
+  dates:
+  - date: '2003-02-15T00:00:00+00:00'
+    type: accepted
+  definition:
+  - content: Winkel von der Äquatorebene zur Ellipsoidsenkrechten durch einen gegebenen
+      Punkt; nordwärts mit positiven Werten
+  examples: []
+  id: '200'
+  lineageSourceSimilarity: 1
+  notes: []
+  release: '1'
+  sources:
+  - origin:
+      ref: ISO 19111:2019
+      clause: 3.1.32
+      link: https://www.iso.org/standard/74039.html
+    type: authoritative
+  - origin:
+      ref: ISO 19111:2003
+    type: lineage
+  terms:
+  - type: abbreviation
+    designation: j
+  - type: expression
+    normativeStatus: preferred
+    designation: geodätische Breite
+  - type: expression
+    designation: ellipsoidal latitude
+  languageCode: deu
+dateAccepted: '2003-02-15T00:00:00+00:00'
+id: c2cc493d-bc21-50a5-96fc-6774f3d53496

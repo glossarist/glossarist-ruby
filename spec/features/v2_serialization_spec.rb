@@ -48,6 +48,40 @@ RSpec.describe "Serialization and deserialization" do
     end
   end
 
+  context "when localizedConcept (with camel case)" do
+    let(:concept_folder) { "concept_collection_v2_camel_cased" }
+    let(:concept_files) { Dir.glob(File.join(fixtures_path(concept_folder), "concept", "*.{yaml,yml}")) }
+    let(:localized_concepts_folder) { File.join(fixtures_path(concept_folder), "localized_concept") }
+    let(:reference_folder) { "concept_collection_v2" }
+
+    it "correctly loads concepts from camel case files and matches reference format" do
+      collection = Glossarist::ManagedConceptCollection.new
+      collection.load_from_files(fixtures_path(concept_folder))
+
+      concept_files.each do |filename|
+        concept_from_file = load_yaml_file(filename)
+        concept = collection[concept_from_file["data"]["identifier"]]
+        reference_concept = load_yaml_file(File.join(fixtures_path(reference_folder), "concept", File.basename(filename)))
+
+        expect(concept.to_yaml_hash["data"]).to eq(reference_concept["data"])
+      end
+
+      Dir.mktmpdir do |tmp_path|
+        collection.save_to_files(tmp_path)
+
+        # Compare with reference format
+        system "diff", fixtures_path(reference_folder), tmp_path
+        expect($?.exitstatus).to eq(0) # no difference
+
+        system "diff", File.join(fixtures_path(reference_folder), "concept"), File.join(tmp_path, "concept")
+        expect($?.exitstatus).to eq(0) # no difference
+
+        system "diff", File.join(fixtures_path(reference_folder), "localized_concept"), File.join(tmp_path, "localized_concept")
+        expect($?.exitstatus).to eq(0) # no difference
+      end
+    end
+  end
+
   context "when localized-concept (with dash as separator)" do
     let(:concept_folder) { "concept_collection_v2_dashed" }
     let(:concept_files) do
