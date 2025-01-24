@@ -25,15 +25,15 @@ module Glossarist
       map :definition, to: :definition, render_nil: true
       map :examples, to: :examples, render_nil: true
       map :id, to: :id
-      map :lineage_source_similarity, to: :lineage_source_similarity
+      map [:lineage_source_similarity, :lineageSourceSimilarity], to: :lineage_source_similarity
       map :notes, to: :notes, render_nil: true
       map :release, to: :release
       map :sources, to: :sources
       map :terms, to: :terms, with: { from: :terms_from_yaml, to: :terms_to_yaml }
       map :related, to: :related
       map :domain, to: :domain
-      map :language_code, to: :language_code
-      map :entry_status, to: :entry_status
+      map [:language_code, :languageCode], to: :language_code
+      map [:entry_status, :entryStatus], to: :entry_status
     end
 
     def terms_from_yaml(model, value)

@@ -13,7 +13,7 @@ module Glossarist
       #       once that is implemented in lutaml-model
       map :id, to: :id, with: { to: :id_to_yaml, from: :id_from_yaml }
       map :identifier, to: :id, with: { to: :id_to_yaml, from: :id_from_yaml }
-      map :localized_concepts, to: :localized_concepts
+      map [:localized_concepts, :localizedConcepts], to: :localized_concepts
       map :groups, to: :groups
       map :sources, to: :sources
       map :localizations, to: :localizations, with: { from: :localizations_from_yaml, to: :localizations_to_yaml }

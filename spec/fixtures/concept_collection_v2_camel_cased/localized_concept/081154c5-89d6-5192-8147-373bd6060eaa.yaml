@@ -1,0 +1,28 @@
+---
+data:
+  dates:
+  - date: '2010-11-01T00:00:00+00:00'
+    type: accepted
+  definition:
+  - content: مجموعة من الخصائص التي تكون المفهوم
+  examples: []
+  id: '888'
+  lineageSourceSimilarity: 1
+  notes: []
+  release: '2'
+  sources:
+  - origin:
+      ref: ISO 1087-1:2000
+      clause: 3.2.9
+      link: https://www.iso.org/standard/20057.html
+    type: authoritative
+  - origin:
+      ref: ISO 19146:2010(E)
+    type: lineage
+  terms:
+  - type: expression
+    normativeStatus: preferred
+    designation: دلالة
+  languageCode: ara
+dateAccepted: '2010-11-01T00:00:00+00:00'
+id: '081154c5-89d6-5192-8147-373bd6060eaa'

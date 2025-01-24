@@ -1,0 +1,33 @@
+---
+data:
+  dates:
+  - date: '2003-02-15T00:00:00+00:00'
+    type: accepted
+  definition:
+  - content: angle from the equatorial plane to the perpendicular to the ellipsoid
+      through a given point, northwards treated as positive
+  examples: []
+  id: '200'
+  lineageSourceSimilarity: 1
+  notes: []
+  release: '1'
+  sources:
+  - origin:
+      ref: ISO 19111:2019
+      clause: 3.1.32
+      link: https://www.iso.org/standard/74039.html
+    type: authoritative
+  - origin:
+      ref: ISO 19111:2003
+    type: lineage
+  terms:
+  - type: abbreviation
+    designation: j
+  - type: expression
+    normativeStatus: preferred
+    designation: geodetic latitude
+  - type: expression
+    designation: ellipsoidal latitude
+  languageCode: eng
+dateAccepted: '2003-02-15T00:00:00+00:00'
+id: 27457e38-89b5-5694-8d19-0dd3973ec71d

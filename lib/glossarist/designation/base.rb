@@ -8,8 +8,8 @@ module Glossarist
 
       yaml do
         map :type, to: :type
-        map :normative_status, to: :normative_status
-        map :geographical_area, to: :geographical_area
+        map [:normative_status, :normativeStatus], to: :normative_status
+        map [:geographical_area, :geographicalArea], to: :geographical_area
         map :designation, to: :designation
       end
 

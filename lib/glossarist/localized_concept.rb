@@ -11,10 +11,10 @@ module Glossarist
 
     yaml do
       map :classification, to: :classification
-      map :review_date, to: :review_date
-      map :review_decision_date, to: :review_decision_date
-      map :review_decision_event, to: :review_decision_event
-      map :review_type, to: :review_type
+      map [:review_date, :reviewDate], to: :review_date
+      map [:review_decision_date, :reviewDecisionDate], to: :review_decision_date
+      map [:review_decision_event, :reviewDecisionEvent], to: :review_decision_event
+      map [:review_type, :reviewType], to: :review_type
     end
 
     def language_code

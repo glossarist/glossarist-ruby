@@ -1,0 +1,33 @@
+---
+data:
+  dates:
+  - date: '2003-02-15T00:00:00+00:00'
+    type: accepted
+  definition:
+  - content: الزاوية من مستوى خط الاستواء إلى الخط المتعامد مع القطع الناقص عبر نقطة
+      معينة باتجاه الشمال حيث تعتبر موجبة
+  examples: []
+  id: '200'
+  lineageSourceSimilarity: 1
+  notes: []
+  release: '1'
+  sources:
+  - origin:
+      ref: ISO 19111:2019
+      clause: 3.1.32
+      link: https://www.iso.org/standard/74039.html
+    type: authoritative
+  - origin:
+      ref: ISO 19111:2003
+    type: lineage
+  terms:
+  - type: abbreviation
+    designation: j
+  - type: expression
+    normativeStatus: preferred
+    designation: خط العرض الجيوديسي
+  - type: expression
+    designation: ellipsoidal latitude
+  languageCode: ara
+dateAccepted: '2003-02-15T00:00:00+00:00'
+id: e4ee4f5c-07b0-577e-8bc0-37e0f98d7a2b

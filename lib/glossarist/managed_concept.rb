@@ -26,7 +26,7 @@ module Glossarist
       map :identifier, with: { to: :identifier_to_yaml, from: :identifier_from_yaml }
       map :related, to: :related
       map :dates, to: :dates
-      map :date_accepted, with: { from: :date_accepted_from_yaml, to: :date_accepted_to_yaml }
+      map [:date_accepted, :dateAccepted], with: { from: :date_accepted_from_yaml, to: :date_accepted_to_yaml }
       map :status, to: :status
 
       map :uuid, to: :uuid, with: { from: :uuid_from_yaml, to: :uuid_to_yaml }
