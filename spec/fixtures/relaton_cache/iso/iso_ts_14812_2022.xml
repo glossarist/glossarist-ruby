@@ -1,5 +1,5 @@
 <bibdata type="standard" schema-version="v1.2.9">
-  <fetched>2024-12-24</fetched>
+  <fetched>2025-02-07</fetched>
   <title type="title-intro" format="text/plain" language="en" script="Latn">Intelligent transport systems</title>
   <title type="title-main" format="text/plain" language="en" script="Latn">Vocabulary</title>
   <title type="main" format="text/plain" language="en" script="Latn">Intelligent transport systems - Vocabulary</title>
@@ -44,8 +44,8 @@
   </copyright>
   <relation type="obsoletes">
     <bibitem type="standard">
-      <formattedref format="text/plain">ISO/AWI TS 14812</formattedref>
-      <docidentifier type="ISO" primary="true">ISO/AWI TS 14812</docidentifier>
+      <formattedref format="text/plain">ISO/DTS 14812</formattedref>
+      <docidentifier type="ISO" primary="true">ISO/DTS 14812</docidentifier>
     </bibitem>
   </relation>
   <place>Geneva</place>
@@ -71,7 +71,7 @@
       <text>IT applications in transport</text>
     </ics>
     <structuredidentifier type="ISO">
-      <project-number>ISO 14812</project-number>
+      <project-number>79779</project-number>
     </structuredidentifier>
   </ext>
 </bibdata>
