@@ -48,7 +48,7 @@ module Glossarist
     end
 
     def terms_to_yaml(model, doc)
-      doc["terms"] = model.terms.map(&:to_yaml_hash)
+      doc["terms"] = model.terms&.map(&:to_yaml_hash)
     end
 
     def date_accepted
