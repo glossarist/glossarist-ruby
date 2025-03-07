@@ -6,7 +6,7 @@ module Glossarist
     attribute :localized_concepts, :hash
     attribute :groups, :string, collection: true
     attribute :sources, ConceptSource, collection: true
-    attribute :localizations, :hash, collection: true, default: -> { {} }
+    attribute :localizations, :hash, collection: true, initialize_empty: true, default: -> { {} }
 
     yaml do
       map %i[id identifier], to: :id,

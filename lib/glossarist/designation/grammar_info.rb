@@ -2,9 +2,9 @@ module Glossarist
   module Designation
     class GrammarInfo < Lutaml::Model::Serializable
       attribute :gender, :string,
-                values: Glossarist::GlossaryDefinition::GRAMMAR_INFO_GENDERS, collection: true
+                values: Glossarist::GlossaryDefinition::GRAMMAR_INFO_GENDERS, collection: true, initialize_empty: true
       attribute :number, :string,
-                values: Glossarist::GlossaryDefinition::GRAMMAR_INFO_NUMBERS, collection: true
+                values: Glossarist::GlossaryDefinition::GRAMMAR_INFO_NUMBERS, collection: true, initialize_empty: true
       attribute :part_of_speech, :string,
                 values: Glossarist::GlossaryDefinition::GRAMMAR_INFO_BOOLEAN_ATTRIBUTES
 
