@@ -11,19 +11,19 @@ RSpec.describe Glossarist::ConceptData do
   it "accepts dates collection" do
     date = Glossarist::ConceptDate.new(type: "accepted")
     expect { subject.dates = [date] }
-      .to change { subject.dates.count }.from(0).to(1)
+      .to change { subject.dates&.count || 0 }.from(0).to(1)
   end
 
   it "accepts definition collection" do
     definition = Glossarist::DetailedDefinition.new(content: "test definition")
     expect { subject.definition = [definition] }
-      .to change { subject.definition.count }.from(0).to(1)
+      .to change { subject.definition&.count || 0 }.from(0).to(1)
   end
 
   it "accepts examples collection" do
     example = Glossarist::DetailedDefinition.new(content: "test example")
     expect { subject.examples = [example] }
-      .to change { subject.examples.count }.from(0).to(1)
+      .to change { subject.examples&.count || 0 }.from(0).to(1)
   end
 
   it "accepts integer for lineage_source_similarity" do
@@ -39,7 +39,7 @@ RSpec.describe Glossarist::ConceptData do
   it "accepts sources collection" do
     source = Glossarist::ConceptSource.new(type: "authoritative")
     expect { subject.sources = [source] }
-      .to change { subject.sources.count }.from(0).to(1)
+      .to change { subject.sources&.count || 0 }.from(0).to(1)
   end
 
   it "accepts strings as review dates" do

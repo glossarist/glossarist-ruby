@@ -38,7 +38,7 @@ RSpec.describe Glossarist::LocalizedConcept do
     definition = Glossarist::DetailedDefinition.new({ content: "this is very important" })
 
     expect { subject.definition = [definition] }
-      .to change { subject.definition.count }.from(0).to(1)
+      .to change { subject.definition&.count || 0 }.from(0).to(1)
   end
 
   it "accepts strings as entry statuses" do
@@ -57,13 +57,17 @@ RSpec.describe Glossarist::LocalizedConcept do
     end
 
     it "is a collection of designations" do
+      expect(subject.designations).to be_nil
+      subject.data.terms = []
       expect { subject.designations << expression }
         .to change { subject.designations.count }.from(0).to(1)
     end
 
     it "is aliased as 'terms'" do
+      expect(subject.designations).to be_nil
+      subject.data.terms = []
       expect { subject.designations << expression }
-        .to change { subject.terms.count }.from(0).to(1)
+        .to change { subject.terms&.count || 0 }.from(0).to(1)
     end
   end
 
@@ -71,7 +75,7 @@ RSpec.describe Glossarist::LocalizedConcept do
     it "adds a note of type DetailedDefinition",
        skip: "will work when custom collection classes are implemented in lutaml-model" do
       expect { subject.notes << "str" }
-        .to change { subject.notes.count }.from(0).to(1)
+        .to change { subject.notes&.count || 0 }.from(0).to(1)
         .and change {
                subject.notes.first.class
              }.from(NilClass).to(Glossarist::DetailedDefinition)
@@ -82,7 +86,7 @@ RSpec.describe Glossarist::LocalizedConcept do
     it "adds an example of type DetailedDefinition",
        skip: "will work when custom collection classes are implemented in lutaml-model" do
       expect { subject.examples << "example" }
-        .to change { subject.examples.count }.from(0).to(1)
+        .to change { subject.examples&.count || 0 }.from(0).to(1)
         .and change {
                subject.examples.first.class
              }.from(NilClass).to(Glossarist::DetailedDefinition)
@@ -95,7 +99,7 @@ RSpec.describe Glossarist::LocalizedConcept do
     it "is an array",
        skip: "will work when custom collection classes are implemented in lutaml-model" do
       expect { subject.sources << item }
-        .to change { subject.sources.count }.from(0).to(1)
+        .to change { subject.sources&.count || 0 }.from(0).to(1)
         .and change {
                subject.sources.first.class
              }.from(NilClass).to(Glossarist::ConceptSource)

@@ -2,8 +2,9 @@
 
 source "https://rubygems.org"
 
-gem "pry", "~> 0.14.0"
-gem "rake", "~> 13.0"
-gem "rspec", "~> 3.10"
+gem "pry"
+gem "rake"
+gem "rspec"
+gem "lutaml-model", github: "lutaml/lutaml-model", branch: "main"
 
 gemspec
