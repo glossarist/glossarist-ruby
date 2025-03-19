@@ -19,7 +19,7 @@ module Glossarist
     end
 
     def id_to_yaml(model, doc)
-      value = model.id || model.identifier
+      value = model.id
       doc["identifier"] = value if value && !doc["identifier"]
     end
 

@@ -44,6 +44,10 @@ module Glossarist
       data.sources
     end
 
+    def sources=(value)
+      data.sources = value
+    end
+
     def examples
       data.examples
     end
