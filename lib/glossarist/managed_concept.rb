@@ -4,7 +4,7 @@ module Glossarist
   class ManagedConcept < Lutaml::Model::Serializable
     include Glossarist::Utilities::CommonFunctions
 
-    attribute :data, ManagedConceptData
+    attribute :data, ManagedConceptData, default: -> { ManagedConceptData.new }
 
     attribute :related, RelatedConcept, collection: true
     attribute :dates, ConceptDate, collection: true
