@@ -25,11 +25,11 @@ module Glossarist
 
     yaml do
       map :dates, to: :dates
-      map :definition, to: :definition, render_nil: true
-      map :examples, to: :examples, render_nil: true
+      map :definition, to: :definition, value_map: { to: { empty: :empty } }
+      map :examples, to: :examples, value_map: { to: { empty: :empty } }
       map :id, to: :id
       map %i[lineage_source_similarity lineageSourceSimilarity], to: :lineage_source_similarity
-      map :notes, to: :notes, render_nil: true
+      map :notes, to: :notes, value_map: { to: { empty: :empty } }
       map :release, to: :release
       map :sources, to: :sources
       map :terms, to: :terms,
