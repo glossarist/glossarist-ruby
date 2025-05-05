@@ -89,7 +89,7 @@ module Glossarist
       return unless localized_concepts_collection
 
       if localized_concepts_collection.is_a?(Hash)
-        @localized_concepts = stringify_keys(localized_concepts_collection)
+        data.localized_concepts = stringify_keys(localized_concepts_collection)
       else
         localized_concepts_collection.each do |localized_concept_hash|
           lang = localized_concept_hash.dig("data", "language_code").to_s
@@ -98,21 +98,24 @@ module Glossarist
             Config.class_for(:localized_concept).of_yaml(localized_concept_hash),
           )
 
-          @localized_concepts[lang] = localization(lang).uuid
+          data.localized_concepts[lang] = localization(lang).uuid
 
           localized_concept
         end
       end
     end
-    attr_reader :localized_concepts
+
+    def localized_concepts
+      data.localized_concepts
+    end
 
     # Adds concept localization.
     # @param localized_concept [LocalizedConcept]
     def add_localization(localized_concept)
       lang = localized_concept.language_code
-      @localized_concepts ||= {}
-      @localized_concepts[lang] =
-        @localized_concepts[lang] || localized_concept.uuid
+      data.localized_concepts ||= {}
+      data.localized_concepts[lang] =
+        data.localized_concepts[lang] || localized_concept.uuid
       localizations.store(lang, localized_concept)
     end
     alias :add_l10n :add_localization
