@@ -100,6 +100,34 @@ RSpec.describe Glossarist::Citation do
       expect(retval["link"]).to eq("https://example.com")
       expect(retval["original"]).to eq("original ref text")
     end
+
+    it "dumps custom locality to a hash" do
+      attrs.replace({
+        source: "Example source",
+        id: "12345",
+        version: "2020",
+        custom_locality: [
+          { name: "version", value: "5" },
+          { name: "schema", value: "3" },
+        ],
+      }.to_yaml)
+
+      retval = YAML.safe_load(subject.to_yaml)
+
+      expect(retval).to be_kind_of(Hash)
+      expect(retval["ref"]["source"]).to eq("Example source")
+      expect(retval["ref"]["id"]).to eq("12345")
+      expect(retval["ref"]["version"]).to eq("2020")
+
+      expect(retval["custom_locality"]).to be_kind_of(Array)
+      expect(retval["custom_locality"].size).to eq(2)
+      expect(retval["custom_locality"][0]).to be_kind_of(Hash)
+      expect(retval["custom_locality"][0]["name"]).to eq("version")
+      expect(retval["custom_locality"][0]["value"]).to eq("5")
+      expect(retval["custom_locality"][1]).to be_kind_of(Hash)
+      expect(retval["custom_locality"][1]["name"]).to eq("schema")
+      expect(retval["custom_locality"][1]["value"]).to eq("3")
+    end
   end
 
   describe "::from_h" do
@@ -139,6 +167,35 @@ RSpec.describe Glossarist::Citation do
       expect(retval.version).to eq("2020")
       expect(retval.clause).to eq("12.3")
       expect(retval.link).to eq("https://example.com")
+    end
+
+    it "loads custom locality from a hash" do
+      src = {
+        "ref" => {
+          "source" => "Example source",
+          "id" => "12345",
+          "version" => "2020",
+        },
+        "custom_locality" => [
+          { "name" => "version", "value" => "5" },
+          { "name" => "schema", "value" => "3" },
+        ],
+      }.to_yaml
+
+      retval = described_class.from_yaml(src)
+
+      expect(retval).to be_kind_of(Glossarist::Citation)
+      expect(retval.source).to eq("Example source")
+      expect(retval.id).to eq("12345")
+      expect(retval.version).to eq("2020")
+      expect(retval.custom_locality).to be_kind_of(Array)
+      expect(retval.custom_locality.size).to eq(2)
+      expect(retval.custom_locality[0]).to be_kind_of(Glossarist::CustomLocality)
+      expect(retval.custom_locality[0].name).to eq("version")
+      expect(retval.custom_locality[0].value).to eq("5")
+      expect(retval.custom_locality[1]).to be_kind_of(Glossarist::CustomLocality)
+      expect(retval.custom_locality[1].name).to eq("schema")
+      expect(retval.custom_locality[1].value).to eq("3")
     end
   end
 end
