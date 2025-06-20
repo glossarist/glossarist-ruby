@@ -32,6 +32,8 @@ module Glossarist
 
     attribute :ref, :string
 
+    attribute :custom_locality, CustomLocality, collection: true
+
     yaml do
       map :id, to: :id, with: { from: :id_from_yaml, to: :id_to_yaml }
       map :text, to: :text, with: { from: :text_from_yaml, to: :text_to_yaml }
@@ -44,6 +46,7 @@ module Glossarist
       map :clause, to: :clause
       map :link, to: :link
       map :original, to: :original
+      map %i[custom_locality customLocality], to: :custom_locality
     end
 
     def ref_from_yaml(model, value)
