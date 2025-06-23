@@ -85,7 +85,7 @@ module Glossarist
       model.identifier = value || model.identifier
     end
 
-    def localized_concepts=(localized_concepts_collection)
+    def localized_concepts=(localized_concepts_collection) # rubocop:disable Metrics/AbcSize
       return unless localized_concepts_collection
 
       if localized_concepts_collection.is_a?(Hash)

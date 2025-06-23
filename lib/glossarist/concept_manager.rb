@@ -19,7 +19,9 @@ module Glossarist
     end
 
     def save_to_files(managed_concepts)
-      managed_concepts.each &method(:save_concept_to_file)
+      managed_concepts.each do |concept|
+        save_concept_to_file(concept)
+      end
     end
 
     def load_concept_from_file(filename)
