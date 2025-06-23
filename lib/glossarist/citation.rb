@@ -17,8 +17,8 @@ module Glossarist
     attribute :version, :string
 
     # @return [String]
-    # Referred clause of the document.
-    attribute :clause, :string
+    # Referred locality of the document.
+    attribute :locality, Locality
 
     # Link to document.
     # @return [String]
@@ -42,8 +42,9 @@ module Glossarist
       map :version, to: :version,
                     with: { from: :version_from_yaml, to: :version_to_yaml }
       map :ref, to: :ref, with: { from: :ref_from_yaml, to: :ref_to_yaml }
-
-      map :clause, to: :clause
+      map %i[clause locality],
+          to: :locality,
+          with: { from: :clause_from_yaml, to: :clause_to_yaml }
       map :link, to: :link
       map :original, to: :original
       map %i[custom_locality customLocality], to: :custom_locality
@@ -108,6 +109,35 @@ module Glossarist
         @version = ref["version"]
       else
         @text = ref
+      end
+    end
+
+    def clause_from_yaml(model, value)
+      # accepts old format like
+      # clause: "11"
+      # or new format like
+      # locality: { type: "clause", reference_from: "11", reference_to: "12" }
+      locality = Locality.new
+      locality.type = value["type"] || "clause"
+      locality.reference_from = value["reference_from"] || value
+      locality.reference_to = value["reference_to"] if value["reference_to"]
+      locality.validate!
+
+      model.locality = locality
+    end
+
+    def clause_to_yaml(model, doc) # rubocop:disable Metrics/AbcSize
+      if model.locality
+        doc["locality"] = {}
+        doc["locality"]["type"] = model.locality.type
+
+        if model.locality.reference_from
+          doc["locality"]["reference_from"] = model.locality.reference_from
+        end
+
+        if model.locality.reference_to
+          doc["locality"]["reference_to"] = model.locality.reference_to
+        end
       end
     end
 
