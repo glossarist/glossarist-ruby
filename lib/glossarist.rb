@@ -13,6 +13,7 @@ require_relative "glossarist/glossary_definition"
 
 require_relative "glossarist/designation"
 require_relative "glossarist/asset"
+require_relative "glossarist/locality"
 require_relative "glossarist/custom_locality"
 require_relative "glossarist/citation"
 require_relative "glossarist/collection"
