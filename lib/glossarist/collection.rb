@@ -60,7 +60,9 @@ module Glossarist
 
     # Writes all concepts to files.
     def save_concepts
-      @index.each_value &method(:save_concept_to_file)
+      @index.each_value do |concept|
+        save_concept_to_file(concept)
+      end
     end
 
     def load_concept_from_file(filename)
