@@ -16,7 +16,9 @@ data:
   sources:
   - origin:
       ref: ISO 19162:2015
-      clause: 4.1.3
+      locality:
+        type: clause
+        reference_from: 4.1.3
       link: https://www.iso.org/standard/63094.html
     type: authoritative
   terms:

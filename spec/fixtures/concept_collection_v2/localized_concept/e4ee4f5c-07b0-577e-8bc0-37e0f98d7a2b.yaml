@@ -14,7 +14,9 @@ data:
   sources:
   - origin:
       ref: ISO 19111:2019
-      clause: 3.1.32
+      locality:
+        type: clause
+        reference_from: 3.1.32
       link: https://www.iso.org/standard/74039.html
     type: authoritative
   - origin:

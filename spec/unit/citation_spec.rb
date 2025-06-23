@@ -28,11 +28,6 @@ RSpec.describe Glossarist::Citation do
       .to change { subject.version }.to("new one")
   end
 
-  it "accepts strings as clause" do
-    expect { subject.clause = "new one" }
-      .to change { subject.clause }.to("new one")
-  end
-
   it "accepts strings as link" do
     expect { subject.link = "new one" }
       .to change { subject.link }.to("new one")
@@ -73,9 +68,12 @@ RSpec.describe Glossarist::Citation do
       }.to_yaml)
 
       retval = YAML.safe_load(subject.to_yaml)
+
       expect(retval).to be_kind_of(Hash)
       expect(retval["ref"]).to eq("Example ref")
-      expect(retval["clause"]).to eq("12.3")
+      expect(retval["locality"]).to be_kind_of(Hash)
+      expect(retval["locality"]["type"]).to eq("clause")
+      expect(retval["locality"]["reference_from"]).to eq("12.3")
       expect(retval["link"]).to eq("https://example.com")
       expect(retval["original"]).to eq("original ref text")
     end
@@ -96,7 +94,9 @@ RSpec.describe Glossarist::Citation do
       expect(retval["ref"]["source"]).to eq("Example source")
       expect(retval["ref"]["id"]).to eq("12345")
       expect(retval["ref"]["version"]).to eq("2020")
-      expect(retval["clause"]).to eq("12.3")
+      expect(retval["locality"]).to be_kind_of(Hash)
+      expect(retval["locality"]["type"]).to eq("clause")
+      expect(retval["locality"]["reference_from"]).to eq("12.3")
       expect(retval["link"]).to eq("https://example.com")
       expect(retval["original"]).to eq("original ref text")
     end
@@ -143,7 +143,9 @@ RSpec.describe Glossarist::Citation do
 
       expect(retval).to be_kind_of(Glossarist::Citation)
       expect(retval.text).to eq("Citation")
-      expect(retval.clause).to eq("12.3")
+      expect(retval.locality).to be_kind_of(Glossarist::Locality)
+      expect(retval.locality.type).to eq("clause")
+      expect(retval.locality.reference_from).to eq("12.3")
       expect(retval.link).to eq("https://example.com")
     end
 
@@ -154,7 +156,11 @@ RSpec.describe Glossarist::Citation do
           "id" => "12345",
           "version" => "2020",
         },
-        "clause" => "12.3",
+        "locality" => {
+          "type" => "issue",
+          "reference_from" => "777",
+          "reference_to" => "888",
+        },
         "link" => "https://example.com",
         "original" => "original ref text",
       }.to_yaml
@@ -165,8 +171,32 @@ RSpec.describe Glossarist::Citation do
       expect(retval.source).to eq("Example source")
       expect(retval.id).to eq("12345")
       expect(retval.version).to eq("2020")
-      expect(retval.clause).to eq("12.3")
+      expect(retval.locality).to be_kind_of(Glossarist::Locality)
+      expect(retval.locality.type).to eq("issue")
+      expect(retval.locality.reference_from).to eq("777")
+      expect(retval.locality.reference_to).to eq("888")
       expect(retval.link).to eq("https://example.com")
+    end
+
+    it "raises error when type is invalid from a hash" do
+      src = {
+        "ref" => {
+          "source" => "Example source",
+          "id" => "12345",
+          "version" => "2020",
+        },
+        "locality" => {
+          "type" => "invalid",
+          "reference_from" => "777",
+          "reference_to" => "888",
+        },
+        "link" => "https://example.com",
+        "original" => "original ref text",
+      }.to_yaml
+
+      expect do
+        described_class.from_yaml(src)
+      end.to raise_error(Lutaml::Model::ValidationError)
     end
 
     it "loads custom locality from a hash" do
