@@ -12,7 +12,9 @@ data:
   sources:
   - origin:
       ref: ISO 1087-1:2000
-      clause: 3.2.9
+      locality:
+        type: clause
+        reference_from: 3.2.9
       link: https://www.iso.org/standard/20057.html
     type: authoritative
   - origin:
