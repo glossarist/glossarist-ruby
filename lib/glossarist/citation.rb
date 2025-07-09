@@ -118,10 +118,17 @@ module Glossarist
       # or new format like
       # locality: { type: "clause", reference_from: "11", reference_to: "12" }
       locality = Locality.new
-      locality.type = value["type"] || "clause"
-      locality.reference_from = value["reference_from"] || value
-      locality.reference_to = value["reference_to"] if value["reference_to"]
-      locality.validate!
+
+      if value.is_a?(Hash)
+        locality.type = value["type"] || "clause"
+        locality.reference_from = value["reference_from"] || value
+        locality.reference_to = value["reference_to"] if value["reference_to"]
+        locality.validate!
+      else
+        locality.type = "clause"
+        locality.reference_from = value
+        locality.validate!
+      end
 
       model.locality = locality
     end
