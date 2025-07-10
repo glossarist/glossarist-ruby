@@ -102,8 +102,6 @@ module Glossarist
           return actual_path
         end
       end
-
-      actual_path
     end
 
     def v1_collection?
