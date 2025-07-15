@@ -77,7 +77,7 @@ module Glossarist
     end
 
     def concepts_glob
-      File.join(path, "concept-*.{yaml,yml}")
+      File.file?(path) ? path : File.join(path, "concept-*.{yaml,yml}")
     end
   end
 end

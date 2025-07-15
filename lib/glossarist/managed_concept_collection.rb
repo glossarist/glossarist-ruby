@@ -70,5 +70,10 @@ module Glossarist
       @concept_manager.path = path
       @concept_manager.save_to_files(@managed_concepts)
     end
+
+    def save_grouped_concepts_to_files(path)
+      @concept_manager.path = path
+      @concept_manager.save_grouped_concepts_to_files(@managed_concepts)
+    end
   end
 end
