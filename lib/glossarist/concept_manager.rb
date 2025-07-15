@@ -12,9 +12,11 @@ module Glossarist
       collection ||= ManagedConceptCollection.new
 
       Dir.glob(concepts_glob) do |filename|
-        concept = load_concept_from_file(filename)
+        concepts = load_concept_from_file(filename)
 
-        collection.store(concept)
+        concepts.each do |concept|
+          collection.store(concept)
+        end
       end
     end
 
@@ -24,30 +26,67 @@ module Glossarist
       end
     end
 
-    def load_concept_from_file(filename)
-      concept_hash = Psych.safe_load(File.read(filename),
-                                     permitted_classes: [Date, Time])
-      concept_hash["uuid"] = concept_hash["id"] || File.basename(filename, ".*")
+    def save_grouped_concepts_to_files(managed_concepts)
+      managed_concepts.each do |concept|
+        save_grouped_concepts_to_file(concept)
+      end
+    end
 
-      concept = Config.class_for(:managed_concept).of_yaml(concept_hash)
-
-      concept.data.localized_concepts.each_value do |id|
-        localized_concept = load_localized_concept(id)
-        concept.add_l10n(localized_concept)
+    def group_concept_hashes(mixed_hashes)
+      concept_hashes = mixed_hashes.select do |concept_hash|
+        !concept_hash["data"]["localized_concepts"].nil? ||
+          !concept_hash["data"]["localizedConcepts"].nil?
       end
 
-      concept
+      localized_concept_hashes = mixed_hashes.select do |concept_hash|
+        concept_hash["data"]["localized_concepts"].nil? &&
+          concept_hash["data"]["localizedConcepts"].nil?
+      end
+
+      [concept_hashes, localized_concept_hashes]
+    end
+
+    def load_concept_from_file(filename)
+      mixed_hashes = YAML.load_stream(File.read(filename))
+      concepts = []
+
+      concept_hashes, localized_concept_hashes =
+        group_concept_hashes(mixed_hashes)
+
+      concept_hashes.each do |concept_hash|
+        concept_hash["uuid"] = concept_hash["id"] ||
+          File.basename(filename, ".*")
+        concept = Config.class_for(:managed_concept).of_yaml(concept_hash)
+
+        concept.data.localized_concepts.each_value do |id|
+          localized_concept =
+            load_localized_concept(id, localized_concept_hashes)
+          concept.add_l10n(localized_concept)
+        end
+
+        concepts << concept
+      end
+
+      concepts
     rescue Psych::SyntaxError => e
       raise Glossarist::ParseError.new(filename: filename, line: e.line)
     end
 
-    def load_localized_concept(id)
-      concept_hash = Psych.safe_load(
-        File.read(localized_concept_path(id)),
-        permitted_classes: [Date, Time],
-      )
-      concept_hash["uuid"] = id
+    def load_localized_concept(id, localized_concept_hashes = [])
+      {}
 
+      concept_hash = if localized_concept_hashes.empty?
+                       Psych.safe_load(
+                         File.read(localized_concept_path(id)),
+                         permitted_classes: [Date, Time],
+                       )
+                     else
+                       localized_concept_hashes.find do |hash|
+                         hash["id"] == id
+                       end
+                     end
+
+      concept_hash["uuid"] = id
       Config.class_for(:localized_concept).of_yaml(concept_hash)
     rescue Psych::SyntaxError => e
       raise Glossarist::ParseError.new(filename: filename, line: e.line)
@@ -71,7 +110,27 @@ module Glossarist
       end
     end
 
+    def save_grouped_concepts_to_file(concept)
+      @localized_concepts_path ||= "localized_concept"
+      concept_dir = File.join(path, "concept")
+
+      Dir.mkdir(concept_dir) unless Dir.exist?(concept_dir)
+
+      content = []
+
+      filename = File.join(concept_dir, "#{concept.uuid}.yaml")
+      content << concept.to_yaml
+
+      concept.localized_concepts.each_key do |lang|
+        content << concept.localization(lang).to_yaml
+      end
+
+      File.write(filename, content.join("\n"))
+    end
+
     def concepts_glob
+      return path if File.file?(path)
+
       if v1_collection?
         File.join(path, "concept-*.{yaml,yml}")
       else

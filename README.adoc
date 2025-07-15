@@ -33,7 +33,18 @@ gem install glossarist
 
 === Reading a Glossarist model V2 from files
 
-To load the glossarist model V2 dataset
+Glossarist model V2 dataset is a collection of concepts and their localized
+concepts in the form of YAML files.
+
+The storage structure of the dataset has 2 forms:
+
+1. Each concept is stored in a concept YAML file and its localized concepts are
+stored in separate YAML files. The concept files are stored in the `concepts`
+folder and its localized concepts are stored in the `localized_concepts` folder.
+2. Each concept and its related localized concepts are stored in a single YAML
+file. The concept files are stored in the `concepts` folder.
+
+To load the glossarist model V2 dataset:
 
 [,ruby]
 ----
@@ -43,16 +54,31 @@ collection.load_from_files("path/to/glossarist-v2-dataset")
 
 === Writing a Glossarist model V2 to files
 
-To wite the glossarist model V2 dataset to files
+To write the glossarist model V2 dataset to files:
 
 [,ruby]
 ----
+# load the collection from files
 collection = Glossarist::ManagedConceptCollection.new
 collection.load_from_files("path/to/glossarist-v2-dataset")
 
 # ... Update the collection ...
 
 collection.save_to_files("path/to/glossarist-v2-dataset")
+----
+
+To write the glossarist model V2 dataset with concepts and their
+localized concepts grouped into single files:
+
+[,ruby]
+----
+# load the collection from files
+collection = Glossarist::ManagedConceptCollection.new
+collection.load_from_files("path/to/glossarist-v2-dataset")
+
+# ... Update the collection ...
+
+collection.save_grouped_concepts_to_files("path/to/glossarist-v2-dataset")
 ----
 
 === ManagedConceptCollection

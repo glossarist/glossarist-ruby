@@ -1,0 +1,95 @@
+---
+data:
+  identifier: '1'
+  localized_concepts:
+    eng: 3a75582e-699c-4e08-b26a-3ebd6fb00101
+    fra: 3a75582e-699c-4e08-b26a-3ebd6fb00102
+    rus: 3a75582e-699c-4e08-b26a-3ebd6fb00103
+    deu: 3a75582e-699c-4e08-b26a-3ebd6fb00104
+dateAccepted: 2023-01-01T00:00:00.000+00:00
+id: 3a75582e-699c-4e08-b26a-3ebd6fb00100
+status: valid
+
+---
+data:
+  dates:
+    - date: 2023-01-01T00:00:00.000+00:00
+      type: accepted
+  definition:
+    - content: process by which atmospheric gases absorb electromagnetic radiation
+  id: '1-EN'
+  sources:
+    - origin:
+        ref: ISO 2533:1975
+        clause: 3.2.1
+      type: authoritative
+  terms:
+    - designation: absorption, atmospheric
+      normative_status: preferred
+      type: expression
+  language_code: eng
+dateAccepted: 2023-01-01T00:00:00.000+00:00
+id: 3a75582e-699c-4e08-b26a-3ebd6fb00101
+
+---
+data:
+  dates:
+    - date: 2023-01-01T00:00:00.000+00:00
+      type: accepted
+  definition:
+    - content: processus par lequel les gaz atmosphériques absorbent le rayonnement électromagnétique
+  id: '1-FR'
+  sources:
+    - origin:
+        ref: ISO 2533:1975
+        clause: 3.2.1
+      type: authoritative
+  terms:
+    - designation: absorption atmosphérique
+      normative_status: preferred
+      type: expression
+  language_code: fra
+dateAccepted: 2023-01-01T00:00:00.000+00:00
+id: 3a75582e-699c-4e08-b26a-3ebd6fb00102
+
+---
+data:
+  dates:
+    - date: 2023-01-01T00:00:00.000+00:00
+      type: accepted
+  definition:
+    - content: процесс поглощения атмосферными газами электромагнитного излучения
+  id: '1-RU'
+  sources:
+    - origin:
+        ref: ISO 2533:1975
+        clause: 3.2.1
+      type: authoritative
+  terms:
+    - designation: атмосферное поглощение
+      normative_status: preferred
+      type: expression
+  language_code: rus
+dateAccepted: 2023-01-01T00:00:00.000+00:00
+id: 3a75582e-699c-4e08-b26a-3ebd6fb00103
+
+---
+data:
+  dates:
+    - date: 2023-01-01T00:00:00.000+00:00
+      type: accepted
+  definition:
+    - content: prozess bei dem atmosphärische Gase elektromagnetische Strahlung absorbieren
+  id: '1-DE'
+  sources:
+    - origin:
+        ref: ISO 2533:1975
+        clause: 3.2.1
+      type: authoritative
+  terms:
+    - designation: atmosphärische Absorption
+      normative_status: preferred
+      type: expression
+  language_code: deu
+dateAccepted: 2023-01-01T00:00:00.000+00:00
+id: 3a75582e-699c-4e08-b26a-3ebd6fb00104

@@ -85,8 +85,7 @@ module Glossarist
 
     def date_accepted_to_yaml(model, doc)
       if model.date_accepted
-        doc["date_accepted"] =
-          model.date_accepted.date.iso8601
+        doc["date_accepted"] = model.date_accepted.date.iso8601
       end
     end
 
@@ -94,8 +93,13 @@ module Glossarist
       return if model.date_accepted
 
       model.data.dates ||= []
-      model.data.dates << ConceptDate.of_yaml({ "date" => value,
-                                                "type" => "accepted" })
+      model.data.dates << ConceptDate.of_yaml(
+        { "date" => value, "type" => "accepted" },
+      )
+
+      model.date_accepted = model.data.dates.find do |d|
+        d.type == "accepted"
+      end
     end
 
     def uuid

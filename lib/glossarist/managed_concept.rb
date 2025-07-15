@@ -52,13 +52,15 @@ module Glossarist
     alias :l10n :localization
 
     def date_accepted_from_yaml(model, value)
-      model.dates ||= []
-      model.dates << ConceptDate.of_yaml({ "date" => value,
-                                           "type" => "accepted" })
+      model.date_accepted = ConceptDate.of_yaml(
+        { "date" => value, "type" => "accepted" },
+      )
     end
 
     def date_accepted_to_yaml(model, doc)
-      doc["date_accepted"] = model.date_accepted.date if model.date_accepted
+      if model.date_accepted
+        doc["date_accepted"] = model.date_accepted.date.iso8601
+      end
     end
 
     def uuid_to_yaml(model, doc)
