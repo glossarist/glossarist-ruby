@@ -112,7 +112,7 @@ module Glossarist
       end
     end
 
-    def clause_from_yaml(model, value)
+    def clause_from_yaml(model, value) # rubocop:disable Metrics/AbcSize
       # accepts old format like
       # clause: "11"
       # or new format like
@@ -123,12 +123,11 @@ module Glossarist
         locality.type = value["type"] || "clause"
         locality.reference_from = value["reference_from"] || value
         locality.reference_to = value["reference_to"] if value["reference_to"]
-        locality.validate!
       else
         locality.type = "clause"
         locality.reference_from = value
-        locality.validate!
       end
+      locality.validate!
 
       model.locality = locality
     end
