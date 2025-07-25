@@ -39,10 +39,10 @@ concepts in the form of YAML files.
 The storage structure of the dataset has 2 forms:
 
 1. Each concept is stored in a concept YAML file and its localized concepts are
-stored in separate YAML files. The concept files are stored in the `concepts`
-folder and its localized concepts are stored in the `localized_concepts` folder.
+stored in separate YAML files. The concept files are stored in the `concept`
+folder and its localized concepts are stored in the `localized_concept` folder.
 2. Each concept and its related localized concepts are stored in a single YAML
-file. The concept files are stored in the `concepts` folder.
+file. These concept files are stored directly in the specified path.
 
 To load the glossarist model V2 dataset:
 
