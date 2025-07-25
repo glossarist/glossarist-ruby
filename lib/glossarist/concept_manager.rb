@@ -112,7 +112,7 @@ module Glossarist
 
     def save_grouped_concepts_to_file(concept)
       @localized_concepts_path ||= "localized_concept"
-      concept_dir = File.join(path, "concept")
+      concept_dir = File.join(path)
 
       Dir.mkdir(concept_dir) unless Dir.exist?(concept_dir)
 
@@ -134,7 +134,13 @@ module Glossarist
       if v1_collection?
         File.join(path, "concept-*.{yaml,yml}")
       else
-        File.join(path, "concept", "*.{yaml,yml}")
+        # normal v2 collection
+        concepts_glob = File.join(path, "concept", "*.{yaml,yml}")
+        if Dir.glob(concepts_glob).empty?
+          # multiple content YAML files
+          concepts_glob = File.join(path, "*.{yaml,yml}")
+        end
+        concepts_glob
       end
     end
 

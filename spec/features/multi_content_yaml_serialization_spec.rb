@@ -162,7 +162,7 @@ RSpec.describe "Serialization and deserialization" do
       Dir.mktmpdir do |tmp_path|
         collection.save_grouped_concepts_to_files(tmp_path)
 
-        concepts = Dir.glob(File.join(tmp_path, "**", "*.{yaml,yml}"))
+        concepts = Dir.glob(File.join(tmp_path, "*.{yaml,yml}"))
         expect(concepts.count).to eq(1)
 
         file_content = File.read(concepts.first)
