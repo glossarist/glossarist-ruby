@@ -51,9 +51,9 @@ module Glossarist
                 line.to_s
               else
                 # remove color codes
-                line.to_s.gsub(/\e\[\d+m/, '')
+                line.to_s.gsub(/\e\[\d+m/, "")
               end
-            end.join("\n")
+            end.join("\n"),
           )
         end
       end

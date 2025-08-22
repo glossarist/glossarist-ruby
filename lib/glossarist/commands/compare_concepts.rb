@@ -1,7 +1,7 @@
 module Glossarist
   module Commands
     class CompareConcepts < Base
-      def compare_file_counts(new_concepts, old_concepts, output_content)
+      def compare_file_counts(new_concepts, old_concepts, output_content) # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/AbcSize, Metrics/MethodLength
         new_count = new_concepts.managed_concepts.count
         old_count = old_concepts.managed_concepts.count
 
@@ -11,18 +11,18 @@ module Glossarist
                           "Old concepts: #{old_count}"
 
         diff = new_count - old_count
-        if diff > 0
-          output_content << "New concepts added: #{diff}"
-        elsif diff < 0
-          output_content << "Old concepts removed: #{-diff}"
-        else
-          output_content << "No change in concept counts."
-        end
+        output_content << if diff.positive?
+                            "New concepts added: #{diff}"
+                          elsif diff.negative?
+                            "Old concepts removed: #{-diff}"
+                          else
+                            "No change in concept counts."
+                          end
 
         output_content << "-" * 40
       end
 
-      def compare_mapped_concepts(new_concepts, old_concepts, output_content)
+      def compare_mapped_concepts(new_concepts, old_concepts, output_content) # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/AbcSize, Metrics/MethodLength
         output_content << "Comparing concepts:"
         output_content << "-" * 40
 
@@ -51,7 +51,7 @@ module Glossarist
         output_content << "-" * 40
       end
 
-      def show_mapping(new_concepts, old_concepts, output_content)
+      def show_mapping(new_concepts, old_concepts, output_content) # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/AbcSize, Metrics/MethodLength
         output_content << "Mapping new concepts to old concepts:"
         output_content << "-" * 40
 
