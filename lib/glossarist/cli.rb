@@ -4,6 +4,7 @@ require "terminal-table"
 
 require_relative "commands/base"
 require_relative "commands/generate_latex"
+require_relative "commands/compare_concepts"
 require_relative "commands/version"
 
 module Glossarist
@@ -32,6 +33,22 @@ module Glossarist
                                            "Concept model"
     def generate_latex
       Commands::GenerateLatex.new(options).run
+    end
+
+    desc "compare_concepts", "Compare New Concepts (Concepts and their " \
+         "localized concepts are stored in the same YAML Stream file) with " \
+         "Old Concepts (Concepts and their localized concepts are stored in " \
+         "different YAML files)"
+    method_option :new_concept_path, aliases: :n, required: true,
+                                     desc: "Path to new yaml concepts directory"
+    method_option :old_concept_path, aliases: :o, required: true,
+                                     desc: "Path to old yaml concepts directory"
+    method_option :report_path, aliases: :r,
+                                desc: "Path to report file"
+    method_option :color, aliases: :c, type: :boolean, default: false,
+                          desc: "Colorize differences"
+    def compare_concepts
+      Commands::CompareConcepts.new(options).run
     end
 
     desc "version", "Print Glossarist Version"

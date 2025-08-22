@@ -27,6 +27,36 @@ module Glossarist
           exit exit_code
         end
       end
+
+      def load_concepts(dataset_concept_path)
+        collection = Glossarist::ManagedConceptCollection.new
+        collection.load_from_files(dataset_concept_path)
+        collection
+      end
+
+      def output(content)
+        # add a newline at the end of the content
+        content << ""
+
+        # output on screen
+        puts content
+
+        use_color_codes = options[:color]
+        report_path = options[:report_path] || "report.txt"
+
+        File.open(report_path, "w") do |file|
+          file.write(
+            content.map do |line|
+              if use_color_codes
+                line.to_s
+              else
+                # remove color codes
+                line.to_s.gsub(/\e\[\d+m/, '')
+              end
+            end.join("\n")
+          )
+        end
+      end
     end
   end
 end
