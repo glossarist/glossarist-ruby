@@ -344,29 +344,124 @@ modification:: A description of the modification to the cited definition of the 
 
 == Commands
 
-`generate_latex`:: Convert Concepts to Latex format
+=== generate_latex
 
-=== Usage:
-[,bash]
+Convert Concepts to Latex format
+
+==== Usage:
+
+[source,sh]
 ----
-glossarist generate_latex p, --concepts-path=CONCEPTS_PATH
+glossarist generate_latex -p, --concepts-path=CONCEPTS_PATH
 ----
 
-=== Options:
+==== Options:
+
 [cols="1,1"]
 |===
-|p, --concepts-path
+|-p, --concepts-path
 |Path to yaml concepts directory
 
-|l, --latex-concepts
-|File path having list of concepts that should be converted to LATEX format. If not provided all the concepts will be converted to the latex format
+|-l, --latex-concepts
+|File path having list of concepts that should be converted to LATEX format.
+If not provided all the concepts will be converted to the latex format
+(Optional)
 
-|o, --output-file
-|Output file path. By default the output will pe printed to the console
+|-o, --output-file
+|Output file path. By default the output will be printed to the console
+(Optional)
 
-|e, --extra-attributes
-|List of extra attributes that are not in standard Glossarist Concept model. eg -e one two three
+|-e, --extra-attributes
+|List of extra attributes that are not in standard Glossarist Concept model.
+(Optional)
+e.g. -e one two three
 |===
+
+=== validate_concepts
+
+Validate Concept models
+
+==== Usage:
+
+[source,sh]
+----
+glossarist validate_concepts -p, --concept-path=CONCEPT_PATH
+----
+
+==== Options:
+
+[cols="1,1"]
+|===
+|-p, --concept-path
+|Path to yaml concepts directory
+
+|-r, --report-path
+|Path to report file (Optional)
+|===
+
+=== validate_id_linkages
+
+Validate ID linkages in Concept YAML
+
+==== Usage:
+
+[source,sh]
+----
+glossarist validate_id_linkages -p, --concept-path=CONCEPT_PATH
+----
+
+==== Options:
+
+[cols="1,1"]
+|===
+|-p, --concept-path
+|Path to yaml concepts directory
+
+|-r, --report-path
+|Path to report file (Optional)
+|===
+
+=== compare_concepts
+
+Compare New Concepts (Concepts and their localized concepts
+are stored in the same YAML Stream file) with Old Concepts (Concepts and their
+localized concepts are stored in different YAML files)
+
+==== Usage:
+
+[source,sh]
+----
+glossarist compare_concepts -n, --new-concept-path=NEW_CONCEPT_PATH -o, --old-concept-path=OLD_CONCEPT_PATH
+----
+
+==== Options:
+
+[cols="1,1"]
+|===
+|-n, --new-concept-path
+|Path to new yaml concepts directory
+
+|-o, --old-concept-path
+|Path to old yaml concepts directory
+
+|-r, --report-path
+|Path to report file (Optional)
+
+|-c, --[no-]color
+|Colorize differences (Optional, default: false)
+|===
+
+=== version
+
+Show the version of the Glossarist gem
+
+==== Usage:
+
+[source,sh]
+----
+glossarist version
+----
+
 
 == Credits
 
