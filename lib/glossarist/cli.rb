@@ -5,6 +5,7 @@ require_relative "commands/base"
 require_relative "commands/generate_latex"
 require_relative "commands/compare_concepts"
 require_relative "commands/validate_concepts"
+require_relative "commands/validate_id_linkages"
 require_relative "commands/version"
 
 module Glossarist
@@ -49,6 +50,15 @@ module Glossarist
                           desc: "Colorize differences"
     def compare_concepts
       Commands::CompareConcepts.new(options).run
+    end
+
+    desc "validate_id_linkages", "Validate ID linkages in Concept YAML"
+    method_option :concept_path, aliases: :p, required: true,
+                                 desc: "Path to yaml concepts directory"
+    method_option :report_path, aliases: :r,
+                                desc: "Path to report file"
+    def validate_id_linkages
+      Commands::ValidateIdLinkages.new(options).run
     end
 
     desc "validate_concepts", "Validate Concept models"
