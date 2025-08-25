@@ -1,0 +1,8 @@
+Validate concepts:
+----------------------------------------
+Validating concept: Aec_service_life_arm.Service_life
+No validation errors found.
+Validating concept: action_schema.action_resource
+Validation errors found:
+ - normative_status is `invalid_status`, must be one of the following [preferred, deprecated, admitted, <símbolo>, 티에스, prąd startowy]
+----------------------------------------

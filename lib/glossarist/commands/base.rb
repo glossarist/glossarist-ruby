@@ -57,6 +57,12 @@ module Glossarist
           )
         end
       end
+
+      def relative_path(to, from = nil)
+        gem_root = Gem::Specification.find_by_name("glossarist").gem_dir
+        from = gem_root if from.nil?
+        Pathname.new(to).relative_path_from(Pathname.new(from)).to_s
+      end
     end
   end
 end

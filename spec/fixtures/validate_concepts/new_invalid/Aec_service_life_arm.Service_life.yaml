@@ -1,0 +1,33 @@
+---
+data:
+  identifier: Aec_service_life_arm.Service_life
+  localized_concepts:
+    eng: Aec_service_life_arm.Service_life-eng
+id: Aec_service_life_arm.Service_life
+
+---
+data:
+  definition:
+  - content: "{{entity data type}} that is a type of {{Aec_whole_life_object}} that
+      represents the service life {{entity}}"
+  examples: []
+  notes:
+  - content: A **Service_life** is a type of {{Aec_physical_object,Aec_physical_object}}
+      that is the temporal part of a {{Aec_whole_life_object,Aec_whole_life_object}}
+      during which it is in service.
+  sources:
+  - origin:
+      ref: ISO 10303
+      custom_locality:
+      - name: schema
+        value: Aec_service_life_arm
+      - name: version
+        value: '1'
+    type: authoritative
+  terms:
+  - type: expression
+    normative_status: preferred
+    designation: Service_life
+  domain: 'application module: Aec_service_life_arm'
+  language_code: eng
+id: Aec_service_life_arm.Service_life-eng

@@ -1,0 +1,7 @@
+Validate concepts:
+----------------------------------------
+Validating concept: Aec_service_life_arm.Service_life
+No validation errors found.
+Validating concept: action_schema.action_resource
+No validation errors found.
+----------------------------------------
