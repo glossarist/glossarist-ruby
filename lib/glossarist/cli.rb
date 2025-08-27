@@ -6,6 +6,7 @@ require_relative "commands/generate_latex"
 require_relative "commands/compare_concepts"
 require_relative "commands/validate_concepts"
 require_relative "commands/validate_id_linkages"
+require_relative "commands/validate_schemas"
 require_relative "commands/version"
 
 module Glossarist
@@ -68,6 +69,17 @@ module Glossarist
                                 desc: "Path to report file"
     def validate_concepts
       Commands::VerifyConcepts.new(options).run
+    end
+
+    desc "validate_schemas", "Validate Concept YAML against schemas"
+    method_option :concept_path, aliases: :p, required: true,
+                                 desc: "Path to yaml concepts directory"
+    method_option :schema_path , aliases: :s, required: true,
+                                 desc: "Path to concept schema directory or URL"
+    method_option :report_path, aliases: :r,
+                                desc: "Path to report file"
+    def validate_schemas
+      Commands::ValidateSchemas.new(options).run
     end
 
     desc "version", "Print Glossarist Version"

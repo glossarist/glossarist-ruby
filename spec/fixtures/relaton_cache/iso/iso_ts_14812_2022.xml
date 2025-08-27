@@ -1,5 +1,5 @@
 <bibdata type="standard" schema-version="v1.2.9">
-  <fetched>2025-03-19</fetched>
+  <fetched>2025-08-25</fetched>
   <title type="title-intro" format="text/plain" language="en" script="Latn">Intelligent transport systems</title>
   <title type="title-main" format="text/plain" language="en" script="Latn">Vocabulary</title>
   <title type="main" format="text/plain" language="en" script="Latn">Intelligent transport systems - Vocabulary</title>
@@ -42,10 +42,13 @@
       </organization>
     </owner>
   </copyright>
-  <relation type="obsoletes">
+  <relation type="updates">
     <bibitem type="standard">
-      <formattedref format="text/plain">ISO/DTS 14812</formattedref>
-      <docidentifier type="ISO" primary="true">ISO/DTS 14812</docidentifier>
+      <formattedref format="text/plain">ISO/TS 14812</formattedref>
+      <docidentifier type="ISO" primary="true">ISO/TS 14812</docidentifier>
+      <date type="circulated">
+        <on>2022-05-06</on>
+      </date>
     </bibitem>
   </relation>
   <place>Geneva</place>

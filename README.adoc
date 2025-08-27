@@ -451,6 +451,31 @@ glossarist compare_concepts -n, --new-concept-path=NEW_CONCEPT_PATH -o, --old-co
 |Colorize differences (Optional, default: false)
 |===
 
+=== validate_schemas
+
+Validate Concept YAML against schemas
+
+==== Usage:
+
+[source,sh]
+----
+glossarist validate_schemas -p, --concept-path=CONCEPT_PATH -s, --schema-path=SCHEMA_PATH
+----
+
+==== Options:
+
+[cols="1,1"]
+|===
+|-p, --concept-path
+|Path to yaml concepts directory
+
+|-s, --schema-path
+|Path to concept schema directory or URL
+
+|-r, --report-path
+|Path to report file (Optional)
+|===
+
 === version
 
 Show the version of the Glossarist gem

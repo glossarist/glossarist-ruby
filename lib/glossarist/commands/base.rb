@@ -28,6 +28,12 @@ module Glossarist
         end
       end
 
+      def concepts_glob(path)
+        return path if File.file?(path)
+
+        File.join(path, "*.{yaml,yml}")
+      end
+
       def load_concepts(dataset_concept_path)
         collection = Glossarist::ManagedConceptCollection.new
         collection.load_from_files(dataset_concept_path)
