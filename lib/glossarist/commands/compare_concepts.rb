@@ -61,7 +61,9 @@ module Glossarist
           mapped_old_concept = find_concept_by_id(old_concepts, concept.id)
 
           if mapped_old_concept
-            output_content << "#{concept.id} | #{mapped_old_concept.id}"
+            mapped_old_concept_id = mapped_old_concept.id ||
+              mapped_old_concept.uuid 
+            output_content << "#{concept.id} | #{mapped_old_concept_id}"
           else
             not_mapped_new_ids << concept.id
           end
@@ -98,9 +100,9 @@ module Glossarist
         output_content << "-" * 40
       end
 
-      def find_concept_by_id(old_concepts, id)
-        old_concepts.find do |concept|
-          concept.data.id == id
+      def find_concept_by_id(concepts, id)
+        concepts.find do |concept|
+          concept.data.id == id || concept.id == id || concept.uuid == id
         end
       end
 
