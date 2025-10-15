@@ -1,0 +1,31 @@
+---
+data:
+  identifier: action_schema.action_resource
+  localized_concepts:
+    eng: action_schema.action_resource-eng
+id: action_schema.action_resource
+
+---
+data:
+  definition:
+  - content: "{{entity data type}} that represents the action resource {{entity}}"
+  examples: []
+  notes:
+  - content: An **action_resource** is a thing that is identified as being needed
+      to carry out an action.
+  sources:
+  - origin:
+      ref: ISO 10303
+      custom_locality:
+      - name: schema
+        value: action_schema
+      - name: version
+        value: '9'
+    type: authoritative
+  terms:
+  - type: expression
+    normative_status: preferred
+    designation: action_resource
+  domain: 'resource: action_schema'
+  language_code: eng
+id: action_schema.action_resource-eng

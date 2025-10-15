@@ -1,0 +1,7 @@
+Validate ID linkages:
+----------------------------------------
+Validating file: spec/fixtures/validate_id_linkages/new_invalid/Aec_service_life_arm.Service_life.yaml
+No missing localized concepts found.
+Validating file: spec/fixtures/validate_id_linkages/new_invalid/action_schema.action_resource.yaml
+Missing localized concepts with IDs: action_schema.action_resource-eng
+----------------------------------------

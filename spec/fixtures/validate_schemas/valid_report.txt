@@ -1,0 +1,7 @@
+Validate schemas:
+----------------------------------------
+Validating file: spec/fixtures/validate_schemas/new/Aec_service_life_arm.Service_life.yaml
+No validation errors found.
+Validating file: spec/fixtures/validate_schemas/new/action_schema.action_resource.yaml
+No validation errors found.
+----------------------------------------

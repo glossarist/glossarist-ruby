@@ -1,0 +1,33 @@
+---
+data:
+  dates: []
+  definition:
+  - content: part of {{urn:iso:std:iso:14812:3.2.6.1,ITS on-board equipment,on-board
+      equipment}} that provides wireless connectivity to other {{urn:iso:std:iso:14812:3.1.8.2,ITS
+      component,ITS components}} external to the {{urn:iso:std:iso:14812:3.7.1.1,vehicle}}
+  examples: []
+  notes:
+  - content: An OBU implementation can also include ITS functionality.
+  sources:
+  - origin:
+      ref: ISO/TS 14812:2022
+      clause: 3.2.6.2
+      link: https://www.iso.org/standard/79779.html
+    type: authoritative
+  terms:
+  - type: expression
+    normative_status: preferred
+    designation: ITS on-board unit
+  - type: expression
+    normative_status: preferred
+    designation: on-board unit
+  - type: expression
+    normative_status: preferred
+    designation: OBU
+  - type: expression
+    normative_status: admitted
+    designation: onboard unit
+  language_code: eng
+  entry_status: valid
+status: valid
+id: 0ae9747b-7423-5e66-bfcf-a066d5f4ab41

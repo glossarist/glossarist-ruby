@@ -1,0 +1,7 @@
+Validate schemas:
+----------------------------------------
+Validating file: spec/fixtures/validate_schemas/tc211/0a45cd30-94db-54a5-b5cb-0c20a3fa7cc1.yaml
+No validation errors found.
+Validating file: spec/fixtures/validate_schemas/tc211/e97a0726-8f8c-51bf-b9d6-54f6afb77db1.yaml
+No validation errors found.
+----------------------------------------

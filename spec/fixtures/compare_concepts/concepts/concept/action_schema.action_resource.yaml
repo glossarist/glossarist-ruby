@@ -1,0 +1,6 @@
+---
+data:
+  identifier: action_schema.action_resource
+  localized_concepts:
+    eng: action_schema.action_resource-eng
+id: action_schema.action_resource

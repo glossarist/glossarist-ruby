@@ -1,0 +1,33 @@
+Comparing concept counts:
+----------------------------------------
+New concepts: 2 | Old concepts: 2
+No change in concept counts.
+----------------------------------------
+Mapping new concepts to old concepts:
+----------------------------------------
+Aec_service_life_arm.Service_life | Aec_service_life_arm.Service_life
+action_schema.action_resource | action_schema.action_resource
+----------------------------------------
+Comparing concepts:
+----------------------------------------
+Diff Tree of Aec_service_life_arm.Service_life with Similarity score: 93.75%:
+------------------------------
+└── Glossarist::ManagedConcept
+    └── data (Glossarist::ManagedConceptData):
+        ├── [1] (Glossarist::ConceptSource)
+        │   └── [2] (Glossarist::CustomLocality)
+        │       └── value (Lutaml::Model::Type::String):
+        │           ├── - (String) "2"
+        │           └── + (String) "1"
+        └── [1] (Glossarist::Designation::Expression)
+            └── designation (Lutaml::Model::Type::String):
+                ├── - (String) "Aec_service_life"
+                └── + (String) "Service_life"
+
+------------------------------
+Diff Tree of action_schema.action_resource with Similarity score: 100%:
+------------------------------
+└── Glossarist::ManagedConcept
+
+------------------------------
+----------------------------------------

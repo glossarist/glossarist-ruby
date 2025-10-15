@@ -1,0 +1,9 @@
+Validate schemas:
+----------------------------------------
+Validating file: spec/fixtures/validate_schemas/new_invalid/Aec_service_life_arm.Service_life.yaml
+Validation errors found:
+ - The property '#/data/language_code' was not of a maximum string length of 3 in schema 5d3a6011-20f0-560e-8d2a-a342bc6c77ea#
+ - The property '#/data/sources/0/type' value "invalid_type" did not match one of the following values: authoritative, lineage in schema 5d3a6011-20f0-560e-8d2a-a342bc6c77ea#
+Validating file: spec/fixtures/validate_schemas/new_invalid/action_schema.action_resource.yaml
+No validation errors found.
+----------------------------------------
