@@ -24,4 +24,21 @@ RSpec.describe Glossarist::Collections::BibliographyCollection do
     item = subject.fetch "ISO/TS 14812:2022"
     expect(item).to be_instance_of(RelatonIsoBib::IsoBibliographicItem)
   end
+
+  describe "version mismatch" do
+    let(:temp_dir) { Dir.mktmpdir }
+    let(:iso_dir) { "#{temp_dir}/iso" }
+
+    before { FileUtils.mkdir_p(iso_dir) }
+    after { FileUtils.rm_rf(temp_dir) }
+
+    it "raises CacheVersionMismatchError on fetch_all when version is wrong" do
+      File.write("#{iso_dir}/version", "wrong")
+      collection = described_class.new(concepts, nil, temp_dir)
+
+      expect { collection.fetch_all }.to raise_error(
+        Glossarist::CacheVersionMismatchError, /version mismatch/
+      )
+    end
+  end
 end
