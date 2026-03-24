@@ -26,7 +26,8 @@ RSpec.describe Glossarist::Locality do
   describe "#to_yaml" do
     context "dumps data to a hash" do
       it "dumps data with reference_from only" do
-        test_yaml = described_class.new(type: "clause", reference_from: "5").to_yaml
+        test_yaml = described_class.new(type: "clause",
+                                        reference_from: "5").to_yaml
 
         retval = YAML.safe_load(test_yaml)
         expect(retval).to be_kind_of(Hash)

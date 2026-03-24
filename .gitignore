@@ -18,3 +18,6 @@
 
 # Relaton local cache directory
 localcache
+
+.vscode
+

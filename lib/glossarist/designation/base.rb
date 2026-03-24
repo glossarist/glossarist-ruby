@@ -30,7 +30,7 @@ module Glossarist
             raise ArgumentError, "unexpected designation type: #{type}"
           end
 
-          super(hash, options)
+          super
         end
       end
     end
