@@ -17,9 +17,9 @@ RSpec.describe "Serialization and deserialization" do
             fra: 3a75582e-699c-4e08-b26a-3ebd6fb00102
             rus: 3a75582e-699c-4e08-b26a-3ebd6fb00103
             deu: 3a75582e-699c-4e08-b26a-3ebd6fb00104
+        id: 3a75582e-699c-4e08-b26a-3ebd6fb00100
         date_accepted: '2023-01-01T00:00:00+00:00'
         status: valid
-        id: 3a75582e-699c-4e08-b26a-3ebd6fb00100
       YAML
     end
 

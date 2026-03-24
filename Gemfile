@@ -2,7 +2,7 @@
 
 source "https://rubygems.org"
 
-gem "lutaml-model", github: "lutaml/lutaml-model", branch: "main"
+gem "lutaml-model"
 gem "pry"
 gem "rake"
 gem "rspec"
