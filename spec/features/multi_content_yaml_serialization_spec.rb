@@ -147,7 +147,9 @@ RSpec.describe "Serialization and deserialization" do
       expect(collection).to be_a Glossarist::ManagedConceptCollection
       expect(collection.managed_concepts.count).to eq(1)
       expect(collection.managed_concepts.first.data.localizations.is_a?(Hash)).to be true
-      expect(collection.managed_concepts.first.data.localizations.keys).to include("eng", "fra", "rus", "deu")
+      expect(collection.managed_concepts.first.data.localizations.keys).to include(
+        "eng", "fra", "rus", "deu"
+      )
       expect(collection.managed_concepts.first.to_yaml).to eq(concept_yaml)
       expect(collection.managed_concepts.first.data.localizations["eng"].to_yaml).to eq(localized_concept_eng)
       expect(collection.managed_concepts.first.data.localizations["fra"].to_yaml).to eq(localized_concept_fra)

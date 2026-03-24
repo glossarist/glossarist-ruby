@@ -5,7 +5,8 @@ module Glossarist
 
     yaml do
       map :path, to: :path
-      map %i[localized_concepts_path localizedConceptsPath], to: :localized_concepts_path
+      map %i[localized_concepts_path localizedConceptsPath],
+          to: :localized_concepts_path
     end
 
     def load_from_files(collection: nil)
@@ -98,8 +99,8 @@ module Glossarist
 
       localized_concept_dir = File.join(path, @localized_concepts_path)
 
-      Dir.mkdir(concept_dir) unless Dir.exist?(concept_dir)
-      Dir.mkdir(localized_concept_dir) unless Dir.exist?(localized_concept_dir)
+      FileUtils.mkdir_p(concept_dir)
+      FileUtils.mkdir_p(localized_concept_dir)
 
       filename = File.join(concept_dir, "#{concept.uuid}.yaml")
       File.write(filename, concept.to_yaml)
@@ -114,7 +115,7 @@ module Glossarist
       @localized_concepts_path ||= "localized_concept"
       concept_dir = File.join(path)
 
-      Dir.mkdir(concept_dir) unless Dir.exist?(concept_dir)
+      FileUtils.mkdir_p(concept_dir)
 
       content = []
 
