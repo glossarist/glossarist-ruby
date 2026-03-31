@@ -3,11 +3,14 @@ module Glossarist
     include Glossarist::Utilities::CommonFunctions
 
     attribute :dates, ConceptDate, collection: true
-    attribute :definition, DetailedDefinition, collection: true, initialize_empty: true
-    attribute :examples, DetailedDefinition, collection: true, initialize_empty: true
+    attribute :definition, DetailedDefinition, collection: true,
+                                               initialize_empty: true
+    attribute :examples, DetailedDefinition, collection: true,
+                                             initialize_empty: true
     attribute :id, :string
     attribute :lineage_source_similarity, :integer
-    attribute :notes, DetailedDefinition, collection: true, initialize_empty: true
+    attribute :notes, DetailedDefinition, collection: true,
+                                          initialize_empty: true
     attribute :release, :string
     attribute :sources, ConceptSource, collection: true
     attribute :terms, Designation::Base, collection: true
@@ -28,7 +31,8 @@ module Glossarist
       map :definition, to: :definition, value_map: { to: { empty: :empty } }
       map :examples, to: :examples, value_map: { to: { empty: :empty } }
       map :id, to: :id
-      map %i[lineage_source_similarity lineageSourceSimilarity], to: :lineage_source_similarity
+      map %i[lineage_source_similarity lineageSourceSimilarity],
+          to: :lineage_source_similarity
       map :notes, to: :notes, value_map: { to: { empty: :empty } }
       map :release, to: :release
       map :sources, to: :sources
@@ -40,7 +44,8 @@ module Glossarist
       map %i[entry_status entryStatus], to: :entry_status
       map %i[review_date reviewDate], to: :review_date
       map %i[review_decision_date reviewDecisionDate], to: :review_decision_date
-      map %i[review_decision_event reviewDecisionEvent], to: :review_decision_event
+      map %i[review_decision_event reviewDecisionEvent],
+          to: :review_decision_event
     end
 
     def terms_from_yaml(model, value)

@@ -5,10 +5,14 @@ require_relative "../lib/glossarist"
 class GlossaristCommand < Thor
   desc "generate_latex", "Convert Concepts to Latex format"
 
-  option :concepts_path, aliases: :p, required: true, desc: "Path to yaml concepts directory"
-  option :latex_concepts, aliases: :l, desc: "File path having list of concepts that should be converted to LATEX format. If not provided all the concepts will be converted to the latex format"
-  option :output_file, aliases: :o, desc: "Output file path. By default the output will pe printed to the console"
-  option :extra_attributes, aliases: :e, type: :array, desc: "List of extra attributes that are not in standard Glossarist Concept model"
+  option :concepts_path, aliases: :p, required: true,
+                         desc: "Path to yaml concepts directory"
+  option :latex_concepts, aliases: :l,
+                          desc: "File path having list of concepts that should be converted to LATEX format. If not provided all the concepts will be converted to the latex format"
+  option :output_file, aliases: :o,
+                       desc: "Output file path. By default the output will pe printed to the console"
+  option :extra_attributes, aliases: :e, type: :array,
+                            desc: "List of extra attributes that are not in standard Glossarist Concept model"
   def generate_latex
     assets = []
     latex_concepts_file = options[:latex_concepts]

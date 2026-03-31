@@ -4,7 +4,7 @@
 #
 
 RSpec.describe Glossarist::Collection do
-  let(:collection_index) { subject.instance_variable_get "@index" }
+  let(:collection_index) { subject.instance_variable_get :@index }
 
   let(:concept1234) { double("concept 1234", id: "1234") }
   let(:concept3456) { double("concept 3456", id: "3456") }
@@ -80,8 +80,7 @@ RSpec.describe Glossarist::Collection do
     before { collection_index["3456"] = concept3456 }
 
     it "iterates through concepts when called with a block" do
-      yielded = []
-      subject.each { |concept| yielded << concept }
+      yielded = subject.map { |concept| concept }
       expect(yielded).to contain_exactly(concept1234, concept3456)
     end
 

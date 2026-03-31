@@ -17,9 +17,9 @@ RSpec.describe "Serialization and deserialization" do
             fra: 3a75582e-699c-4e08-b26a-3ebd6fb00102
             rus: 3a75582e-699c-4e08-b26a-3ebd6fb00103
             deu: 3a75582e-699c-4e08-b26a-3ebd6fb00104
-        id: 3a75582e-699c-4e08-b26a-3ebd6fb00100
         date_accepted: '2023-01-01T00:00:00+00:00'
         status: valid
+        id: 3a75582e-699c-4e08-b26a-3ebd6fb00100
       YAML
     end
 
@@ -147,7 +147,9 @@ RSpec.describe "Serialization and deserialization" do
       expect(collection).to be_a Glossarist::ManagedConceptCollection
       expect(collection.managed_concepts.count).to eq(1)
       expect(collection.managed_concepts.first.data.localizations.is_a?(Hash)).to be true
-      expect(collection.managed_concepts.first.data.localizations.keys).to include("eng", "fra", "rus", "deu")
+      expect(collection.managed_concepts.first.data.localizations.keys).to include(
+        "eng", "fra", "rus", "deu"
+      )
       expect(collection.managed_concepts.first.to_yaml).to eq(concept_yaml)
       expect(collection.managed_concepts.first.data.localizations["eng"].to_yaml).to eq(localized_concept_eng)
       expect(collection.managed_concepts.first.data.localizations["fra"].to_yaml).to eq(localized_concept_fra)
