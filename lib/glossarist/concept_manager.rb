@@ -48,7 +48,7 @@ module Glossarist
     end
 
     def load_concept_from_file(filename)
-      mixed_hashes = YAML.load_stream(File.read(filename))
+      mixed_hashes = YAML.load_stream(File.read(filename, encoding: "utf-8"))
       concepts = []
 
       concept_hashes, localized_concept_hashes =
@@ -78,7 +78,7 @@ module Glossarist
 
       concept_hash = if localized_concept_hashes.empty?
                        Psych.safe_load(
-                         File.read(localized_concept_path(id)),
+                         File.read(localized_concept_path(id), encoding: "utf-8"),
                          permitted_classes: [Date, Time],
                        )
                      else
@@ -103,11 +103,11 @@ module Glossarist
       FileUtils.mkdir_p(localized_concept_dir)
 
       filename = File.join(concept_dir, "#{concept.uuid}.yaml")
-      File.write(filename, concept.to_yaml)
+      File.write(filename, concept.to_yaml, encoding: "utf-8")
 
       concept.localized_concepts.each do |lang, uuid|
         filename = File.join(localized_concept_dir, "#{uuid}.yaml")
-        File.write(filename, concept.localization(lang).to_yaml)
+        File.write(filename, concept.localization(lang).to_yaml, encoding: "utf-8")
       end
     end
 
@@ -126,7 +126,7 @@ module Glossarist
         content << concept.localization(lang).to_yaml
       end
 
-      File.write(filename, content.join("\n"))
+      File.write(filename, content.join("\n"), encoding: "utf-8")
     end
 
     def concepts_glob

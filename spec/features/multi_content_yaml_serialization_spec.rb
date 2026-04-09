@@ -167,7 +167,7 @@ RSpec.describe "Serialization and deserialization" do
         concepts = Dir.glob(File.join(tmp_path, "*.{yaml,yml}"))
         expect(concepts.count).to eq(1)
 
-        file_content = File.read(concepts.first)
+        file_content = File.read(concepts.first, encoding: "utf-8")
 
         expected_file_content = [
           concept_yaml,
