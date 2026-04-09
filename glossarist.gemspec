@@ -32,6 +32,6 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "lutaml-model", "~> 0.7"
-  spec.add_dependency "relaton", "~> 1.19"
+  spec.add_dependency "relaton", ">= 2.0.0.alpha.1", "< 3"
   spec.add_dependency "thor"
 end

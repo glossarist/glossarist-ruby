@@ -1,11 +1,11 @@
-<bibdata type="standard" schema-version="v1.2.9">
-  <fetched>2026-03-24</fetched>
-  <title type="title-intro" format="text/plain" language="en" script="Latn">Intelligent transport systems</title>
-  <title type="title-main" format="text/plain" language="en" script="Latn">Vocabulary</title>
-  <title type="main" format="text/plain" language="en" script="Latn">Intelligent transport systems - Vocabulary</title>
-  <title type="title-intro" format="text/plain" language="fr" script="Latn">Systèmes de transport intelligents</title>
-  <title type="title-main" format="text/plain" language="fr" script="Latn">Vocabulaire</title>
-  <title type="main" format="text/plain" language="fr" script="Latn">Systèmes de transport intelligents - Vocabulaire</title>
+<bibdata type="standard" schema-version="v1.4.1">
+  <fetched>2026-03-31</fetched>
+  <title language="en" script="Latn" type="title-intro" format="text/plain">Intelligent transport systems</title>
+  <title language="en" script="Latn" type="title-main" format="text/plain">Vocabulary</title>
+  <title language="en" script="Latn" type="main" format="text/plain">Intelligent transport systems - Vocabulary</title>
+  <title language="fr" script="Latn" type="title-intro" format="text/plain">Systèmes de transport intelligents</title>
+  <title language="fr" script="Latn" type="title-main" format="text/plain">Vocabulaire</title>
+  <title language="fr" script="Latn" type="main" format="text/plain">Systèmes de transport intelligents - Vocabulaire</title>
   <uri type="src">https://www.iso.org/standard/79779.html</uri>
   <uri type="obp">https://www.iso.org/obp/ui/en/#!iso:std:79779:en</uri>
   <uri type="rss">https://www.iso.org/contents/data/standard/07/97/79779.detail.rss</uri>
@@ -24,12 +24,25 @@
       <uri>www.iso.org</uri>
     </organization>
   </contributor>
+  <contributor>
+    <role type="author">
+      <description>committee</description>
+    </role>
+    <organization>
+      <name>International Organization for Standardization</name>
+      <subdivision type="technical-committee" subtype="TC">
+        <name>Intelligent transport systems</name>
+        <identifier>ISO/TC 204</identifier>
+      </subdivision>
+      <abbreviation>ISO</abbreviation>
+    </organization>
+  </contributor>
   <edition>1</edition>
   <language>en</language>
   <language>fr</language>
   <script>Latn</script>
-  <abstract format="text/plain" language="en" script="Latn">This document defines terms relating to intelligent transport systems (ITS).</abstract>
-  <abstract format="text/plain" language="fr" script="Latn">This document defines terms relating to intelligent transport systems (ITS).</abstract>
+  <abstract language="en" script="Latn">This document defines terms relating to intelligent transport systems (ITS).</abstract>
+  <abstract language="fr" script="Latn">This document defines terms relating to intelligent transport systems (ITS).</abstract>
   <status>
     <stage>90</stage>
     <substage>92</substage>
@@ -44,19 +57,19 @@
   </copyright>
   <relation type="updates">
     <bibitem type="standard">
-      <formattedref format="text/plain">ISO/TS 14812</formattedref>
+      <formattedref>ISO/TS 14812</formattedref>
       <docidentifier type="ISO" primary="true">ISO/TS 14812</docidentifier>
       <date type="circulated">
         <on>2022-05-06</on>
       </date>
     </bibitem>
   </relation>
-  <place>Geneva</place>
-  <ext schema-version="v1.0.3">
+  <place>
+    <formattedPlace>Geneva</formattedPlace>
+  </place>
+  <ext schema-version="v1.0.5">
     <doctype>technical-specification</doctype>
-    <editorialgroup>
-      <technical-committee number="204" type="TC" identifier="ISO/TC 204">Intelligent transport systems</technical-committee>
-    </editorialgroup>
+    <flavor>iso</flavor>
     <ics>
       <code>01.040.03</code>
       <text>Services. Company organization, management and quality. Administration. Transport. Sociology. (Vocabularies)</text>
