@@ -2,6 +2,22 @@
 
 require "relaton"
 
+# Patch Relaton::Registry to handle ArgumentError from incompatible gems
+# (e.g. relaton-cen, relaton-ieee) that haven't been updated for
+# lutaml-model 0.8's requirement that all attributes have a type.
+module RelatonRegistryPatch
+  def register_gems
+    Relaton::Registry::SUPPORTED_GEMS.each do |b|
+      require "#{b}/processor"
+      register Kernel.const_get("#{gem_to_module_path(b)}::Processor")
+    rescue LoadError, ArgumentError => e
+      Relaton::Util.error "backend #{b} not present\n" \
+                          "#{e.message}\n#{e.backtrace[0..5].join "\n"}"
+    end
+  end
+end
+Relaton::Registry.prepend(RelatonRegistryPatch)
+
 module Glossarist
   module Collections
     class BibliographyCollection < Relaton::Db
