@@ -17,12 +17,12 @@ RSpec.describe Glossarist::Collections::BibliographyCollection do
   it "populated bibliography correctly" do
     items = subject.fetch_all
     expect(items.size).to be 1
-    expect(items[0]).to be_instance_of Relaton::Iso::ItemData
+    expect(items[0]).to be_instance_of Relaton::Iso::Bibdata
   end
 
   it "fetches the correct record" do
     item = subject.fetch "ISO/TS 14812:2022"
-    expect(item).to be_instance_of(Relaton::Iso::ItemData)
+    expect(item).to be_instance_of(Relaton::Iso::Bibdata)
   end
 
   describe "version mismatch" do
