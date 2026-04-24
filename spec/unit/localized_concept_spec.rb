@@ -72,8 +72,7 @@ RSpec.describe Glossarist::LocalizedConcept do
   end
 
   describe "#notes" do
-    it "adds a note of type DetailedDefinition",
-       skip: "will work when custom collection classes are implemented in lutaml-model" do
+    it "adds a note of type DetailedDefinition" do
       expect { subject.notes << "str" }
         .to change { subject.notes&.count || 0 }.from(0).to(1)
         .and change {
@@ -83,8 +82,7 @@ RSpec.describe Glossarist::LocalizedConcept do
   end
 
   describe "#examples" do
-    it "adds an example of type DetailedDefinition",
-       skip: "will work when custom collection classes are implemented in lutaml-model" do
+    it "adds an example of type DetailedDefinition" do
       expect { subject.examples << "example" }
         .to change { subject.examples&.count || 0 }.from(0).to(1)
         .and change {
@@ -96,8 +94,7 @@ RSpec.describe Glossarist::LocalizedConcept do
   describe "#sources" do
     let(:item) { { "text" => "source" } }
 
-    it "is an array",
-       skip: "will work when custom collection classes are implemented in lutaml-model" do
+    it "is an array" do
       expect { subject.sources << item }
         .to change { subject.sources&.count || 0 }.from(0).to(1)
         .and change {

@@ -1,4 +1,8 @@
 # frozen_string_literal: true
 
-require_relative "utilities/common_functions"
-require_relative "utilities/uuid"
+module Glossarist
+  module Utilities
+    autoload :CommonFunctions, "glossarist/utilities/common_functions"
+    autoload :UUID,            "glossarist/utilities/uuid"
+  end
+end

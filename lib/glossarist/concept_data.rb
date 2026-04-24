@@ -3,16 +3,21 @@ module Glossarist
     include Glossarist::Utilities::CommonFunctions
 
     attribute :dates, ConceptDate, collection: true
-    attribute :definition, DetailedDefinition, collection: true,
-                                               initialize_empty: true
-    attribute :examples, DetailedDefinition, collection: true,
-                                             initialize_empty: true
+    attribute :definition, DetailedDefinition,
+              collection: Collections::DetailedDefinitionCollection,
+              initialize_empty: true
+    attribute :examples, DetailedDefinition,
+              collection: Collections::DetailedDefinitionCollection,
+              initialize_empty: true
     attribute :id, :string
     attribute :lineage_source_similarity, :integer
-    attribute :notes, DetailedDefinition, collection: true,
-                                          initialize_empty: true
+    attribute :notes, DetailedDefinition,
+              collection: Collections::DetailedDefinitionCollection,
+              initialize_empty: true
     attribute :release, :string
-    attribute :sources, ConceptSource, collection: true
+    attribute :sources, ConceptSource,
+              collection: Collections::ConceptSourceCollection,
+              initialize_empty: true
     attribute :terms, Designation::Base, collection: true
     attribute :related, RelatedConcept, collection: true
     attribute :domain, :string
