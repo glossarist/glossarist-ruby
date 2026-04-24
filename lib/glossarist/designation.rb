@@ -1,18 +1,15 @@
 # frozen_string_literal: true
 
-# (c) Copyright 2021 Ribose Inc.
-#
-
-require_relative "designation/base"
-require_relative "designation/expression"
-require_relative "designation/abbreviation"
-require_relative "designation/grammar_info"
-require_relative "designation/symbol"
-require_relative "designation/graphical_symbol"
-require_relative "designation/letter_symbol"
-
 module Glossarist
   module Designation
+    autoload :Base,              "glossarist/designation/base"
+    autoload :Expression,        "glossarist/designation/expression"
+    autoload :Abbreviation,      "glossarist/designation/abbreviation"
+    autoload :GrammarInfo,       "glossarist/designation/grammar_info"
+    autoload :Symbol,            "glossarist/designation/symbol"
+    autoload :GraphicalSymbol,   "glossarist/designation/graphical_symbol"
+    autoload :LetterSymbol,      "glossarist/designation/letter_symbol"
+
     # Bi-directional class-to-string mapping for STI-like serialization.
     SERIALIZED_TYPES = {
       Expression => "expression",

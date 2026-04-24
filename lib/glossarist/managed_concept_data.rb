@@ -6,7 +6,9 @@ module Glossarist
     attribute :localized_concepts, :hash
     attribute :groups, :string, collection: true
     attribute :sources, ConceptSource, collection: true
-    attribute :localizations, :hash, collection: true, default: -> { {} }
+    attribute :localizations, LocalizedConcept,
+              collection: Collections::LocalizationCollection,
+              initialize_empty: true
 
     yaml do
       map %i[id identifier], to: :id,
@@ -28,11 +30,9 @@ module Glossarist
     end
 
     def localizations_from_yaml(model, value)
-      model.localizations ||= {}
-
       value.each do |localized_concept_hash|
         localized_concept = Glossarist::LocalizedConcept.of_yaml(localized_concept_hash)
-        model.localizations[localized_concept.language_code] = localized_concept
+        model.localizations.store(localized_concept.language_code, localized_concept)
       end
     end
 

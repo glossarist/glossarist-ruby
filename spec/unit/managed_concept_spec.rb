@@ -198,7 +198,7 @@ RSpec.describe Glossarist::ManagedConcept do
         subject.add_localization(localized_concept)
       end
 
-      expect(subject.data.localizations).to be_a(Hash)
+      expect(subject.data.localizations).to be_a(Glossarist::Collections::LocalizationCollection)
       expect(subject.data.localizations["eng"]).to be_a(Glossarist::LocalizedConcept)
       expect(subject.data.localizations["eng"].data.definition.first.content).to eq("this is very important")
       expect(subject.data.localizations["eng"].entry_status).to eq("valid")
