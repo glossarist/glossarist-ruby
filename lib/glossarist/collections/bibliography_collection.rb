@@ -43,7 +43,11 @@ module Glossarist
           next unless File.exist?(version_file)
 
           actual = File.read(version_file, encoding: "utf-8").strip
-          expected = Relaton::Registry.instance.by_type(dir.split("/").last)&.grammar_hash
+          expected = begin
+            Relaton::Registry.instance.by_type(dir.split("/").last)&.grammar_hash
+          rescue ArgumentError
+            nil
+          end
           next if expected.nil? || actual == expected
 
           return CacheVersionMismatchError.new(dir, expected, actual)

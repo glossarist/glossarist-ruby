@@ -34,6 +34,11 @@ RSpec.describe Glossarist::Collections::BibliographyCollection do
 
     it "raises CacheVersionMismatchError on fetch_all when version is wrong" do
       File.write("#{iso_dir}/version", "wrong")
+
+      processor = instance_double("processor", grammar_hash: "correct_hash")
+      allow(Relaton::Registry.instance).to receive(:by_type)
+        .with("iso").and_return(processor)
+
       collection = described_class.new(concepts, nil, temp_dir)
 
       expect { collection.fetch_all }.to raise_error(
