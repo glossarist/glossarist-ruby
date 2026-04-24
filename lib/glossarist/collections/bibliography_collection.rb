@@ -18,6 +18,17 @@ module RelatonRegistryPatch
 end
 Relaton::Registry.prepend(RelatonRegistryPatch)
 
+# Patch Relaton::DbCache#grammar_hash to rescue ArgumentError from
+# incompatible gems during Relaton::Db initialization.
+module RelatonDbCachePatch
+  def grammar_hash
+    super
+  rescue ArgumentError
+    nil
+  end
+end
+Relaton::DbCache.prepend(RelatonDbCachePatch)
+
 module Glossarist
   module Collections
     class BibliographyCollection < Relaton::Db
