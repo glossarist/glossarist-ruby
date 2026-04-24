@@ -2,33 +2,6 @@
 
 require "relaton"
 
-# Patch Relaton::Registry to handle ArgumentError from incompatible gems
-# (e.g. relaton-cen, relaton-ieee) that haven't been updated for
-# lutaml-model 0.8's requirement that all attributes have a type.
-module RelatonRegistryPatch
-  def register_gems
-    Relaton::Registry::SUPPORTED_GEMS.each do |b|
-      require "#{b}/processor"
-      register Kernel.const_get("#{gem_to_module_path(b)}::Processor")
-    rescue LoadError, ArgumentError => e
-      Relaton::Util.error "backend #{b} not present\n" \
-                          "#{e.message}\n#{e.backtrace[0..5].join "\n"}"
-    end
-  end
-end
-Relaton::Registry.prepend(RelatonRegistryPatch)
-
-# Patch Relaton::DbCache#grammar_hash to rescue ArgumentError from
-# incompatible gems during Relaton::Db initialization.
-module RelatonDbCachePatch
-  def grammar_hash
-    super
-  rescue ArgumentError
-    nil
-  end
-end
-Relaton::DbCache.prepend(RelatonDbCachePatch)
-
 module Glossarist
   module Collections
     class BibliographyCollection < Relaton::Db
@@ -54,11 +27,7 @@ module Glossarist
           next unless File.exist?(version_file)
 
           actual = File.read(version_file, encoding: "utf-8").strip
-          expected = begin
-            Relaton::Registry.instance.by_type(dir.split("/").last)&.grammar_hash
-          rescue ArgumentError
-            nil
-          end
+          expected = Relaton::Registry.instance.by_type(dir.split("/").last)&.grammar_hash
           next if expected.nil? || actual == expected
 
           return CacheVersionMismatchError.new(dir, expected, actual)
