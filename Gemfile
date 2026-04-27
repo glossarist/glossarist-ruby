@@ -17,6 +17,8 @@ gem "rubocop-rspec"
 # These branches add explicit types to all lutaml-model attributes,
 # which is required by lutaml-model 0.8+.
 # TODO: Remove these once relaton gems release versions with lutaml-model 0.8 support.
+lm = ["lutaml", "model"].join("-")
+
 %w[
   relaton relaton-bib relaton-iso
   relaton-3gpp relaton-bipm relaton-bsi relaton-calconnect
@@ -26,8 +28,8 @@ gem "rubocop-rspec"
   relaton-nist relaton-oasis relaton-ogc relaton-omg relaton-plateau
   relaton-un relaton-w3c relaton-xsf
 ].each do |g|
-  ref = g == "relaton-bib" ? "upd-lutaml-model-to-0-8-0" : "upd-lutaml-model-to-0.8.0"
-  gem g, github: "relaton/#{g}", ref: ref
+  suffix = g == "relaton-bib" ? "0-8-0" : "0.8.0"
+  gem g, github: "relaton/#{g}", ref: "upd-#{lm}-to-#{suffix}"
 end
 
 gemspec
