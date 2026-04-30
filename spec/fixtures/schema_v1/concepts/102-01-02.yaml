@@ -1,0 +1,29 @@
+---
+termid: '102-01-02'
+term: quantity
+eng:
+  terms:
+    - type: expression
+      designation: quantity
+      normative_status: preferred
+  definition:
+    - content: property of a phenomenon, body, or substance
+  language_code: eng
+  entry_status: valid
+  dates:
+    - type: accepted
+      date: '2008-08-01T00:00:00+00:00'
+  sources:
+    - type: authoritative
+      origin:
+        ref: ISO 1087-1:2000
+        clause: '3.4.16'
+deu:
+  terms:
+    - type: expression
+      designation: Größe
+      normative_status: preferred
+  definition:
+    - content: Eigenschaft eines Phänomens
+  language_code: deu
+  entry_status: valid
