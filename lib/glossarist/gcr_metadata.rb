@@ -2,12 +2,14 @@
 
 module Glossarist
   class GcrMetadata
-    attr_accessor :title, :description, :owner, :tags,
+    attr_accessor :shortname, :version, :title, :description, :owner, :tags,
                   :concept_count, :languages,
                   :created_at, :glossarist_version, :schema_version,
                   :statistics, :homepage, :repository, :license
 
     def initialize(attrs = {})
+      @shortname = attrs[:shortname]
+      @version = attrs[:version]
       @title = attrs[:title]
       @description = attrs[:description]
       @owner = attrs[:owner]
@@ -26,6 +28,8 @@ module Glossarist
     def self.from_concepts(concepts, register_data: nil, options: {})
       stats = GcrStatistics.from_concepts(concepts)
       new(
+        shortname: options[:shortname] || register_data&.dig("shortname") || register_data&.dig("id"),
+        version: options[:version] || register_data&.dig("version"),
         title: options[:title] || register_data&.dig("name"),
         description: options[:description] || register_data&.dig("description"),
         owner: options[:owner],
@@ -41,6 +45,8 @@ module Glossarist
 
     def to_h
       h = {
+        "shortname" => shortname,
+        "version" => version,
         "title" => title,
         "description" => description,
         "owner" => owner,

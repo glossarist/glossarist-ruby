@@ -45,6 +45,10 @@ module Glossarist
     desc "package DIR", "Create a .gcr ZIP archive from a schema v1 dataset"
     option :output, aliases: :o, required: true,
                    desc: "Output .gcr file path"
+    option :shortname, type: :string, required: true,
+                      desc: "Machine-readable dataset ID"
+    option :version, type: :string, required: true,
+                    desc: "Semantic version (e.g. 1.0.0)"
     option :title, type: :string, desc: "Dataset title"
     option :description, type: :string, desc: "Dataset description"
     option :owner, type: :string, desc: "Dataset owner"
