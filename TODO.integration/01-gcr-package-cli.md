@@ -13,6 +13,10 @@ The `glossarist` Ruby gem provides the canonical way to build versioned GCR pack
 - Missing: `shortname` and `version` fields in GcrMetadata
 - Missing: v2 format support in `PackageCommand`
 
+## Status
+
+Tasks 1–5 are **implemented** on branch `fix/gemfile-lutaml-model-substring`. Remaining: task 6 (publish gem to RubyGems).
+
 ## Tasks
 
 ### 1. Add `shortname` and `version` to `GcrMetadata`
@@ -168,9 +172,9 @@ glossarist validate isotc204-1.0.0.gcr
 
 ## Acceptance Criteria
 
-- [ ] `GcrMetadata` includes `shortname` and `version` fields
-- [ ] `glossarist package --shortname X --version Y` produces `{X}-{Y}.gcr`
-- [ ] `metadata.yaml` contains `shortname` and `version`
-- [ ] `glossarist validate` checks metadata has required fields
-- [ ] Works with both v1 (`concepts/*.yaml`) and v2 (`geolexica-v2/*.yaml`) datasets
+- [x] `GcrMetadata` includes `shortname` and `version` fields
+- [x] `glossarist package --shortname X --version Y` produces `{X}-{Y}.gcr`
+- [x] `metadata.yaml` contains `shortname` and `version`
+- [x] `glossarist validate` checks metadata has required fields
+- [x] Works with both v1 (`concepts/*.yaml`) and v2 (`geolexica-v2/*.yaml`) datasets
 - [ ] Gem published to RubyGems
