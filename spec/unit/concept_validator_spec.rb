@@ -17,7 +17,7 @@ RSpec.describe Glossarist::ConceptValidator do
         "entry_status" => "valid",
       },
     }
-    base.merge(overrides) do |key, oldval, newval|
+    base.merge(overrides) do |_key, oldval, newval|
       if oldval.is_a?(Hash) && newval.is_a?(Hash)
         oldval.merge(newval)
       else
@@ -75,7 +75,8 @@ RSpec.describe Glossarist::ConceptValidator do
     it "reports authoritative_source" do
       Dir.mktmpdir do |dir|
         concept = valid_concept
-        concept["eng"] = concept["eng"].merge("authoritative_source" => { "ref" => "ISO 9000" })
+        concept["eng"] =
+          concept["eng"].merge("authoritative_source" => { "ref" => "ISO 9000" })
         write_concept(dir, "1.yaml", concept)
         result = described_class.new(dir).validate_all
         expect(result.errors).to include(a_string_matching(/has 'authoritative_source'/))
@@ -95,7 +96,9 @@ RSpec.describe Glossarist::ConceptValidator do
     it "reports abbrev: true in terms" do
       Dir.mktmpdir do |dir|
         concept = valid_concept
-        concept["eng"] = concept["eng"].merge("terms" => [{ "designation" => "GIS", "abbrev" => true }])
+        concept["eng"] =
+          concept["eng"].merge("terms" => [{ "designation" => "GIS",
+                                             "abbrev" => true }])
         write_concept(dir, "1.yaml", concept)
         result = described_class.new(dir).validate_all
         expect(result.errors).to include(a_string_matching(/has 'abbrev: true'/))

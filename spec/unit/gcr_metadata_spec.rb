@@ -32,21 +32,26 @@ RSpec.describe Glossarist::GcrMetadata do
 
       expect(metadata.concept_count).to eq(2)
       expect(metadata.languages).to contain_exactly("eng", "deu")
-      expect(metadata.statistics.concepts_by_status).to eq({ "valid" => 2, "draft" => 1 })
+      expect(metadata.statistics.concepts_by_status).to eq({ "valid" => 2,
+                                                             "draft" => 1 })
       expect(metadata.statistics.concepts_with_definitions).to eq(2)
       expect(metadata.statistics.concepts_with_sources).to eq(1)
     end
 
     it "uses register data for title/description" do
       register = { "name" => "My Dataset", "description" => "A dataset" }
-      metadata = described_class.from_concepts(concepts, register_data: register)
+      metadata = described_class.from_concepts(concepts,
+                                               register_data: register)
 
       expect(metadata.title).to eq("My Dataset")
       expect(metadata.description).to eq("A dataset")
     end
 
     it "overrides with options" do
-      metadata = described_class.from_concepts(concepts, options: { title: "Custom Title", owner: "Me" })
+      metadata = described_class.from_concepts(concepts,
+                                               options: {
+                                                 title: "Custom Title", owner: "Me"
+                                               })
 
       expect(metadata.title).to eq("Custom Title")
       expect(metadata.owner).to eq("Me")

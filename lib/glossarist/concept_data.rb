@@ -20,6 +20,7 @@ module Glossarist
               initialize_empty: true
     attribute :terms, Designation::Base, collection: true
     attribute :related, RelatedConcept, collection: true
+    attribute :references, ConceptReference, collection: true
     attribute :domain, :string
     attribute :review_date, :date_time
     attribute :review_decision_date, :date_time
@@ -44,6 +45,7 @@ module Glossarist
       map :terms, to: :terms,
                   with: { from: :terms_from_yaml, to: :terms_to_yaml }
       map :related, to: :related
+      map :references, to: :references
       map :domain, to: :domain
       map %i[language_code languageCode], to: :language_code
       map %i[entry_status entryStatus], to: :entry_status

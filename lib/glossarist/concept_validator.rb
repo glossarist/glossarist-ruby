@@ -4,7 +4,7 @@ require "yaml"
 
 module Glossarist
   class ConceptValidator
-    LANG_CODES = %w[eng ara deu fra spa ita jpn kor pol por srp swe zho rus fin dan nld msa nob nno].freeze
+    LANG_CODES = Glossarist::LANG_CODES
     VALID_ENTRY_STATUSES = %w[valid superseded withdrawn draft].freeze
 
     attr_reader :path, :errors, :warnings
@@ -28,9 +28,11 @@ module Glossarist
     private
 
     def concept_files
-      concepts_dir = File.directory?(File.join(@path, "concepts")) \
-        ? File.join(@path, "concepts") \
-        : @path
+      concepts_dir = if File.directory?(File.join(@path, "concepts"))
+                       File.join(@path, "concepts")
+                     else
+                       @path
+                     end
       Dir.glob(File.join(concepts_dir, "*.yaml"))
     end
 
@@ -38,10 +40,10 @@ module Glossarist
       hash = YAML.safe_load_file(file, permitted_classes: [Date, Time])
     rescue Psych::SyntaxError => e
       @errors << "#{File.basename(file)}: YAML parse error at line #{e.line}: #{e.message}"
-      return
-    rescue => e
+      nil
+    rescue StandardError => e
       @errors << "#{File.basename(file)}: #{e.message}"
-      return
+      nil
     else
       validate_termid(hash, file, seen_termids)
       validate_language_blocks(hash, file)
@@ -157,6 +159,7 @@ module Glossarist
 
       LANG_CODES.each do |lang|
         next unless hash[lang].is_a?(Hash)
+
         if hash[lang].key?("_revisions")
           @warnings << "#{fname}/#{lang}: has '_revisions' (stripped during migration)"
         end

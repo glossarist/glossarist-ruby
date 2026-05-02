@@ -5,40 +5,24 @@ module Glossarist
     class ValidateCommand
       def initialize(path, options)
         @path = path
-        @strict = options[:strict]
-        @format = options[:format]
+        @options = options
       end
 
       def run
-        result = validate_path
+        result = DatasetValidator.new.validate(
+          @path,
+          strict: @options[:strict],
+          reference_path: @options[:reference_path],
+        )
         report(result)
-        exit_code = result.errors.any? || (@strict && result.warnings.any?) ? 1 : 0
+        exit_code = result.errors.any? || (@options[:strict] && result.warnings.any?) ? 1 : 0
         exit(exit_code) unless exit_code.zero?
       end
 
       private
 
-      def validate_path
-        if File.extname(@path).downcase == ".gcr"
-          validate_gcr
-        else
-          validate_directory
-        end
-      end
-
-      def validate_gcr
-        require "glossarist/gcr_package"
-        package = GcrPackage.new(@path)
-        package.validate
-      end
-
-      def validate_directory
-        validator = ConceptValidator.new(@path)
-        validator.validate_all
-      end
-
       def report(result)
-        case @format
+        case @options[:format]
         when "json"
           require "json"
           puts JSON.pretty_generate(result.to_h)
@@ -58,7 +42,11 @@ module Glossarist
           result.errors.each { |e| puts "  ERROR: #{e}" }
         end
 
-        result.warnings.each { |w| puts "  WARNING: #{w}" } if result.warnings.any?
+        if result.warnings.any?
+          result.warnings.each do |w|
+            puts "  WARNING: #{w}"
+          end
+        end
 
         total = result.errors.length + result.warnings.length
         puts "#{total} issue(s) found."

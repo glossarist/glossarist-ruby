@@ -30,13 +30,13 @@ module Glossarist
 
     desc "upgrade SOURCE_DIR", "Upgrade dataset to current schema version"
     option :output, aliases: :o, required: true,
-                   desc: "Output directory or .gcr file path"
+                    desc: "Output directory or .gcr file path"
     option :target_version, type: :string, default: Glossarist::SchemaMigration::CURRENT_SCHEMA_VERSION,
-                           desc: "Target schema version (default: current)"
+                            desc: "Target schema version (default: current)"
     option :cross_references, type: :string,
-                             desc: "Path to datasets.yml for cross-reference maps"
+                              desc: "Path to datasets.yml for cross-reference maps"
     option :dry_run, type: :boolean, default: false,
-                    desc: "Show what would change without writing"
+                     desc: "Show what would change without writing"
     def upgrade(source_dir)
       require_relative "cli/upgrade_command"
       Glossarist::CLI::UpgradeCommand.new(source_dir, options).run
@@ -44,28 +44,33 @@ module Glossarist
 
     desc "package DIR", "Create a .gcr ZIP archive from a schema v1 dataset"
     option :output, aliases: :o, required: true,
-                   desc: "Output .gcr file path"
+                    desc: "Output .gcr file path"
     option :shortname, type: :string, required: true,
-                      desc: "Machine-readable dataset ID"
+                       desc: "Machine-readable dataset ID"
     option :version, type: :string, required: true,
-                    desc: "Semantic version (e.g. 1.0.0)"
+                     desc: "Semantic version (e.g. 1.0.0)"
+    option :uri_prefix, type: :string,
+                        desc: "URI namespace prefix (e.g. urn:iec:std:iec:60050)"
     option :title, type: :string, desc: "Dataset title"
     option :description, type: :string, desc: "Dataset description"
     option :owner, type: :string, desc: "Dataset owner"
     option :register_yaml, type: :string,
-                          desc: "Path to register.yaml to include in package"
+                           desc: "Path to register.yaml to include in package"
     option :tags, type: :array, desc: "Tags for the dataset"
     def package(dir)
       require_relative "cli/package_command"
       Glossarist::CLI::PackageCommand.new(dir, options).run
     end
 
-    desc "validate PATH", "Validate dataset directory or .gcr for schema compliance"
+    desc "validate PATH",
+         "Validate dataset directory or .gcr for schema compliance"
     option :strict, type: :boolean, default: false,
-                   desc: "Treat warnings as errors"
+                    desc: "Treat warnings as errors"
     option :format, type: :string, default: "text",
-                   enum: %w[text json yaml],
-                   desc: "Output format for validation results"
+                    enum: %w[text json yaml],
+                    desc: "Output format for validation results"
+    option :reference_path, type: :string,
+                            desc: "Path to directory of .gcr files for cross-dataset reference validation"
     def validate(path)
       require_relative "cli/validate_command"
       Glossarist::CLI::ValidateCommand.new(path, options).run

@@ -21,6 +21,12 @@ module Glossarist
       @warnings << message
     end
 
+    def merge(other)
+      other.errors.each { |e| add_error(e) }
+      other.warnings.each { |w| add_warning(w) }
+      self
+    end
+
     def to_h
       {
         "valid" => valid?,

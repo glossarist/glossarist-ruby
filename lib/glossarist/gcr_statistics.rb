@@ -2,7 +2,7 @@
 
 module Glossarist
   class GcrStatistics
-    LANG_CODES = %w[eng ara deu fra spa ita jpn kor pol por srp swe zho rus fin dan nld msa nob nno].freeze
+    LANG_CODES = Glossarist::LANG_CODES
 
     attr_accessor :total_concepts, :languages, :concepts_by_status,
                   :concepts_with_definitions, :concepts_with_sources
@@ -24,6 +24,7 @@ module Glossarist
       concepts.each do |concept|
         LANG_CODES.each do |lang|
           next unless concept[lang].is_a?(Hash)
+
           languages << lang
 
           status = concept[lang]["entry_status"]
