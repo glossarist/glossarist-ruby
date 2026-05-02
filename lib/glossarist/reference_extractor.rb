@@ -104,8 +104,7 @@ module Glossarist
     end
 
     def resolve_iec_urn(urn, display)
-      m = urn.match(/::#con-([\d-]+)/) || urn.match(/60050-(\d+(?:-\d+)+)(?::[\d-]+)?(?:\z|:)/)
-      concept_id = m&.[](1) || ""
+      concept_id = extract_iec_concept_id(urn)
 
       ConceptReference.new(
         term: display || "",
@@ -171,6 +170,18 @@ module Glossarist
         m[1]
       else
         tail
+      end
+    end
+
+    def extract_iec_concept_id(urn)
+      if (m = urn.match(/::#con-([\d-]+)/))
+        m[1]
+      else
+        segments = urn.split(":")
+        code_part = segments.find { |s| s.start_with?("60050-") }
+        return "" unless code_part
+
+        code_part.sub(/\A60050-/, "").sub(/-\d{4}-\d{2}\z/, "")
       end
     end
 
