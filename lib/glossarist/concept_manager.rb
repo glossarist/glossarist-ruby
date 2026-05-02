@@ -78,7 +78,8 @@ module Glossarist
 
       concept_hash = if localized_concept_hashes.empty?
                        Psych.safe_load(
-                         File.read(localized_concept_path(id), encoding: "utf-8"),
+                         File.read(localized_concept_path(id),
+                                   encoding: "utf-8"),
                          permitted_classes: [Date, Time],
                        )
                      else
@@ -107,7 +108,8 @@ module Glossarist
 
       concept.localized_concepts.each do |lang, uuid|
         filename = File.join(localized_concept_dir, "#{uuid}.yaml")
-        File.write(filename, concept.localization(lang).to_yaml, encoding: "utf-8")
+        File.write(filename, concept.localization(lang).to_yaml,
+                   encoding: "utf-8")
       end
     end
 

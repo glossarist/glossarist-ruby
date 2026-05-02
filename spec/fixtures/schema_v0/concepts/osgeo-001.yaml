@@ -1,0 +1,14 @@
+---
+termid: osgeo-001
+term: GIS
+eng:
+  terms:
+    - designation: GIS
+      abbrev: true
+      normative_status: preferred
+  definition: Geographic Information System
+  language_code: eng
+  entry_status: valid
+  authoritative_source:
+    ref: OSGeo
+    link: https://osgeo.org

@@ -1,0 +1,4 @@
+name: Test Dataset
+description: A test dataset for schema migration
+subregisters:
+  eng: {}

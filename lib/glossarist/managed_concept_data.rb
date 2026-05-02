@@ -32,7 +32,8 @@ module Glossarist
     def localizations_from_yaml(model, value)
       value.each do |localized_concept_hash|
         localized_concept = Glossarist::LocalizedConcept.of_yaml(localized_concept_hash)
-        model.localizations.store(localized_concept.language_code, localized_concept)
+        model.localizations.store(localized_concept.language_code,
+                                  localized_concept)
       end
     end
 

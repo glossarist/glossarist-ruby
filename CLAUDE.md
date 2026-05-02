@@ -15,9 +15,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Glossarist is a Ruby gem implementing the [Glossarist concept model](https://github.com/glossarist/concept-model) (ISO 10241-1). It provides classes for managing terminology glossaries with multi-language support, serialization to/from YAML, and bibliography integration via Relaton.
 
-### Core Model Hierarchy
+All model classes use `Lutaml::Model::Serializable` for serialization.
 
-All model classes use `Lutaml::Model::Serializable` for serialization. Key classes:
+### Core Model Hierarchy
 
 - **`ManagedConceptCollection`** (`managed_concept_collection.rb`) — top-level enumerable collection of ManagedConcepts. Entry point for loading/saving glossaries via `ConceptManager`.
 - **`ManagedConcept`** (`managed_concept.rb`) — a managed concept with `ManagedConceptData` (groups, localized_concepts map, sources), related concepts, dates, and status. Delegates localization via `add_l10n`/`localization(lang)`.
@@ -26,9 +26,13 @@ All model classes use `Lutaml::Model::Serializable` for serialization. Key class
 - **`ConceptData`** (`concept_data.rb`) — the data payload inside `Concept`: definition, terms, examples, notes, sources, language_code. Uses `DetailedDefinition` collections for definition/examples/notes.
 - **`ManagedConceptData`** (`managed_concept_data.rb`) — the data payload inside `ManagedConcept`: id, localized_concepts hash (lang_code => uuid), groups, sources.
 
+### UUID Generation
+
+Concepts use deterministic UUID v5 (SHA-1) derived from their serialized YAML content and the OID namespace (`Utilities::UUID`). This means a concept's UUID is stable across sessions as long as its data doesn't change.
+
 ### Designation (STI-like pattern)
 
-`Designation::Base` (`designation/base.rb`) uses a self-referencing factory pattern (`of_yaml`) that dispatches to subclasses based on `type` field: `Expression`, `Symbol`, `Abbreviation`, `GraphicalSymbol`, `LetterSymbol`. The mapping is in `SERIALIZED_TYPES`.
+`Designation::Base` (`designation/base.rb`) uses a self-referencing factory pattern (`of_yaml`) that dispatches to subclasses based on `type` field: `Expression`, `Symbol`, `Abbreviation`, `GraphicalSymbol`, `LetterSymbol`. The bi-directional mapping is in `SERIALIZED_TYPES` (`designation.rb`).
 
 ### YAML Serialization
 
@@ -46,14 +50,31 @@ All model classes use `Lutaml::Model::Serializable` for serialization. Key class
 
 ### Collections
 
-`collections/` contains `BibliographyCollection` (extends `Relaton::Db` for bibliography caching), `AssetCollection`, `Collection` (base enumerable), and `DesignationCollection`.
+Custom collection classes in `collections/` extend `Lutaml::Model::Collection`:
+- **`LocalizationCollection`** — keyed by `language_code`, used for `ManagedConceptData#localizations`.
+- **`DetailedDefinitionCollection`**, **`ConceptSourceCollection`** — typed collections for ConceptData fields.
+- **`BibliographyCollection`** — extends `Relaton::Db` for bibliography caching with cache version checking.
+- **`AssetCollection`**, **`Collection`** (base enumerable), **`DesignationCollection`**.
+
+### GCR Packaging
+
+Three classes handle glossary concept registry (GCR) ZIP packages:
+- **`GcrPackage`** (`gcr_package.rb`) — creates/loads/validates ZIP archives containing `metadata.yaml`, `register.yaml`, and `concepts/*.yaml` entries.
+- **`GcrMetadata`** (`gcr_metadata.rb`) — package metadata (shortname, version, languages, statistics). Built from concepts via `GcrMetadata.from_concepts`.
+- **`GcrStatistics`** (`gcr_statistics.rb`) — computes stats (total concepts, languages, concepts by status) from concept data.
+- **`SchemaMigration`** (`schema_migration.rb`) — migrates concepts from v0 (legacy IEV format) to v1, normalizing definitions, dates, entry statuses, and extracting inline references.
+- **`ValidationResult`** (`validation_result.rb`) — simple errors/warnings container for package validation.
+
+### CLI
+
+The `exe/glossarist` executable uses Thor. Currently provides `generate_latex` which converts concepts to LaTeX glossary entries via `ConceptSet`.
 
 ### Dependencies
 
 - `lutaml-model` (~> 0.8) — serialization framework (YAML/XML)
 - `relaton` (>= 2.0.0, < 3) — bibliography database integration
-- `thor` — CLI commands (e.g., `glossarist generate_latex`)
+- `thor` — CLI commands
 
-## Branch Notes
+## Gemfile Notes
 
-The `lutaml-model-0.8` branch upgrades from an earlier lutaml-model to 0.8, which requires explicit types on all attributes. Some upstream relaton-* gems (cen, ieee) haven't been updated yet; a compatibility patch is in `bibliography_collection.rb` that prepends `RelatonRegistryPatch` to gracefully skip incompatible backends.
+The Gemfile pins all relaton-* gems to custom branches (`upd-lutaml-model-to-0.8.0`) that add explicit types to lutaml-model attributes required by 0.8+. These branches live on the upstream `relaton/*` repos. Remove them once relaton gems release versions with lutaml-model 0.8 support.

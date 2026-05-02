@@ -344,29 +344,405 @@ modification:: A description of the modification to the cited definition of the 
 
 == Commands
 
-`generate_latex`:: Convert Concepts to Latex format
+=== generate_latex
 
-=== Usage:
+Convert Concepts to Latex format.
+
 [,bash]
 ----
-glossarist generate_latex p, --concepts-path=CONCEPTS_PATH
+glossarist generate_latex -p PATH_TO_CONCEPTS
 ----
 
-=== Options:
+Options:
 [cols="1,1"]
 |===
 |p, --concepts-path
 |Path to yaml concepts directory
 
 |l, --latex-concepts
-|File path having list of concepts that should be converted to LATEX format. If not provided all the concepts will be converted to the latex format
+|File path having list of concepts that should be converted to LATEX format
 
 |o, --output-file
-|Output file path. By default the output will pe printed to the console
+|Output file path
 
 |e, --extra-attributes
-|List of extra attributes that are not in standard Glossarist Concept model. eg -e one two three
+|List of extra attributes that are not in standard Glossarist Concept model
 |===
+
+=== package
+
+Create a `.gcr` ZIP archive from a concept dataset.
+
+[,bash]
+----
+glossarist package DIR -o output.gcr --shortname mydataset --version 1.0.0 --uri-prefix urn:iso:std:iso:19111
+----
+
+Options:
+[cols="1,1"]
+|===
+|o, --output (required)
+|Output `.gcr` file path
+
+|--shortname (required)
+|Machine-readable dataset shortname (e.g. `iev`, `iso19111`)
+
+|--version (required)
+|Semantic version (e.g. `1.0.0`)
+
+|--title
+|Human-readable dataset title
+
+|--description
+|Dataset description
+
+|--owner
+|Dataset owner
+
+|--register-yaml
+|Path to register.yaml to include in package
+
+|--uri-prefix
+|URI namespace this dataset provides (e.g. `urn:iec:std:iec:60050`)
+
+|--tags
+|Tags for the dataset
+|===
+
+Ruby API:
+[,ruby]
+----
+GcrPackage.create_from_directory(
+  "path/to/dataset",
+  output: "output.gcr",
+  shortname: "mydataset",
+  version: "1.0.0",
+  uri_prefix: "urn:iso:std:iso:19111",
+)
+----
+
+=== validate
+
+Validate a dataset directory or `.gcr` file for schema compliance.
+
+[,bash]
+----
+glossarist validate PATH
+glossarist validate PATH --reference-path path/to/gcrs/
+----
+
+Options:
+[cols="1,1"]
+|===
+|--strict
+|Treat warnings as errors
+
+|--format
+|Output format: `text`, `json`, or `yaml`
+
+|--reference-path
+|Path to directory of `.gcr` files for cross-dataset reference validation
+|===
+
+Ruby API:
+[,ruby]
+----
+result = DatasetValidator.new.validate("path/to/dataset")
+result = DatasetValidator.new.validate("path/to/dataset", reference_path: "gcrs/")
+result.valid?   # => true/false
+result.errors   # => [...]
+result.warnings # => [...]
+----
+
+=== upgrade
+
+Upgrade a dataset to the current schema version.
+
+[,bash]
+----
+glossarist upgrade SOURCE_DIR -o OUTPUT_DIR
+----
+
+== Glossarist Concept Repository (GCR)
+
+A **GCR** (Glossarist Concept Repository) is a distributable, versioned ZIP archive containing glossary concepts and metadata. GCR packages are created from v2 datasets.
+
+=== GCR Package Format
+
+A `.gcr` file is a ZIP archive with the following structure:
+
+----
+metadata.yaml          # Package metadata
+register.yaml          # Optional register information
+concepts/              # Concept YAML files
+  102-01-01.yaml
+  200.yaml
+----
+
+=== Creating a GCR Package
+
+CLI:
+[,bash]
+----
+glossarist package path/to/v2-dataset -o mydataset-1.0.0.gcr \
+  --shortname mydataset --version 1.0.0 --uri-prefix urn:iso:std:iso:19111
+----
+
+Ruby API:
+[,ruby]
+----
+GcrPackage.create_from_directory(
+  "path/to/v2-dataset",
+  output: "mydataset-1.0.0.gcr",
+  shortname: "mydataset",
+  version: "1.0.0",
+  uri_prefix: "urn:iso:std:iso:19111",
+  title: "My Dataset",
+  description: "A terminology dataset",
+)
+----
+
+=== Loading a GCR Package
+
+[,ruby]
+----
+pkg = GcrPackage.load("mydataset-1.0.0.gcr")
+pkg.metadata     # => Hash with metadata fields
+pkg.concepts     # => Array of concept hashes
+----
+
+=== GCR Metadata
+
+Metadata fields in `metadata.yaml`:
+
+[cols="1,1"]
+|===
+|shortname
+|Machine-readable dataset identifier (e.g. `iev`)
+
+|version
+|Semantic version (e.g. `1.0.0`)
+
+|title
+|Human-readable title
+
+|description
+|Dataset description
+
+|owner
+|Dataset owner
+
+|tags
+|Array of tags
+
+|concept_count
+|Number of concepts in the package
+
+|languages
+|Array of language codes present
+
+|created_at
+|ISO 8601 timestamp of package creation
+
+|glossarist_version
+|Version of the Glossarist gem used
+
+|schema_version
+|Schema version of the package format
+
+|uri_prefix
+|URI namespace this dataset provides (e.g. `urn:iec:std:iec:60050`)
+
+|external_references
+|Array of `{uri: "..."}` for URI namespaces this dataset references
+|===
+
+=== GCR Statistics
+
+[,ruby]
+----
+stats = GcrStatistics.from_concepts(concepts)
+stats.total_concepts           # => 150
+stats.languages                # => ["eng", "fra", "deu"]
+stats.concepts_by_status       # => { "valid" => 140, "draft" => 10 }
+stats.concepts_with_definitions # => 148
+stats.concepts_with_sources    # => 130
+----
+
+== Concept Mentions
+
+Concepts can reference other concepts within the same dataset (intra-set) or in different datasets (inter-set) using inline mention syntax. All mentions use double braces `{{...}}`.
+
+=== Syntax
+
+The concept mention syntax mirrors HTML `<a href="id">display_text</a>` — the display text is independent of the target concept's canonical designation.
+
+[cols="1,2,2,2"]
+|===
+|Form |Syntax |Example |Resolution
+
+|ID only
+|`{{ID}}`
+|`{{200}}`
+|Intra-set: concept 200, auto-display
+
+|ID + display
+|`{{TEXT, ID}}`
+|`{{geodetic latitude, 200}}`
+|Intra-set: concept 200, custom display
+
+|Designation
+|`{{TEXT}}`
+|`{{geodetic latitude}}`
+|Intra-set: find by designation
+
+|URN + display
+|`{{TEXT, URN}}`
+|`{{equality, urn:iec:std:iec:60050-102-01-01}}`
+|Inter-set: resolve by URN
+
+|URN only
+|`{{URN}}`
+|`{{urn:iec:std:iec:60050-102-01-01}}`
+|Inter-set: resolve URN, auto-display
+|===
+
+=== URN Schemes
+
+IEC URN (IEV):: `urn:iec:std:iec:60050-{code}` — source is `urn:iec:std:iec:60050`, concept_id is the IEV code
+ISO URN (RFC 5141):: `urn:iso:std:iso:{std}:...:term:{id}` — source is `urn:iso:std:iso:{std}`, concept_id is the term ID
+
+=== Extracting Mentions (Ruby API)
+
+[,ruby]
+----
+extractor = ReferenceExtractor.new
+
+# From a text string
+refs = extractor.extract_from_text("See {{equality, urn:iec:std:iec:60050-102-01-01}} and {{lat, 200}}")
+# => [ConceptReference(term: "equality", concept_id: "102-01-01",
+#                      source: "urn:iec:std:iec:60050", ref_type: "urn"),
+#     ConceptReference(term: "lat", concept_id: "200",
+#                      source: nil, ref_type: "local")]
+
+# From all text fields in a localized concept
+refs = extractor.extract_from_localized(lc_hash)
+
+# From all language blocks in a concept
+refs = extractor.extract_from_concept_hash(concept_hash)
+----
+
+=== Resolving Mentions (Ruby API)
+
+Resolution uses an adapter chain: route overrides → local → package → remote.
+
+[,ruby]
+----
+resolver = ReferenceResolver.new
+
+# Register the current dataset for intra-set resolution
+resolver.register_self(concepts)
+
+# Register co-loaded GCRs with their URI prefixes
+resolver.register_package(iev_concepts, uri_prefix: "urn:iec:std:iec:60050")
+resolver.register_package(iso_concepts, uri_prefix: "urn:iso:std:iso:19111")
+
+# Add URI route overrides (e.g. author used wrong URI)
+resolver.add_route(from: "urn:iso:std:iso:19115", to: "urn:iso:std:iso:19111")
+
+# Resolve a single reference
+ref = ConceptReference.new(term: "equality", concept_id: "102-01-01",
+                           source: "urn:iec:std:iec:60050", ref_type: "urn")
+resolver.resolve(ref)  # => concept hash
+
+# Validate all references in a package
+result = resolver.validate_all(concepts)
+result.errors    # => structural errors
+result.warnings  # => unresolvable references
+----
+
+=== GCR Collection & Routing
+
+When multiple GCRs are placed together in a directory, a `collection.yaml` configures resolution:
+
+[,yaml]
+----
+# collection.yaml
+packages:
+  - file: iev-2.0.0.gcr
+  - file: iso19111-1.0.0.gcr
+
+routes:
+  - from: "urn:iso:std:iso:19115"
+    to: "urn:iso:std:iso:19111"
+
+remote:
+  - uri_prefix: "urn:iec:std:iec:60050"
+    endpoint: "https://vocabulary.example.org/api/concepts"
+----
+
+[,ruby]
+----
+resolver = ReferenceResolver.new
+resolver.load_collection("path/to/gcr_collection/")
+# Packages auto-registered with their uri_prefix from metadata
+# Route overrides applied
+# Remote endpoints registered
+----
+
+=== Resolution Adapters
+
+The resolution framework uses a chain of adapters, each implementing `resolve(reference) → concept_hash | nil`:
+
+LocalAdapter:: Resolves intra-set references by concept ID or designation lookup
+PackageAdapter:: Resolves inter-set references by matching `source` URI to a GCR's `uri_prefix`
+RouteAdapter:: Remaps incorrect source URIs before delegation
+RemoteAdapter:: Resolves via HTTP to an online GCR endpoint
+
+=== URN-to-HTTP Resolution
+
+Concept mentions rendered as hyperlinks need HTTP URLs. The `UrnResolver` converts URNs to their canonical web locations:
+
+[,ruby]
+----
+# Class-level convenience
+url = UrnResolver.resolve("urn:iec:std:iec:60050-102-01-01")
+# => "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=102-01-01"
+
+url = UrnResolver.resolve("urn:iso:std:iso:19111:ed-3:v1:en:term:3.1.32")
+# => "https://www.iso.org/obp/ui/#iso:std:iso:19111:ed-3:v1:en:term:3.1.32"
+
+# Also accepts ConceptReference objects
+ref = ConceptReference.new(term: "equality", concept_id: "102-01-01",
+                           source: "urn:iec:std:iec:60050", ref_type: "urn")
+url = UrnResolver.resolve(ref)
+# => "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=102-01-01"
+----
+
+Built-in mappings:
+
+[cols="1,1,1"]
+|===
+|URN Prefix |Target |Example URL
+
+|`urn:iec:std:iec:60050-*`
+|IEC Electropedia
+|`electropedia.org/iev/iev.nsf/display?openform&ievref=102-01-01`
+
+|`urn:iso:*`
+|ISO Online Browsing Platform
+|`iso.org/obp/ui/#iso:std:iso:19111:term:3.1.32`
+|===
+
+Register custom schemes:
+
+[,ruby]
+----
+resolver = UrnResolver.new
+resolver.register_scheme("urn:example:") do |urn|
+  "https://example.org/concepts/#{urn.sub('urn:example:', '')}"
+end
+----
 
 == Credits
 

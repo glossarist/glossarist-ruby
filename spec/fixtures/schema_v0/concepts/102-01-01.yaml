@@ -1,0 +1,15 @@
+---
+termid: 102-01-01
+term: equality
+eng:
+  terms:
+    - type: expression
+      designation: equality
+      normative_status: preferred
+  definition: relation between two entities which have certain properties in common
+  language_code: eng
+  entry_status: Standard
+  date_accepted: "2008-08-01T00:00:00+00:00"
+  _revisions:
+    - date: "2020-01-01"
+      author: admin

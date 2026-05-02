@@ -1,0 +1,16 @@
+---
+termid: '102-01-01'
+term: equality
+eng:
+  terms:
+    - type: expression
+      designation: equality
+      normative_status: preferred
+  definition:
+    - content: relation between two entities which have certain properties in common
+  language_code: eng
+  entry_status: valid
+  date_accepted: '2008-08-01T00:00:00+00:00'
+  dates:
+    - type: accepted
+      date: '2008-08-01T00:00:00+00:00'

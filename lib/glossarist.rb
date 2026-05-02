@@ -12,22 +12,34 @@ require_relative "glossarist/glossary_definition"
 module Glossarist
   autoload :Asset,                    "glossarist/asset"
   autoload :Citation,                 "glossarist/citation"
+  autoload :CLI,                      "glossarist/cli"
   autoload :Collection,               "glossarist/collection"
   autoload :Concept,                  "glossarist/concept"
   autoload :ConceptData,              "glossarist/concept_data"
+  autoload :ConceptReference,         "glossarist/concept_reference"
+  autoload :ReferenceExtractor,       "glossarist/reference_extractor"
+  autoload :ReferenceResolver,        "glossarist/reference_resolver"
+  autoload :ResolutionAdapter,        "glossarist/resolution_adapter"
   autoload :ConceptDate,              "glossarist/concept_date"
   autoload :ConceptManager,           "glossarist/concept_manager"
   autoload :ConceptSet,               "glossarist/concept_set"
   autoload :ConceptSource,            "glossarist/concept_source"
+  autoload :ConceptValidator,         "glossarist/concept_validator"
   autoload :Config,                   "glossarist/config"
+  autoload :DatasetValidator,         "glossarist/dataset_validator"
   autoload :CustomLocality,           "glossarist/custom_locality"
   autoload :DetailedDefinition,       "glossarist/detailed_definition"
   autoload :Designation,              "glossarist/designation"
   autoload :Error,                    "glossarist/error"
-  autoload :InvalidTypeError,         "glossarist/error/invalid_type_error"
-  autoload :InvalidLanguageCodeError, "glossarist/error/invalid_language_code_error"
-  autoload :ParseError,               "glossarist/error/parse_error"
-  autoload :CacheVersionMismatchError, "glossarist/error/cache_version_mismatch_error"
+  autoload :GcrPackage,              "glossarist/gcr_package"
+  autoload :GcrMetadata,             "glossarist/gcr_metadata"
+  autoload :GcrStatistics,           "glossarist/gcr_statistics"
+  autoload :InvalidTypeError, "glossarist/error/invalid_type_error"
+  autoload :InvalidLanguageCodeError,
+           "glossarist/error/invalid_language_code_error"
+  autoload :ParseError, "glossarist/error/parse_error"
+  autoload :CacheVersionMismatchError,
+           "glossarist/error/cache_version_mismatch_error"
   autoload :Locality,                 "glossarist/locality"
   autoload :LocalizedConcept,         "glossarist/localized_concept"
   autoload :ManagedConcept,           "glossarist/managed_concept"
@@ -35,13 +47,19 @@ module Glossarist
   autoload :ManagedConceptData,       "glossarist/managed_concept_data"
   autoload :NonVerbRep,               "glossarist/non_verb_rep"
   autoload :RelatedConcept,           "glossarist/related_concept"
+  autoload :SchemaMigration,          "glossarist/schema_migration"
+  autoload :UrnResolver,              "glossarist/urn_resolver"
   autoload :Utilities,                "glossarist/utilities"
+  autoload :ValidationResult,         "glossarist/validation_result"
 end
 
 require_relative "glossarist/version"
 require_relative "glossarist/collections"
 
 module Glossarist
+  LANG_CODES = %w[eng ara deu fra spa ita jpn kor pol por srp swe zho rus fin
+                  dan nld msa nob nno].freeze
+
   def self.configure
     config = Glossarist::Config.instance
 
