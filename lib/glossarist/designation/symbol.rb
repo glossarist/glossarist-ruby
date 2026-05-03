@@ -2,7 +2,7 @@ module Glossarist
   module Designation
     class Symbol < Base
       attribute :international, :boolean
-      attribute :type, :string
+      attribute :type, :string, default: -> { "symbol" }
 
       yaml do
         map :international, to: :international

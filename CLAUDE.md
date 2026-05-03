@@ -77,4 +77,9 @@ The `exe/glossarist` executable uses Thor. Currently provides `generate_latex` w
 
 ## Gemfile Notes
 
-The Gemfile pins all relaton-* gems to custom branches (`upd-lutaml-model-to-0.8.0`) that add explicit types to lutaml-model attributes required by 0.8+. These branches live on the upstream `relaton/*` repos. Remove them once relaton gems release versions with lutaml-model 0.8 support.
+The Gemfile overrides relaton gems from git branches for lutaml-model 0.8 compatibility:
+- 5 repos use `fix/lutaml-model-0.8` branches (relaton-bib, relaton-iso, relaton-3gpp, relaton-bipm, relaton-bsi)
+- 5 repos use `lutaml-integration` branches (relaton-calconnect, relaton-ccsds, relaton-cen, relaton-iec, relaton-itu)
+- Released 2.0.0 gems have untyped lutaml-model attributes that fail with 0.8+
+- relaton-bib 2.1.0 is released but sub-gems pin `~> 2.0.0`, blocking 2.1.0 adoption until upstream updates constraints
+- Remove git overrides once relaton gems release versions with lutaml-model 0.8 support

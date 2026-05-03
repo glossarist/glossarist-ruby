@@ -107,13 +107,23 @@ to_version: CURRENT_SCHEMA_VERSION, ref_maps: {})
       src = lc.delete("authoritative_source")
       return if lc.key?("sources")
 
-      if src.is_a?(Hash)
+      sources = (src.is_a?(Array) ? src : [src]).map do |s|
+        next unless s.is_a?(Hash)
+
         origin = {}
-        origin["ref"] = src["ref"] if src["ref"]
-        origin["clause"] = src["clause"] if src["clause"]
-        origin["link"] = src["link"] if src["link"]
-        lc["sources"] = [{ "type" => "authoritative", "origin" => origin }]
-      end
+        origin["ref"] = s["ref"] if s["ref"]
+        origin["clause"] = s["clause"] if s["clause"]
+        origin["link"] = s["link"] if s["link"]
+
+        entry = { "type" => "authoritative", "origin" => origin }
+        if s["relationship"]
+          entry["status"] = s["relationship"]["type"] || "identical"
+          entry["modification"] = s["relationship"]["modification"] if s["relationship"]["modification"]
+        end
+        entry
+      end.compact
+
+      lc["sources"] = sources if sources.any?
     end
 
     def migrate_dates(lc)

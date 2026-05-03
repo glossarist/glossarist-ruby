@@ -18,19 +18,26 @@ module Glossarist
         type = hash["type"]
 
         if type.nil? || /\w/ !~ type
-          raise ArgumentError, "designation type is missing"
+          type = infer_designation_type(hash)
+          hash["type"] = type
         end
 
         if self == Base
-          # called on Base class, delegate it to proper subclass
           SERIALIZED_TYPES[type].of_yaml(hash)
         else
-          # called on subclass, instantiate object
           unless SERIALIZED_TYPES[self] == type
             raise ArgumentError, "unexpected designation type: #{type}"
           end
 
           super
+        end
+      end
+
+      def self.infer_designation_type(hash)
+        if hash["international"] || hash["abbreviation_type"]
+          "symbol"
+        else
+          "expression"
         end
       end
     end

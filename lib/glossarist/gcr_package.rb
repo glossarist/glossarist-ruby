@@ -152,6 +152,8 @@ module Glossarist
       def collect_concepts(dir)
         if v2_concepts?(dir)
           collect_v2_concepts(dir)
+        elsif managed_concepts?(dir)
+          collect_managed_concepts(dir)
         elsif v1_concepts?(dir)
           collect_v1_concepts(dir)
         else
@@ -169,6 +171,12 @@ module Glossarist
         File.directory?(File.join(dir, "geolexica-v2"))
       end
 
+      def managed_concepts?(dir)
+        concept_dir = File.join(dir, "concepts", "concept")
+        File.directory?(concept_dir) && Dir.glob(File.join(concept_dir,
+                                                            "*.yaml")).any?
+      end
+
       def collect_v1_concepts(dir)
         concepts_dir = File.join(dir, "concepts")
         files = Dir.glob(File.join(concepts_dir, "*.yaml"))
@@ -181,12 +189,65 @@ module Glossarist
       end
 
       def collect_v2_concepts(dir)
+        v2_dir = File.join(dir, "geolexica-v2")
+        if File.directory?(File.join(v2_dir, "concepts"))
+          collect_managed_concepts(v2_dir)
+        else
+          collect_grouped_v2_concepts(v2_dir)
+        end
+      end
+
+      def collect_grouped_v2_concepts(v2_dir)
         collection = Glossarist::ManagedConceptCollection.new
-        manager = Glossarist::ConceptManager.new(path: File.join(dir,
-                                                                 "geolexica-v2"))
+        manager = Glossarist::ConceptManager.new(path: v2_dir)
         manager.load_from_files(collection: collection)
 
         collection.map { |concept| concept_to_flat_hash(concept) }
+      end
+
+      def collect_managed_concepts(dir)
+        concepts_dir = File.join(dir, "concepts")
+        concept_files = Dir.glob(File.join(concepts_dir, "concept", "*.yaml"))
+
+        return [] if concept_files.empty?
+
+        lc_dir = find_localized_concepts_dir(concepts_dir)
+        concepts = []
+
+        concept_files.each do |f|
+          concept_hash = YAML.safe_load_file(f,
+                                              permitted_classes: [Date, Time, Symbol])
+          next unless concept_hash&.dig("data", "identifier")
+
+          termid = concept_hash["data"]["identifier"].to_s
+          flat = { "termid" => termid }
+
+          lc_map = concept_hash["data"]["localized_concepts"] ||
+            concept_hash["data"]["localizedConcepts"] || {}
+          lc_map.each do |lang, uuid|
+            lc_file = Dir.glob(File.join(lc_dir, "#{uuid}.{yaml,yml}")).first
+            next unless lc_file
+
+            lc_data = YAML.safe_load_file(lc_file,
+                                           permitted_classes: [Date, Time, Symbol])
+            next unless lc_data&.dig("data")
+
+            flat[lang] = lc_data["data"]
+          end
+
+          flat["term"] = preferred_designation(flat["eng"]&.dig("terms")) || ""
+          concepts << flat
+        end
+
+        concepts
+      end
+
+      def find_localized_concepts_dir(concepts_dir)
+        %w[localized_concept localized-concept].each do |name|
+          d = File.join(concepts_dir, name)
+          return d if File.directory?(d)
+        end
+        nil
       end
 
       def concept_to_flat_hash(concept)
@@ -198,7 +259,7 @@ module Glossarist
         hash
       end
 
-      def localized_to_flat_hash(l10n) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+      def localized_to_flat_hash(l10n)
         h = {}
         h["terms"] = l10n.designations.map(&:to_hash) if l10n.designations.any?
         if l10n.definition.any?
