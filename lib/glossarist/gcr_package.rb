@@ -88,7 +88,8 @@ module Glossarist
 
           if (entry = zf.find_entry("metadata.yaml"))
             metadata = YAML.safe_load(entry.get_input_stream.read,
-                                      permitted_classes: [Date, Time])
+                                      permitted_classes: [Date, Time],
+                                      aliases: true)
             unless metadata.is_a?(Hash) && metadata["concept_count"]
               result.add_error("metadata.yaml missing required fields")
             end
@@ -173,7 +174,7 @@ module Glossarist
         files = Dir.glob(File.join(concepts_dir, "*.yaml"))
         concepts = []
         files.each do |file|
-          hash = YAML.safe_load_file(file, permitted_classes: [Date, Time])
+          hash = YAML.safe_load_file(file, permitted_classes: [Date, Time, Symbol])
           concepts << hash if hash&.dig("termid")
         end
         concepts
@@ -190,8 +191,8 @@ module Glossarist
 
       def concept_to_flat_hash(concept)
         hash = { "termid" => concept.data.id.to_s }
-        concept.localizations.each do |lang, l10n|
-          hash[lang] = localized_to_flat_hash(l10n)
+        concept.localizations.each_value do |l10n|
+          hash[l10n.language_code] = localized_to_flat_hash(l10n)
         end
         hash["term"] = preferred_designation(hash["eng"]&.dig("terms")) || ""
         hash
@@ -199,7 +200,7 @@ module Glossarist
 
       def localized_to_flat_hash(l10n) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
         h = {}
-        h["terms"] = l10n.designations.map(&:to_h) if l10n.designations.any?
+        h["terms"] = l10n.designations.map(&:to_hash) if l10n.designations.any?
         if l10n.definition.any?
           h["definition"] = l10n.definition.map do |d|
             { "content" => d.content }
@@ -215,12 +216,12 @@ module Glossarist
             { "content" => e.content }
           end
         end
-        h["sources"] = l10n.sources.map(&:to_h) if l10n.sources.any?
+        h["sources"] = l10n.sources.map(&:to_hash) if l10n.sources.any?
         h["language_code"] = l10n.language_code if l10n.language_code
         h["entry_status"] = l10n.entry_status if l10n.entry_status
-        h["dates"] = l10n.dates.map(&:to_h) if l10n.dates.any?
-        if l10n.references.any?
-          h["references"] = l10n.references.map do |r|
+        h["dates"] = l10n.data.dates.map(&:to_hash) if l10n.data.dates&.any?
+        if l10n.data.references&.any?
+          h["references"] = l10n.data.references.map do |r|
             r.respond_to?(:to_gcr_hash) ? r.to_gcr_hash : r
           end
         end
@@ -241,6 +242,8 @@ module Glossarist
         return nil unless File.exist?(path)
 
         YAML.safe_load_file(path, permitted_classes: [Date, Time])
+      rescue Psych::SyntaxError
+        nil
       end
 
       def inject_references(concepts)
