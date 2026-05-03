@@ -13,23 +13,12 @@ gem "rubocop-performance"
 gem "rubocop-rake"
 gem "rubocop-rspec"
 
-# Use lutaml-model 0.8 compatible branches for all relaton gems.
-# These branches add explicit types to all lutaml-model attributes,
-# which is required by lutaml-model 0.8+.
-# TODO: Remove these once relaton gems release versions with lutaml-model 0.8 support.
-lm = ["lutaml", "model"].join("-")
-
-%w[
-  relaton relaton-bib relaton-iso
-  relaton-3gpp relaton-bipm relaton-bsi relaton-calconnect
-  relaton-ccsds relaton-cen relaton-cie relaton-doi relaton-ecma
-  relaton-etsi relaton-gb relaton-iana relaton-iec relaton-ieee
-  relaton-ietf relaton-iho relaton-isbn relaton-itu relaton-jis
-  relaton-nist relaton-oasis relaton-ogc relaton-omg relaton-plateau
-  relaton-un relaton-w3c relaton-xsf
-].each do |g|
-  suffix = g == "relaton-bib" ? "0-8-0" : "0.8.0"
-  gem g, github: "relaton/#{g}", ref: "upd-#{lm}-to-#{suffix}"
-end
-
-gemspec
+# Override relaton gems from fix/lutaml-model-0.8 branches where available.
+# Released 2.0.0 gems have untyped lutaml-model attributes that fail with 0.8+.
+# fix/lutaml-model-0.8 branches keep version 2.0.0 (compatible) + lutaml-model ~> 0.8.
+# TODO: Remove once relaton gems release versions with lutaml-model 0.8 support.
+gem "relaton-bib", github: "relaton/relaton-bib", branch: "fix/lutaml-model-0.8"
+gem "relaton-iso", github: "relaton/relaton-iso", branch: "fix/lutaml-model-0.8"
+gem "relaton-3gpp", github: "relaton/relaton-3gpp", branch: "fix/lutaml-model-0.8"
+gem "relaton-bipm", github: "relaton/relaton-bipm", branch: "fix/lutaml-model-0.8"
+gem "relaton-bsi", github: "relaton/relaton-bsi", branch: "fix/lutaml-model-0.8"
