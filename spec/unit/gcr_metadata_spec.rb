@@ -5,26 +5,27 @@ require "spec_helper"
 RSpec.describe Glossarist::GcrMetadata do
   describe ".from_concepts" do
     let(:concepts) do
-      [
-        {
-          "termid" => "1",
-          "eng" => {
-            "definition" => [{ "content" => "def" }],
-            "entry_status" => "valid",
-            "sources" => [{ "type" => "authoritative" }],
-          },
-          "deu" => {
-            "definition" => [{ "content" => "def" }],
-            "entry_status" => "valid",
-          },
-        },
-        {
-          "termid" => "2",
-          "eng" => {
-            "entry_status" => "draft",
-          },
-        },
-      ]
+      mc1 = Glossarist::ManagedConcept.new(data: { id: "1" })
+      mc1.add_localization(build_l10n("eng",
+                                      definition: [{ "content" => "def" }],
+                                      entry_status: "valid",
+                                      sources: [{ "type" => "authoritative" }]))
+      mc1.add_localization(build_l10n("deu",
+                                      definition: [{ "content" => "def" }],
+                                      entry_status: "valid"))
+
+      mc2 = Glossarist::ManagedConcept.new(data: { id: "2" })
+      mc2.add_localization(build_l10n("eng", entry_status: "draft"))
+
+      [mc1, mc2]
+    end
+
+    def build_l10n(lang, definition: nil, entry_status: nil, sources: nil)
+      data = { "language_code" => lang }
+      data["definition"] = definition if definition
+      data["entry_status"] = entry_status if entry_status
+      data["sources"] = sources if sources
+      Glossarist::LocalizedConcept.of_yaml({ "data" => data })
     end
 
     it "computes statistics from concepts" do
@@ -58,7 +59,7 @@ RSpec.describe Glossarist::GcrMetadata do
     end
   end
 
-  describe "#to_h" do
+  describe "#to_yaml_hash" do
     it "serializes to hash" do
       metadata = described_class.new(
         title: "Test",
@@ -70,7 +71,7 @@ RSpec.describe Glossarist::GcrMetadata do
         statistics: Glossarist::GcrStatistics.new(total_concepts: 5),
       )
 
-      h = metadata.to_h
+      h = metadata.to_yaml_hash
       expect(h["title"]).to eq("Test")
       expect(h["concept_count"]).to eq(5)
       expect(h["schema_version"]).to eq("1")
@@ -78,7 +79,7 @@ RSpec.describe Glossarist::GcrMetadata do
 
     it "excludes nil optional fields" do
       metadata = described_class.new(title: "Test")
-      h = metadata.to_h
+      h = metadata.to_yaml_hash
       expect(h).not_to have_key("homepage")
       expect(h).not_to have_key("repository")
     end

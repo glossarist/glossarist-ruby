@@ -1,62 +1,35 @@
 # frozen_string_literal: true
 
 module Glossarist
-  class GcrStatistics
-    LANG_CODES = Glossarist::LANG_CODES
+  class GcrStatistics < Lutaml::Model::Serializable
+    attribute :total_concepts, :integer
+    attribute :languages, :string, collection: true
+    attribute :concepts_by_status, :hash
+    attribute :concepts_with_definitions, :integer
+    attribute :concepts_with_sources, :integer
 
-    attr_accessor :total_concepts, :languages, :concepts_by_status,
-                  :concepts_with_definitions, :concepts_with_sources
-
-    def initialize(attrs = {})
-      @total_concepts = attrs[:total_concepts] || 0
-      @languages = attrs[:languages] || []
-      @concepts_by_status = attrs[:concepts_by_status] || {}
-      @concepts_with_definitions = attrs[:concepts_with_definitions] || 0
-      @concepts_with_sources = attrs[:concepts_with_sources] || 0
+    key_value do
+      map :total_concepts, to: :total_concepts
+      map :languages, to: :languages
+      map :concepts_by_status, to: :concepts_by_status
+      map :concepts_with_definitions, to: :concepts_with_definitions
+      map :concepts_with_sources, to: :concepts_with_sources
     end
 
     def self.from_concepts(concepts)
-      languages = Set.new
-      by_status = Hash.new(0)
-      with_defs = 0
-      with_sources = 0
-
-      concepts.each do |concept|
-        LANG_CODES.each do |lang|
-          next unless concept[lang].is_a?(Hash)
-
-          languages << lang
-
-          status = concept[lang]["entry_status"]
-          by_status[status] += 1 if status
-
-          if concept[lang]["definition"]
-            with_defs += 1
-          end
-
-          if concept[lang]["sources"]
-            with_sources += 1
-          end
-        end
-      end
+      l10ns = concepts.flat_map { |c| c.localizations.to_a }
 
       new(
         total_concepts: concepts.length,
-        languages: languages.sort,
-        concepts_by_status: by_status,
-        concepts_with_definitions: with_defs,
-        concepts_with_sources: with_sources,
+        languages: l10ns.map(&:language_code).compact.sort.uniq,
+        concepts_by_status: l10ns.map(&:entry_status).compact.tally,
+        concepts_with_definitions: count_with(l10ns, :definition),
+        concepts_with_sources: count_with(l10ns, :sources),
       )
     end
 
-    def to_h
-      {
-        "total_concepts" => total_concepts,
-        "languages" => languages,
-        "concepts_by_status" => concepts_by_status,
-        "concepts_with_definitions" => concepts_with_definitions,
-        "concepts_with_sources" => concepts_with_sources,
-      }
+    def self.count_with(l10ns, attr)
+      l10ns.count { |l| l.data.send(attr)&.any? }
     end
   end
 end

@@ -1,31 +1,45 @@
 # frozen_string_literal: true
 
 module Glossarist
-  class GcrMetadata
-    attr_accessor :shortname, :version, :title, :description, :owner, :tags,
-                  :concept_count, :languages,
-                  :created_at, :glossarist_version, :schema_version,
-                  :statistics, :homepage, :repository, :license,
-                  :uri_prefix, :external_references
+  class GcrMetadata < Lutaml::Model::Serializable
+    attribute :shortname, :string
+    attribute :version, :string
+    attribute :title, :string
+    attribute :description, :string
+    attribute :owner, :string
+    attribute :tags, :string, collection: true
+    attribute :concept_count, :integer
+    attribute :languages, :string, collection: true
+    attribute :created_at, :string
+    attribute :glossarist_version, :string
+    attribute :schema_version, :string, default: -> { "1.0.0" }
+    attribute :statistics, GcrStatistics
+    attribute :homepage, :string
+    attribute :repository, :string
+    attribute :license, :string
+    attribute :uri_prefix, :string
+    attribute :concept_uri_template, :string
+    attribute :external_references, :hash, collection: true
 
-    def initialize(attrs = {})
-      @shortname = attrs[:shortname]
-      @version = attrs[:version]
-      @title = attrs[:title]
-      @description = attrs[:description]
-      @owner = attrs[:owner]
-      @tags = attrs[:tags] || []
-      @concept_count = attrs[:concept_count] || 0
-      @languages = attrs[:languages] || []
-      @created_at = attrs[:created_at]
-      @glossarist_version = attrs[:glossarist_version]
-      @schema_version = attrs[:schema_version] || "1.0.0"
-      @statistics = attrs[:statistics]
-      @homepage = attrs[:homepage]
-      @repository = attrs[:repository]
-      @license = attrs[:license]
-      @uri_prefix = attrs[:uri_prefix]
-      @external_references = attrs[:external_references] || []
+    key_value do
+      map :shortname, to: :shortname
+      map :version, to: :version
+      map :title, to: :title
+      map :description, to: :description
+      map :owner, to: :owner
+      map :tags, to: :tags
+      map :concept_count, to: :concept_count
+      map :languages, to: :languages
+      map :created_at, to: :created_at
+      map :glossarist_version, to: :glossarist_version
+      map :schema_version, to: :schema_version
+      map :statistics, to: :statistics
+      map :homepage, to: :homepage
+      map :repository, to: :repository
+      map :license, to: :license
+      map :uri_prefix, to: :uri_prefix
+      map :concept_uri_template, to: :concept_uri_template
+      map :external_references, to: :external_references
     end
 
     def self.from_concepts(concepts, register_data: nil, options: {})
@@ -44,6 +58,7 @@ module Glossarist
         schema_version: register_data&.dig("schema_version") || SchemaMigration::CURRENT_SCHEMA_VERSION,
         statistics: stats,
         uri_prefix: options[:uri_prefix],
+        concept_uri_template: options[:concept_uri_template],
         external_references: derive_external_references(concepts),
       )
     end
@@ -51,35 +66,22 @@ module Glossarist
     def self.derive_external_references(concepts)
       sources = Set.new
       concepts.each do |concept|
-        Array(concept["references"]).each do |ref|
-          src = ref.is_a?(Hash) ? ref["source"] : nil
-          sources.add(src) if src && !src.empty?
+        concept.localizations.each do |l10n|
+          l10n.data.references&.each do |ref|
+            src = ref.source
+            sources.add(src) if src && !src.empty?
+          end
         end
       end
       sources.map { |uri| { "uri" => uri } }
     end
 
-    def to_h
-      h = {
-        "shortname" => shortname,
-        "version" => version,
-        "title" => title,
-        "description" => description,
-        "owner" => owner,
-        "tags" => tags,
-        "concept_count" => concept_count,
-        "languages" => languages,
-        "created_at" => created_at,
-        "glossarist_version" => glossarist_version,
-        "schema_version" => schema_version,
-        "statistics" => statistics&.to_h,
-      }
-      h["homepage"] = homepage if homepage
-      h["repository"] = repository if repository
-      h["license"] = license if license
-      h["uri_prefix"] = uri_prefix if uri_prefix
-      h["external_references"] = external_references if external_references&.any?
-      h.compact
+    def [](key)
+      to_yaml_hash[key]
+    end
+
+    def dig(*keys)
+      to_yaml_hash.dig(*keys)
     end
   end
 end
