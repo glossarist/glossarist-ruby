@@ -60,7 +60,9 @@ RSpec.describe "Concept mention resolution pipeline" do
 
       expect(refs.size).to eq(3)
       urn_ref = refs.find { |r| r.source == "urn:iec:std:iec:60050" }
-      local_ref = refs.find { |r| r.ref_type == "local" && r.concept_id == "101" }
+      local_ref = refs.find do |r|
+        r.ref_type == "local" && r.concept_id == "101"
+      end
       missing_ref = refs.find { |r| r.concept_id == "200" }
 
       expect(urn_ref).to be_external
@@ -158,9 +160,11 @@ RSpec.describe "Concept mention resolution pipeline" do
       expect(pkg.concepts.length).to eq(1)
       expect(pkg.metadata["uri_prefix"]).to eq("urn:example:test")
 
-      loaded_concept = pkg.concepts.first
-      expect(loaded_concept["references"]).to be_a(Array)
-      expect(loaded_concept["references"].first["source"]).to eq("urn:iec:std:iec:60050")
+      loaded_mc = pkg.concepts.first
+      expect(loaded_mc).to be_a(Glossarist::ManagedConcept)
+      l10n = loaded_mc.localization("eng")
+      expect(l10n.data.references).not_to be_empty
+      expect(l10n.data.references.first.source).to eq("urn:iec:std:iec:60050")
     end
   end
 end

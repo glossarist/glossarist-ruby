@@ -181,11 +181,11 @@ RSpec.describe Glossarist::SchemaMigration do
           result = described_class.new(input).migrate
 
           expect(result["eng"]["references"]).to include({
-            "term" => "equality",
-            "concept_id" => "102-01-01",
-            "source" => "urn:iec:std:iec:60050",
-            "ref_type" => "urn",
-          })
+                                                           "term" => "equality",
+                                                           "concept_id" => "102-01-01",
+                                                           "source" => "urn:iec:std:iec:60050",
+                                                           "ref_type" => "urn",
+                                                         })
         end
 
         it "extracts URN cross-references" do
@@ -198,11 +198,11 @@ RSpec.describe Glossarist::SchemaMigration do
           result = described_class.new(input).migrate
 
           expect(result["eng"]["references"]).to include({
-            "term" => "term",
-            "concept_id" => "3.5.1.2",
-            "source" => "urn:iso:std:iso:14812",
-            "ref_type" => "urn",
-          })
+                                                           "term" => "term",
+                                                           "concept_id" => "3.5.1.2",
+                                                           "source" => "urn:iso:std:iso:14812",
+                                                           "ref_type" => "urn",
+                                                         })
         end
 
         it "deduplicates references" do
@@ -309,9 +309,11 @@ RSpec.describe Glossarist::SchemaMigration do
 
     it "migrates concepts to directory output" do
       source = create_source_dataset([
-        { "termid" => "1", "eng" => { "definition" => "bare text" } },
-        { "termid" => "2", "eng" => { "definition" => "another" } },
-      ])
+                                       { "termid" => "1",
+                                         "eng" => { "definition" => "bare text" } },
+                                       { "termid" => "2",
+                                         "eng" => { "definition" => "another" } },
+                                     ])
       output = File.join(@tmpdir, "output")
 
       result = described_class.upgrade_directory(source, output: output)
@@ -324,8 +326,9 @@ RSpec.describe Glossarist::SchemaMigration do
 
     it "migrates concepts to .gcr output" do
       source = create_source_dataset([
-        { "termid" => "1", "eng" => { "definition" => "test" } },
-      ])
+                                       { "termid" => "1",
+                                         "eng" => { "definition" => "test" } },
+                                     ])
       output = File.join(@tmpdir, "output.gcr")
 
       result = described_class.upgrade_directory(source, output: output)
@@ -335,17 +338,19 @@ RSpec.describe Glossarist::SchemaMigration do
 
     it "preserves register.yaml with updated schema_version" do
       source = create_source_dataset([
-        { "termid" => "1", "eng" => { "definition" => "test" } },
-      ])
+                                       { "termid" => "1",
+                                         "eng" => { "definition" => "test" } },
+                                     ])
       File.write(File.join(source, "register.yaml"), YAML.dump({
-        "name" => "Test",
-        "schema_version" => "0",
-      }))
+                                                                 "name" => "Test",
+                                                                 "schema_version" => "0",
+                                                               }))
       output = File.join(@tmpdir, "output")
 
       described_class.upgrade_directory(source, output: output)
-      register = YAML.safe_load_file(File.join(output, "register.yaml"))
-      expect(register["schema_version"]).to eq("1")
+      register = Glossarist::V1::Register.from_file(File.join(output,
+                                                              "register.yaml"))
+      expect(register.schema_version).to eq("1")
     end
 
     it "raises ArgumentError for non-directory source" do
@@ -365,8 +370,9 @@ RSpec.describe Glossarist::SchemaMigration do
 
     it "returns result hash with all keys" do
       source = create_source_dataset([
-        { "termid" => "1", "eng" => { "definition" => "test" } },
-      ])
+                                       { "termid" => "1",
+                                         "eng" => { "definition" => "test" } },
+                                     ])
       output = File.join(@tmpdir, "output")
 
       result = described_class.upgrade_directory(source, output: output)

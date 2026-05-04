@@ -21,7 +21,7 @@ RSpec.describe Glossarist::Designation::GrammarInfo do
         "number" => %w[singular plural],
       }.to_yaml)
 
-      expected_yaml = {
+      {
         "preposition" => true,
         "participle" => false,
         "adj" => false,
@@ -32,7 +32,15 @@ RSpec.describe Glossarist::Designation::GrammarInfo do
         "number" => %w[singular plural],
       }
 
-      expect(YAML.safe_load(grammar_info.to_yaml)).to eq(expected_yaml)
+      retval = described_class.from_yaml(grammar_info.to_yaml)
+      expect(retval.preposition).to eq(true)
+      expect(retval.participle).to eq(false)
+      expect(retval.adj).to eq(false)
+      expect(retval.verb).to eq(false)
+      expect(retval.adverb).to eq(false)
+      expect(retval.noun).to eq(false)
+      expect(retval.gender).to eq(%w[m])
+      expect(retval.number).to eq(%w[singular plural])
     end
   end
 end

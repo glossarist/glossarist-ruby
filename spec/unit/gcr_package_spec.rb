@@ -6,29 +6,15 @@ require "tmpdir"
 RSpec.describe Glossarist::GcrPackage do
   let(:sample_concepts) do
     [
-      {
-        "termid" => "102-01-01",
-        "term" => "equality",
-        "eng" => {
-          "terms" => [{ "type" => "expression", "designation" => "equality" }],
-          "definition" => [{ "content" => "test definition" }],
-          "entry_status" => "valid",
-        },
-      },
-      {
-        "termid" => "102-01-02",
-        "term" => "quantity",
-        "eng" => {
-          "terms" => [{ "type" => "expression", "designation" => "quantity" }],
-          "definition" => [{ "content" => "another definition" }],
-          "entry_status" => "valid",
-        },
-      },
+      build_managed_concept("102-01-01", "equality", "test definition"),
+      build_managed_concept("102-01-02", "quantity", "another definition"),
     ]
   end
 
   let(:sample_metadata) do
     Glossarist::GcrMetadata.new(
+      shortname: "test",
+      version: "1.0.0",
       title: "Test Dataset",
       concept_count: 2,
       languages: ["eng"],
@@ -51,11 +37,28 @@ RSpec.describe Glossarist::GcrPackage do
     FileUtils.rm_rf(@tmpdir)
   end
 
+  def build_managed_concept(termid, designation, definition_content)
+    mc = Glossarist::ManagedConcept.new(data: { id: termid })
+    l10n = Glossarist::LocalizedConcept.of_yaml({
+                                                  "data" => {
+                                                    "language_code" => "eng",
+                                                    "terms" => [{
+                                                      "type" => "expression", "designation" => designation
+                                                    }],
+                                                    "definition" => [{ "content" => definition_content }],
+                                                    "entry_status" => "valid",
+                                                  },
+                                                })
+    mc.add_localization(l10n)
+    mc
+  end
+
   def create_test_gcr(register: nil)
+    register_data = register ? Glossarist::RegisterData.of_yaml(register) : nil
     described_class.create(
       concepts: sample_concepts,
       metadata: sample_metadata,
-      register_yaml: register,
+      register_data: register_data,
       output_path: gcr_path,
     )
     GC.start
@@ -74,14 +77,27 @@ RSpec.describe Glossarist::GcrPackage do
       end
     end
 
+    it "writes multi-document YAML for each concept" do
+      create_test_gcr
+
+      Zip::File.open(gcr_path) do |zf|
+        entry = zf.find_entry("concepts/102-01-01.yaml")
+        doc = Glossarist::ConceptDocument.from_yamls(entry.get_input_stream.read)
+        expect(doc.concept).to be_a(Glossarist::ManagedConcept)
+        expect(doc.localizations.length).to eq(1)
+        expect(doc.concept.data.id).to eq("102-01-01")
+        expect(doc.localizations.first.language_code).to eq("eng")
+      end
+    end
+
     it "includes register.yaml when provided" do
       register = { "name" => "Test", "schema_version" => "1" }
       create_test_gcr(register: register)
 
       Zip::File.open(gcr_path) do |zf|
         expect(zf.find_entry("register.yaml")).not_to be_nil
-        yaml = YAML.safe_load(zf.find_entry("register.yaml").get_input_stream.read)
-        expect(yaml["name"]).to eq("Test")
+        rd = Glossarist::RegisterData.from_yaml(zf.find_entry("register.yaml").get_input_stream.read)
+        expect(rd["name"]).to eq("Test")
       end
     end
   end
@@ -92,9 +108,18 @@ RSpec.describe Glossarist::GcrPackage do
 
       package = described_class.load(gcr_path)
       expect(package.concepts.length).to eq(2)
-      expect(package.concepts.map do |c|
-        c["termid"]
-      end).to contain_exactly("102-01-01", "102-01-02")
+      ids = package.concepts.map { |mc| mc.data.id }
+      expect(ids).to contain_exactly("102-01-01", "102-01-02")
+    end
+
+    it "loads concepts as ManagedConcept objects" do
+      create_test_gcr
+
+      package = described_class.load(gcr_path)
+      package.concepts.each do |mc|
+        expect(mc).to be_a(Glossarist::ManagedConcept)
+        expect(mc.localization("eng")).to be_a(Glossarist::LocalizedConcept)
+      end
     end
 
     it "loads metadata from a .gcr file" do
@@ -159,10 +184,10 @@ RSpec.describe Glossarist::GcrPackage do
       )
 
       pkg = described_class.load(output)
-      concept = pkg.concepts.first
-      expect(concept["references"]).to be_a(Array)
-      expect(concept["references"].length).to eq(2)
-      ids = concept["references"].map { |r| r["concept_id"] }
+      mc = pkg.concepts.first
+      l10n = mc.localization("eng")
+      expect(l10n.data.references).not_to be_empty
+      ids = l10n.data.references.map(&:concept_id)
       expect(ids).to contain_exactly("102-01-01", "200")
     end
 
@@ -190,11 +215,11 @@ RSpec.describe Glossarist::GcrPackage do
       )
 
       pkg = described_class.load(output)
-      concept = pkg.concepts.first
-      expect(concept["references"]).to be_a(Array)
-      ref = concept["references"].first
-      expect(ref["source"]).to eq("urn:iso:std:iso:19111")
-      expect(ref["concept_id"]).to eq("3.1.32")
+      mc = pkg.concepts.first
+      l10n = mc.localization("eng")
+      ref = l10n.data.references.first
+      expect(ref.source).to eq("urn:iso:std:iso:19111")
+      expect(ref.concept_id).to eq("3.1.32")
     end
 
     it "includes external_references in metadata" do

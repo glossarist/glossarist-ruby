@@ -26,26 +26,25 @@ RSpec.describe Glossarist::Locality do
   describe "#to_yaml" do
     context "dumps data to a hash" do
       it "dumps data with reference_from only" do
-        test_yaml = described_class.new(type: "clause",
-                                        reference_from: "5").to_yaml
+        obj = described_class.new(type: "clause", reference_from: "5")
+        retval = described_class.from_yaml(obj.to_yaml)
 
-        retval = YAML.safe_load(test_yaml)
-        expect(retval).to be_kind_of(Hash)
-        expect(retval["type"]).to eq("clause")
-        expect(retval["reference_from"]).to eq("5")
-        expect(retval["reference_to"]).to eq(nil)
+        expect(retval).to be_kind_of(Glossarist::Locality)
+        expect(retval.type).to eq("clause")
+        expect(retval.reference_from).to eq("5")
+        expect(retval.reference_to).to eq(nil)
       end
 
       it "dumps data with reference_from and reference_to" do
-        test_yaml = described_class.new(
+        obj = described_class.new(
           type: "clause", reference_from: "5", reference_to: "10",
-        ).to_yaml
+        )
+        retval = described_class.from_yaml(obj.to_yaml)
 
-        retval = YAML.safe_load(test_yaml)
-        expect(retval).to be_kind_of(Hash)
-        expect(retval["type"]).to eq("clause")
-        expect(retval["reference_from"]).to eq("5")
-        expect(retval["reference_to"]).to eq("10")
+        expect(retval).to be_kind_of(Glossarist::Locality)
+        expect(retval.type).to eq("clause")
+        expect(retval.reference_from).to eq("5")
+        expect(retval.reference_to).to eq("10")
       end
 
       it "raise Lutaml::Model::ValidationError with invalid type" do

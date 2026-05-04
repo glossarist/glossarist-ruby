@@ -10,7 +10,7 @@ RSpec.describe Glossarist::UrnResolver do
     it "resolves simple IEV code" do
       url = resolver.resolve("urn:iec:std:iec:60050-102-01-01")
       expect(url).to eq(
-        "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=#{CGI.escape('102-01-01')}"
+        "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=#{CGI.escape('102-01-01')}",
       )
     end
 

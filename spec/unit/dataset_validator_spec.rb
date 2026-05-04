@@ -14,6 +14,21 @@ RSpec.describe Glossarist::DatasetValidator do
     FileUtils.rm_rf(@tmpdir)
   end
 
+  def build_managed_concept(termid, designation, definition_content)
+    mc = Glossarist::ManagedConcept.new(data: { id: termid })
+    l10n = Glossarist::LocalizedConcept.of_yaml({
+                                                  "data" => {
+                                                    "language_code" => "eng",
+                                                    "terms" => [{
+                                                      "type" => "expression", "designation" => designation
+                                                    }],
+                                                    "definition" => [{ "content" => definition_content }],
+                                                  },
+                                                })
+    mc.add_localization(l10n)
+    mc
+  end
+
   def create_valid_directory
     dir = File.join(@tmpdir, "dataset")
     concepts_dir = File.join(dir, "concepts")
@@ -32,15 +47,7 @@ RSpec.describe Glossarist::DatasetValidator do
 
   def create_valid_gcr
     output = File.join(@tmpdir, "test.gcr")
-    concepts = [
-      {
-        "termid" => "100",
-        "eng" => {
-          "terms" => [{ "type" => "expression", "designation" => "test" }],
-          "definition" => [{ "content" => "test definition" }],
-        },
-      },
-    ]
+    concepts = [build_managed_concept("100", "test", "test definition")]
     metadata = Glossarist::GcrMetadata.new(
       shortname: "test",
       version: "1.0.0",
@@ -51,7 +58,7 @@ RSpec.describe Glossarist::DatasetValidator do
     Glossarist::GcrPackage.create(
       concepts: concepts,
       metadata: metadata,
-      register_yaml: nil,
+      register_data: nil,
       output_path: output,
     )
     GC.start
@@ -90,16 +97,6 @@ RSpec.describe Glossarist::DatasetValidator do
   end
 
   describe "cross-reference validation" do
-    let(:iev_concepts) do
-      [{
-        "termid" => "102-01-01",
-        "eng" => {
-          "terms" => [{ "type" => "expression", "designation" => "equality" }],
-          "definition" => [{ "content" => "equality concept" }],
-        },
-      }]
-    end
-
     def create_reference_gcr(shortname, concepts, uri_prefix: nil)
       path = File.join(@tmpdir, "refs", "#{shortname}.gcr")
       FileUtils.mkdir_p(File.dirname(path))
@@ -114,7 +111,7 @@ RSpec.describe Glossarist::DatasetValidator do
       Glossarist::GcrPackage.create(
         concepts: concepts,
         metadata: metadata,
-        register_yaml: nil,
+        register_data: nil,
         output_path: path,
       )
       GC.start
@@ -126,14 +123,14 @@ RSpec.describe Glossarist::DatasetValidator do
       FileUtils.mkdir_p(ref_dir)
 
       target = create_valid_directory
-      target_concept = YAML.safe_load_file(
-        File.join(target, "concepts", "100.yaml"),
-        permitted_classes: [Date, Time],
-      )
-      target_concept["eng"]["definition"] = [
-        { "content" => "See {{missing, urn:unknown:std:999}}" },
-      ]
-      File.write(File.join(target, "concepts", "100.yaml"), YAML.dump(target_concept))
+      concept = {
+        "termid" => "100",
+        "eng" => {
+          "terms" => [{ "type" => "expression", "designation" => "test" }],
+          "definition" => [{ "content" => "See {{missing, urn:unknown:std:999}}" }],
+        },
+      }
+      File.write(File.join(target, "concepts", "100.yaml"), YAML.dump(concept))
 
       result = validator.validate(target, reference_path: ref_dir)
       expect(result.warnings.size).to be >= 1
@@ -145,14 +142,14 @@ RSpec.describe Glossarist::DatasetValidator do
       FileUtils.mkdir_p(ref_dir)
 
       target = create_valid_directory
-      target_concept = YAML.safe_load_file(
-        File.join(target, "concepts", "100.yaml"),
-        permitted_classes: [Date, Time],
-      )
-      target_concept["eng"]["definition"] = [
-        { "content" => "See {{missing, 999}}" },
-      ]
-      File.write(File.join(target, "concepts", "100.yaml"), YAML.dump(target_concept))
+      concept = {
+        "termid" => "100",
+        "eng" => {
+          "terms" => [{ "type" => "expression", "designation" => "test" }],
+          "definition" => [{ "content" => "See {{missing, 999}}" }],
+        },
+      }
+      File.write(File.join(target, "concepts", "100.yaml"), YAML.dump(concept))
 
       result = validator.validate(target, reference_path: ref_dir)
       expect(result.warnings.size).to be >= 1
@@ -161,17 +158,20 @@ RSpec.describe Glossarist::DatasetValidator do
 
     it "returns no warnings when all references resolve" do
       ref_dir = File.join(@tmpdir, "refs")
-      create_reference_gcr("iev", iev_concepts, uri_prefix: "urn:iec:std:iec:60050")
+      iev_concept = build_managed_concept("102-01-01", "equality",
+                                          "equality concept")
+      create_reference_gcr("iev", [iev_concept],
+                           uri_prefix: "urn:iec:std:iec:60050")
 
       target = create_valid_directory
-      target_concept = YAML.safe_load_file(
-        File.join(target, "concepts", "100.yaml"),
-        permitted_classes: [Date, Time],
-      )
-      target_concept["eng"]["definition"] = [
-        { "content" => "See {{equality, urn:iec:std:iec:60050-102-01-01}}" },
-      ]
-      File.write(File.join(target, "concepts", "100.yaml"), YAML.dump(target_concept))
+      concept = {
+        "termid" => "100",
+        "eng" => {
+          "terms" => [{ "type" => "expression", "designation" => "test" }],
+          "definition" => [{ "content" => "See {{equality, urn:iec:std:iec:60050-102-01-01}}" }],
+        },
+      }
+      File.write(File.join(target, "concepts", "100.yaml"), YAML.dump(concept))
 
       result = validator.validate(target, reference_path: ref_dir)
       expect(result.warnings).to be_empty
@@ -188,29 +188,27 @@ RSpec.describe Glossarist::DatasetValidator do
 
     it "validates cross-references for .gcr input" do
       ref_dir = File.join(@tmpdir, "refs")
-      create_reference_gcr("iev", iev_concepts, uri_prefix: "urn:iec:std:iec:60050")
+      iev_concept = build_managed_concept("102-01-01", "equality",
+                                          "equality concept")
+      create_reference_gcr("iev", [iev_concept],
+                           uri_prefix: "urn:iec:std:iec:60050")
 
       output = File.join(@tmpdir, "target.gcr")
-      target_concepts = [
-        {
-          "termid" => "100",
-          "eng" => {
-            "terms" => [{ "type" => "expression", "designation" => "test" }],
-            "definition" => [{ "content" => "See {{equality, urn:iec:std:iec:60050-102-01-01}}" }],
-          },
-        },
-      ]
+      target_concept = build_managed_concept(
+        "100", "test", "See {{equality, urn:iec:std:iec:60050-102-01-01}}"
+      )
       metadata = Glossarist::GcrMetadata.new(
         shortname: "target",
         version: "1.0.0",
         concept_count: 1,
         languages: ["eng"],
         schema_version: "1",
+        uri_prefix: "urn:example:target",
       )
       Glossarist::GcrPackage.create(
-        concepts: target_concepts,
+        concepts: [target_concept],
         metadata: metadata,
-        register_yaml: nil,
+        register_data: nil,
         output_path: output,
       )
       GC.start

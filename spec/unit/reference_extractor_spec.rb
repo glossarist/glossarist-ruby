@@ -163,7 +163,8 @@ RSpec.describe Glossarist::ReferenceExtractor do
       refs = subject.extract_from_text(text)
 
       expect(refs.size).to eq(2)
-      expect(refs.map(&:term)).to contain_exactly("geodetic latitude", "latitude")
+      expect(refs.map(&:term)).to contain_exactly("geodetic latitude",
+                                                  "latitude")
     end
 
     it "deduplicates identical designation refs" do
@@ -208,7 +209,8 @@ RSpec.describe Glossarist::ReferenceExtractor do
       refs = subject.extract_from_localized(lc_hash)
 
       expect(refs.size).to eq(3)
-      expect(refs.map(&:concept_id)).to contain_exactly("100", "102-01-01", "300")
+      expect(refs.map(&:concept_id)).to contain_exactly("100", "102-01-01",
+                                                        "300")
     end
   end
 
@@ -236,7 +238,7 @@ RSpec.describe Glossarist::ReferenceExtractor do
 
   describe "custom identifier resolver registration" do
     it "allows registering new identifier resolvers" do
-      described_class.register_identifier_resolver("doi:") do |ext, identifier, display|
+      described_class.register_identifier_resolver("doi:") do |_ext, identifier, display|
         Glossarist::ConceptReference.new(
           term: display || "",
           concept_id: identifier.sub("doi:", ""),
