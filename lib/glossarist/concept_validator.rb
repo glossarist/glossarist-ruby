@@ -52,7 +52,6 @@ module Glossarist
     def validate_concept(concept, fname, seen_ids)
       validate_id(concept, fname, seen_ids)
       validate_localizations(concept, fname)
-      validate_definitions(concept, fname)
       validate_entry_statuses(concept, fname)
     end
 
@@ -83,18 +82,6 @@ module Glossarist
         terms = l10n.data&.terms
         unless terms.is_a?(Array) && terms.any?
           @errors << "#{fname}/#{lang}: must have at least 1 term"
-        end
-      end
-    end
-
-    def validate_definitions(concept, fname)
-      (concept.localizations&.values || []).each do |l10n|
-        lang = l10n.language_code || "unknown"
-        next unless l10n.data&.definition
-
-        defs = l10n.data.definition
-        if defs.empty?
-          @errors << "#{fname}/#{lang}: definition is empty"
         end
       end
     end
