@@ -3,7 +3,7 @@ module Glossarist
     attribute :path, :string
     attribute :localized_concepts_path, :string
 
-    yaml do
+    key_value do
       map :path, to: :path
       map %i[localized_concepts_path localizedConceptsPath],
           to: :localized_concepts_path
@@ -33,63 +33,43 @@ module Glossarist
       end
     end
 
-    def group_concept_hashes(mixed_hashes)
-      concept_hashes = mixed_hashes.select do |concept_hash|
-        !concept_hash["data"]["localized_concepts"].nil? ||
-          !concept_hash["data"]["localizedConcepts"].nil?
+    def load_concept_from_file(filename) # rubocop:disable Metrics/CyclomaticComplexity
+      raw = File.read(filename, encoding: "utf-8")
+      doc = ConceptDocument.from_yamls(raw)
+      concept = doc.concept
+      unless concept
+        raise Glossarist::ParseError.new(filename: filename)
       end
 
-      localized_concept_hashes = mixed_hashes.select do |concept_hash|
-        concept_hash["data"]["localized_concepts"].nil? &&
-          concept_hash["data"]["localizedConcepts"].nil?
+      concept_uuid = concept.identifier || concept.data&.id || File.basename(
+        filename, ".*"
+      )
+      concept.instance_variable_set(:@uuid, concept_uuid)
+
+      concept.data.localized_concepts.each_value do |id|
+        localized_concept = load_localized_concept(id, doc.localizations)
+        concept.add_l10n(localized_concept)
       end
 
-      [concept_hashes, localized_concept_hashes]
-    end
-
-    def load_concept_from_file(filename)
-      mixed_hashes = YAML.load_stream(File.read(filename, encoding: "utf-8"))
-      concepts = []
-
-      concept_hashes, localized_concept_hashes =
-        group_concept_hashes(mixed_hashes)
-
-      concept_hashes.each do |concept_hash|
-        concept_hash["uuid"] = concept_hash["id"] ||
-          File.basename(filename, ".*")
-        concept = Config.class_for(:managed_concept).of_yaml(concept_hash)
-
-        concept.data.localized_concepts.each_value do |id|
-          localized_concept =
-            load_localized_concept(id, localized_concept_hashes)
-          concept.add_l10n(localized_concept)
-        end
-
-        concepts << concept
-      end
-
-      concepts
+      [concept]
     rescue Psych::SyntaxError => e
       raise Glossarist::ParseError.new(filename: filename, line: e.line)
     end
 
-    def load_localized_concept(id, localized_concept_hashes = [])
-      {}
+    def load_localized_concept(id, inline_localizations = nil)
+      if inline_localizations
+        l10n = inline_localizations.find { |l| l.id == id }
+        if l10n
+          l10n.instance_variable_set(:@uuid, id)
+          return l10n
+        end
+      end
 
-      concept_hash = if localized_concept_hashes.empty?
-                       Psych.safe_load(
-                         File.read(localized_concept_path(id),
-                                   encoding: "utf-8"),
-                         permitted_classes: [Date, Time],
-                       )
-                     else
-                       localized_concept_hashes.find do |hash|
-                         hash["id"] == id
-                       end
-                     end
-
-      concept_hash["uuid"] = id
-      Config.class_for(:localized_concept).of_yaml(concept_hash)
+      l10n = LocalizedConcept.from_yaml(
+        File.read(localized_concept_path(id), encoding: "utf-8"),
+      )
+      l10n.instance_variable_set(:@uuid, id)
+      l10n
     rescue Psych::SyntaxError => e
       raise Glossarist::ParseError.new(filename: filename, line: e.line)
     end

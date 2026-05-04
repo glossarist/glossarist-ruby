@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require "yaml"
 require "fileutils"
 
 module Glossarist
@@ -21,7 +20,7 @@ module Glossarist
     attr_reader :from_version, :to_version
 
     def initialize(concept_hash, from_version: "0",
-to_version: CURRENT_SCHEMA_VERSION, ref_maps: {})
+                             to_version: CURRENT_SCHEMA_VERSION, ref_maps: {})
       @concept = concept_hash
       @from_version = from_version
       @to_version = to_version
@@ -37,8 +36,6 @@ to_version: CURRENT_SCHEMA_VERSION, ref_maps: {})
       @concept
     end
 
-    # API-level method: upgrade all concepts in a directory.
-    # Returns a result hash with migrated concepts and metadata.
     def self.upgrade_directory(source_dir, output:, # rubocop:disable Metrics/MethodLength, Metrics/ParameterLists
                               target_version: CURRENT_SCHEMA_VERSION,
                               cross_references: nil,
@@ -46,8 +43,14 @@ to_version: CURRENT_SCHEMA_VERSION, ref_maps: {})
       source_dir = File.expand_path(source_dir)
 
       concepts_dir = find_concepts_dir(source_dir)
-      raise ArgumentError, "#{source_dir} is not a directory" unless File.directory?(source_dir)
-      raise ArgumentError, "No concept YAML files found in #{source_dir}" unless concepts_dir
+      unless File.directory?(source_dir)
+        raise ArgumentError,
+              "#{source_dir} is not a directory"
+      end
+      unless concepts_dir
+        raise ArgumentError,
+              "No concept YAML files found in #{source_dir}"
+      end
 
       source_version = detect_schema_version(source_dir)
       ref_maps = load_ref_maps(cross_references)
@@ -118,7 +121,10 @@ to_version: CURRENT_SCHEMA_VERSION, ref_maps: {})
         entry = { "type" => "authoritative", "origin" => origin }
         if s["relationship"]
           entry["status"] = s["relationship"]["type"] || "identical"
-          entry["modification"] = s["relationship"]["modification"] if s["relationship"]["modification"]
+          if s["relationship"]["modification"]
+            entry["modification"] =
+              s["relationship"]["modification"]
+          end
         end
         entry
       end.compact
@@ -221,7 +227,6 @@ to_version: CURRENT_SCHEMA_VERSION, ref_maps: {})
       end
     end
 
-    # Class methods for directory-level upgrade
     class << self
       private
 
@@ -234,26 +239,14 @@ to_version: CURRENT_SCHEMA_VERSION, ref_maps: {})
       end
 
       def detect_schema_version(source_dir)
-        register_path = File.join(source_dir, "register.yaml")
-        if File.exist?(register_path)
-          register = YAML.safe_load_file(register_path,
-                                         permitted_classes: [Date, Time])
-          register&.dig("schema_version")&.to_s || "0"
-        else
-          "0"
-        end
+        register = V1::Register.from_file(File.join(source_dir,
+                                                    "register.yaml"))
+        register&.schema_version || "0"
       end
 
       def load_ref_maps(cross_references_path)
-        return {} unless cross_references_path && File.exist?(cross_references_path)
-
-        config = YAML.safe_load_file(cross_references_path,
-                                     permitted_classes: [Date, Time])
-        xref = config["crossReferences"] || {}
-        {
-          ref_prefix_map: xref["refPrefixMap"] || {},
-          urn_standard_map: xref["urnStandardMap"] || {},
-        }
+        xref = V1::CrossReferences.from_file(cross_references_path)
+        xref ? xref.to_ref_maps : {}
       end
 
       def read_and_migrate_concepts(concepts_dir, source_version, # rubocop:disable Metrics/MethodLength
@@ -263,11 +256,11 @@ to_version: CURRENT_SCHEMA_VERSION, ref_maps: {})
         errors = 0
 
         files.each do |file|
-          hash = YAML.safe_load_file(file, permitted_classes: [Date, Time])
-          next unless hash&.dig("termid")
+          v1 = V1::Concept.from_file(file)
+          next unless v1
 
           migration = new(
-            hash,
+            v1.to_yaml_hash,
             from_version: source_version,
             to_version: target_version,
             ref_maps: ref_maps,
@@ -283,11 +276,11 @@ to_version: CURRENT_SCHEMA_VERSION, ref_maps: {})
       end
 
       def read_register_yaml(source_dir, target_version)
-        register_path = File.join(source_dir, "register.yaml")
-        return nil unless File.exist?(register_path)
+        register = V1::Register.from_file(File.join(source_dir,
+                                                    "register.yaml"))
+        return nil unless register
 
-        data = YAML.safe_load_file(register_path,
-                                   permitted_classes: [Date, Time]) || {}
+        data = register.to_h
         data["schema_version"] = target_version
         data
       end
@@ -301,17 +294,21 @@ to_version: CURRENT_SCHEMA_VERSION, ref_maps: {})
             return
           end
 
-          metadata = GcrMetadata.from_concepts(concepts,
-                                               register_data: register_data)
+          v1_concepts = concepts.map { |h| V1::Concept.of_yaml(h).to_managed_concept }
+          rd = register_data ? RegisterData.of_yaml(register_data) : nil
+          metadata = GcrMetadata.from_concepts(v1_concepts,
+                                               register_data: rd)
           GcrPackage.create(
-            concepts: concepts,
+            concepts: v1_concepts,
             metadata: metadata,
-            register_yaml: register_data,
+            register_data: rd,
             output_path: output_path,
           )
         else
           if dry_run
-            puts "Would write #{concepts.length} concepts to #{File.join(output_path, 'concepts/')}"
+            puts "Would write #{concepts.length} concepts to #{File.join(
+              output_path, 'concepts/'
+            )}"
             return
           end
 
@@ -320,13 +317,15 @@ to_version: CURRENT_SCHEMA_VERSION, ref_maps: {})
 
           concepts.each do |concept|
             termid = concept["termid"]
+            mc = V1::Concept.of_yaml(concept).to_managed_concept
             File.write(File.join(concepts_out, "#{termid}.yaml"),
-                       YAML.dump(concept))
+                       mc.to_yaml)
           end
 
           if register_data
+            rd = RegisterData.of_yaml(register_data)
             File.write(File.join(output_path, "register.yaml"),
-                       YAML.dump(register_data))
+                       rd.to_yaml)
           end
         end
       end
