@@ -12,7 +12,8 @@ module Glossarist
 
     class << self
       def register_identifier_resolver(prefix, &resolver)
-        @identifier_resolvers << IdentifierResolver.new(prefix: prefix, resolver: resolver)
+        @identifier_resolvers << IdentifierResolver.new(prefix: prefix,
+                                                        resolver: resolver)
       end
 
       def register_pattern(name:, regex:, &resolver)
@@ -52,6 +53,20 @@ module Glossarist
 
         extract_from_localized(concept_hash[lang])
       end
+    end
+
+    def extract_from_managed_concept(concept)
+      concept.localizations.flat_map do |l10n|
+        extract_from_localized_concept(l10n)
+      end
+    end
+
+    def extract_from_localized_concept(l10n)
+      texts = []
+      l10n.data.definition&.each { |d| texts << d.content if d.content }
+      l10n.data.notes&.each { |n| texts << n.content if n.content }
+      l10n.data.examples&.each { |e| texts << e.content if e.content }
+      texts.flat_map { |t| extract_from_text(t) }
     end
 
     # Unified concept mention dispatcher.
@@ -156,7 +171,13 @@ module Glossarist
     def deduplicate(refs)
       seen = Set.new
       refs.select do |ref|
-        key = ref.concept_id ? [ref.source, ref.concept_id] : [ref.source, ref.concept_id, ref.term]
+        key = if ref.concept_id
+                [ref.source,
+                 ref.concept_id]
+              else
+                [ref.source, ref.concept_id,
+                 ref.term]
+              end
         seen.add?(key)
       end
     end
@@ -181,7 +202,7 @@ module Glossarist
         code_part = segments.find { |s| s.start_with?("60050-") }
         return "" unless code_part
 
-        code_part.sub(/\A60050-/, "").sub(/-\d{4}-\d{2}\z/, "")
+        code_part.delete_prefix("60050-").sub(/-\d{4}-\d{2}\z/, "")
       end
     end
 

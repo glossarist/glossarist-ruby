@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "zip"
-require "yaml"
 require "fileutils"
 
 module Glossarist
@@ -14,10 +13,10 @@ module Glossarist
       @concepts = []
     end
 
-    def self.create(concepts:, metadata:, register_yaml:, output_path:)
+    def self.create(concepts:, metadata:, output_path:, register_data: nil)
       FileUtils.mkdir_p(File.dirname(output_path))
       package = new(output_path)
-      package.send(:write, concepts, metadata, register_yaml)
+      package.send(:write, concepts, metadata, register_data)
       package
     end
 
@@ -27,308 +26,197 @@ module Glossarist
       package
     end
 
-    def self.create_from_directory(dir, output:, shortname:, version:, # rubocop:disable Metrics/ParameterLists
+    def self.create_from_directory(dir, output:, shortname:, version:, # rubocop:disable Metrics/MethodLength, Metrics/ParameterLists
                                   title: nil, description: nil, owner: nil,
                                   tags: [], register_yaml: nil,
-                                  uri_prefix: nil)
+                                  uri_prefix: nil, concept_uri_template: nil,
+                                  streaming: false)
       dir = File.expand_path(dir)
-      unless File.directory?(dir)
-        raise ArgumentError,
-              "#{dir} is not a directory"
+
+      if streaming
+        create_streaming(dir, output: output, shortname: shortname, version: version,
+                              title: title, description: description, owner: owner,
+                              tags: tags, register_yaml: register_yaml,
+                              uri_prefix: uri_prefix,
+                              concept_uri_template: concept_uri_template)
+      else
+        create_batch(dir, output: output, shortname: shortname, version: version,
+                          title: title, description: description, owner: owner,
+                          tags: tags, register_yaml: register_yaml,
+                          uri_prefix: uri_prefix,
+                          concept_uri_template: concept_uri_template)
       end
-
-      concepts = collect_concepts(dir)
-      raise ArgumentError, "No concept files found in #{dir}" if concepts.empty?
-
-      inject_references(concepts)
-
-      register_data = load_register_data(register_yaml, dir)
-      metadata = GcrMetadata.from_concepts(
-        concepts,
-        register_data: register_data,
-        options: {
-          shortname: shortname,
-          version: version,
-          title: title,
-          description: description,
-          owner: owner,
-          tags: tags,
-          uri_prefix: uri_prefix,
-        },
-      )
-
-      create(
-        concepts: concepts,
-        metadata: metadata,
-        register_yaml: register_data,
-        output_path: File.expand_path(output),
-      )
     end
 
-    def validate # rubocop:disable Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
-      result = ValidationResult.new
-
-      unless File.exist?(@zip_path)
-        result.add_error("File not found: #{@zip_path}")
-        return result
-      end
-
-      begin
-        Zip::File.open(@zip_path) do |zf|
-          unless zf.find_entry("metadata.yaml")
-            result.add_error("Missing metadata.yaml")
-          end
-
-          concept_entries = zf.entries.select do |e|
-            e.name.start_with?("concepts/") && e.name.end_with?(".yaml")
-          end
-          if concept_entries.empty?
-            result.add_error("No concept files found in concepts/")
-          end
-
-          if (entry = zf.find_entry("metadata.yaml"))
-            metadata = YAML.safe_load(entry.get_input_stream.read,
-                                      permitted_classes: [Date, Time],
-                                      aliases: true)
-            unless metadata.is_a?(Hash) && metadata["concept_count"]
-              result.add_error("metadata.yaml missing required fields")
-            end
-          end
-        end
-      rescue StandardError => e
-        result.add_error("Failed to read ZIP: #{e.message}")
-      end
-
-      result
+    def validate
+      GcrValidator.new.validate(@zip_path)
     end
 
-    # Instance methods
     private
 
-    def write(concepts, metadata, register_yaml)
+    def write(concepts, metadata, register_data)
       Zip::File.open(@zip_path, create: true) do |zf|
         zf.get_output_stream("metadata.yaml") do |f|
-          f.write(YAML.dump(metadata.to_h))
+          f.write(metadata.to_yaml)
         end
 
-        if register_yaml
+        if register_data
           zf.get_output_stream("register.yaml") do |f|
-            f.write(YAML.dump(register_yaml))
+            f.write(register_data.to_yaml)
           end
         end
 
-        concepts.each do |concept|
-          termid = concept["termid"]
-          zf.get_output_stream("concepts/#{termid}.yaml") do |f|
-            f.write(YAML.dump(concept))
-          end
+        concepts.each do |mc|
+          write_concept(zf, mc)
         end
       end
     end
 
-    def read # rubocop:disable Metrics/AbcSize
+    def write_concept(zip_file, concept)
+      termid = concept.data.id.to_s
+      doc = ConceptDocument.from_managed_concept(concept)
+      zip_file.get_output_stream("concepts/#{termid}.yaml") do |f|
+        f.write(doc.to_yamls)
+      end
+    end
+
+    def read
       @concepts = []
 
       Zip::File.open(@zip_path) do |zf|
         if (entry = zf.find_entry("metadata.yaml"))
-          @metadata = YAML.safe_load(entry.get_input_stream.read,
-                                     permitted_classes: [Date, Time], aliases: true)
+          @metadata = GcrMetadata.from_yaml(entry.get_input_stream.read)
         end
 
         zf.entries.each do |entry|
           next unless entry.name.start_with?("concepts/") && entry.name.end_with?(".yaml")
 
-          hash = YAML.safe_load(entry.get_input_stream.read,
-                                permitted_classes: [Date, Time], aliases: true)
-          @concepts << hash if hash
+          raw = entry.get_input_stream.read
+          doc = ConceptDocument.from_yamls(raw)
+          @concepts << doc.to_managed_concept
         end
       end
     end
 
-    # Class methods (private)
     class << self
       private
 
-      def collect_concepts(dir)
-        if v2_concepts?(dir)
-          collect_v2_concepts(dir)
-        elsif managed_concepts?(dir)
-          collect_managed_concepts(dir)
-        elsif v1_concepts?(dir)
-          collect_v1_concepts(dir)
-        else
-          []
+      def create_batch(dir, output:, shortname:, version:, **opts)
+        concepts = ConceptCollector.collect(dir)
+        if concepts.empty?
+          raise ArgumentError,
+                "No concept files found in #{dir}"
         end
-      end
 
-      def v1_concepts?(dir)
-        concepts_dir = File.join(dir, "concepts")
-        File.directory?(concepts_dir) && Dir.glob(File.join(concepts_dir,
-                                                            "*.yaml")).any?
-      end
-
-      def v2_concepts?(dir)
-        File.directory?(File.join(dir, "geolexica-v2"))
-      end
-
-      def managed_concepts?(dir)
-        concept_dir = File.join(dir, "concepts", "concept")
-        File.directory?(concept_dir) && Dir.glob(File.join(concept_dir,
-                                                            "*.yaml")).any?
-      end
-
-      def collect_v1_concepts(dir)
-        concepts_dir = File.join(dir, "concepts")
-        files = Dir.glob(File.join(concepts_dir, "*.yaml"))
-        concepts = []
-        files.each do |file|
-          hash = YAML.safe_load_file(file, permitted_classes: [Date, Time, Symbol])
-          concepts << hash if hash&.dig("termid")
+        enricher = ConceptEnricher.new
+        enricher.inject_references(concepts)
+        if opts[:concept_uri_template]
+          enricher.apply_uri_template(concepts,
+                                      opts[:concept_uri_template])
         end
-        concepts
+
+        register_data = load_register_data(opts[:register_yaml], dir)
+        metadata = build_metadata(concepts, shortname: shortname, version: version,
+                                            register_data: register_data, **opts)
+
+        create(
+          concepts: concepts,
+          metadata: metadata,
+          register_data: register_data,
+          output_path: File.expand_path(output),
+        )
       end
 
-      def collect_v2_concepts(dir)
-        v2_dir = File.join(dir, "geolexica-v2")
-        if File.directory?(File.join(v2_dir, "concepts"))
-          collect_managed_concepts(v2_dir)
-        else
-          collect_grouped_v2_concepts(v2_dir)
-        end
-      end
+      def create_streaming(dir, output:, shortname:, version:, **opts) # rubocop:disable Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/BlockLength
+        enricher = ConceptEnricher.new
+        output_path = File.expand_path(output)
+        FileUtils.mkdir_p(File.dirname(output_path))
 
-      def collect_grouped_v2_concepts(v2_dir)
-        collection = Glossarist::ManagedConceptCollection.new
-        manager = Glossarist::ConceptManager.new(path: v2_dir)
-        manager.load_from_files(collection: collection)
+        register_data = load_register_data(opts[:register_yaml], dir)
+        concept_count = 0
+        languages = Set.new
 
-        collection.map { |concept| concept_to_flat_hash(concept) }
-      end
-
-      def collect_managed_concepts(dir)
-        concepts_dir = File.join(dir, "concepts")
-        concept_files = Dir.glob(File.join(concepts_dir, "concept", "*.yaml"))
-
-        return [] if concept_files.empty?
-
-        lc_dir = find_localized_concepts_dir(concepts_dir)
-        concepts = []
-
-        concept_files.each do |f|
-          concept_hash = YAML.safe_load_file(f,
-                                              permitted_classes: [Date, Time, Symbol])
-          next unless concept_hash&.dig("data", "identifier")
-
-          termid = concept_hash["data"]["identifier"].to_s
-          flat = { "termid" => termid }
-
-          lc_map = concept_hash["data"]["localized_concepts"] ||
-            concept_hash["data"]["localizedConcepts"] || {}
-          lc_map.each do |lang, uuid|
-            lc_file = Dir.glob(File.join(lc_dir, "#{uuid}.{yaml,yml}")).first
-            next unless lc_file
-
-            lc_data = YAML.safe_load_file(lc_file,
-                                           permitted_classes: [Date, Time, Symbol])
-            next unless lc_data&.dig("data")
-
-            flat[lang] = lc_data["data"]
+        Zip::OutputStream.open(output_path) do |zos|
+          if register_data
+            zos.put_next_entry("register.yaml")
+            zos.write(register_data.to_yaml)
           end
 
-          flat["term"] = preferred_designation(flat["eng"]&.dig("terms")) || ""
-          concepts << flat
+          ConceptCollector.each_concept(dir) do |mc|
+            enricher.inject_references([mc])
+            if opts[:concept_uri_template]
+              enricher.apply_uri_template([mc],
+                                          opts[:concept_uri_template])
+            end
+
+            mc.localizations.each do |l10n|
+              languages << l10n.language_code if l10n.language_code
+            end
+            concept_count += 1
+
+            termid = mc.data.id.to_s
+            doc = ConceptDocument.from_managed_concept(mc)
+            zos.put_next_entry("concepts/#{termid}.yaml")
+            zos.write(doc.to_yamls)
+          end
+
+          if concept_count.zero?
+            raise ArgumentError,
+                  "No concept files found in #{dir}"
+          end
+
+          metadata = build_streaming_metadata(concept_count, languages,
+                                              shortname: shortname, version: version,
+                                              register_data: register_data, **opts)
+          zos.put_next_entry("metadata.yaml")
+          zos.write(metadata.to_yaml)
         end
 
-        concepts
+        new(output_path)
       end
 
-      def find_localized_concepts_dir(concepts_dir)
-        %w[localized_concept localized-concept].each do |name|
-          d = File.join(concepts_dir, name)
-          return d if File.directory?(d)
-        end
-        nil
+      def build_streaming_metadata(concept_count, languages, shortname:, version:, # rubocop:disable Metrics/ParameterLists
+                                   register_data: nil, **opts)
+        GcrMetadata.new(
+          shortname: shortname,
+          version: version,
+          title: opts[:title],
+          description: opts[:description],
+          owner: opts[:owner],
+          tags: opts[:tags] || [],
+          concept_count: concept_count,
+          languages: languages.sort,
+          created_at: Time.now.utc.iso8601,
+          glossarist_version: Glossarist::VERSION,
+          schema_version: register_data&.dig("schema_version") || SchemaMigration::CURRENT_SCHEMA_VERSION,
+          uri_prefix: opts[:uri_prefix],
+          concept_uri_template: opts[:concept_uri_template],
+        )
       end
 
-      def concept_to_flat_hash(concept)
-        hash = { "termid" => concept.data.id.to_s }
-        concept.localizations.each_value do |l10n|
-          hash[l10n.language_code] = localized_to_flat_hash(l10n)
-        end
-        hash["term"] = preferred_designation(hash["eng"]&.dig("terms")) || ""
-        hash
-      end
-
-      def localized_to_flat_hash(l10n)
-        h = {}
-        h["terms"] = l10n.designations.map(&:to_hash) if l10n.designations.any?
-        if l10n.definition.any?
-          h["definition"] = l10n.definition.map do |d|
-            { "content" => d.content }
-          end
-        end
-        if l10n.notes.any?
-          h["notes"] = l10n.notes.map do |n|
-            { "content" => n.content }
-          end
-        end
-        if l10n.examples.any?
-          h["examples"] = l10n.examples.map do |e|
-            { "content" => e.content }
-          end
-        end
-        h["sources"] = l10n.sources.map(&:to_hash) if l10n.sources.any?
-        h["language_code"] = l10n.language_code if l10n.language_code
-        h["entry_status"] = l10n.entry_status if l10n.entry_status
-        h["dates"] = l10n.data.dates.map(&:to_hash) if l10n.data.dates&.any?
-        if l10n.data.references&.any?
-          h["references"] = l10n.data.references.map do |r|
-            r.respond_to?(:to_gcr_hash) ? r.to_gcr_hash : r
-          end
-        end
-        h
-      end
-
-      def preferred_designation(terms)
-        return nil unless terms.is_a?(Array)
-
-        primary = terms.find do |t|
-          t.is_a?(Hash) && t["normative_status"] == "preferred"
-        end
-        primary&.dig("designation") || terms.dig(0, "designation")
+      def build_metadata(concepts, shortname:, version:, register_data: nil,
+**opts)
+        GcrMetadata.from_concepts(
+          concepts,
+          register_data: register_data,
+          options: {
+            shortname: shortname,
+            version: version,
+            title: opts[:title],
+            description: opts[:description],
+            owner: opts[:owner],
+            tags: opts[:tags],
+            uri_prefix: opts[:uri_prefix],
+            concept_uri_template: opts[:concept_uri_template],
+          },
+        )
       end
 
       def load_register_data(register_yaml_path, dir)
         path = register_yaml_path || File.join(dir, "register.yaml")
         return nil unless File.exist?(path)
 
-        YAML.safe_load_file(path, permitted_classes: [Date, Time])
-      rescue Psych::SyntaxError
-        nil
-      end
-
-      def inject_references(concepts)
-        extractor = ReferenceExtractor.new
-
-        concepts.each do |concept|
-          refs = extractor.extract_from_concept_hash(concept)
-          next if refs.empty?
-
-          existing = concept["references"] || []
-          existing = existing.map do |r|
-            r.respond_to?(:to_gcr_hash) ? r.to_gcr_hash : r
-          end
-          seen_keys = existing.to_set { |r| [r["source"], r["concept_id"]] }
-
-          refs.each do |ref|
-            key = [ref.source, ref.concept_id]
-            next if seen_keys.include?(key)
-
-            seen_keys.add(key)
-            existing << ref.to_gcr_hash
-          end
-          concept["references"] = existing
-        end
+        RegisterData.from_file(path)
       end
     end
   end

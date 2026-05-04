@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "yaml"
-
 module Glossarist
   class ReferenceResolver
     def initialize
@@ -20,7 +18,8 @@ module Glossarist
       prefix = uri_prefix || infer_uri_prefix(package_or_concepts)
       raise ArgumentError, "uri_prefix required" unless prefix
 
-      @package_adapters << ResolutionAdapter::Package.new(concepts, uri_prefix: prefix)
+      @package_adapters << ResolutionAdapter::Package.new(concepts,
+                                                          uri_prefix: prefix)
     end
 
     def add_route(from:, to:)
@@ -28,25 +27,22 @@ module Glossarist
     end
 
     def register_remote(uri_prefix:, endpoint:)
-      @remote_adapters << ResolutionAdapter::Remote.new(uri_prefix: uri_prefix, endpoint: endpoint)
+      @remote_adapters << ResolutionAdapter::Remote.new(uri_prefix: uri_prefix,
+                                                        endpoint: endpoint)
     end
 
     def resolve(reference)
-      # 1. Local resolution (intra-set)
       if reference.local?
         return @local_adapter&.resolve(reference)
       end
 
-      # 2. Apply route overrides
       routed_ref = apply_routes(reference)
 
-      # 3. Try package adapters (co-loaded GCRs)
       @package_adapters.each do |adapter|
         result = adapter.resolve(routed_ref)
         return result if result
       end
 
-      # 4. Try remote adapters
       @remote_adapters.each do |adapter|
         result = adapter.resolve(routed_ref)
         return result if result
@@ -55,9 +51,9 @@ module Glossarist
       nil
     end
 
-    def resolve_all(concept_hash, extractor: nil)
+    def resolve_all(concept, extractor: nil)
       extractor ||= ReferenceExtractor.new
-      refs = extractor.extract_from_concept_hash(concept_hash)
+      refs = extract_refs(concept, extractor)
       refs.map { |ref| [ref, resolve(ref)] }
     end
 
@@ -67,8 +63,8 @@ module Glossarist
       result = ValidationResult.new
 
       concepts.each do |concept|
-        refs = extractor.extract_from_concept_hash(concept)
-        termid = concept["termid"] || concept["id"]
+        refs = extract_refs(concept, extractor)
+        termid = extract_termid(concept)
 
         refs.each do |ref|
           resolved = resolve(ref)
@@ -125,10 +121,9 @@ module Glossarist
     end
 
     def load_collection_config(config_path, collection_dir)
-      config = YAML.safe_load(File.read(config_path),
-                              permitted_classes: [Date, Time])
+      config = CollectionConfig.from_file(config_path)
 
-      Array(config["packages"]).each do |pkg|
+      config.packages.each do |pkg|
         gcr_path = File.join(collection_dir, pkg["file"])
         next unless File.exist?(gcr_path)
 
@@ -137,12 +132,13 @@ module Glossarist
         register_package(gcr, uri_prefix: prefix)
       end
 
-      Array(config["routes"]).each do |route|
+      config.routes.each do |route|
         add_route(from: route["from"], to: route["to"])
       end
 
-      Array(config["remote"]).each do |remote|
-        register_remote(uri_prefix: remote["uri_prefix"], endpoint: remote["endpoint"])
+      config.remotes.each do |remote|
+        register_remote(uri_prefix: remote["uri_prefix"],
+                        endpoint: remote["endpoint"])
       end
     end
 
@@ -151,6 +147,22 @@ module Glossarist
         pkg = GcrPackage.load(gcr_path)
         prefix = pkg.metadata&.dig("uri_prefix")
         register_package(pkg, uri_prefix: prefix)
+      end
+    end
+
+    def extract_refs(concept, extractor)
+      if concept.is_a?(ManagedConcept)
+        extractor.extract_from_managed_concept(concept)
+      else
+        extractor.extract_from_concept_hash(concept)
+      end
+    end
+
+    def extract_termid(concept)
+      if concept.is_a?(ManagedConcept)
+        concept.data.id&.to_s
+      else
+        (concept["termid"] || concept["id"])&.to_s
       end
     end
   end

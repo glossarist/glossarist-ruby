@@ -2,7 +2,6 @@
 
 require "net/http"
 require "json"
-require "yaml"
 
 module Glossarist
   class ResolutionAdapter
@@ -36,8 +35,10 @@ module Glossarist
         content_type = response["content-type"].to_s
         if content_type.include?("json")
           JSON.parse(response.body)
+        elsif content_type.include?("yaml")
+          ConceptDocument.from_yamls(response.body).to_managed_concept
         else
-          YAML.safe_load(response.body, permitted_classes: [Date, Time])
+          ManagedConcept.from_yaml(response.body)
         end
       end
 
