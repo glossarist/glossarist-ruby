@@ -8,7 +8,7 @@ module Glossarist
     attribute :type, :string,
               values: Glossarist::GlossaryDefinition::CONCEPT_DATE_TYPES
 
-    yaml do
+    key_value do
       map :date, to: :date
       map :type, to: :type
     end

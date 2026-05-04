@@ -5,7 +5,7 @@ module Glossarist
     attribute :content, :string
     attribute :sources, ConceptSource, collection: true
 
-    yaml do
+    key_value do
       map :content, to: :content
       map :sources, to: :sources
     end

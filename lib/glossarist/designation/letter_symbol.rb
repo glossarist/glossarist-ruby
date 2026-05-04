@@ -5,7 +5,7 @@ module Glossarist
       attribute :language, :string
       attribute :script, :string
 
-      yaml do
+      key_value do
         map :text, to: :text
         map :language, to: :language
         map :script, to: :script

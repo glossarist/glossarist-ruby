@@ -11,7 +11,7 @@ module Glossarist
     attribute :extension_attributes, :hash
     attribute :termid, :string
 
-    yaml do
+    key_value do
       map :data, to: :data
       map :termid, to: :termid
       map :subject, to: :subject

@@ -2,7 +2,7 @@ module Glossarist
   class Asset < Lutaml::Model::Serializable
     attribute :path, :string
 
-    yaml do
+    key_value do
       map :path, to: :path
     end
 

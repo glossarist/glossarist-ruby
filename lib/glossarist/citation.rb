@@ -34,7 +34,7 @@ module Glossarist
 
     attribute :custom_locality, CustomLocality, collection: true
 
-    yaml do
+    key_value do
       map :id, to: :id, with: { from: :id_from_yaml, to: :id_to_yaml }
       map :text, to: :text, with: { from: :text_from_yaml, to: :text_to_yaml }
       map :source, to: :source,

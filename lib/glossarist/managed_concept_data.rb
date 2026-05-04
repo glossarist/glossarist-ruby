@@ -3,6 +3,7 @@ module Glossarist
     include Glossarist::Utilities::CommonFunctions
 
     attribute :id, :string
+    attribute :uri, :string
     attribute :localized_concepts, :hash
     attribute :groups, :string, collection: true
     attribute :sources, ConceptSource, collection: true
@@ -10,9 +11,10 @@ module Glossarist
               collection: Collections::LocalizationCollection,
               initialize_empty: true
 
-    yaml do
+    key_value do
       map %i[id identifier], to: :id,
                              with: { to: :id_to_yaml, from: :id_from_yaml }
+      map :uri, to: :uri
       map %i[localized_concepts localizedConcepts], to: :localized_concepts
       map :groups, to: :groups
       map :sources, to: :sources

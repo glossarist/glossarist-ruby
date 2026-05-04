@@ -7,7 +7,7 @@ module Glossarist
     attribute :source, :string
     attribute :ref_type, :string
 
-    yaml do
+    key_value do
       map :term, to: :term
       map :concept_id, to: :concept_id
       map :source, to: :source

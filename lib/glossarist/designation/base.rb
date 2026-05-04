@@ -7,7 +7,7 @@ module Glossarist
                 values: Glossarist::GlossaryDefinition::DESIGNATION_BASE_NORMATIVE_STATUSES
       attribute :type, :string
 
-      yaml do
+      key_value do
         map :type, to: :type
         map %i[normative_status normativeStatus], to: :normative_status
         map %i[geographical_area geographicalArea], to: :geographical_area

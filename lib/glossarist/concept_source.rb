@@ -7,7 +7,7 @@ module Glossarist
     attribute :origin, Citation
     attribute :modification, :string
 
-    yaml do
+    key_value do
       # TODO: change to `map [:ref, :origin], to: :origin
       #       when multiple key mapping is supported in lutaml-model
       map :origin, to: :origin

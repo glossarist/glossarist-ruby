@@ -7,7 +7,7 @@ module Glossarist
               values: Glossarist::GlossaryDefinition::RELATED_CONCEPT_TYPES
     attribute :ref, Citation
 
-    yaml do
+    key_value do
       map :content, to: :content
       map :type, to: :type
       map :ref, with: { from: :ref_from_yaml, to: :ref_to_yaml }

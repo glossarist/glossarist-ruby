@@ -32,7 +32,7 @@ module Glossarist
     attribute :language_code, :string, pattern: /^.{3}$/
     attribute :entry_status, :string
 
-    yaml do
+    key_value do
       map :dates, to: :dates
       map :definition, to: :definition, value_map: { to: { empty: :empty } }
       map :examples, to: :examples, value_map: { to: { empty: :empty } }
