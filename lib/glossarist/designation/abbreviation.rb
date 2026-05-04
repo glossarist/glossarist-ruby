@@ -8,7 +8,7 @@ module Glossarist
         attribute name.to_sym, :boolean
       end
 
-      yaml do
+      key_value do
         map :international, to: :international
         map :type, to: :type, render_default: true
         Glossarist::GlossaryDefinition::ABBREVIATION_TYPES.each do |name|

@@ -8,7 +8,7 @@ module Glossarist
     # @return [String]
     attribute :value, :string
 
-    yaml do
+    key_value do
       map :name, to: :name
       map :value, to: :value
     end

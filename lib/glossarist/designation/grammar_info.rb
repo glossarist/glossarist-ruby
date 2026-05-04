@@ -8,7 +8,7 @@ module Glossarist
       attribute :part_of_speech, :string,
                 values: Glossarist::GlossaryDefinition::GRAMMAR_INFO_BOOLEAN_ATTRIBUTES
 
-      yaml do
+      key_value do
         map :gender, to: :gender
         map :number, to: :number
 

@@ -6,7 +6,7 @@ module Glossarist
       attribute :text, :string
       attribute :image, :string
 
-      yaml do
+      key_value do
         map :text, to: :text
         map :image, to: :image
       end

@@ -5,7 +5,7 @@ module Glossarist
     attribute :formula, :string
     attribute :sources, ConceptSource, collection: true
 
-    yaml do
+    key_value do
       map :image, to: :image
       map :table, to: :table
       map :formula, to: :formula

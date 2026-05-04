@@ -13,7 +13,7 @@ module Glossarist
     # @return [String]
     attribute :reference_to, :string
 
-    yaml do
+    key_value do
       map :type, to: :type
       map :reference_from, to: :reference_from
       map :reference_to, to: :reference_to

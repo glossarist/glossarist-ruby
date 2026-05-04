@@ -13,7 +13,7 @@ module Glossarist
       attribute :grammar_info, GrammarInfo, collection: true
       attribute :type, :string, default: -> { "expression" }
 
-      yaml do
+      key_value do
         map :type, to: :type, render_default: true
         map :prefix, to: :prefix
         map %i[usage_info usageInfo], to: :usage_info

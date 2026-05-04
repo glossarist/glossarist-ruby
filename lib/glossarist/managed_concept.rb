@@ -21,7 +21,7 @@ module Glossarist
 
     attribute :uuid, :string
 
-    yaml do
+    key_value do
       map :data, to: :data
       map :id, with: { to: :identifier_to_yaml, from: :identifier_from_yaml }
       map :identifier,
