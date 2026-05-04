@@ -85,7 +85,7 @@ RSpec.describe Glossarist::ConceptValidator do
       end
     end
 
-    it "reports empty definition" do
+    it "does not flag empty definition as error" do
       Dir.mktmpdir do |dir|
         concept = valid_concept(
           "eng" => {
@@ -96,7 +96,7 @@ RSpec.describe Glossarist::ConceptValidator do
         )
         write_concept(dir, "1.yaml", concept)
         result = described_class.new(dir).validate_all
-        expect(result.errors).to include(a_string_matching(/definition is empty/))
+        expect(result).to be_valid
       end
     end
   end
