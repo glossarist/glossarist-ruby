@@ -55,7 +55,8 @@ RSpec.describe Glossarist::ReferenceResolver do
   describe "#register_package and #resolve" do
     it "resolves URN references by matching uri_prefix" do
       resolver = described_class.new
-      resolver.register_package(iev_concepts, uri_prefix: "urn:iec:std:iec:60050")
+      resolver.register_package(iev_concepts,
+                                uri_prefix: "urn:iec:std:iec:60050")
 
       ref = Glossarist::ConceptReference.new(
         term: "equality", concept_id: "102-01-01",
@@ -69,7 +70,8 @@ RSpec.describe Glossarist::ReferenceResolver do
 
     it "returns nil when uri_prefix does not match" do
       resolver = described_class.new
-      resolver.register_package(iev_concepts, uri_prefix: "urn:iec:std:iec:60050")
+      resolver.register_package(iev_concepts,
+                                uri_prefix: "urn:iec:std:iec:60050")
 
       ref = Glossarist::ConceptReference.new(
         term: "lat", concept_id: "3.1.32",
@@ -80,7 +82,8 @@ RSpec.describe Glossarist::ReferenceResolver do
 
     it "returns nil for unknown concept_id within a matching package" do
       resolver = described_class.new
-      resolver.register_package(iev_concepts, uri_prefix: "urn:iec:std:iec:60050")
+      resolver.register_package(iev_concepts,
+                                uri_prefix: "urn:iec:std:iec:60050")
 
       ref = Glossarist::ConceptReference.new(
         term: "missing", concept_id: "999-99-99",
@@ -93,8 +96,10 @@ RSpec.describe Glossarist::ReferenceResolver do
   describe "#add_route" do
     it "remaps source URI via route override" do
       resolver = described_class.new
-      resolver.register_package(iso_concepts, uri_prefix: "urn:iso:std:iso:19111")
-      resolver.add_route(from: "urn:iso:std:iso:19115", to: "urn:iso:std:iso:19111")
+      resolver.register_package(iso_concepts,
+                                uri_prefix: "urn:iso:std:iso:19111")
+      resolver.add_route(from: "urn:iso:std:iso:19115",
+                         to: "urn:iso:std:iso:19111")
 
       ref = Glossarist::ConceptReference.new(
         term: "lat", concept_id: "3.1.32",
@@ -130,7 +135,8 @@ RSpec.describe Glossarist::ReferenceResolver do
     it "reports valid when all external references resolve" do
       resolver = described_class.new
       resolver.register_self(iev_concepts)
-      resolver.register_package(iev_concepts, uri_prefix: "urn:iec:std:iec:60050")
+      resolver.register_package(iev_concepts,
+                                uri_prefix: "urn:iec:std:iec:60050")
 
       concept = {
         "termid" => "100",
@@ -169,8 +175,10 @@ RSpec.describe Glossarist::ReferenceResolver do
   describe "#registered_datasets" do
     it "returns registered uri_prefixes" do
       resolver = described_class.new
-      resolver.register_package(iev_concepts, uri_prefix: "urn:iec:std:iec:60050")
-      resolver.register_package(iso_concepts, uri_prefix: "urn:iso:std:iso:19111")
+      resolver.register_package(iev_concepts,
+                                uri_prefix: "urn:iec:std:iec:60050")
+      resolver.register_package(iso_concepts,
+                                uri_prefix: "urn:iso:std:iso:19111")
 
       expect(resolver.registered_datasets).to contain_exactly(
         "urn:iec:std:iec:60050", "urn:iso:std:iso:19111"

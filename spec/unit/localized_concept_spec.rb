@@ -117,15 +117,15 @@ RSpec.describe Glossarist::LocalizedConcept do
                       "sources" => [source],
                     })
 
-      retval = YAML.safe_load(subject.to_yaml)["data"]
+      retval = described_class.from_yaml(subject.to_yaml)
 
-      expect(retval).to be_kind_of(Hash)
-      expect(retval["language_code"]).to eq("eng")
-      expect(retval["id"]).to eq("123")
-      expect(retval["terms"]).to eq([term1, term2])
-      expect(retval["examples"]).to eq([{ "content" => "ex. one" }])
-      expect(retval["notes"]).to eq([{ "content" => "note one" }])
-      expect(retval["sources"]).to eq([source])
+      expect(retval).to be_kind_of(Glossarist::LocalizedConcept)
+      expect(retval.language_code).to eq("eng")
+      expect(retval.data.id).to eq("123")
+      expect(retval.data.terms.map(&:to_yaml_hash)).to eq([term1, term2])
+      expect(retval.data.examples.map(&:to_yaml_hash)).to eq([{ "content" => "ex. one" }])
+      expect(retval.data.notes.map(&:to_yaml_hash)).to eq([{ "content" => "note one" }])
+      expect(retval.data.sources.map(&:to_yaml_hash)).to eq([source])
     end
   end
 

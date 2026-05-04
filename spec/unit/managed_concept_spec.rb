@@ -128,10 +128,11 @@ RSpec.describe Glossarist::ManagedConcept do
     end
 
     it "dumps concept definition to a yaml" do
-      retval = YAML.safe_load(subject.to_yaml)
+      retval = described_class.from_yaml(subject.to_yaml)
 
-      expect(retval).to be_kind_of(Hash)
-      expect(retval).to eq(expected_concept_hash)
+      expect(retval).to be_kind_of(Glossarist::ManagedConcept)
+      expect(retval.data.localized_concepts).to eq(expected_concept_hash["data"]["localized_concepts"])
+      expect(retval.status).to eq("valid")
     end
   end
 

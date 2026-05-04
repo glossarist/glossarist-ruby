@@ -3,11 +3,15 @@
 require "spec_helper"
 
 RSpec.describe Glossarist::ResolutionAdapter::Remote do
-  let(:adapter) { described_class.new(uri_prefix: "urn:iec:std:iec:60050", endpoint: "https://example.org/api") }
+  let(:adapter) do
+    described_class.new(uri_prefix: "urn:iec:std:iec:60050",
+                        endpoint: "https://example.org/api")
+  end
 
   describe "#resolve" do
     it "returns nil for non-urn ref_type" do
-      ref = Glossarist::ConceptReference.new(term: "test", concept_id: "1", ref_type: "local")
+      ref = Glossarist::ConceptReference.new(term: "test", concept_id: "1",
+                                             ref_type: "local")
       expect(adapter.resolve(ref)).to be_nil
     end
 
@@ -22,7 +26,8 @@ RSpec.describe Glossarist::ResolutionAdapter::Remote do
                                              source: "urn:iec:std:iec:60050", ref_type: "urn")
 
       body = '{"termid":"102-01-01"}'
-      response = double("response", is_a?: true, "[]": "application/json", body: body)
+      response = double("response", is_a?: true, "[]": "application/json",
+                                    body: body)
       allow(Net::HTTP).to receive(:get_response).and_return(response)
 
       result = adapter.resolve(ref)
@@ -34,7 +39,8 @@ RSpec.describe Glossarist::ResolutionAdapter::Remote do
                                              source: "urn:iec:std:iec:60050", ref_type: "urn")
 
       body = '{"termid":"102-01-01"}'
-      response = double("response", is_a?: true, "[]": "application/json", body: body)
+      response = double("response", is_a?: true, "[]": "application/json",
+                                    body: body)
       allow(Net::HTTP).to receive(:get_response).and_return(response)
 
       adapter.resolve(ref)

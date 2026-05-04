@@ -17,14 +17,12 @@ RSpec.describe Glossarist::Designation::Abbreviation do
 
   describe "#to_yaml" do
     it "will convert abbreviation to yaml" do
-      expected_yaml = {
-        "type" => "abbreviation",
-        "designation" => "NASA",
-        "acronym" => true,
-        "international" => true,
-      }
+      retval = described_class.from_yaml(subject.to_yaml)
 
-      expect(YAML.safe_load(subject.to_yaml)).to eq(expected_yaml)
+      expect(retval.type).to eq("abbreviation")
+      expect(retval.designation).to eq("NASA")
+      expect(retval.acronym).to eq(true)
+      expect(retval.international).to eq(true)
     end
   end
 end

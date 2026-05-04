@@ -50,17 +50,17 @@ RSpec.describe Glossarist::Designation::Expression do
         usage_info: "science",
       }.to_yaml)
 
-      retval = YAML.safe_load(subject.to_yaml)
+      retval = described_class.from_yaml(subject.to_yaml)
 
-      expect(retval).to be_kind_of(Hash)
-      expect(retval["type"]).to eq("expression")
-      expect(retval["designation"]).to eq("Example designation")
-      expect(retval["normative_status"]).to eq("preferred")
-      expect(retval["geographical_area"]).to eq("somewhere")
-      expect(retval["grammar_info"].first["gender"]).to eq(["m"])
-      expect(retval["grammar_info"].first["adj"]).to eq(true)
-      expect(retval["grammar_info"].first["number"]).to eq(["singular"])
-      expect(retval["usage_info"]).to eq("science")
+      expect(retval).to be_kind_of(Glossarist::Designation::Expression)
+      expect(retval.type).to eq("expression")
+      expect(retval.designation).to eq("Example designation")
+      expect(retval.normative_status).to eq("preferred")
+      expect(retval.geographical_area).to eq("somewhere")
+      expect(retval.grammar_info.first.gender).to eq(["m"])
+      expect(retval.grammar_info.first.adj).to eq(true)
+      expect(retval.grammar_info.first.number).to eq(["singular"])
+      expect(retval.usage_info).to eq("science")
     end
   end
 
@@ -105,13 +105,13 @@ RSpec.describe Glossarist::Designation::Symbol do
                       international: true,
                     })
 
-      retval = YAML.safe_load(subject.to_yaml)
-      expect(retval).to be_kind_of(Hash)
-      expect(retval["type"]).to eq("symbol")
-      expect(retval["designation"]).to eq("X")
-      expect(retval["normative_status"]).to eq("preferred")
-      expect(retval["geographical_area"]).to eq("somewhere")
-      expect(retval["international"]).to be(true)
+      retval = described_class.from_yaml(subject.to_yaml)
+      expect(retval).to be_kind_of(Glossarist::Designation::Symbol)
+      expect(retval.type).to eq("symbol")
+      expect(retval.designation).to eq("X")
+      expect(retval.normative_status).to eq("preferred")
+      expect(retval.geographical_area).to eq("somewhere")
+      expect(retval.international).to be(true)
     end
   end
 

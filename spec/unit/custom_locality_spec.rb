@@ -20,12 +20,12 @@ RSpec.describe Glossarist::CustomLocality do
 
   describe "#to_yaml" do
     it "dumps data to a hash" do
-      test_yaml = described_class.new(name: "version", value: "5").to_yaml
+      obj = described_class.new(name: "version", value: "5")
+      retval = described_class.from_yaml(obj.to_yaml)
 
-      retval = YAML.safe_load(test_yaml)
-      expect(retval).to be_kind_of(Hash)
-      expect(retval["name"]).to eq("version")
-      expect(retval["value"]).to eq("5")
+      expect(retval).to be_kind_of(Glossarist::CustomLocality)
+      expect(retval.name).to eq("version")
+      expect(retval.value).to eq("5")
     end
   end
 

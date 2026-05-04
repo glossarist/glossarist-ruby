@@ -16,16 +16,14 @@ RSpec.describe Glossarist::Designation::LetterSymbol do
 
   describe "#to_yaml" do
     it "will convert letter symbol to yaml" do
-      expected_yaml = {
-        "type" => "letter_symbol",
-        "designation" => "A",
-        "international" => true,
-        "text" => "A",
-        "language" => "en",
-        "script" => "Latn",
-      }
+      retval = described_class.from_yaml(subject.to_yaml)
 
-      expect(YAML.safe_load(subject.to_yaml)).to eq(expected_yaml)
+      expect(retval.type).to eq("letter_symbol")
+      expect(retval.designation).to eq("A")
+      expect(retval.international).to eq(true)
+      expect(retval.text).to eq("A")
+      expect(retval.language).to eq("en")
+      expect(retval.script).to eq("Latn")
     end
   end
 end

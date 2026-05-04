@@ -14,36 +14,37 @@ RSpec.describe "Serialization and deserialization" do
       collection.load_from_files(fixtures_path(concept_folder))
 
       concept_files.each do |filename|
-        concept_from_file = load_yaml_file(filename)
-        concept = collection[concept_from_file["data"]["identifier"]]
+        concept_from_file = Glossarist::ManagedConcept.from_yaml(File.read(filename))
+        concept = collection[concept_from_file.identifier]
 
-        expect(concept.to_yaml_hash["data"]).to eq(concept_from_file["data"])
+        expect(concept.to_yaml_hash["data"]).to eq(concept_from_file.to_yaml_hash["data"])
 
         concept.localized_concepts.each do |lang, id|
           localized_concept_path = File.join(localized_concepts_folder,
                                              "#{id}.yaml")
-          localized_concept = load_yaml_file(localized_concept_path)
+          localized_concept = Glossarist::LocalizedConcept.from_yaml(File.read(localized_concept_path))
 
-          expect(localized_concept["data"]).to eq(concept.localizations[lang].to_yaml_hash["data"])
+          expect(localized_concept.to_yaml_hash["data"]).to eq(concept.localizations[lang].to_yaml_hash["data"])
         end
       end
 
       Dir.mktmpdir do |tmp_path|
         collection.save_to_files(tmp_path)
 
-        # check if concept and localized_concept folder exist
-        system "diff", fixtures_path(concept_folder), tmp_path
-        expect($?.exitstatus).to eq(0) # no difference
+        expected_dir = fixtures_path(concept_folder)
+        Dir.glob(File.join(expected_dir, "concept",
+                           "*.yaml")).each do |expected_file|
+          actual_file = File.join(tmp_path, "concept",
+                                  File.basename(expected_file))
+          expect(File.read(actual_file)).to be_yaml_equivalent_to(File.read(expected_file))
+        end
 
-        # check content of conecept folder
-        system "diff", File.join(fixtures_path(concept_folder), "concept"),
-               File.join(tmp_path, "concept")
-        expect($?.exitstatus).to eq(0) # no difference
-
-        # check content of localized_conecept folder
-        system "diff",
-               File.join(fixtures_path(concept_folder), "localized_concept"), File.join(tmp_path, "localized_concept")
-        expect($?.exitstatus).to eq(0) # no difference
+        Dir.glob(File.join(expected_dir, "localized_concept",
+                           "*.yaml")).each do |expected_file|
+          actual_file = File.join(tmp_path, "localized_concept",
+                                  File.basename(expected_file))
+          expect(File.read(actual_file)).to be_yaml_equivalent_to(File.read(expected_file))
+        end
       end
     end
   end
@@ -54,9 +55,6 @@ RSpec.describe "Serialization and deserialization" do
       Dir.glob(File.join(fixtures_path(concept_folder), "concept",
                          "*.{yaml,yml}"))
     end
-    let(:localized_concepts_folder) do
-      File.join(fixtures_path(concept_folder), "localized_concept")
-    end
     let(:reference_folder) { "concept_collection_v2" }
 
     it "correctly loads concepts from camel case files and matches reference format" do
@@ -64,29 +62,31 @@ RSpec.describe "Serialization and deserialization" do
       collection.load_from_files(fixtures_path(concept_folder))
 
       concept_files.each do |filename|
-        concept_from_file = load_yaml_file(filename)
-        concept = collection[concept_from_file["data"]["identifier"]]
-        reference_concept = load_yaml_file(File.join(
-                                             fixtures_path(reference_folder), "concept", File.basename(filename)
-                                           ))
+        concept_from_file = Glossarist::ManagedConcept.from_yaml(File.read(filename))
+        reference_concept = Glossarist::ManagedConcept.from_yaml(File.read(File.join(
+                                                                             fixtures_path(reference_folder), "concept", File.basename(filename)
+                                                                           )))
 
-        expect(concept.to_yaml_hash["data"]).to eq(reference_concept["data"])
+        expect(concept_from_file.to_yaml_hash["data"]).to eq(reference_concept.to_yaml_hash["data"])
       end
 
       Dir.mktmpdir do |tmp_path|
         collection.save_to_files(tmp_path)
 
-        # Compare with reference format
-        system "diff", fixtures_path(reference_folder), tmp_path
-        expect($?.exitstatus).to eq(0) # no difference
+        reference_dir = fixtures_path(reference_folder)
+        Dir.glob(File.join(reference_dir, "concept",
+                           "*.yaml")).each do |expected_file|
+          actual_file = File.join(tmp_path, "concept",
+                                  File.basename(expected_file))
+          expect(File.read(actual_file)).to be_yaml_equivalent_to(File.read(expected_file))
+        end
 
-        system "diff", File.join(fixtures_path(reference_folder), "concept"),
-               File.join(tmp_path, "concept")
-        expect($?.exitstatus).to eq(0) # no difference
-
-        system "diff",
-               File.join(fixtures_path(reference_folder), "localized_concept"), File.join(tmp_path, "localized_concept")
-        expect($?.exitstatus).to eq(0) # no difference
+        Dir.glob(File.join(reference_dir, "localized_concept",
+                           "*.yaml")).each do |expected_file|
+          actual_file = File.join(tmp_path, "localized_concept",
+                                  File.basename(expected_file))
+          expect(File.read(actual_file)).to be_yaml_equivalent_to(File.read(expected_file))
+        end
       end
     end
   end
@@ -106,41 +106,38 @@ RSpec.describe "Serialization and deserialization" do
       collection.load_from_files(fixtures_path(concept_folder))
 
       concept_files.each do |filename|
-        concept_from_file = load_yaml_file(filename)
-        concept = collection[concept_from_file["data"]["identifier"]]
+        concept_from_file = Glossarist::ManagedConcept.from_yaml(File.read(filename))
+        concept = collection[concept_from_file.identifier]
 
-        expect(concept.to_yaml_hash["data"]).to eq(concept_from_file["data"])
+        expect(concept.to_yaml_hash["data"]).to eq(concept_from_file.to_yaml_hash["data"])
 
         concept.localized_concepts.each do |lang, id|
           localized_concept_path = File.join(localized_concepts_folder,
                                              "#{id}.yaml")
-          localized_concept = load_yaml_file(localized_concept_path)
+          localized_concept = Glossarist::LocalizedConcept.from_yaml(File.read(localized_concept_path))
 
-          expect(localized_concept["data"]).to eq(concept.localizations[lang].to_yaml_hash["data"])
+          expect(localized_concept.to_yaml_hash["data"]).to eq(concept.localizations[lang].to_yaml_hash["data"])
         end
       end
 
       Dir.mktmpdir do |tmp_path|
         collection.save_to_files(tmp_path)
 
-        # check if concept and localized-concept folder exist
-        system "diff", fixtures_path(concept_folder), tmp_path
-        expect($?.exitstatus).to eq(0) # no difference
+        expected_dir = fixtures_path(concept_folder)
+        Dir.glob(File.join(expected_dir, "concept",
+                           "*.yaml")).each do |expected_file|
+          actual_file = File.join(tmp_path, "concept",
+                                  File.basename(expected_file))
+          expect(File.read(actual_file)).to be_yaml_equivalent_to(File.read(expected_file))
+        end
 
-        # check content of conecept folder
-        system "diff", File.join(fixtures_path(concept_folder), "concept"),
-               File.join(tmp_path, "concept")
-        expect($?.exitstatus).to eq(0) # no difference
-
-        # check content of localized-conecept folder
-        system "diff",
-               File.join(fixtures_path(concept_folder), "localized-concept"), File.join(tmp_path, "localized-concept")
-        expect($?.exitstatus).to eq(0) # no difference
+        Dir.glob(File.join(expected_dir, "localized-concept",
+                           "*.yaml")).each do |expected_file|
+          actual_file = File.join(tmp_path, "localized-concept",
+                                  File.basename(expected_file))
+          expect(File.read(actual_file)).to be_yaml_equivalent_to(File.read(expected_file))
+        end
       end
     end
-  end
-
-  def load_yaml_file(filename)
-    Psych.safe_load(File.read(filename), permitted_classes: [Date])
   end
 end

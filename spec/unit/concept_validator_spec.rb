@@ -5,7 +5,9 @@ require "tmpdir"
 
 RSpec.describe Glossarist::ConceptValidator do
   def write_concept(dir, name, content)
-    File.write(File.join(dir, name), YAML.dump(content))
+    concepts_dir = File.join(dir, "concepts")
+    FileUtils.mkdir_p(concepts_dir)
+    File.write(File.join(concepts_dir, name), YAML.dump(content))
   end
 
   def valid_concept(overrides = {})
@@ -17,13 +19,14 @@ RSpec.describe Glossarist::ConceptValidator do
         "entry_status" => "valid",
       },
     }
-    base.merge(overrides) do |_key, oldval, newval|
-      if oldval.is_a?(Hash) && newval.is_a?(Hash)
-        oldval.merge(newval)
-      else
-        newval
-      end
+    overrides.each do |key, value|
+      base[key] = if base[key].is_a?(Hash) && value.is_a?(Hash)
+                    base[key].merge(value)
+                  else
+                    value
+                  end
     end
+    base
   end
 
   describe "#validate_all" do
@@ -35,99 +38,65 @@ RSpec.describe Glossarist::ConceptValidator do
       end
     end
 
-    it "reports missing termid" do
-      Dir.mktmpdir do |dir|
-        concept = valid_concept
-        concept = concept.reject { |k, _| k == "termid" }
-        write_concept(dir, "bad.yaml", concept)
-        result = described_class.new(dir).validate_all
-        expect(result.errors).to include(a_string_matching(/missing termid/))
-      end
-    end
-
-    it "reports non-string termid" do
-      Dir.mktmpdir do |dir|
-        write_concept(dir, "1.yaml", valid_concept.merge("termid" => 123))
-        result = described_class.new(dir).validate_all
-        expect(result.errors).to include(a_string_matching(/termid must be a string/))
-      end
-    end
-
-    it "reports duplicate termids" do
+    it "reports duplicate ids" do
       Dir.mktmpdir do |dir|
         write_concept(dir, "a.yaml", valid_concept)
         write_concept(dir, "b.yaml", valid_concept)
         result = described_class.new(dir).validate_all
-        expect(result.errors).to include(a_string_matching(/duplicate termid '1'/))
-      end
-    end
-
-    it "reports bare string definition" do
-      Dir.mktmpdir do |dir|
-        concept = valid_concept
-        concept["eng"] = concept["eng"].merge("definition" => "bare string")
-        write_concept(dir, "1.yaml", concept)
-        result = described_class.new(dir).validate_all
-        expect(result.errors).to include(a_string_matching(/definition is bare string/))
-      end
-    end
-
-    it "reports authoritative_source" do
-      Dir.mktmpdir do |dir|
-        concept = valid_concept
-        concept["eng"] =
-          concept["eng"].merge("authoritative_source" => { "ref" => "ISO 9000" })
-        write_concept(dir, "1.yaml", concept)
-        result = described_class.new(dir).validate_all
-        expect(result.errors).to include(a_string_matching(/has 'authoritative_source'/))
+        expect(result.errors).to include(a_string_matching(/duplicate id '1'/))
       end
     end
 
     it "reports invalid entry_status" do
       Dir.mktmpdir do |dir|
-        concept = valid_concept
-        concept["eng"] = concept["eng"].merge("entry_status" => "Standard")
+        concept = valid_concept(
+          "eng" => {
+            "terms" => [{ "type" => "expression", "designation" => "test" }],
+            "definition" => [{ "content" => "a definition" }],
+            "entry_status" => "Standard",
+          },
+        )
         write_concept(dir, "1.yaml", concept)
         result = described_class.new(dir).validate_all
         expect(result.errors).to include(a_string_matching(/invalid entry_status 'Standard'/))
       end
     end
 
-    it "reports abbrev: true in terms" do
-      Dir.mktmpdir do |dir|
-        concept = valid_concept
-        concept["eng"] =
-          concept["eng"].merge("terms" => [{ "designation" => "GIS",
-                                             "abbrev" => true }])
-        write_concept(dir, "1.yaml", concept)
-        result = described_class.new(dir).validate_all
-        expect(result.errors).to include(a_string_matching(/has 'abbrev: true'/))
-      end
-    end
-
-    it "warns about _revisions" do
-      Dir.mktmpdir do |dir|
-        concept = valid_concept.merge("_revisions" => [{ "date" => "2020" }])
-        write_concept(dir, "1.yaml", concept)
-        result = described_class.new(dir).validate_all
-        expect(result.warnings).to include(a_string_matching(/has '_revisions'/))
-        expect(result).to be_valid
-      end
-    end
-
-    it "reports no language blocks" do
+    it "reports no localizations" do
       Dir.mktmpdir do |dir|
         write_concept(dir, "1.yaml", { "termid" => "1" })
         result = described_class.new(dir).validate_all
-        expect(result.errors).to include(a_string_matching(/no language blocks/))
+        expect(result.errors).to include(a_string_matching(/no localizations/))
       end
     end
 
-    it "reports YAML parse errors" do
+    it "reports missing terms" do
       Dir.mktmpdir do |dir|
-        File.write(File.join(dir, "bad.yaml"), "termid: [\ninvalid yaml")
+        concept = {
+          "termid" => "1",
+          "eng" => {
+            "definition" => [{ "content" => "a definition" }],
+            "entry_status" => "valid",
+          },
+        }
+        write_concept(dir, "1.yaml", concept)
         result = described_class.new(dir).validate_all
-        expect(result.errors).to include(a_string_matching(/YAML parse error/))
+        expect(result.errors).to include(a_string_matching(/must have at least 1 term/))
+      end
+    end
+
+    it "reports empty definition" do
+      Dir.mktmpdir do |dir|
+        concept = valid_concept(
+          "eng" => {
+            "terms" => [{ "type" => "expression", "designation" => "test" }],
+            "definition" => [],
+            "entry_status" => "valid",
+          },
+        )
+        write_concept(dir, "1.yaml", concept)
+        result = described_class.new(dir).validate_all
+        expect(result.errors).to include(a_string_matching(/definition is empty/))
       end
     end
   end

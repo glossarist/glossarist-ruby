@@ -146,12 +146,14 @@ RSpec.describe Glossarist::ConceptReference do
     end
 
     it "returns nil for local references" do
-      ref = described_class.new(term: "test", concept_id: "200", ref_type: "local")
+      ref = described_class.new(term: "test", concept_id: "200",
+                                ref_type: "local")
       expect(ref.to_urn).to be_nil
     end
 
     it "returns nil for designation references" do
-      ref = described_class.new(term: "geodetic latitude", ref_type: "designation")
+      ref = described_class.new(term: "geodetic latitude",
+                                ref_type: "designation")
       expect(ref.to_urn).to be_nil
     end
 
@@ -171,11 +173,11 @@ RSpec.describe Glossarist::ConceptReference do
       )
 
       expect(ref.to_gcr_hash).to eq({
-        "term" => "equality",
-        "concept_id" => "102-01-01",
-        "source" => "urn:iec:std:iec:60050",
-        "ref_type" => "urn",
-      })
+                                      "term" => "equality",
+                                      "concept_id" => "102-01-01",
+                                      "source" => "urn:iec:std:iec:60050",
+                                      "ref_type" => "urn",
+                                    })
     end
 
     it "omits nil source for internal reference" do
@@ -186,10 +188,10 @@ RSpec.describe Glossarist::ConceptReference do
       )
 
       expect(ref.to_gcr_hash).to eq({
-        "term" => "latitude",
-        "concept_id" => "200",
-        "ref_type" => "local",
-      })
+                                      "term" => "latitude",
+                                      "concept_id" => "200",
+                                      "ref_type" => "local",
+                                    })
     end
 
     it "omits nil concept_id for designation reference" do

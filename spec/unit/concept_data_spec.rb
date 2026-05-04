@@ -91,10 +91,10 @@ RSpec.describe Glossarist::ConceptData do
       subject.language_code = "eng"
       subject.entry_status = "valid"
 
-      yaml = YAML.safe_load(subject.to_yaml)
-      expect(yaml["id"]).to eq("test-123")
-      expect(yaml["language_code"]).to eq("eng")
-      expect(yaml["entry_status"]).to eq("valid")
+      roundtrip = described_class.from_yaml(subject.to_yaml)
+      expect(roundtrip.id).to eq("test-123")
+      expect(roundtrip.language_code).to eq("eng")
+      expect(roundtrip.entry_status).to eq("valid")
     end
   end
 end
