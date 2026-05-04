@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "yaml"
-
 module Glossarist
   class ConceptValidator
     LANG_CODES = Glossarist::LANG_CODES
@@ -16,10 +14,20 @@ module Glossarist
     end
 
     def validate_all
-      seen_termids = {}
+      seen_ids = {}
+      file_idx = 0
 
-      concept_files.each do |file|
-        validate_concept_file(file, seen_termids)
+      ConceptCollector.each_concept(@path) do |concept|
+        fname = concept_file_name(concept, file_idx)
+        validate_concept(concept, fname, seen_ids)
+        file_idx += 1
+      end
+
+      if file_idx.zero?
+        yaml_files = find_yaml_files
+        if yaml_files.any?
+          @errors << "YAML files found but no parseable concepts"
+        end
       end
 
       ValidationResult.new(errors: @errors, warnings: @warnings)
@@ -27,7 +35,7 @@ module Glossarist
 
     private
 
-    def concept_files
+    def find_yaml_files
       concepts_dir = if File.directory?(File.join(@path, "concepts"))
                        File.join(@path, "concepts")
                      else
@@ -36,132 +44,69 @@ module Glossarist
       Dir.glob(File.join(concepts_dir, "*.yaml"))
     end
 
-    def validate_concept_file(file, seen_termids)
-      hash = YAML.safe_load_file(file, permitted_classes: [Date, Time])
-    rescue Psych::SyntaxError => e
-      @errors << "#{File.basename(file)}: YAML parse error at line #{e.line}: #{e.message}"
-      nil
-    rescue StandardError => e
-      @errors << "#{File.basename(file)}: #{e.message}"
-      nil
-    else
-      validate_termid(hash, file, seen_termids)
-      validate_language_blocks(hash, file)
-      validate_definitions(hash, file)
-      validate_sources(hash, file)
-      validate_entry_statuses(hash, file)
-      validate_terms_designations(hash, file)
-      validate_no_revisions(hash, file)
+    def concept_file_name(concept, idx)
+      id = concept.data&.id
+      id ? "concept-#{id}.yaml" : "concept-#{idx}.yaml"
     end
 
-    def validate_termid(hash, file, seen_termids)
-      fname = File.basename(file)
-      unless hash.key?("termid")
-        @errors << "#{fname}: missing termid"
+    def validate_concept(concept, fname, seen_ids)
+      validate_id(concept, fname, seen_ids)
+      validate_localizations(concept, fname)
+      validate_definitions(concept, fname)
+      validate_entry_statuses(concept, fname)
+    end
+
+    def validate_id(concept, fname, seen_ids)
+      id = concept.data&.id
+      unless id
+        @errors << "#{fname}: missing concept id"
         return
       end
 
-      termid = hash["termid"]
-      unless termid.is_a?(String)
-        @errors << "#{fname}: termid must be a string, got #{termid.class}"
-      end
-
-      if seen_termids[termid]
-        @errors << "#{fname}: duplicate termid '#{termid}' (first seen in #{seen_termids[termid]})"
+      id_str = id.to_s
+      if seen_ids[id_str]
+        @errors << "#{fname}: duplicate id '#{id_str}' (first seen in #{seen_ids[id_str]})"
       else
-        seen_termids[termid] = fname
+        seen_ids[id_str] = fname
       end
     end
 
-    def validate_language_blocks(hash, file)
-      fname = File.basename(file)
-      langs = LANG_CODES.select { |l| hash[l].is_a?(Hash) }
-      if langs.empty?
-        @errors << "#{fname}: no language blocks found"
+    def validate_localizations(concept, fname)
+      l10ns = concept.localizations&.values || []
+      if l10ns.empty?
+        @errors << "#{fname}: no localizations found"
         return
       end
 
-      langs.each do |lang|
-        terms = hash[lang]["terms"]
+      l10ns.each do |l10n|
+        lang = l10n.language_code || "unknown"
+        terms = l10n.data&.terms
         unless terms.is_a?(Array) && terms.any?
           @errors << "#{fname}/#{lang}: must have at least 1 term"
         end
       end
     end
 
-    def validate_definitions(hash, file)
-      fname = File.basename(file)
-      LANG_CODES.each do |lang|
-        next unless hash[lang].is_a?(Hash)
-        next unless hash[lang].key?("definition")
+    def validate_definitions(concept, fname)
+      (concept.localizations&.values || []).each do |l10n|
+        lang = l10n.language_code || "unknown"
+        next unless l10n.data&.definition
 
-        defn = hash[lang]["definition"]
-        if defn.is_a?(String)
-          @errors << "#{fname}/#{lang}: definition is bare string (expected array)"
-        elsif !defn.is_a?(Array)
-          @errors << "#{fname}/#{lang}: definition must be an array"
-        elsif defn.any? { |d| !d.is_a?(Hash) || !d.key?("content") }
-          @errors << "#{fname}/#{lang}: definition items must have 'content' key"
+        defs = l10n.data.definition
+        if defs.empty?
+          @errors << "#{fname}/#{lang}: definition is empty"
         end
       end
     end
 
-    def validate_sources(hash, file)
-      fname = File.basename(file)
-      LANG_CODES.each do |lang|
-        next unless hash[lang].is_a?(Hash)
+    def validate_entry_statuses(concept, fname)
+      (concept.localizations&.values || []).each do |l10n|
+        lang = l10n.language_code || "unknown"
+        status = l10n.data&.entry_status
+        next unless status
 
-        if hash[lang].key?("authoritative_source")
-          @errors << "#{fname}/#{lang}: has 'authoritative_source' (should be 'sources' array after migration)"
-        end
-
-        sources = hash[lang]["sources"]
-        next unless sources
-
-        unless sources.is_a?(Array)
-          @errors << "#{fname}/#{lang}: sources must be an array"
-        end
-      end
-    end
-
-    def validate_entry_statuses(hash, file)
-      fname = File.basename(file)
-      LANG_CODES.each do |lang|
-        next unless hash[lang].is_a?(Hash)
-        next unless hash[lang].key?("entry_status")
-
-        status = hash[lang]["entry_status"]
         unless VALID_ENTRY_STATUSES.include?(status)
           @errors << "#{fname}/#{lang}: invalid entry_status '#{status}' (expected one of: #{VALID_ENTRY_STATUSES.join(', ')})"
-        end
-      end
-    end
-
-    def validate_terms_designations(hash, file)
-      fname = File.basename(file)
-      LANG_CODES.each do |lang|
-        next unless hash[lang].is_a?(Hash)
-        next unless hash[lang]["terms"].is_a?(Array)
-
-        hash[lang]["terms"].each_with_index do |term, idx|
-          if term.is_a?(Hash) && term["abbrev"] == true
-            @errors << "#{fname}/#{lang}/terms[#{idx}]: has 'abbrev: true' (should be 'type: abbreviation' after migration)"
-          end
-        end
-      end
-    end
-
-    def validate_no_revisions(hash, file)
-      fname = File.basename(file)
-      if hash.key?("_revisions")
-        @warnings << "#{fname}: has '_revisions' (stripped during migration)"
-      end
-
-      LANG_CODES.each do |lang|
-        next unless hash[lang].is_a?(Hash)
-
-        if hash[lang].key?("_revisions")
-          @warnings << "#{fname}/#{lang}: has '_revisions' (stripped during migration)"
         end
       end
     end

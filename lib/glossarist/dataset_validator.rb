@@ -24,7 +24,7 @@ module Glossarist
     end
 
     def validate_gcr(path)
-      GcrPackage.new(path).validate
+      GcrValidator.new.validate(path)
     end
 
     def validate_directory(path)
@@ -61,19 +61,9 @@ module Glossarist
     end
 
     def validate_directory_refs(resolver, path, extractor)
-      concepts = load_concept_hashes(path)
+      concepts = ConceptCollector.collect(path)
       resolver.register_self(concepts)
       resolver.validate_all(concepts, extractor: extractor)
-    end
-
-    def load_concept_hashes(dir)
-      files = Dir.glob(File.join(dir, "**", "*.yaml"))
-      concepts = []
-      files.each do |file|
-        hash = YAML.safe_load_file(file, permitted_classes: [Date, Time])
-        concepts << hash if hash&.dig("termid")
-      end
-      concepts
     end
   end
 end

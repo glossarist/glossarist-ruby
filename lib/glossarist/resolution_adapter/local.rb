@@ -39,17 +39,33 @@ module Glossarist
       private
 
       def designations_for(concept)
-        concept.each_value.flat_map do |lang_block|
-          next [] unless lang_block.is_a?(Hash) && lang_block.key?("terms")
+        if concept.is_a?(ManagedConcept)
+          concept.localizations.flat_map do |l10n|
+            l10n.data.terms.filter_map do |t|
+              t.respond_to?(:designation) ? t.designation : nil
+            end
+          end
+        else
+          concept.each_value.flat_map do |lang_block|
+            next [] unless lang_block.is_a?(Hash) && lang_block.key?("terms")
 
-          Array(lang_block["terms"]).filter_map { |t| t["designation"] }
+            Array(lang_block["terms"]).filter_map { |t| t["designation"] }
+          end
         end
       end
 
       def build_index
         concepts.each do |concept|
-          termid = (concept["termid"] || concept["id"])&.to_s
+          termid = extract_termid(concept)
           @index[termid] = concept if termid
+        end
+      end
+
+      def extract_termid(concept)
+        if concept.is_a?(ManagedConcept)
+          concept.data.id&.to_s
+        else
+          (concept["termid"] || concept["id"])&.to_s
         end
       end
     end
