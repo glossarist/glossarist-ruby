@@ -5,6 +5,15 @@ require "fileutils"
 
 module Glossarist
   class GcrPackage
+    COMPILED_EXTENSIONS = {
+      "tbx" => "tbx.xml",
+      "jsonld" => "jsonld",
+      "turtle" => "ttl",
+      "jsonl" => "jsonl",
+    }.freeze
+
+    KNOWN_COMPILED_FORMATS = COMPILED_EXTENSIONS.keys.freeze
+
     attr_reader :zip_path, :metadata, :concepts
 
     def initialize(zip_path)
@@ -13,16 +22,18 @@ module Glossarist
       @concepts = []
     end
 
-    def self.create(concepts:, metadata:, output_path:, register_data: nil)
+    def self.create(concepts:, metadata:, output_path:, register_data: nil,
+                    compiled_formats: [], **opts)
       FileUtils.mkdir_p(File.dirname(output_path))
       package = new(output_path)
-      package.send(:write, concepts, metadata, register_data)
+      package.write(concepts, metadata, register_data,
+                    compiled_formats: compiled_formats, **opts)
       package
     end
 
     def self.load(zip_path)
       package = new(zip_path)
-      package.send(:read)
+      package.read
       package
     end
 
@@ -30,8 +41,14 @@ module Glossarist
                                   title: nil, description: nil, owner: nil,
                                   tags: [], register_yaml: nil,
                                   uri_prefix: nil, concept_uri_template: nil,
-                                  streaming: false)
+                                  streaming: false, compiled_formats: [])
       dir = File.expand_path(dir)
+      formats = Array(compiled_formats).map(&:to_s)
+
+      if streaming && formats.any?
+        raise ArgumentError,
+              "Compiled formats require batch mode (streaming: true is incompatible)"
+      end
 
       if streaming
         create_streaming(dir, output: output, shortname: shortname, version: version,
@@ -44,7 +61,8 @@ module Glossarist
                           title: title, description: description, owner: owner,
                           tags: tags, register_yaml: register_yaml,
                           uri_prefix: uri_prefix,
-                          concept_uri_template: concept_uri_template)
+                          concept_uri_template: concept_uri_template,
+                          compiled_formats: formats)
       end
     end
 
@@ -52,9 +70,8 @@ module Glossarist
       GcrValidator.new.validate(@zip_path)
     end
 
-    private
-
-    def write(concepts, metadata, register_data)
+    def write(concepts, metadata, register_data, compiled_formats: [],
+              shortname: nil, **opts)
       Zip::File.open(@zip_path, create: true) do |zf|
         zf.get_output_stream("metadata.yaml") do |f|
           f.write(metadata.to_yaml)
@@ -68,6 +85,11 @@ module Glossarist
 
         concepts.each do |mc|
           write_concept(zf, mc)
+        end
+
+        if compiled_formats.any?
+          write_compiled(zf, concepts, compiled_formats, shortname: shortname,
+                                                         **opts)
         end
       end
     end
@@ -98,10 +120,67 @@ module Glossarist
       end
     end
 
+    def write_compiled(zip_file, concepts, formats, shortname: nil, **opts)
+      name = shortname || "glossary"
+      transform_opts = { shortname: name }.merge(opts.slice(:site_url,
+                                                            :uri_prefix, :title))
+
+      if formats.include?("tbx")
+        write_compiled_tbx(zip_file, concepts, transform_opts, name)
+      end
+
+      skos_formats = formats & %w[jsonld turtle jsonl]
+      if skos_formats.any?
+        write_compiled_skos(zip_file, concepts, skos_formats, transform_opts,
+                            name)
+      end
+
+      (formats - KNOWN_COMPILED_FORMATS).each do |fmt|
+        warn "Warning: Unknown compiled format '#{fmt}', skipping"
+      end
+    end
+
+    def write_compiled_tbx(zip_file, concepts, opts, name)
+      require "glossarist/transforms/concept_to_tbx_transform"
+      doc = Transforms::ConceptToTbxTransform.transform_document(concepts, opts)
+      zip_file.get_output_stream("compiled/#{name}.tbx.xml") do |f|
+        f.write(doc.to_xml)
+      end
+    end
+
+    def write_compiled_skos(zip_file, concepts, formats, opts, name) # rubocop:disable Metrics/MethodLength
+      require "glossarist/transforms/concept_to_skos_transform"
+      vocab = Transforms::ConceptToSkosTransform.transform_document(concepts,
+                                                                    opts)
+
+      if formats.include?("jsonld")
+        zip_file.get_output_stream("compiled/#{name}.jsonld") do |f|
+          f.write(vocab.to_jsonld)
+        end
+      end
+
+      if formats.include?("turtle")
+        zip_file.get_output_stream("compiled/#{name}.ttl") do |f|
+          f.write(vocab.to_turtle)
+        end
+      end
+
+      return unless formats.include?("jsonl")
+
+      zip_file.get_output_stream("compiled/#{name}.jsonl") do |f|
+        concepts.each do |concept|
+          skos = Transforms::ConceptToSkosTransform.transform(concept, opts)
+          f.write(skos.to_jsonld)
+          f.write("\n")
+        end
+      end
+    end
+
     class << self
       private
 
-      def create_batch(dir, output:, shortname:, version:, **opts)
+      def create_batch(dir, output:, shortname:, version:,
+compiled_formats: [], **opts)
         concepts = ConceptCollector.collect(dir)
         if concepts.empty?
           raise ArgumentError,
@@ -117,13 +196,17 @@ module Glossarist
 
         register_data = load_register_data(opts[:register_yaml], dir)
         metadata = build_metadata(concepts, shortname: shortname, version: version,
-                                            register_data: register_data, **opts)
+                                            register_data: register_data,
+                                            compiled_formats: compiled_formats, **opts)
 
         create(
           concepts: concepts,
           metadata: metadata,
           register_data: register_data,
           output_path: File.expand_path(output),
+          compiled_formats: compiled_formats,
+          shortname: shortname,
+          **opts,
         )
       end
 
@@ -195,7 +278,7 @@ module Glossarist
       end
 
       def build_metadata(concepts, shortname:, version:, register_data: nil,
-**opts)
+                         compiled_formats: [], **opts)
         GcrMetadata.from_concepts(
           concepts,
           register_data: register_data,
@@ -208,6 +291,7 @@ module Glossarist
             tags: opts[:tags],
             uri_prefix: opts[:uri_prefix],
             concept_uri_template: opts[:concept_uri_template],
+            compiled_formats: compiled_formats,
           },
         )
       end

@@ -19,6 +19,7 @@ module Glossarist
     attribute :license, :string
     attribute :uri_prefix, :string
     attribute :concept_uri_template, :string
+    attribute :compiled_formats, :string, collection: true
     attribute :external_references, :hash, collection: true
 
     key_value do
@@ -39,6 +40,7 @@ module Glossarist
       map :license, to: :license
       map :uri_prefix, to: :uri_prefix
       map :concept_uri_template, to: :concept_uri_template
+      map :compiled_formats, to: :compiled_formats
       map :external_references, to: :external_references
     end
 
@@ -59,6 +61,7 @@ module Glossarist
         statistics: stats,
         uri_prefix: options[:uri_prefix],
         concept_uri_template: options[:concept_uri_template],
+        compiled_formats: options[:compiled_formats] || [],
         external_references: derive_external_references(concepts),
       )
     end

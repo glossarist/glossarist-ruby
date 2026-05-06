@@ -256,4 +256,162 @@ RSpec.describe Glossarist::GcrPackage do
       expect(pkg.metadata["uri_prefix"]).to eq("urn:iso:std:iso:19111")
     end
   end
+
+  describe "compiled formats" do
+    before do
+      @tmpdir = Dir.mktmpdir
+    end
+
+    after do
+      FileUtils.rm_rf(@tmpdir)
+    end
+
+    def create_v1_dataset_for_compiled
+      source = File.join(@tmpdir, "source")
+      concepts_dir = File.join(source, "concepts")
+      FileUtils.mkdir_p(concepts_dir)
+
+      concept = {
+        "termid" => "100",
+        "term" => "latitude",
+        "eng" => {
+          "terms" => [{ "type" => "expression", "designation" => "latitude" }],
+          "definition" => [{ "content" => "angular distance" }],
+        },
+      }
+      File.write(File.join(concepts_dir, "100.yaml"), YAML.dump(concept))
+      source
+    end
+
+    it "bundles TBX compiled format" do
+      source = create_v1_dataset_for_compiled
+      output = File.join(@tmpdir, "output.gcr")
+
+      described_class.create_from_directory(
+        source,
+        output: output,
+        shortname: "test",
+        version: "1.0.0",
+        compiled_formats: ["tbx"],
+      )
+
+      Zip::File.open(output) do |zf|
+        entry = zf.find_entry("compiled/test.tbx.xml")
+        expect(entry).not_to be_nil
+        content = entry.get_input_stream.read
+        expect(content).to include("<tbx")
+      end
+    end
+
+    it "bundles JSON-LD compiled format" do
+      source = create_v1_dataset_for_compiled
+      output = File.join(@tmpdir, "output.gcr")
+
+      described_class.create_from_directory(
+        source,
+        output: output,
+        shortname: "test",
+        version: "1.0.0",
+        compiled_formats: ["jsonld"],
+      )
+
+      Zip::File.open(output) do |zf|
+        entry = zf.find_entry("compiled/test.jsonld")
+        expect(entry).not_to be_nil
+        parsed = JSON.parse(entry.get_input_stream.read)
+        expect(parsed["@context"]).to include("skos")
+        expect(parsed["@graph"]).to be_an(Array)
+      end
+    end
+
+    it "bundles Turtle compiled format" do
+      source = create_v1_dataset_for_compiled
+      output = File.join(@tmpdir, "output.gcr")
+
+      described_class.create_from_directory(
+        source,
+        output: output,
+        shortname: "test",
+        version: "1.0.0",
+        compiled_formats: ["turtle"],
+      )
+
+      Zip::File.open(output) do |zf|
+        entry = zf.find_entry("compiled/test.ttl")
+        expect(entry).not_to be_nil
+        content = entry.get_input_stream.read
+        expect(content).to include("@prefix skos:")
+        expect(content).to include("a skos:Concept")
+      end
+    end
+
+    it "bundles JSONL compiled format" do
+      source = create_v1_dataset_for_compiled
+      output = File.join(@tmpdir, "output.gcr")
+
+      described_class.create_from_directory(
+        source,
+        output: output,
+        shortname: "test",
+        version: "1.0.0",
+        compiled_formats: ["jsonl"],
+      )
+
+      Zip::File.open(output) do |zf|
+        entry = zf.find_entry("compiled/test.jsonl")
+        expect(entry).not_to be_nil
+        lines = entry.get_input_stream.read.strip.split("\n")
+        expect(lines.length).to be >= 1
+        lines.each { |line| expect { JSON.parse(line) }.not_to raise_error }
+      end
+    end
+
+    it "warns on unknown compiled format" do
+      source = create_v1_dataset_for_compiled
+      output = File.join(@tmpdir, "output.gcr")
+
+      expect do
+        described_class.create_from_directory(
+          source,
+          output: output,
+          shortname: "test",
+          version: "1.0.0",
+          compiled_formats: ["unknown"],
+        )
+      end.to output(/Unknown compiled format/).to_stderr
+    end
+
+    it "raises error when compiled formats used with streaming" do
+      source = create_v1_dataset_for_compiled
+      output = File.join(@tmpdir, "output.gcr")
+
+      expect do
+        described_class.create_from_directory(
+          source,
+          output: output,
+          shortname: "test",
+          version: "1.0.0",
+          compiled_formats: ["jsonld"],
+          streaming: true,
+        )
+      end.to raise_error(ArgumentError, /batch mode/)
+    end
+
+    it "records compiled_formats in metadata" do
+      source = create_v1_dataset_for_compiled
+      output = File.join(@tmpdir, "output.gcr")
+
+      described_class.create_from_directory(
+        source,
+        output: output,
+        shortname: "test",
+        version: "1.0.0",
+        compiled_formats: ["jsonld", "turtle"],
+      )
+
+      pkg = described_class.load(output)
+      expect(pkg.metadata.compiled_formats).to contain_exactly("jsonld",
+                                                               "turtle")
+    end
+  end
 end
