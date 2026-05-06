@@ -67,11 +67,24 @@ Three classes handle glossary concept registry (GCR) ZIP packages:
 
 ### CLI
 
-The `exe/glossarist` executable uses Thor. Currently provides `generate_latex` which converts concepts to LaTeX glossary entries via `ConceptSet`.
+The `exe/glossarist` executable uses Thor. Commands:
+- `generate_latex` — converts concepts to LaTeX glossary entries
+- `package` — creates `.gcr` ZIP archives with optional compiled formats (`--compiled-formats tbx,jsonld,turtle,jsonl`)
+- `export` — exports concepts in json/tbx/jsonld/turtle/jsonl formats
+- `validate` — validates datasets and `.gcr` files
+- `upgrade` — migrates datasets to current schema version
+
+### Export Transforms
+
+- **`ConceptToTbxTransform`** (`transforms/concept_to_tbx_transform.rb`) — converts ManagedConcept to TBX-XML using the tbx gem (ISO 30042:2019). Produces `Tbx::ConceptEntry` per concept or `Tbx::Document` for full export.
+- **`ConceptToSkosTransform`** (`transforms/concept_to_skos_transform.rb`) — converts ManagedConcept to SKOS RDF using `Glossarist::Rdf::SkosConcept`. Has `transform` (single) and `transform_document` (batch, returns `SkosVocabulary`). Produces JSON-LD and Turtle via the unified `rdf` DSL.
+- **SKOS/RDF models** (`lib/glossarist/rdf/`) — `SkosConcept`, `SkosVocabulary` (ConceptScheme container), `LocalizedLiteral` (language-tagged value), namespace classes.
+- TBX, Turtle, JSON-LD, JSONL export all write a single document file; JSON writes per-concept files.
 
 ### Dependencies
 
-- `lutaml-model` (~> 0.8) — serialization framework (YAML/XML)
+- `lutaml-model` (~> 0.8.5) — serialization framework (YAML/XML/JSON-LD/Turtle)
+- `tbx` — ISO 30042:2019 TBX model classes
 - `relaton` (>= 2.0.0, < 3) — bibliography database integration
 - `thor` — CLI commands
 
