@@ -7,6 +7,7 @@ gemspec
 gem "canon"
 gem "lutaml-model", "~> 0.8.0"
 gem "rake", "~> 13.0"
+gem "tbx", "~> 0.1"
 gem "rspec", "~> 3.0"
 gem "rubocop"
 gem "rubocop-performance"
