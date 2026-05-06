@@ -31,8 +31,9 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "lutaml-model", "~> 0.8"
+  spec.add_dependency "lutaml-model", "~> 0.8.5"
   spec.add_dependency "relaton", ">= 2.0.0", "< 3"
   spec.add_dependency "rubyzip", ">= 2.3", "< 3"
+  spec.add_dependency "tbx", "~> 0.1"
   spec.add_dependency "thor"
 end

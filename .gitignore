@@ -22,3 +22,5 @@ localcache
 .vscode
 
 TODO*
+
+*.gem

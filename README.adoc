@@ -407,6 +407,12 @@ Options:
 
 |--tags
 |Tags for the dataset
+
+|--compiled-formats
+|Comma-separated compiled formats to bundle (tbx,jsonld,turtle,jsonl)
+
+|--concept-uri-template
+|URI template for concept URIs
 |===
 
 Ruby API:
@@ -418,7 +424,87 @@ GcrPackage.create_from_directory(
   shortname: "mydataset",
   version: "1.0.0",
   uri_prefix: "urn:iso:std:iso:19111",
+  compiled_formats: ["jsonld", "turtle"],
 )
+----
+
+=== export
+
+Export concepts in machine-readable formats.
+
+[,bash]
+----
+glossarist export PATH --format json --output DIR
+glossarist export PATH --format jsonld --output DIR --shortname isotc211
+glossarist export PATH --format turtle --output DIR
+glossarist export PATH --format tbx --output DIR --shortname isotc211
+glossarist export PATH --format jsonl --output DIR
+glossarist export package.gcr --format json --output DIR
+----
+
+The path can be either a concept dataset directory or a `.gcr` file. When exporting from a `.gcr`, the `shortname` and `uri_prefix` are automatically resolved from the package metadata.
+
+==== Output Formats
+
+[cols="1,2,1"]
+|===
+|Format |Output |Files
+
+|`json`
+|Per-concept JSON files
+|`{concept_id}.json`
+
+|`tbx`
+|Single TBX-XML document (ISO 30042:2019)
+|`{shortname}.tbx.xml`
+
+|`jsonld`
+|Single JSON-LD file with `@graph`
+|`{shortname}.jsonld`
+
+|`turtle`
+|Single Turtle file with all concept triples
+|`{shortname}.ttl`
+
+|`jsonl`
+|JSONL file with one JSON-LD object per line
+|`{shortname}.jsonl`
+|===
+
+Options:
+[cols="1,1"]
+|===
+|--format (required)
+|Output format: `json`, `tbx`, `jsonld`, `turtle`, or `jsonl`
+
+|o, --output (required)
+|Output directory
+
+|--shortname
+|Dataset shortname for concept ID prefixing
+
+|--uri-prefix
+|URI/URN prefix for the dataset
+
+|--site-url
+|Base URL of the glossarist site
+
+|--title
+|Dataset title for document header
+|===
+
+Ruby API:
+[,ruby]
+----
+# Export to JSON-LD
+cmd = Glossarist::CLI::ExportCommand.new("path/to/dataset",
+  format: "jsonld", output: "/tmp/export", shortname: "isotc211")
+cmd.run
+
+# Transform a single concept to SKOS
+skos = Glossarist::Transforms::ConceptToSkosTransform.transform(concept)
+puts skos.to_jsonld
+puts skos.to_turtle
 ----
 
 === validate

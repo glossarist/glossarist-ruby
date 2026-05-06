@@ -126,6 +126,16 @@ module Glossarist
     # Returns concept localization.
     # @param lang [String] language code
     # @return [LocalizedConcept]
+    def to_jsonld
+      require "glossarist/transforms/concept_to_skos_transform"
+      Transforms::ConceptToSkosTransform.transform(self).to_jsonld
+    end
+
+    def to_turtle
+      require "glossarist/transforms/concept_to_skos_transform"
+      Transforms::ConceptToSkosTransform.transform(self).to_turtle
+    end
+
     def default_designation
       localized = localization("eng") || localizations.values.first
       terms = localized&.preferred_terms&.first || localized&.terms&.first

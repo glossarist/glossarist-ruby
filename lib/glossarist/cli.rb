@@ -57,6 +57,10 @@ module Glossarist
     option :register_yaml, type: :string,
                            desc: "Path to register.yaml to include in package"
     option :tags, type: :array, desc: "Tags for the dataset"
+    option :compiled_formats, type: :string,
+                              desc: "Comma-separated compiled formats to bundle (tbx,jsonld,turtle,jsonl)"
+    option :concept_uri_template, type: :string,
+                                  desc: "URI template for concept URIs"
     def package(dir)
       require_relative "cli/package_command"
       Glossarist::CLI::PackageCommand.new(dir, options).run
@@ -74,6 +78,25 @@ module Glossarist
     def validate(path)
       require_relative "cli/validate_command"
       Glossarist::CLI::ValidateCommand.new(path, options).run
+    end
+
+    desc "export PATH", "Export concepts in machine-readable formats"
+    option :format, type: :string, required: true,
+                    enum: %w[json jsonld turtle tbx jsonl],
+                    desc: "Output format"
+    option :output, aliases: :o, type: :string, required: true,
+                    desc: "Output directory"
+    option :shortname, type: :string,
+                       desc: "Dataset shortname for concept ID prefixing"
+    option :uri_prefix, type: :string,
+                        desc: "URI/URN prefix for the dataset"
+    option :site_url, type: :string,
+                      desc: "Base URL of the glossarist site"
+    option :title, type: :string,
+                   desc: "Dataset title for document header"
+    def export(path)
+      require_relative "cli/export_command"
+      Glossarist::CLI::ExportCommand.new(path, options).run
     end
 
     def method_missing(*args)

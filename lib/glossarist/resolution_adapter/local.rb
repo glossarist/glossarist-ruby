@@ -41,9 +41,7 @@ module Glossarist
       def designations_for(concept)
         if concept.is_a?(ManagedConcept)
           concept.localizations.flat_map do |l10n|
-            l10n.data.terms.filter_map do |t|
-              t.respond_to?(:designation) ? t.designation : nil
-            end
+            l10n.data.terms.filter_map(&:designation)
           end
         else
           concept.each_value.flat_map do |lang_block|
