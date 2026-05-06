@@ -29,7 +29,11 @@ module Glossarist
     end
 
     def self.count_with(l10ns, attr)
-      l10ns.count { |l| l.data.send(attr)&.any? }
+      case attr
+      when :definition then l10ns.count { |l| l.data.definition&.any? }
+      when :sources then l10ns.count { |l| l.data.sources&.any? }
+      else 0
+      end
     end
   end
 end
