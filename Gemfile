@@ -7,12 +7,12 @@ gemspec
 gem "canon"
 gem "lutaml-model", "~> 0.8.0"
 gem "rake", "~> 13.0"
-gem "tbx", "~> 0.1"
 gem "rspec", "~> 3.0"
 gem "rubocop"
 gem "rubocop-performance"
 gem "rubocop-rake"
 gem "rubocop-rspec"
+gem "tbx", "~> 0.1"
 
 # Override relaton gems with lutaml-model 0.8 compatible versions.
 # Released 2.0.0 gems have untyped lutaml-model attributes that fail with 0.8+.

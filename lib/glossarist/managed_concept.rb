@@ -10,8 +10,6 @@ module Glossarist
     attribute :dates, ConceptDate, collection: true
     attribute :sources, ConceptSource
     attribute :date_accepted, ConceptDate
-    # TODO: convert to LocalizedConceptCollection when custom
-    #       collections are implemented in lutaml-model
     attribute :status, :string,
               values: Glossarist::GlossaryDefinition::CONCEPT_STATUSES
 
@@ -33,14 +31,6 @@ module Glossarist
       map :status, to: :status
 
       map :uuid, to: :uuid, with: { from: :uuid_from_yaml, to: :uuid_to_yaml }
-    end
-
-    def localized_concepts
-      data.localized_concepts
-    end
-
-    def localized_concepts=(val)
-      data.localized_concepts = val
     end
 
     def localizations
@@ -123,9 +113,6 @@ module Glossarist
     end
     alias :add_l10n :add_localization
 
-    # Returns concept localization.
-    # @param lang [String] language code
-    # @return [LocalizedConcept]
     def to_jsonld
       require "glossarist/transforms/concept_to_skos_transform"
       Transforms::ConceptToSkosTransform.transform(self).to_jsonld
