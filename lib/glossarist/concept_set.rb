@@ -35,8 +35,6 @@ module Glossarist
       end.join("\n")
     end
 
-    private
-
     def to_latex_from_file(entries_file)
       File.readlines(entries_file).map do |concept_name|
         concept = concept_map[concept_name.strip.downcase]

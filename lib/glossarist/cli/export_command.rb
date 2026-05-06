@@ -5,10 +5,7 @@ module Glossarist
     class ExportCommand
       EXTENSIONS = {
         "json" => "json",
-        "jsonld" => "jsonld",
-        "turtle" => "ttl",
-        "tbx" => "tbx.xml",
-        "jsonl" => "jsonl",
+        **GcrPackage::COMPILED_EXTENSIONS,
       }.freeze
 
       def initialize(path, options)
@@ -22,12 +19,12 @@ module Glossarist
         FileUtils.mkdir_p(output_dir)
 
         concepts = load_concepts
-        name = resolve_shortname(concepts)
+        name = resolve_shortname
 
         case format
         when "json" then export_json(concepts, output_dir)
-        when "jsonld" then export_document(concepts, name, output_dir, :jsonld)
-        when "turtle" then export_document(concepts, name, output_dir, :turtle)
+        when "jsonld" then export_jsonld(concepts, name, output_dir)
+        when "turtle" then export_turtle(concepts, name, output_dir)
         when "tbx" then export_tbx(concepts, name, output_dir)
         when "jsonl" then export_jsonl(concepts, name, output_dir)
         end
@@ -55,7 +52,7 @@ module Glossarist
         @options[:uri_prefix] ||= package.metadata["uri_prefix"]
       end
 
-      def resolve_shortname(_concepts)
+      def resolve_shortname
         @options[:shortname] || "glossary"
       end
 
@@ -75,27 +72,30 @@ module Glossarist
         end
       end
 
-      def export_document(concepts, name, output_dir, format)
+      def export_jsonld(concepts, name, output_dir)
         require "glossarist/transforms/concept_to_skos_transform"
         vocab = Transforms::ConceptToSkosTransform.transform_document(concepts,
                                                                       transform_options)
-        ext = EXTENSIONS[format.to_s]
-        File.write(File.join(output_dir, "#{name}.#{ext}"),
-                   vocab.public_send(:"to_#{format}"))
+        File.write(File.join(output_dir, "#{name}.jsonld"), vocab.to_jsonld)
+      end
+
+      def export_turtle(concepts, name, output_dir)
+        require "glossarist/transforms/concept_to_skos_transform"
+        vocab = Transforms::ConceptToSkosTransform.transform_document(concepts,
+                                                                      transform_options)
+        File.write(File.join(output_dir, "#{name}.ttl"), vocab.to_turtle)
       end
 
       def export_tbx(concepts, name, output_dir)
         require "glossarist/transforms/concept_to_tbx_transform"
         doc = Transforms::ConceptToTbxTransform.transform_document(concepts,
                                                                    transform_options)
-        File.write(File.join(output_dir, "#{name}.#{EXTENSIONS['tbx']}"),
-                   doc.to_xml)
+        File.write(File.join(output_dir, "#{name}.tbx.xml"), doc.to_xml)
       end
 
       def export_jsonl(concepts, name, output_dir)
         require "glossarist/transforms/concept_to_skos_transform"
-        File.open(File.join(output_dir, "#{name}.#{EXTENSIONS['jsonl']}"),
-                  "w") do |f|
+        File.open(File.join(output_dir, "#{name}.jsonl"), "w") do |f|
           concepts.each do |concept|
             skos = Transforms::ConceptToSkosTransform.transform(concept,
                                                                 transform_options)
