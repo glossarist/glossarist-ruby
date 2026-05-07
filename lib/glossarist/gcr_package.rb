@@ -2,6 +2,7 @@
 
 require "zip"
 require "fileutils"
+require "pathname"
 
 module Glossarist
   class GcrPackage
@@ -14,12 +15,18 @@ module Glossarist
 
     KNOWN_COMPILED_FORMATS = COMPILED_EXTENSIONS.keys.freeze
 
-    attr_reader :zip_path, :metadata, :concepts
+    DATASET_ASSETS = [
+      { path: "bibliography.yaml", type: :file, attr: :bibliography },
+      { path: "images", type: :directory },
+    ].freeze
+
+    attr_reader :zip_path, :metadata, :concepts, :bibliography
 
     def initialize(zip_path)
       @zip_path = zip_path
       @metadata = nil
       @concepts = []
+      @bibliography = nil
     end
 
     def self.create(concepts:, metadata:, output_path:, register_data: nil,
@@ -66,12 +73,43 @@ module Glossarist
       end
     end
 
+    def self.each_dataset_asset(source_dir)
+      base = Pathname.new(source_dir)
+      DATASET_ASSETS.each do |asset|
+        path = File.join(source_dir, asset[:path])
+        case asset[:type]
+        when :file
+          yield_file_asset(path, asset[:path]) { |*a| yield(*a) }
+        when :directory
+          yield_directory_assets(path, base) { |*a| yield(*a) }
+        end
+      end
+    end
+
+    def self.yield_file_asset(path, entry_name)
+      return unless File.exist?(path)
+
+      yield entry_name, File.binread(path)
+    end
+
+    def self.yield_directory_assets(dir_path, base_path)
+      return unless File.directory?(dir_path)
+
+      Dir.glob(File.join(dir_path, "**", "*")).each do |file|
+        next unless File.file?(file)
+
+        relative = Pathname.new(file).relative_path_from(base_path).to_s
+        yield relative, File.binread(file)
+      end
+    end
+
     def validate
       GcrValidator.new.validate(@zip_path)
     end
 
-    def write(concepts, metadata, register_data, compiled_formats: [],
-              shortname: nil, **opts)
+    def write(concepts, metadata, register_data, # rubocop:disable Metrics/ParameterLists
+              compiled_formats: [],
+              shortname: nil, source_dir: nil, **opts)
       Zip::File.open(@zip_path, create: true) do |zf|
         zf.get_output_stream("metadata.yaml") do |f|
           f.write(metadata.to_yaml)
@@ -87,6 +125,12 @@ module Glossarist
           write_concept(zf, mc)
         end
 
+        if source_dir
+          self.class.each_dataset_asset(source_dir) do |name, content|
+            zf.get_output_stream(name) { |f| f.write(content) }
+          end
+        end
+
         if compiled_formats.any?
           write_compiled(zf, concepts, compiled_formats, shortname: shortname,
                                                          **opts)
@@ -94,29 +138,51 @@ module Glossarist
       end
     end
 
+    def read
+      @concepts = []
+
+      Zip::File.open(@zip_path) do |zf|
+        read_metadata(zf)
+        read_file_assets(zf)
+        read_concepts(zf)
+      end
+    end
+
+    def read_metadata(zip_file)
+      entry = zip_file.find_entry("metadata.yaml")
+      return unless entry
+
+      @metadata = GcrMetadata.from_yaml(entry.get_input_stream.read)
+    end
+
+    def read_file_assets(zip_file)
+      DATASET_ASSETS.each do |asset|
+        next unless asset[:type] == :file && asset[:attr]
+
+        entry = zip_file.find_entry(asset[:path])
+        next unless entry
+
+        instance_variable_set("@#{asset[:attr]}", entry.get_input_stream.read)
+      end
+    end
+
+    def read_concepts(zip_file)
+      zip_file.entries.each do |entry|
+        next unless entry.name.start_with?("concepts/") && entry.name.end_with?(".yaml")
+
+        raw = entry.get_input_stream.read
+        doc = ConceptDocument.from_yamls(raw)
+        @concepts << doc.to_managed_concept
+      end
+    end
+
+    private
+
     def write_concept(zip_file, concept)
       termid = concept.data.id.to_s
       doc = ConceptDocument.from_managed_concept(concept)
       zip_file.get_output_stream("concepts/#{termid}.yaml") do |f|
         f.write(doc.to_yamls)
-      end
-    end
-
-    def read
-      @concepts = []
-
-      Zip::File.open(@zip_path) do |zf|
-        if (entry = zf.find_entry("metadata.yaml"))
-          @metadata = GcrMetadata.from_yaml(entry.get_input_stream.read)
-        end
-
-        zf.entries.each do |entry|
-          next unless entry.name.start_with?("concepts/") && entry.name.end_with?(".yaml")
-
-          raw = entry.get_input_stream.read
-          doc = ConceptDocument.from_yamls(raw)
-          @concepts << doc.to_managed_concept
-        end
       end
     end
 
@@ -206,6 +272,7 @@ compiled_formats: [], **opts)
           output_path: File.expand_path(output),
           compiled_formats: compiled_formats,
           shortname: shortname,
+          source_dir: dir,
           **opts,
         )
       end
@@ -219,7 +286,7 @@ compiled_formats: [], **opts)
         concept_count = 0
         languages = Set.new
 
-        Zip::OutputStream.open(output_path) do |zos|
+        Zip::OutputStream.open(output_path) do |zos| # rubocop:disable Metrics/BlockLength
           if register_data
             zos.put_next_entry("register.yaml")
             zos.write(register_data.to_yaml)
@@ -253,6 +320,11 @@ compiled_formats: [], **opts)
                                               register_data: register_data, **opts)
           zos.put_next_entry("metadata.yaml")
           zos.write(metadata.to_yaml)
+
+          each_dataset_asset(dir) do |name, content|
+            zos.put_next_entry(name)
+            zos.write(content)
+          end
         end
 
         new(output_path)

@@ -13,27 +13,8 @@ module Glossarist
       end
 
       begin
-        Zip::File.open(zip_path) do |zf|
-          unless zf.find_entry("metadata.yaml")
-            result.add_error("Missing metadata.yaml")
-            return result
-          end
-
-          metadata = GcrMetadata.from_yaml(
-            zf.find_entry("metadata.yaml").get_input_stream.read,
-          )
-          validate_metadata(metadata, result)
-
-          concept_entries = zf.entries.select do |e|
-            e.name.start_with?("concepts/") && e.name.end_with?(".yaml")
-          end
-          if concept_entries.empty?
-            result.add_error("No concept files found in concepts/")
-          end
-
-          concept_entries.each do |entry|
-            validate_concept_entry(entry, metadata, result)
-          end
+        Zip::File.open(zip_path) do |zip_file|
+          validate_zip_contents(zip_file, result)
         end
       rescue StandardError => e
         result.add_error("Failed to read ZIP: #{e.message}")
@@ -43,6 +24,31 @@ module Glossarist
     end
 
     private
+
+    def validate_zip_contents(zip_file, result) # rubocop:disable Metrics/AbcSize
+      unless zip_file.find_entry("metadata.yaml")
+        result.add_error("Missing metadata.yaml")
+        return
+      end
+
+      metadata = GcrMetadata.from_yaml(
+        zip_file.find_entry("metadata.yaml").get_input_stream.read,
+      )
+      validate_metadata(metadata, result)
+
+      concept_entries = zip_file.entries.select do |e|
+        e.name.start_with?("concepts/") && e.name.end_with?(".yaml")
+      end
+      if concept_entries.empty?
+        result.add_error("No concept files found in concepts/")
+      end
+
+      concept_entries.each do |entry|
+        validate_concept_entry(entry, metadata, result)
+      end
+
+      validate_assets(zip_file, result)
+    end
 
     def validate_metadata(metadata, result)
       unless metadata&.concept_count
@@ -93,6 +99,37 @@ module Glossarist
       if concept_uri.nil? && template.nil? && uri_prefix.nil?
         result.add_warning("#{entry.name}: no concept URI (data.uri) and no concept_uri_template or uri_prefix in metadata")
       end
+    end
+
+    def validate_assets(zip_file, result)
+      GcrPackage::DATASET_ASSETS.each do |asset|
+        case asset[:type]
+        when :file
+          validate_file_asset_entry(zip_file, asset[:path], result)
+        when :directory
+          validate_directory_asset(zip_file, asset[:path], result)
+        end
+      end
+    end
+
+    def validate_file_asset_entry(zip_file, path, result)
+      entry = zip_file.find_entry(path)
+      return unless entry
+
+      YAML.safe_load(entry.get_input_stream.read)
+    rescue Psych::SyntaxError => e
+      result.add_error("#{path}: invalid YAML at line #{e.line}: #{e.message}")
+    end
+
+    def validate_directory_asset(zip_file, dir_path, result)
+      dir_entries = zip_file.entries.select do |e|
+        e.name.start_with?("#{dir_path}/")
+      end
+      return unless dir_entries.any? && dir_entries.all? do |e|
+        e.name.end_with?("/")
+      end
+
+      result.add_warning("#{dir_path}/ directory is empty")
     end
   end
 end
