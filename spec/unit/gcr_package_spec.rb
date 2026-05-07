@@ -414,4 +414,271 @@ RSpec.describe Glossarist::GcrPackage do
                                                                "turtle")
     end
   end
+
+  describe "bibliography and images" do
+    before do
+      @tmpdir = Dir.mktmpdir
+    end
+
+    after do
+      FileUtils.rm_rf(@tmpdir)
+    end
+
+    def create_source_with_assets(include_bibliography: true, # rubocop:disable Metrics/AbcSize
+                                   include_images: true)
+      source = File.join(@tmpdir, "source")
+      concepts_dir = File.join(source, "concepts")
+      FileUtils.mkdir_p(concepts_dir)
+
+      concept = {
+        "termid" => "100",
+        "term" => "latitude",
+        "eng" => {
+          "terms" => [{ "type" => "expression", "designation" => "latitude" }],
+          "definition" => [{ "content" => "angular distance" }],
+        },
+      }
+      File.write(File.join(concepts_dir, "100.yaml"), YAML.dump(concept))
+
+      if include_bibliography
+        write_test_bibliography(source)
+      end
+
+      if include_images
+        write_test_images(source)
+      end
+
+      source
+    end
+
+    def write_test_bibliography(source)
+      bib = {
+        "ISO_19111_2019" => {
+          "type" => "standard",
+          "title" => "Geographic information — Referencing by coordinates",
+        },
+      }
+      File.write(File.join(source, "bibliography.yaml"), YAML.dump(bib))
+    end
+
+    def write_test_images(source)
+      FileUtils.mkdir_p(File.join(source, "images", "diagrams"))
+      File.binwrite(File.join(source, "images", "figure1.png"),
+                    "\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR")
+      File.binwrite(File.join(source, "images", "diagrams", "schema.png"),
+                    "\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR2")
+    end
+
+    it "includes bibliography.yaml in batch mode" do
+      source = create_source_with_assets(include_images: false)
+      output = File.join(@tmpdir, "output.gcr")
+
+      described_class.create_from_directory(
+        source,
+        output: output,
+        shortname: "test",
+        version: "1.0.0",
+      )
+
+      Zip::File.open(output) do |zf|
+        entry = zf.find_entry("bibliography.yaml")
+        expect(entry).not_to be_nil
+        parsed = YAML.safe_load(entry.get_input_stream.read)
+        expect(parsed).to have_key("ISO_19111_2019")
+      end
+    end
+
+    it "includes images/ in batch mode" do
+      source = create_source_with_assets(include_bibliography: false)
+      output = File.join(@tmpdir, "output.gcr")
+
+      described_class.create_from_directory(
+        source,
+        output: output,
+        shortname: "test",
+        version: "1.0.0",
+      )
+
+      Zip::File.open(output) do |zf|
+        expect(zf.find_entry("images/figure1.png")).not_to be_nil
+        expect(zf.find_entry("images/diagrams/schema.png")).not_to be_nil
+      end
+    end
+
+    it "skips bibliography.yaml when absent" do
+      source = create_source_with_assets(include_bibliography: false,
+                                         include_images: false)
+      output = File.join(@tmpdir, "output.gcr")
+
+      described_class.create_from_directory(
+        source,
+        output: output,
+        shortname: "test",
+        version: "1.0.0",
+      )
+
+      Zip::File.open(output) do |zf|
+        expect(zf.find_entry("bibliography.yaml")).to be_nil
+      end
+    end
+
+    it "skips images/ when absent" do
+      source = create_source_with_assets(include_bibliography: false,
+                                         include_images: false)
+      output = File.join(@tmpdir, "output.gcr")
+
+      described_class.create_from_directory(
+        source,
+        output: output,
+        shortname: "test",
+        version: "1.0.0",
+      )
+
+      Zip::File.open(output) do |zf|
+        image_entries = zf.entries.select { |e| e.name.start_with?("images/") }
+        expect(image_entries).to be_empty
+      end
+    end
+
+    it "preserves binary content of images" do
+      source = create_source_with_assets(include_bibliography: false)
+      original = File.binread(File.join(source, "images", "figure1.png"))
+      output = File.join(@tmpdir, "output.gcr")
+
+      described_class.create_from_directory(
+        source,
+        output: output,
+        shortname: "test",
+        version: "1.0.0",
+      )
+
+      Zip::File.open(output) do |zf|
+        content = zf.find_entry("images/figure1.png").get_input_stream.read
+        expect(content.bytes).to eq(original.bytes)
+      end
+    end
+
+    it "reads bibliography from loaded GCR" do
+      source = create_source_with_assets(include_images: false)
+      output = File.join(@tmpdir, "output.gcr")
+
+      described_class.create_from_directory(
+        source,
+        output: output,
+        shortname: "test",
+        version: "1.0.0",
+      )
+
+      pkg = described_class.load(output)
+      expect(pkg.bibliography).not_to be_nil
+      parsed = YAML.safe_load(pkg.bibliography)
+      expect(parsed).to have_key("ISO_19111_2019")
+    end
+
+    it "returns nil bibliography when GCR has none" do
+      source = create_source_with_assets(include_bibliography: false,
+                                         include_images: false)
+      output = File.join(@tmpdir, "output.gcr")
+
+      described_class.create_from_directory(
+        source,
+        output: output,
+        shortname: "test",
+        version: "1.0.0",
+      )
+
+      pkg = described_class.load(output)
+      expect(pkg.bibliography).to be_nil
+    end
+
+    it "includes bibliography in streaming mode" do
+      source = create_source_with_assets(include_images: false)
+      output = File.join(@tmpdir, "output.gcr")
+
+      described_class.create_from_directory(
+        source,
+        output: output,
+        shortname: "test",
+        version: "1.0.0",
+        streaming: true,
+      )
+
+      Zip::File.open(output) do |zf|
+        expect(zf.find_entry("bibliography.yaml")).not_to be_nil
+      end
+    end
+
+    it "includes images in streaming mode" do
+      source = create_source_with_assets(include_bibliography: false)
+      output = File.join(@tmpdir, "output.gcr")
+
+      described_class.create_from_directory(
+        source,
+        output: output,
+        shortname: "test",
+        version: "1.0.0",
+        streaming: true,
+      )
+
+      Zip::File.open(output) do |zf|
+        expect(zf.find_entry("images/figure1.png")).not_to be_nil
+        expect(zf.find_entry("images/diagrams/schema.png")).not_to be_nil
+      end
+    end
+
+    it "includes both bibliography and images in streaming mode" do
+      source = create_source_with_assets
+      output = File.join(@tmpdir, "output.gcr")
+
+      described_class.create_from_directory(
+        source,
+        output: output,
+        shortname: "test",
+        version: "1.0.0",
+        streaming: true,
+      )
+
+      Zip::File.open(output) do |zf|
+        expect(zf.find_entry("bibliography.yaml")).not_to be_nil
+        expect(zf.find_entry("images/figure1.png")).not_to be_nil
+        expect(zf.find_entry("concepts/100.yaml")).not_to be_nil
+        expect(zf.find_entry("metadata.yaml")).not_to be_nil
+      end
+    end
+
+    it "round-trips bibliography through create_from_directory → load" do
+      source = create_source_with_assets(include_images: false)
+      original_bib = File.binread(File.join(source, "bibliography.yaml"))
+      output = File.join(@tmpdir, "output.gcr")
+
+      described_class.create_from_directory(
+        source,
+        output: output,
+        shortname: "test",
+        version: "1.0.0",
+      )
+
+      pkg = described_class.load(output)
+      expect(pkg.bibliography.bytes).to eq(original_bib.bytes)
+    end
+
+    it "round-trips images through create_from_directory → zip inspection" do
+      source = create_source_with_assets(include_bibliography: false)
+      original = File.binread(File.join(source, "images", "diagrams",
+                                        "schema.png"))
+      output = File.join(@tmpdir, "output.gcr")
+
+      described_class.create_from_directory(
+        source,
+        output: output,
+        shortname: "test",
+        version: "1.0.0",
+      )
+
+      Zip::File.open(output) do |zf|
+        round_tripped = zf.find_entry("images/diagrams/schema.png").get_input_stream.read
+        expect(round_tripped.bytes).to eq(original.bytes)
+      end
+    end
+  end
 end

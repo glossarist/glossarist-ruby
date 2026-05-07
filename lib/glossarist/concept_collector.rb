@@ -41,13 +41,35 @@ module Glossarist
       def v1_concepts?(dir)
         concepts_dir = File.join(dir, "concepts")
         File.directory?(concepts_dir) &&
+          !v2_flat_concepts?(dir) &&
+          !managed_concepts?(dir) &&
           Dir.glob(File.join(concepts_dir, "*.yaml")).any? do |f|
             V1::Concept.from_file(f)&.termid?
           end
       end
 
       def v2_concepts?(dir)
-        File.directory?(File.join(dir, "geolexica-v2"))
+        File.directory?(File.join(dir, "geolexica-v2")) ||
+          v2_flat_concepts?(dir)
+      end
+
+      def v2_flat_concepts?(dir)
+        return false if managed_concepts?(dir)
+
+        concepts_dir = File.join(dir, "concepts")
+        return false unless File.directory?(concepts_dir)
+
+        Dir.glob(File.join(concepts_dir, "*.yaml")).first(5).any? do |f|
+          v2_flat_concept_file?(f)
+        end
+      end
+
+      def v2_flat_concept_file?(path)
+        raw = File.read(path, encoding: "utf-8")
+        doc = ConceptDocument.from_yamls(raw)
+        !!doc.concept&.data&.id
+      rescue StandardError
+        false
       end
 
       def managed_concepts?(dir)
@@ -74,24 +96,32 @@ module Glossarist
       end
 
       def collect_v2_concepts(dir)
-        v2_dir = File.join(dir, "geolexica-v2")
-        if File.directory?(File.join(v2_dir, "concepts"))
-          collect_managed_concepts(v2_dir)
+        if v2_flat_concepts?(dir)
+          collect_grouped_v2_concepts(File.join(dir, "concepts"))
         else
-          collect_grouped_v2_concepts(v2_dir)
+          v2_dir = File.join(dir, "geolexica-v2")
+          if File.directory?(File.join(v2_dir, "concepts"))
+            collect_managed_concepts(v2_dir)
+          else
+            collect_grouped_v2_concepts(v2_dir)
+          end
         end
       end
 
       def each_v2_concept(dir, &block)
-        v2_dir = File.join(dir, "geolexica-v2")
-        if File.directory?(File.join(v2_dir, "concepts"))
-          each_managed_concept(v2_dir, &block)
+        if v2_flat_concepts?(dir)
+          each_grouped_v2_concepts(File.join(dir, "concepts"), &block)
         else
-          each_grouped_v2_concept(v2_dir, &block)
+          v2_dir = File.join(dir, "geolexica-v2")
+          if File.directory?(File.join(v2_dir, "concepts"))
+            each_managed_concept(v2_dir, &block)
+          else
+            each_grouped_v2_concepts(v2_dir, &block)
+          end
         end
       end
 
-      def each_grouped_v2_concept(v2_dir, &block)
+      def each_grouped_v2_concepts(v2_dir, &block)
         collection = ManagedConceptCollection.new
         manager = ConceptManager.new(path: v2_dir)
         manager.load_from_files(collection: collection)
