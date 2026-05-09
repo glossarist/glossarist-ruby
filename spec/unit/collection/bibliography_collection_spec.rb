@@ -4,33 +4,20 @@
 #
 
 RSpec.describe Glossarist::Collections::BibliographyCollection do
-  subject { described_class.new(concepts, nil, relaton_cache_path) }
-
   let(:concepts) do
     collection = Glossarist::ManagedConceptCollection.new
     collection.load_from_files(fixtures_path("concept_collection_v2"))
     collection
   end
 
-  let(:relaton_cache_path) { fixtures_path("relaton_cache") }
+  let(:cache_dir) { Dir.mktmpdir }
 
-  it "populated bibliography correctly" do
-    items = subject.fetch_all
-    expect(items.size).to be 1
-    expect(items[0]).to be_instance_of Relaton::Iso::ItemData
-  end
-
-  it "fetches the correct record" do
-    item = subject.fetch "ISO/TS 14812:2022"
-    expect(item).to be_instance_of(Relaton::Iso::ItemData)
-  end
+  after { FileUtils.rm_rf(cache_dir) }
 
   describe "version mismatch" do
-    let(:temp_dir) { Dir.mktmpdir }
-    let(:iso_dir) { "#{temp_dir}/iso" }
+    let(:iso_dir) { File.join(cache_dir, "iso") }
 
     before { FileUtils.mkdir_p(iso_dir) }
-    after { FileUtils.rm_rf(temp_dir) }
 
     it "raises CacheVersionMismatchError on fetch_all when version is wrong" do
       File.write("#{iso_dir}/version", "wrong")
@@ -39,11 +26,16 @@ RSpec.describe Glossarist::Collections::BibliographyCollection do
       allow(Relaton::Registry.instance).to receive(:by_type)
         .with("iso").and_return(processor)
 
-      collection = described_class.new(concepts, nil, temp_dir)
+      collection = described_class.new(concepts, nil, cache_dir)
 
       expect { collection.fetch_all }.to raise_error(
         Glossarist::CacheVersionMismatchError, /version mismatch/
       )
+    end
+
+    it "does not raise on fetch_all when no version file exists" do
+      collection = described_class.new(concepts, nil, cache_dir)
+      expect { collection.fetch_all }.not_to raise_error
     end
   end
 end

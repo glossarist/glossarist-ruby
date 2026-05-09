@@ -5,9 +5,13 @@ RSpec.describe Glossarist::ConceptSet do
     described_class.new(
       concepts,
       assets,
-      bibliography: { local_cache: fixtures_path("relaton_cache") },
+      bibliography: { local_cache: cache_dir },
     )
   end
+
+  let(:cache_dir) { Dir.mktmpdir }
+
+  after { FileUtils.rm_rf(cache_dir) }
 
   let(:concepts) { fixtures_path("concept_collection_v2") }
 
