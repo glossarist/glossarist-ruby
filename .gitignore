@@ -16,8 +16,9 @@
 .rubocop-http---*
 .rubocop-https---*
 
-# Relaton local cache directory
+# Relaton cache directories
 localcache
+spec/fixtures/relaton_cache/
 
 .vscode
 
