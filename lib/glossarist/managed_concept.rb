@@ -1,4 +1,4 @@
-require_relative "localized_concept"
+# frozen_string_literal: true
 
 module Glossarist
   class ManagedConcept < Lutaml::Model::Serializable

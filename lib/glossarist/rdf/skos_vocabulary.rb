@@ -2,7 +2,6 @@
 
 require "lutaml/turtle"
 require "lutaml/jsonld"
-require_relative "../rdf"
 
 module Glossarist
   module Rdf

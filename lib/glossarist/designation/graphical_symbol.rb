@@ -1,4 +1,4 @@
-require_relative "symbol"
+# frozen_string_literal: true
 
 module Glossarist
   module Designation

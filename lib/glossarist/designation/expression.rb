@@ -1,5 +1,4 @@
-require_relative "base"
-require_relative "grammar_info"
+# frozen_string_literal: true
 
 module Glossarist
   module Designation

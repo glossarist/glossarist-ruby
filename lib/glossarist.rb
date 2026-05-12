@@ -7,14 +7,13 @@ require "psych"
 require "thor"
 require "lutaml/model"
 
-require_relative "glossarist/glossary_definition"
-
 module Glossarist
   autoload :Asset,                    "glossarist/asset"
   autoload :Citation,                 "glossarist/citation"
   autoload :CLI,                      "glossarist/cli"
   autoload :CollectionConfig,         "glossarist/collection_config"
   autoload :Collection,               "glossarist/collection"
+  autoload :Collections,              "glossarist/collections"
   autoload :Concept,                  "glossarist/concept"
   autoload :ConceptData,              "glossarist/concept_data"
   autoload :ConceptReference,         "glossarist/concept_reference"
@@ -35,10 +34,10 @@ module Glossarist
   autoload :DetailedDefinition,       "glossarist/detailed_definition"
   autoload :Designation,              "glossarist/designation"
   autoload :Error,                    "glossarist/error"
-  autoload :GcrPackage,              "glossarist/gcr_package"
-  autoload :GcrMetadata,             "glossarist/gcr_metadata"
-  autoload :GcrStatistics,           "glossarist/gcr_statistics"
-  autoload :GcrValidator,            "glossarist/gcr_validator"
+  autoload :GcrPackage,               "glossarist/gcr_package"
+  autoload :GcrMetadata,              "glossarist/gcr_metadata"
+  autoload :GcrStatistics,            "glossarist/gcr_statistics"
+  autoload :GcrValidator,             "glossarist/gcr_validator"
   autoload :InvalidTypeError, "glossarist/error/invalid_type_error"
   autoload :InvalidLanguageCodeError,
            "glossarist/error/invalid_language_code_error"
@@ -52,16 +51,20 @@ module Glossarist
   autoload :ManagedConceptData,       "glossarist/managed_concept_data"
   autoload :NonVerbRep,               "glossarist/non_verb_rep"
   autoload :RelatedConcept,           "glossarist/related_concept"
+  autoload :Rdf,                      "glossarist/rdf"
+  autoload :Sts,                      "glossarist/sts"
+  autoload :Transforms,               "glossarist/transforms"
   autoload :SchemaMigration,          "glossarist/schema_migration"
   autoload :UrnResolver,              "glossarist/urn_resolver"
   autoload :Utilities,                "glossarist/utilities"
-  autoload :RegisterData, "glossarist/register_data"
+  autoload :RegisterData,             "glossarist/register_data"
   autoload :ValidationResult,         "glossarist/validation_result"
   autoload :V1,                       "glossarist/v1"
 end
 
 require_relative "glossarist/version"
 require_relative "glossarist/collections"
+require_relative "glossarist/glossary_definition"
 
 module Glossarist
   LANG_CODES = %w[eng ara deu fra spa ita jpn kor pol por srp swe zho rus fin
