@@ -2,28 +2,45 @@
 
 module Glossarist
   class ValidationResult
-    attr_reader :errors, :warnings
+    attr_reader :issues
 
-    def initialize(errors: [], warnings: [])
-      @errors = errors
-      @warnings = warnings
+    def initialize(errors: [], warnings: [], issues: [])
+      @issues = []
+      errors.each { |e| add_error(e) }
+      warnings.each { |w| add_warning(w) }
+      issues.each { |i| add_issue(i) }
     end
 
     def valid?
-      @errors.empty?
+      @issues.none?(&:error?)
+    end
+
+    def errors
+      @issues.select(&:error?).map(&:message)
+    end
+
+    def warnings
+      @issues.select(&:warning?).map(&:message)
     end
 
     def add_error(message)
-      @errors << message
+      @issues << Validation::ValidationIssue.new(
+        severity: "error", message: message,
+      )
     end
 
     def add_warning(message)
-      @warnings << message
+      @issues << Validation::ValidationIssue.new(
+        severity: "warning", message: message,
+      )
+    end
+
+    def add_issue(issue)
+      @issues << issue
     end
 
     def merge(other)
-      other.errors.each { |e| add_error(e) }
-      other.warnings.each { |w| add_warning(w) }
+      other.issues.each { |i| @issues << i }
       self
     end
 
