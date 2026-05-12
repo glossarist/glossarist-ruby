@@ -507,6 +507,123 @@ puts skos.to_jsonld
 puts skos.to_turtle
 ----
 
+=== import
+
+Import terminology concepts from STS XML files into a new or existing dataset.
+
+[,bash]
+----
+# Import one or more STS XML files into a new dataset directory
+glossarist import iso-8373.xml -o output_dir
+
+# Import into a new GCR package (--shortname and --version required)
+glossarist import iso-8373.xml -o iso-8373.gcr \
+  --shortname iso-8373 --version 1.0.0 --title "ISO 8373 Robotics"
+
+# Import multiple files into a new dataset
+glossarist import iso-8373.xml iso-9000.xml -o combined_dataset
+
+# Import into an existing dataset (dedup by designation + domain)
+glossarist import iso-8373.xml --into existing_dataset/
+
+# Import into an existing GCR (re-packages automatically)
+glossarist import iso-8373.xml --into existing.gcr
+
+# Control duplicate handling
+glossarist import iso-8373.xml --into existing_dataset/ --on-duplicate replace
+----
+
+Deduplication is based on **designation + domain** (case-insensitive). When
+duplicates are found, the `--on-duplicate` strategy determines the behavior:
+
+[cols="1,2"]
+|===
+|`skip` (default)
+|Keep the existing concept, skip the new one
+
+|`replace`
+|Replace the existing concept with the new one
+
+|`merge`
+|Add new localizations to the existing concept (e.g. add French to an English-only concept)
+|===
+
+Options:
+[cols="1,1"]
+|===
+|o, --output
+|Output directory or `.gcr` file path (new dataset)
+
+|--into
+|Path to existing dataset directory or `.gcr` file to merge into
+
+|--shortname
+|Dataset shortname (required for GCR output)
+
+|--version
+|Dataset version (required for GCR output)
+
+|--title
+|Dataset title
+
+|--description
+|Dataset description
+
+|--owner
+|Dataset owner
+
+|--uri-prefix
+|URI prefix for the dataset
+
+|--on-duplicate
+|How to handle duplicates: `skip`, `replace`, or `merge`
+|===
+
+Ruby API:
+[,ruby]
+----
+require "glossarist/sts"
+
+importer = Glossarist::Sts::Importer.new
+
+# Import into a new dataset directory
+result = importer.import_new(
+  ["iso-8373.xml", "iso-9000.xml"],
+  output: "output_dir",
+)
+puts result.concepts.length    # total concepts imported
+puts result.conflicts.length   # duplicates detected
+puts result.skipped_count      # skipped (strategy: skip)
+
+# Import into a new GCR package
+result = importer.import_new(
+  ["iso-8373.xml"],
+  output: "iso-8373.gcr",
+  shortname: "iso-8373",
+  version: "1.0.0",
+  title: "ISO 8373 Robotics Vocabulary",
+)
+
+# Import into an existing dataset with merge strategy
+importer = Glossarist::Sts::Importer.new(duplicate_strategy: :merge)
+result = importer.import_into_existing(
+  ["french_supplement.xml"],
+  "existing_dataset/",
+)
+result.concepts.each do |mc|
+  puts "#{mc.data.id}: #{mc.localizations.keys.join(', ')}"
+end
+----
+
+==== Import result
+
+`import_new` and `import_into_existing` return an `ImportResult` with:
+
+concepts:: `Array<ManagedConcept>` — the imported concepts
+conflicts:: `Array<DuplicateConflict>` — duplicate pairs detected by designation + domain
+source_files:: `Array<String>` — the input file paths
+skipped_count:: `Integer` — concepts skipped due to duplicates (strategy: skip)
+
 === validate
 
 Validate a dataset directory or `.gcr` file for schema compliance.
