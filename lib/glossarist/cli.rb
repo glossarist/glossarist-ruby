@@ -4,6 +4,11 @@ require "thor"
 
 module Glossarist
   class CLI < Thor
+    autoload :UpgradeCommand, "#{__dir__}/cli/upgrade_command"
+    autoload :PackageCommand,  "#{__dir__}/cli/package_command"
+    autoload :ValidateCommand, "#{__dir__}/cli/validate_command"
+    autoload :ImportCommand,   "#{__dir__}/cli/import_command"
+    autoload :ExportCommand,   "#{__dir__}/cli/export_command"
     desc "generate_latex", "Convert Concepts to Latex format"
 
     option :concepts_path, aliases: :p, required: true,
@@ -38,8 +43,7 @@ module Glossarist
     option :dry_run, type: :boolean, default: false,
                      desc: "Show what would change without writing"
     def upgrade(source_dir)
-      require_relative "cli/upgrade_command"
-      Glossarist::CLI::UpgradeCommand.new(source_dir, options).run
+      CLI::UpgradeCommand.new(source_dir, options).run
     end
 
     desc "package DIR", "Create a .gcr ZIP archive from a schema v1 dataset"
@@ -62,8 +66,7 @@ module Glossarist
     option :concept_uri_template, type: :string,
                                   desc: "URI template for concept URIs"
     def package(dir)
-      require_relative "cli/package_command"
-      Glossarist::CLI::PackageCommand.new(dir, options).run
+      CLI::PackageCommand.new(dir, options).run
     end
 
     desc "validate PATH",
@@ -76,8 +79,27 @@ module Glossarist
     option :reference_path, type: :string,
                             desc: "Path to directory of .gcr files for cross-dataset reference validation"
     def validate(path)
-      require_relative "cli/validate_command"
-      Glossarist::CLI::ValidateCommand.new(path, options).run
+      CLI::ValidateCommand.new(path, options).run
+    end
+
+    desc "import FILES...", "Import terms from STS XML files"
+    option :output, aliases: :o, type: :string,
+                    desc: "Output directory or .gcr file path (new dataset)"
+    option :into, type: :string,
+                  desc: "Path to existing dataset directory or .gcr file to merge into"
+    option :shortname, type: :string,
+                       desc: "Dataset shortname (required for GCR output)"
+    option :version, type: :string,
+                     desc: "Dataset version (required for GCR output)"
+    option :title, type: :string, desc: "Dataset title"
+    option :description, type: :string, desc: "Dataset description"
+    option :owner, type: :string, desc: "Dataset owner"
+    option :uri_prefix, type: :string, desc: "URI prefix for the dataset"
+    option :on_duplicate, type: :string, default: "skip",
+                          enum: %w[skip replace merge],
+                          desc: "How to handle duplicate concepts (designation + domain)"
+    def import(*files)
+      CLI::ImportCommand.new(files, options).run
     end
 
     desc "export PATH", "Export concepts in machine-readable formats"
@@ -95,8 +117,7 @@ module Glossarist
     option :title, type: :string,
                    desc: "Dataset title for document header"
     def export(path)
-      require_relative "cli/export_command"
-      Glossarist::CLI::ExportCommand.new(path, options).run
+      CLI::ExportCommand.new(path, options).run
     end
 
     def method_missing(*args)
