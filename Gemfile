@@ -14,5 +14,5 @@ gem "rubocop"
 gem "rubocop-performance"
 gem "rubocop-rake"
 gem "rubocop-rspec"
-gem "sts", "~> 0.5.6"
-gem "tbx", "~> 0.1"
+
+
