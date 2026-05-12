@@ -4,7 +4,7 @@ require "zip"
 
 module Glossarist
   class GcrValidator
-    def validate(zip_path) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+    def validate(zip_path)
       result = ValidationResult.new
 
       unless File.exist?(zip_path)
@@ -13,123 +13,48 @@ module Glossarist
       end
 
       begin
-        Zip::File.open(zip_path) do |zip_file|
-          validate_zip_contents(zip_file, result)
-        end
+        zip_entries = Zip::File.open(zip_path) { |zf| zf.entries.to_set(&:name) }
       rescue StandardError => e
         result.add_error("Failed to read ZIP: #{e.message}")
+        return result
+      end
+
+      unless zip_entries.include?("metadata.yaml")
+        result.add_error("Missing metadata.yaml")
+        return result
+      end
+
+      begin
+        context = Validation::Rules::GcrContext.new(zip_path)
+      rescue StandardError => e
+        result.add_error("Failed to load GCR: #{e.message}")
+        return result
+      end
+
+      # Collection-level rules (metadata, structure, integrity)
+      collection_rules = Validation::Rules::Registry.for_scope(:collection)
+      collection_rules.each do |rule|
+        next unless rule.applicable?(context)
+
+        rule.check(context).each { |i| result.add_issue(i) }
+      end
+
+      # Per-concept rules
+      concept_rules = Validation::Rules::Registry.for_scope(:concept)
+      context.concepts.each_with_index do |concept, idx|
+        fname = concept.data&.id ? "concepts/#{concept.data.id}.yaml" : "concepts/concept-#{idx}.yaml"
+        concept_context = Validation::Rules::ConceptContext.new(
+          concept, file_name: fname, collection_context: context
+        )
+
+        concept_rules.each do |rule|
+          next unless rule.applicable?(concept_context)
+
+          rule.check(concept_context).each { |i| result.add_issue(i) }
+        end
       end
 
       result
-    end
-
-    private
-
-    def validate_zip_contents(zip_file, result) # rubocop:disable Metrics/AbcSize
-      unless zip_file.find_entry("metadata.yaml")
-        result.add_error("Missing metadata.yaml")
-        return
-      end
-
-      metadata = GcrMetadata.from_yaml(
-        zip_file.find_entry("metadata.yaml").get_input_stream.read,
-      )
-      validate_metadata(metadata, result)
-
-      concept_entries = zip_file.entries.select do |e|
-        e.name.start_with?("concepts/") && e.name.end_with?(".yaml")
-      end
-      if concept_entries.empty?
-        result.add_error("No concept files found in concepts/")
-      end
-
-      concept_entries.each do |entry|
-        validate_concept_entry(entry, metadata, result)
-      end
-
-      validate_assets(zip_file, result)
-    end
-
-    def validate_metadata(metadata, result)
-      unless metadata&.concept_count
-        result.add_error("metadata.yaml missing required fields (concept_count)")
-      end
-
-      unless metadata&.shortname
-        result.add_error("metadata.yaml missing shortname")
-      end
-
-      unless metadata&.version
-        result.add_error("metadata.yaml missing version")
-      end
-    end
-
-    def validate_concept_entry(entry, metadata, result) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
-      raw = entry.get_input_stream.read
-      doc = ConceptDocument.from_yamls(raw)
-    rescue Psych::SyntaxError => e
-      result.add_error("#{entry.name}: invalid YAML at line #{e.line}: #{e.message}")
-    rescue StandardError => e
-      result.add_error("#{entry.name}: parse error: #{e.message}")
-    else
-      concept = doc.concept
-      unless concept&.data&.id
-        result.add_error("#{entry.name}: document 0 missing data.identifier")
-      end
-
-      localizations = doc.localizations
-      if localizations.empty?
-        result.add_error("#{entry.name}: expected at least 1 localization document")
-      else
-        localizations.each_with_index do |l10n, idx|
-          unless l10n&.language_code
-            result.add_error("#{entry.name}: document #{idx + 1} missing data.language_code")
-          end
-        end
-      end
-
-      validate_concept_uri(entry, concept, metadata, result)
-    end
-
-    def validate_concept_uri(entry, concept, metadata, result) # rubocop:disable Metrics/CyclomaticComplexity
-      concept_uri = concept&.data&.uri
-      template = metadata&.concept_uri_template
-      uri_prefix = metadata&.uri_prefix
-
-      if concept_uri.nil? && template.nil? && uri_prefix.nil?
-        result.add_warning("#{entry.name}: no concept URI (data.uri) and no concept_uri_template or uri_prefix in metadata")
-      end
-    end
-
-    def validate_assets(zip_file, result)
-      GcrPackage::DATASET_ASSETS.each do |asset|
-        case asset[:type]
-        when :file
-          validate_file_asset_entry(zip_file, asset[:path], result)
-        when :directory
-          validate_directory_asset(zip_file, asset[:path], result)
-        end
-      end
-    end
-
-    def validate_file_asset_entry(zip_file, path, result)
-      entry = zip_file.find_entry(path)
-      return unless entry
-
-      YAML.safe_load(entry.get_input_stream.read)
-    rescue Psych::SyntaxError => e
-      result.add_error("#{path}: invalid YAML at line #{e.line}: #{e.message}")
-    end
-
-    def validate_directory_asset(zip_file, dir_path, result)
-      dir_entries = zip_file.entries.select do |e|
-        e.name.start_with?("#{dir_path}/")
-      end
-      return unless dir_entries.any? && dir_entries.all? do |e|
-        e.name.end_with?("/")
-      end
-
-      result.add_warning("#{dir_path}/ directory is empty")
     end
   end
 end

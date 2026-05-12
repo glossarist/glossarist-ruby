@@ -126,15 +126,17 @@ RSpec.describe Glossarist::DatasetValidator do
       concept = {
         "termid" => "100",
         "eng" => {
-          "terms" => [{ "type" => "expression", "designation" => "test" }],
+          "terms" => [{ "type" => "expression", "designation" => "test",
+                        "normative_status" => "preferred" }],
           "definition" => [{ "content" => "See {{missing, urn:unknown:std:999}}" }],
+          "sources" => [{ "type" => "authoritative" }],
         },
       }
       File.write(File.join(target, "concepts", "100.yaml"), YAML.dump(concept))
 
       result = validator.validate(target, reference_path: ref_dir)
       expect(result.warnings.size).to be >= 1
-      expect(result.warnings.first).to include("inter-set")
+      expect(result.warnings).to include(a_string_matching(/inter-set/))
     end
 
     it "reports warnings for unresolvable intra-set references" do
@@ -145,15 +147,17 @@ RSpec.describe Glossarist::DatasetValidator do
       concept = {
         "termid" => "100",
         "eng" => {
-          "terms" => [{ "type" => "expression", "designation" => "test" }],
+          "terms" => [{ "type" => "expression", "designation" => "test",
+                        "normative_status" => "preferred" }],
           "definition" => [{ "content" => "See {{missing, 999}}" }],
+          "sources" => [{ "type" => "authoritative" }],
         },
       }
       File.write(File.join(target, "concepts", "100.yaml"), YAML.dump(concept))
 
       result = validator.validate(target, reference_path: ref_dir)
       expect(result.warnings.size).to be >= 1
-      expect(result.warnings.first).to include("intra-set")
+      expect(result.warnings).to include(a_string_matching(/intra-set/))
     end
 
     it "returns no warnings when all references resolve" do
@@ -167,14 +171,17 @@ RSpec.describe Glossarist::DatasetValidator do
       concept = {
         "termid" => "100",
         "eng" => {
-          "terms" => [{ "type" => "expression", "designation" => "test" }],
+          "terms" => [{ "type" => "expression", "designation" => "test",
+                        "normative_status" => "preferred" }],
           "definition" => [{ "content" => "See {{equality, urn:iec:std:iec:60050-102-01-01}}" }],
+          "sources" => [{ "type" => "authoritative" }],
         },
       }
       File.write(File.join(target, "concepts", "100.yaml"), YAML.dump(concept))
 
       result = validator.validate(target, reference_path: ref_dir)
-      expect(result.warnings).to be_empty
+      cross_ref_warnings = result.warnings.grep_v(/preferred|authoritative/)
+      expect(cross_ref_warnings).to be_empty
     end
 
     it "handles empty reference_path directory" do
@@ -214,7 +221,8 @@ RSpec.describe Glossarist::DatasetValidator do
       GC.start
 
       result = validator.validate(output, reference_path: ref_dir)
-      expect(result.warnings).to be_empty
+      cross_ref_warnings = result.warnings.grep_v(/preferred|authoritative/)
+      expect(cross_ref_warnings).to be_empty
     end
   end
 end

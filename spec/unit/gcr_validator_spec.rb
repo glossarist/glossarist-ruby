@@ -81,7 +81,7 @@ RSpec.describe Glossarist::GcrValidator do
       GC.start
       result = validator.validate(output)
       expect(result.warnings).not_to be_empty
-      expect(result.warnings.first).to include("no concept URI")
+      expect(result.warnings).to include(a_string_matching(/no concept URI/))
     end
 
     it "validates bibliography.yaml as YAML when present" do
