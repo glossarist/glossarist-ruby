@@ -74,36 +74,24 @@ RSpec.describe Glossarist::Validation::AssetIndex do
 
   describe ".build_from_zip" do
     it "indexes image entries from the ZIP" do
-      Dir.mktmpdir do |dir|
-        gcr_path = File.join(dir, "test.gcr")
-        mc = Glossarist::ManagedConcept.new(data: { id: "1" })
-        l10n = Glossarist::LocalizedConcept.of_yaml({
-                                                      "data" => {
-                                                        "language_code" => "eng",
-                                                        "terms" => [{
-                                                          "type" => "expression", "designation" => "test"
-                                                        }],
-                                                        "definition" => [{ "content" => "def" }],
-                                                      },
-                                                    })
-        mc.add_localization(l10n)
-        metadata = Glossarist::GcrMetadata.new(
-          shortname: "test", version: "1.0.0",
-          concept_count: 1, languages: ["eng"], schema_version: "1",
-          uri_prefix: "urn:test"
-        )
-        Glossarist::GcrPackage.create(
-          concepts: [mc], metadata: metadata,
-          register_data: nil, output_path: gcr_path
-        )
+      tmpdir = Dir.mktmpdir
+      gcr_path = File.join(tmpdir, "test.gcr")
+      buffer = StringIO.new
 
-        Zip::File.open(gcr_path, create: false) do |zf|
-          zf.get_output_stream("images/logo.png") { |f| f.write("data") }
-        end
-
-        index = described_class.build_from_zip(gcr_path)
-        expect(index.resolve?("images/logo.png")).to be true
+      Zip::OutputStream.write_buffer(buffer) do |zos|
+        zos.put_next_entry("metadata.yaml")
+        zos.write(YAML.dump({ "shortname" => "test" }))
+        zos.put_next_entry("images/logo.png")
+        zos.write("data")
       end
+
+      File.binwrite(gcr_path, buffer.string)
+      GC.start
+
+      index = described_class.build_from_zip(gcr_path)
+      expect(index.resolve?("images/logo.png")).to be true
+    ensure
+      FileUtils.rm_rf(tmpdir)
     end
   end
 end

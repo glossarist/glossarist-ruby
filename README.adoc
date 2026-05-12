@@ -626,12 +626,14 @@ skipped_count:: `Integer` — concepts skipped due to duplicates (strategy: skip
 
 === validate
 
-Validate a dataset directory or `.gcr` file for schema compliance.
+Validate a dataset directory or `.gcr` file for schema compliance, structural
+integrity, cross-reference resolution, and data quality.
 
 [,bash]
 ----
 glossarist validate PATH
 glossarist validate PATH --reference-path path/to/gcrs/
+glossarist validate PATH --strict
 ----
 
 Options:
@@ -656,6 +658,210 @@ result.valid?   # => true/false
 result.errors   # => [...]
 result.warnings # => [...]
 ----
+
+== Validation System
+
+Glossarist provides a rule-based validation framework that checks dataset
+directories and GCR packages for structural, schema, reference, integrity,
+quality, and localization issues.
+
+=== Architecture
+
+The validation system uses the **rule-registry pattern** (Open/Closed
+Principle). Each check is a self-describing rule class that subclasses
+`Glossarist::Validation::Rules::Base`. New rules are added by subclassing and
+registering — no existing code is modified.
+
+```
+Glossarist::Validation
+├── Rules
+│   ├── Base                    # Abstract rule: code, category, severity, scope, check
+│   ├── Registry                # Global registry: register, all, for_category, for_scope
+│   ├── DatasetContext          # Lazy-loaded access to a directory dataset
+│   ├── GcrContext              # Lazy-loaded access to a .gcr package
+│   └── (26 rule classes)      # One file per rule
+├── ValidationIssue             # Single finding: severity, code, message, location, suggestion
+├── BibliographyIndex           # Index of bibliography anchors from sources + bibliography.yaml
+├── AssetIndex                  # Index of asset paths from images/ directory or GCR ZIP
+├── ConceptValidator            # Orchestrator: runs per-concept rules
+├── GcrValidator                # Orchestrator: runs GCR-level rules
+└── DatasetValidator            # Orchestrator: runs directory-level + collection rules
+```
+
+=== Rule Categories
+
+Rules are classified into six MECE (Mutually Exclusive, Collectively
+Exhaustive) categories:
+
+[cols="1,2"]
+|===
+|Category |What it checks
+
+|`structure` |File/directory layout, ZIP contents, required parts
+|`schema` |Field types, enum values, required fields, YAML syntax
+|`references` |Cross-references between concepts, bibliography, assets
+|`integrity` |Metadata vs. reality, filename vs. ID, UUID cross-references
+|`quality` |Empty content, missing preferred terms, duplicate terms
+|`localization` |Language coverage, orphaned/missing localization files
+|===
+
+=== Built-in Rules
+
+The following rules are registered by default. Each rule has a unique code
+(e.g. `GLS-001`), a severity (`error` or `warning`), and a scope (`:concept`
+for per-concept checks or `:collection` for dataset-wide checks).
+
+==== Structure Rules
+
+[cols="1,2,1,1"]
+|===
+|Code |Rule |Severity |Scope
+
+|GLS-001 |Concept ID is present |error |`:concept`
+|GLS-002 |At least one localization per concept |error |`:concept`
+|GLS-005 |Each localization has at least 1 term |error |`:concept`
+|GLS-020-YAML |bibliography.yaml is valid YAML |error |`:collection`
+|===
+
+==== Schema Rules
+
+[cols="1,2,1,1"]
+|===
+|Code |Rule |Severity |Scope
+
+|GLS-003 |Entry status is a valid enum value |error |`:concept`
+|GLS-201 |Concept status is a valid enum value |error |`:concept`
+|GLS-202/203 |Source type and status are valid enums |error |`:concept`
+|GLS-200 |Related concept type is valid |error |`:concept`
+|GLS-204 |Designation normative_status is valid |error |`:concept`
+|GLS-205 |Date type is a valid enum |warning |`:concept`
+|GLS-206 |Language code is exactly 3 lowercase letters |error |`:concept`
+|GLS-207 |Designation type maps to a known subclass |error |`:concept`
+|===
+
+==== Reference Rules
+
+[cols="1,2,1,1"]
+|===
+|Code |Rule |Severity |Scope
+
+|GLS-100 |`{{...}}` concept mentions resolve locally |warning |`:concept`
+|GLS-102 |`<<anchor>>` AsciiDoc xrefs resolve in bibliography index |warning |`:concept`
+|GLS-103-105 |Image references resolve in asset index |warning |`:concept`
+|GLS-110 |Related concept references resolve |warning |`:concept`
+|GLS-020 |Orphaned bibliography entries |warning |`:collection`
+|GLS-021 |Orphaned images |warning |`:collection`
+|GLS-112 |Supersedes/superseded_by symmetry check |warning |`:collection`
+|GLS-113 |No circular related-concept chains |error |`:collection`
+|===
+
+==== Integrity Rules
+
+[cols="1,2,1,1"]
+|===
+|Code |Rule |Severity |Scope
+
+|GLS-001-U |Concept IDs are unique |error |`:collection`
+|GLS-011 |Concept count matches metadata |error |`:collection`
+|GLS-012 |Language list matches actual languages |warning |`:collection`
+|GLS-013 |Language coverage per concept |warning |`:concept`
+|GLS-015 |Filename matches concept ID (GCR) |error |`:concept`
+|GLS-016 |Concept URI is set or template is applicable |warning |`:collection`
+|GLS-018 |Localized concept UUID cross-references resolve |error |`:concept`
+|GLS-019 |Orphaned localization files |warning |`:collection`
+|===
+
+==== Quality Rules
+
+[cols="1,2,1,1"]
+|===
+|Code |Rule |Severity |Scope
+
+|GLS-300 |Definition content is non-empty |warning |`:concept`
+|GLS-301 |At least one preferred designation per localization |warning |`:concept`
+|GLS-302 |No duplicate preferred terms within a language |warning |`:collection`
+|GLS-304 |Source citation is not empty |warning |`:concept`
+|GLS-306 |At least one authoritative source |warning |`:concept`
+|GLS-307 |Date values are parseable |warning |`:concept`
+|===
+
+=== Cross-Reference Validation
+
+The validation system checks that all references in concept content point to
+resources that actually exist:
+
+* **Bibliographic cross-references** — AsciiDoc `<<anchor>>` xrefs are checked
+  against a `BibliographyIndex` built from all `ConceptSource` entries and
+  optional `bibliography.yaml`.
+* **Image/asset references** — `image::path[]` references and model-level asset
+  paths (`NonVerbRep`, `GraphicalSymbol`) are checked against an `AssetIndex`
+  built from the `images/` directory or GCR ZIP entries.
+* **Inter-concept references** — `{{...}}` concept mentions are checked against
+  the concept collection for local references, and against registered GCR
+  packages for inter-set URN references.
+
+=== Validation Result
+
+`ValidationResult` holds the aggregated findings from all rules:
+
+[,ruby]
+----
+result = DatasetValidator.new.validate("path/to/dataset")
+result.valid?    # => true if no errors
+result.errors    # => Array of error strings
+result.warnings  # => Array of warning strings
+result.issues    # => Array of ValidationIssue objects (full detail)
+----
+
+Each `ValidationIssue` carries structured metadata:
+
+[,ruby]
+----
+issue = result.issues.first
+issue.severity   # => "error" or "warning"
+issue.code       # => "GLS-300"
+issue.message    # => "definition 1 has empty content"
+issue.location   # => "concepts/100.yaml/eng"
+issue.suggestion # => "Add definition text or remove the empty entry"
+issue.to_s       # => "[ERROR] [GLS-300] concepts/100.yaml/eng: definition 1 has empty content"
+----
+
+=== Adding Custom Rules
+
+New validation rules are added by subclassing `Base` and registering with the
+global `Registry`. This extends validation without modifying existing code:
+
+[,ruby]
+----
+class MyCustomRule < Glossarist::Validation::Rules::Base
+  def code = "CUSTOM-001"
+  def category = :quality
+  def severity = "warning"
+  def scope = :concept
+
+  def applicable?(context)
+    context.concept&.localizations&.any?
+  end
+
+  def check(context)
+    issues = []
+    context.concept.localizations.each do |l10n|
+      # ... your check logic ...
+      if some_condition
+        issues << issue("something is wrong",
+          location: context.file_name,
+          suggestion: "how to fix it")
+      end
+    end
+    issues
+  end
+end
+
+Glossarist::Validation::Rules::Registry.register(MyCustomRule)
+----
+
+Custom rules are automatically picked up by `DatasetValidator`, `GcrValidator`,
+and `ConceptValidator` on the next validation run.
 
 === upgrade
 

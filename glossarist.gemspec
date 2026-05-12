@@ -32,9 +32,9 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "lutaml-model", "~> 0.8.5"
-  spec.add_dependency "sts", "~> 0.5.6"
   spec.add_dependency "relaton", ">= 2.0.0", "< 3"
   spec.add_dependency "rubyzip", ">= 2.3", "< 3"
+  spec.add_dependency "sts", "~> 0.5.6"
   spec.add_dependency "tbx", "~> 0.1"
   spec.add_dependency "thor"
 end
