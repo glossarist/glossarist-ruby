@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<standard xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:tbx="urn:iso:std:iso:30042:ed-2">
+  <front>
+    <std-meta>
+      <permissions>
+        <copyright-statement>All rights reserved</copyright-statement>
+        <copyright-holder>ISO</copyright-holder>
+        <copyright-year>2021</copyright-year>
+      </permissions>
+      <title-wrap xml:lang="en">
+        <main>Test Vocabulary</main>
+        <full>Test Vocabulary</full>
+      </title-wrap>
+      <proj-id>ISO 12345</proj-id>
+      <content-language>en</content-language>
+      <std-ref type="dated">ISO 12345:2021</std-ref>
+      <std-ref type="undated">ISO 12345</std-ref>
+      <doc-ref>ISO 12345:2021(en)</doc-ref>
+    </std-meta>
+  </front>
+  <body>
+    <sec id="sec_1">
+      <title>1 Scope</title>
+      <label>1</label>
+      <p>This document defines test terms.</p>
+    </sec>
+    <sec id="sec_3">
+      <title>3 Terms and definitions</title>
+      <label>3</label>
+      <term-sec id="sec_3.1">
+        <label>3.1</label>
+        <tbx:termEntry id="term_3.1">
+          <tbx:langSet xml:lang="en">
+            <tbx:definition>test robot definition</tbx:definition>
+            <tbx:tig id="tig_3.1-1">
+              <tbx:term>test robot</tbx:term>
+              <tbx:partOfSpeech value="noun"/>
+              <tbx:normativeAuthorization value="preferredTerm"/>
+            </tbx:tig>
+            <tbx:note>A note about the test robot.</tbx:note>
+            <tbx:example>An example of a test robot.</tbx:example>
+            <tbx:source>ISO 12345:2021, 3.1, modified</tbx:source>
+          </tbx:langSet>
+        </tbx:termEntry>
+      </term-sec>
+      <term-sec id="sec_3.2">
+        <label>3.2</label>
+        <tbx:termEntry id="term_3.2">
+          <tbx:langSet xml:lang="en">
+            <tbx:definition>ability to perform tasks autonomously</tbx:definition>
+            <tbx:tig id="tig_3.2-1">
+              <tbx:term>autonomy</tbx:term>
+              <tbx:partOfSpeech value="noun"/>
+              <tbx:normativeAuthorization value="preferredTerm"/>
+            </tbx:tig>
+            <tbx:subjectField>robotics</tbx:subjectField>
+          </tbx:langSet>
+        </tbx:termEntry>
+      </term-sec>
+    </sec>
+  </body>
+</standard>

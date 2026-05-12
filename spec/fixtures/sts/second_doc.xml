@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<standard xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:tbx="urn:iso:std:iso:30042:ed-2">
+  <front>
+    <std-meta>
+      <permissions>
+        <copyright-statement>All rights reserved</copyright-statement>
+        <copyright-holder>ISO</copyright-holder>
+        <copyright-year>2021</copyright-year>
+      </permissions>
+      <title-wrap xml:lang="en">
+        <main>Second Test Document</main>
+        <full>Second Test Document</full>
+      </title-wrap>
+      <proj-id>ISO 54321</proj-id>
+      <content-language>en</content-language>
+      <std-ref type="dated">ISO 54321:2021</std-ref>
+      <std-ref type="undated">ISO 54321</std-ref>
+      <doc-ref>ISO 54321:2021(en)</doc-ref>
+    </std-meta>
+  </front>
+  <body>
+    <sec id="sec_2">
+      <title>2 Terms</title>
+      <label>2</label>
+      <term-sec id="sec_2.1">
+        <label>2.1</label>
+        <tbx:termEntry id="term_2.1">
+          <tbx:langSet xml:lang="en">
+            <tbx:definition>a sensor is a device that detects changes</tbx:definition>
+            <tbx:tig id="tig_2.1-1">
+              <tbx:term>sensor</tbx:term>
+              <tbx:partOfSpeech value="noun"/>
+              <tbx:normativeAuthorization value="preferredTerm"/>
+            </tbx:tig>
+            <tbx:subjectField>robotics</tbx:subjectField>
+          </tbx:langSet>
+        </tbx:termEntry>
+      </term-sec>
+    </sec>
+  </body>
+</standard>

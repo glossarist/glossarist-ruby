@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<standard xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:tbx="urn:iso:std:iso:30042:ed-2">
+  <front>
+    <std-meta>
+      <permissions>
+        <copyright-statement>All rights reserved</copyright-statement>
+        <copyright-holder>ISO</copyright-holder>
+        <copyright-year>2021</copyright-year>
+      </permissions>
+      <title-wrap xml:lang="en">
+        <main>Multilingual Test</main>
+        <full>Multilingual Test Vocabulary</full>
+      </title-wrap>
+      <proj-id>ISO 99999</proj-id>
+      <content-language>en</content-language>
+      <std-ref type="dated">ISO 99999:2021</std-ref>
+      <std-ref type="undated">ISO 99999</std-ref>
+      <doc-ref>ISO 99999:2021(en-fr)</doc-ref>
+    </std-meta>
+  </front>
+  <body>
+    <sec id="sec_1">
+      <title>1 Terms</title>
+      <label>1</label>
+      <term-sec id="sec_1.1">
+        <label>1.1</label>
+        <tbx:termEntry id="term_1.1">
+          <tbx:langSet xml:lang="en">
+            <tbx:definition>a mechanical device</tbx:definition>
+            <tbx:tig id="tig_1.1-en-1">
+              <tbx:term>machine</tbx:term>
+              <tbx:partOfSpeech value="noun"/>
+              <tbx:normativeAuthorization value="preferredTerm"/>
+            </tbx:tig>
+            <tbx:tig id="tig_1.1-en-2">
+              <tbx:term>mechanical device</tbx:term>
+              <tbx:normativeAuthorization value="admittedTerm"/>
+            </tbx:tig>
+            <tbx:subjectField>engineering</tbx:subjectField>
+          </tbx:langSet>
+          <tbx:langSet xml:lang="fr">
+            <tbx:definition>un dispositif mecanique</tbx:definition>
+            <tbx:tig id="tig_1.1-fr-1">
+              <tbx:term>machine</tbx:term>
+              <tbx:partOfSpeech value="noun"/>
+              <tbx:normativeAuthorization value="preferredTerm"/>
+            </tbx:tig>
+            <tbx:subjectField>ingenierie</tbx:subjectField>
+          </tbx:langSet>
+        </tbx:termEntry>
+      </term-sec>
+      <term-sec id="sec_1.2">
+        <label>1.2</label>
+        <tbx:termEntry id="term_1.2">
+          <tbx:langSet xml:lang="en">
+            <tbx:definition>a shortened form of a word</tbx:definition>
+            <tbx:tig id="tig_1.2-en-1">
+              <tbx:term>acronym example</tbx:term>
+              <tbx:partOfSpeech value="noun"/>
+              <tbx:normativeAuthorization value="preferredTerm"/>
+            </tbx:tig>
+            <tbx:tig id="tig_1.2-en-2">
+              <tbx:term>AE</tbx:term>
+              <tbx:termType value="acronym"/>
+              <tbx:normativeAuthorization value="admittedTerm"/>
+            </tbx:tig>
+          </tbx:langSet>
+        </tbx:termEntry>
+      </term-sec>
+    </sec>
+  </body>
+</standard>

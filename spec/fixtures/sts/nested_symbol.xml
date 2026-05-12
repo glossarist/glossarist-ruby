@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<standard xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:tbx="urn:iso:std:iso:30042:ed-2">
+  <front>
+    <std-meta>
+      <permissions>
+        <copyright-statement>All rights reserved</copyright-statement>
+        <copyright-holder>ISO</copyright-holder>
+        <copyright-year>2021</copyright-year>
+      </permissions>
+      <title-wrap xml:lang="en">
+        <main>Nested Symbol Test</main>
+        <full>Nested Symbol Test Vocabulary</full>
+      </title-wrap>
+      <proj-id>ISO 11111</proj-id>
+      <content-language>en</content-language>
+      <std-ref type="dated">ISO 11111:2021</std-ref>
+      <std-ref type="undated">ISO 11111</std-ref>
+      <doc-ref>ISO 11111:2021(en)</doc-ref>
+    </std-meta>
+  </front>
+  <body>
+    <sec id="sec_3">
+      <title>3 Terms and definitions</title>
+      <label>3</label>
+      <term-sec id="sec_3.1">
+        <label>3.1</label>
+        <tbx:termEntry id="term_3.1">
+          <tbx:langSet xml:lang="en">
+            <tbx:definition>velocity measured in metres per second</tbx:definition>
+            <tbx:tig id="tig_3.1-1">
+              <tbx:term>v</tbx:term>
+              <tbx:termType value="symbol"/>
+              <tbx:normativeAuthorization value="admittedTerm"/>
+            </tbx:tig>
+            <tbx:tig id="tig_3.1-2">
+              <tbx:term>velocity</tbx:term>
+              <tbx:partOfSpeech value="noun"/>
+              <tbx:normativeAuthorization value="preferredTerm"/>
+            </tbx:tig>
+            <tbx:subjectField>physics</tbx:subjectField>
+          </tbx:langSet>
+        </tbx:termEntry>
+        <term-sec id="sec_3.1.1">
+          <label>3.1.1</label>
+          <tbx:termEntry id="term_3.1.1">
+            <tbx:langSet xml:lang="en">
+              <tbx:definition>the maximum velocity attainable</tbx:definition>
+              <tbx:tig id="tig_3.1.1-1">
+                <tbx:term>terminal velocity</tbx:term>
+                <tbx:partOfSpeech value="noun"/>
+                <tbx:normativeAuthorization value="preferredTerm"/>
+              </tbx:tig>
+              <tbx:note>A falling object reaches terminal velocity.</tbx:note>
+            </tbx:langSet>
+          </tbx:termEntry>
+        </term-sec>
+      </term-sec>
+      <term-sec id="sec_3.2">
+        <label>3.2</label>
+        <tbx:termEntry id="term_3.2">
+          <tbx:langSet xml:lang="en">
+            <tbx:definition>an old term no longer recommended</tbx:definition>
+            <tbx:tig id="tig_3.2-1">
+              <tbx:term>velocity head</tbx:term>
+              <tbx:partOfSpeech value="noun"/>
+              <tbx:normativeAuthorization value="deprecatedTerm"/>
+            </tbx:tig>
+            <tbx:subjectField>physics</tbx:subjectField>
+          </tbx:langSet>
+        </tbx:termEntry>
+      </term-sec>
+    </sec>
+  </body>
+</standard>
