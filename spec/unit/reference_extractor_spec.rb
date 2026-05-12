@@ -257,4 +257,88 @@ RSpec.describe Glossarist::ReferenceExtractor do
       described_class.identifier_resolvers.pop
     end
   end
+
+  describe "AsciiDoc cross-reference extraction" do
+    it "extracts <<anchor>> as BibliographicReference" do
+      refs = subject.extract_from_text("See <<ISO_9000>> for details.")
+      bib_refs = refs.grep(Glossarist::BibliographicReference)
+      expect(bib_refs.size).to eq(1)
+      expect(bib_refs.first.anchor).to eq("ISO_9000")
+    end
+
+    it "extracts <<anchor,display text>> as BibliographicReference" do
+      refs = subject.extract_from_text("See <<ISO_9000,ISO 9000>> for details.")
+      bib_refs = refs.grep(Glossarist::BibliographicReference)
+      expect(bib_refs.size).to eq(1)
+      expect(bib_refs.first.anchor).to eq("ISO_9000")
+    end
+
+    it "deduplicates identical anchors" do
+      refs = subject.extract_from_text("See <<ISO_9000>> and <<ISO_9000>> again.")
+      bib_refs = refs.grep(Glossarist::BibliographicReference)
+      expect(bib_refs.size).to eq(1)
+    end
+  end
+
+  describe "image reference extraction" do
+    it "extracts image::path[] as AssetReference" do
+      refs = subject.extract_from_text("See image::diagram.png[] for details.")
+      asset_refs = refs.grep(Glossarist::AssetReference)
+      expect(asset_refs.size).to eq(1)
+      expect(asset_refs.first.path).to eq("diagram.png")
+    end
+
+    it "extracts image:path[] (inline) as AssetReference" do
+      refs = subject.extract_from_text("See image:icon.svg[] inline.")
+      asset_refs = refs.grep(Glossarist::AssetReference)
+      expect(asset_refs.size).to eq(1)
+      expect(asset_refs.first.path).to eq("icon.svg")
+    end
+  end
+
+  describe "#extract_asset_refs_from_concept" do
+    it "extracts graphical symbol image from concept localizations" do
+      mc = Glossarist::ManagedConcept.new(data: { id: "1" })
+      l10n = Glossarist::LocalizedConcept.of_yaml({
+                                                    "data" => {
+                                                      "language_code" => "eng",
+                                                      "terms" => [
+                                                        {
+                                                          "type" => "graphical_symbol", "image" => "images/symbol.svg"
+                                                        },
+                                                      ],
+                                                    },
+                                                  })
+      mc.add_localization(l10n)
+
+      refs = subject.extract_asset_refs_from_concept(mc)
+      expect(refs.size).to eq(1)
+      expect(refs.first).to be_a(Glossarist::AssetReference)
+      expect(refs.first.path).to eq("images/symbol.svg")
+    end
+  end
+
+  describe "#extract_bib_refs_from_concept" do
+    it "extracts bibliography anchors from source citations" do
+      mc = Glossarist::ManagedConcept.new(data: { id: "1" })
+      l10n = Glossarist::LocalizedConcept.of_yaml({
+                                                    "data" => {
+                                                      "language_code" => "eng",
+                                                      "terms" => [{
+                                                        "type" => "expression", "designation" => "test"
+                                                      }],
+                                                      "sources" => [{
+                                                        "type" => "authoritative",
+                                                        "origin" => { "text" => "ISO 9000:2015" },
+                                                      }],
+                                                    },
+                                                  })
+      mc.add_localization(l10n)
+
+      refs = subject.extract_bib_refs_from_concept(mc)
+      expect(refs).not_to be_empty
+      expect(refs.first).to be_a(Glossarist::BibliographicReference)
+      expect(refs.first.anchor).to eq("ISO 9000:2015")
+    end
+  end
 end

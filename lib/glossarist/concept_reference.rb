@@ -41,5 +41,9 @@ module Glossarist
       h["ref_type"] = ref_type if ref_type
       h.compact
     end
+
+    def dedup_key
+      concept_id ? [source, concept_id] : [source, concept_id, term]
+    end
   end
 end

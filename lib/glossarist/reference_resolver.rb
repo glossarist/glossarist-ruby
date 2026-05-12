@@ -153,6 +153,7 @@ module Glossarist
     def extract_refs(concept, extractor)
       if concept.is_a?(ManagedConcept)
         extractor.extract_from_managed_concept(concept)
+          .grep(ConceptReference)
       else
         extractor.extract_from_concept_hash(concept)
       end

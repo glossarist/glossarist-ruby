@@ -152,6 +152,65 @@ module Glossarist
 
     LANG_CODES = Glossarist::LANG_CODES
 
+    # Extract asset references from model attributes (NonVerbRep, GraphicalSymbol).
+    def extract_asset_refs_from_concept(concept)
+      refs = []
+
+      concept.localizations.each do |l10n|
+        nvr = l10n.non_verb_rep
+        if nvr.is_a?(String) && !nvr.strip.empty?
+          nvr.strip.split.each do |p|
+            refs << AssetReference.new(path: p) unless p.empty?
+          end
+        end
+
+        (l10n.data&.terms || []).each do |term|
+          if term.is_a?(Designation::GraphicalSymbol) && term.image && !term.image.strip.empty?
+            refs << AssetReference.new(path: term.image.strip)
+          end
+        end
+      end
+
+      refs
+    end
+
+    # Extract bibliographic xrefs from model-level source citations.
+    def extract_bib_refs_from_concept(concept)
+      refs = []
+      concept.localizations.each do |l10n|
+        gather_all_sources(l10n).each do |source|
+          origin = source.origin
+          next unless origin
+
+          if origin.text && !origin.text.strip.empty?
+            refs << BibliographicReference.new(anchor: origin.text)
+          end
+
+          next unless origin.source && origin.id
+
+          key = "#{origin.source} #{origin.id}"
+          refs << BibliographicReference.new(anchor: key)
+          refs << BibliographicReference.new(anchor: origin.id.to_s)
+        end
+      end
+      refs
+    end
+
+    # Extract all reference types from a managed concept.
+    def extract_all_from_managed_concept(concept)
+      concept_refs = extract_from_managed_concept(concept)
+      asset_refs = extract_asset_refs_from_concept(concept)
+      concept_refs + asset_refs
+    end
+
+    def resolve_asciidoc_xref(target)
+      BibliographicReference.new(anchor: target.strip)
+    end
+
+    def resolve_image_ref(path)
+      AssetReference.new(path: path.strip)
+    end
+
     private
 
     def gather_texts(lc_hash)
@@ -170,16 +229,7 @@ module Glossarist
 
     def deduplicate(refs)
       seen = Set.new
-      refs.select do |ref|
-        key = if ref.concept_id
-                [ref.source,
-                 ref.concept_id]
-              else
-                [ref.source, ref.concept_id,
-                 ref.term]
-              end
-        seen.add?(key)
-      end
+      refs.select { |ref| seen.add?(ref.dedup_key) }
     end
 
     def extract_term_id_from_urn_tail(tail)
@@ -212,6 +262,18 @@ module Glossarist
       regex: /\{\{([^}]+)\}\}/,
     ) { |ext, content| ext.resolve_mention(content) }
 
+    # AsciiDoc cross-references: <<anchor>> or <<anchor,display text>>
+    register_pattern(
+      name: :asciidoc_xref,
+      regex: /<<([^,>\n]+?)(?:,[^>\n]*)?>>/,
+    ) { |ext, target| ext.resolve_asciidoc_xref(target) }
+
+    # Image references: image::path[] or image:path[]
+    register_pattern(
+      name: :asciidoc_image,
+      regex: /image::?([^\[\]]+)\[/,
+    ) { |ext, path| ext.resolve_image_ref(path) }
+
     register_identifier_resolver("urn:iec:std:iec:60050") do |ext, identifier, display|
       ext.resolve_iec_urn(identifier, display)
     end
@@ -222,6 +284,14 @@ module Glossarist
 
     register_identifier_resolver("urn:") do |ext, identifier, display|
       ext.resolve_generic_urn(identifier, display)
+    end
+
+    def gather_all_sources(l10n)
+      sources = Array(l10n.data&.sources)
+      sources += Array((l10n.data&.definition || []).flat_map(&:sources).compact)
+      sources += Array((l10n.data&.notes || []).flat_map(&:sources).compact)
+      sources += Array((l10n.data&.examples || []).flat_map(&:sources).compact)
+      sources
     end
   end
 end
