@@ -9,6 +9,8 @@ require "lutaml/model"
 
 module Glossarist
   autoload :Asset,                    "glossarist/asset"
+  autoload :AssetReference,           "glossarist/asset_reference"
+  autoload :BibliographicReference,   "glossarist/bibliographic_reference"
   autoload :Citation,                 "glossarist/citation"
   autoload :CLI,                      "glossarist/cli"
   autoload :CollectionConfig,         "glossarist/collection_config"
@@ -57,6 +59,7 @@ module Glossarist
   autoload :SchemaMigration,          "glossarist/schema_migration"
   autoload :UrnResolver,              "glossarist/urn_resolver"
   autoload :Utilities,                "glossarist/utilities"
+  autoload :Validation,               "glossarist/validation"
   autoload :RegisterData,             "glossarist/register_data"
   autoload :ValidationResult,         "glossarist/validation_result"
   autoload :V1,                       "glossarist/v1"

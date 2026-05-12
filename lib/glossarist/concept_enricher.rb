@@ -8,6 +8,7 @@ module Glossarist
       concepts.each do |mc|
         mc.localizations.each do |l10n|
           refs = extractor.extract_from_localized_concept(l10n)
+            .grep(ConceptReference)
           next if refs.empty?
 
           existing = l10n.data.references || []
