@@ -146,43 +146,122 @@ Localized concept has the following fields
 id:: An optional identifier for the term, to be used in cross-references.
 uuid:: UUID for the concept
 designations:: Array of <<designation,Designations>> under which the term being defined is known. This method will also accept an array of hashes for designation and will convert them to their respective classes.
-domain:: An optional semantic domain for the term being defined, in case the term is ambiguous between several semantic domains.
+domain:: URI reference to the subject area or section concept. Can be a relative URI (e.g. `section-103-01`), a URN (e.g. `urn:iec:std:iec:60050-103-01`), or a URL (e.g. `https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=103-01`).
 subject:: Subject of the term.
 definition:: Array of <<detailed-definition,Detailed Definition>> of the term.
 non_verb_rep:: Array of <<non-verbal,non-verbal>> representations used to help define the term.
 notes:: Zero or more notes about the term. A note is in <<detailed-definition,Detailed Definition>> format.
 examples:: Zero or more examples of how the term is to be used in <<detailed-definition,Detailed Definition>> format.
 language_code:: The language of the localization, as an ISO-639 3-letter code.
+script:: The script of the localization, as an ISO 15924 4-letter code (e.g. `Hans` for Simplified Chinese, `Latn` for Latin, `Cyrl` for Cyrillic). Optional — when omitted, the default script for the language is assumed.
+system:: The ISO 24229 conversion system code used to produce this localization (e.g. `Var:jpn-Hrkt:Latn:Hepburn-1886` for Hepburn-romanized Japanese). Optional — only set when the localization is a romanization or transliteration.
 entry_status:: Entry status of the concept. Must be one of the following: +notValid+, +valid+, +superseded+, +retired+.
 classification:: Classification of the concept. Must be one of the following: +preferred+, +admitted+, +deprecated+.
 
 [[id,designation]]
-=== Designation::Base
+=== Designation
 
-A name under which a managed term is known.
+A name under which a managed term is known. Designations follow an
+inheritance hierarchy based on ISO 10241-1 and the Metanorma concept model.
 
-Methods::
-  `from_h(options)`::: Creates a new designation instance based on the specified type.
+==== Designation::Base (common to all types)
+
+designation:: String — the term text or symbol.
+normative_status:: Enum — one of `preferred`, `deprecated`, `admitted`.
+geographical_area:: String — geographic usage region (ISO 3166-1 country code).
+language:: String — language of this designation (ISO 639 code). Usually inherited from the LocalizedConcept's `language_code`, but can differ for borrowed terms.
+script:: String — script of the designation text (ISO 15924 code, e.g. `Hani` for Kanji, `Latn` for Latin, `Cyrl` for Cyrillic).
+system:: String — ISO 24229 conversion system code used to produce this designation (e.g. `Var:jpn-Hrkt:Latn:Hepburn-1886` for Hepburn romanization). Optional — only set when the designation is a romanization or transliteration.
+international:: Boolean — whether the designation is used internationally.
+absent:: Boolean — whether the designation is intentionally absent in this language.
+pronunciation:: Collection of `Pronunciation` entries — phonetic or romanized representations of the designation.
++
+Each `Pronunciation` entry has:
++
+[cols="1,1,2"]
+|===
+|Attribute |Standard |Description
+
+|`content` |— |The pronunciation text
+|`language` |ISO 639 |Language/dialect being pronounced (3-letter code)
+|`script` |ISO 15924 |Script of the pronunciation text (4-letter code)
+|`country` |ISO 3166-1 |Country variant (2-letter code, optional)
+|`system` |ISO 24229 |Conversion system code or identifier (e.g. `IPA`, `Var:jpn-Hrkt:Latn:Hepburn-1886`)
+|===
++
+Example:
++
+[,yaml]
+----
+pronunciation:
+  - content: "toːkjoː"
+    language: jpn
+    script: Latn
+    system: IPA
+  - content: "Tōkyō"
+    language: jpn
+    script: Latn
+    system: "Var:jpn-Hrkt:Latn:Hepburn-1886"
+----
+
+==== Designation::Expression (text-based, inherits Base)
+
+prefix:: String — text before the designation.
+usage_info:: String — disambiguation text for the designation.
+field_of_application:: String — IEC "specific use", appears in angle brackets after the designation (e.g. "in communication theory").
+grammar_info:: Array of GrammarInfo — gender, number, part of speech.
+
+==== Designation::Abbreviation (inherits Expression)
+
+acronym:: Boolean — is this an acronym?
+initialism:: Boolean — is this an initialism?
+truncation:: Boolean — is this a truncation?
+
+==== Designation::Symbol (inherits Base)
+
+No additional attributes beyond Base.
+
+==== Designation::LetterSymbol (inherits Symbol)
+
+text:: String — the letter symbol text.
+language:: String — language code.
+script:: String — script code (e.g. `Latn`, `Cyrl`).
+
+==== Designation::GraphicalSymbol (inherits Symbol)
+
+text:: String — description of the symbol.
+image:: String — the graphical symbol (emoji, path, or data URL).
+
+==== Factory Method
+
+`Designation::Base.from_h(options)` creates a new designation instance based on the specified type.
 
 Parameters::
   * options (Hash) - The options for creating the designation.
-  * "type" (String) - The type of designation (expression, symbol, abbreviation, graphical_symbol, letter_symbol). Note: type key should be string and not a symbol so { type: "expression" } will not work.
+  * "type" (String) - The type of designation (`expression`, `symbol`, `abbreviation`, `graphical_symbol`, `letter_symbol`). Note: type key should be string and not a symbol so `{ type: "expression" }` will not work.
   * Additional options depend on the specific designation type.
 
 Returns::
-  Designation::{type}::: A new instance of specified type. e.g `Glossarist::Designation::Base.from_h("type" => "expression")` will return `Glossarist::Designation::Expression`
+  Designation::{type}::: A new instance of specified type.
 
 Example
 [,ruby]
 ----
-# Example usage of Designation::Base class
+# Expression with field of application
+expr = Designation::Base.from_h({
+  "type" => "expression",
+  "designation" => "information",
+  "normative_status" => "preferred",
+  "field_of_application" => "in communication theory",
+})
 
-attributes_for_expression = { designation: "foobar", geographical_area: "abc", normative_status: "status" }
-designation_expression = Designation::Base.from_h({ "type" => "expression" }.merge(attributes_for_expression))
-
-attributes_for_abbreviation = { designation: "foobar", geographical_area: "abc", normative_status: "status", international: true }
-designation_abbreviation = Designation::Base.from_h({ "type" => "abbreviation" }.merge(attributes_for_abbreviation))
-
+# International abbreviation
+abbr = Designation::Base.from_h({
+  "type" => "abbreviation",
+  "designation" => "ISO",
+  "international" => true,
+  "acronym" => true,
+})
 ----
 
 [[id,related-concept]]

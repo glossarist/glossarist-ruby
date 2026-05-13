@@ -52,6 +52,7 @@ module Glossarist
   autoload :ManagedConceptCollection, "glossarist/managed_concept_collection"
   autoload :ManagedConceptData,       "glossarist/managed_concept_data"
   autoload :NonVerbRep,               "glossarist/non_verb_rep"
+  autoload :Pronunciation,            "glossarist/pronunciation"
   autoload :RelatedConcept,           "glossarist/related_concept"
   autoload :Rdf,                      "glossarist/rdf"
   autoload :Sts,                      "glossarist/sts"

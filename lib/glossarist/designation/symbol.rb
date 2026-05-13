@@ -1,11 +1,9 @@
 module Glossarist
   module Designation
     class Symbol < Base
-      attribute :international, :boolean
       attribute :type, :string, default: -> { "symbol" }
 
       key_value do
-        map :international, to: :international
         map :type, to: :type, render_default: true
       end
 

@@ -25,4 +25,21 @@ RSpec.describe Glossarist::Designation::GraphicalSymbol do
       expect(subject.to_yaml).to eq(expected_yaml)
     end
   end
+
+  describe "#international" do
+    it "is inherited from Base" do
+      expect(subject.international).to eq(true)
+    end
+  end
+
+  describe "#absent" do
+    it "is inherited from Base" do
+      gs = described_class.from_yaml({
+        "type" => "graphical_symbol",
+        "image" => "♔",
+        "absent" => true,
+      }.to_yaml)
+      expect(gs.absent).to eq(true)
+    end
+  end
 end

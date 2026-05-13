@@ -2,13 +2,9 @@ module Glossarist
   module Designation
     class LetterSymbol < Symbol
       attribute :text, :string
-      attribute :language, :string
-      attribute :script, :string
 
       key_value do
         map :text, to: :text
-        map :language, to: :language
-        map :script, to: :script
       end
 
       def self.of_yaml(hash, options = {})

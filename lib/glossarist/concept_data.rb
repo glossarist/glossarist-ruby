@@ -30,6 +30,8 @@ module Glossarist
     # Language code should be exactly 3 char long.
     # TODO: use min_length, max_length once added in lutaml-model
     attribute :language_code, :string, pattern: /^.{3}$/
+    attribute :script, :string
+    attribute :system, :string
     attribute :entry_status, :string
 
     key_value do
@@ -48,6 +50,8 @@ module Glossarist
       map :references, to: :references
       map :domain, to: :domain
       map %i[language_code languageCode], to: :language_code
+      map :script, to: :script
+      map :system, to: :system
       map %i[entry_status entryStatus], to: :entry_status
       map %i[review_date reviewDate], to: :review_date
       map %i[review_decision_date reviewDecisionDate], to: :review_decision_date

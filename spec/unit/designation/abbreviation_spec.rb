@@ -25,4 +25,37 @@ RSpec.describe Glossarist::Designation::Abbreviation do
       expect(retval.international).to eq(true)
     end
   end
+
+  describe "#international" do
+    it "is inherited from Base" do
+      expect(subject.international).to eq(true)
+    end
+
+    it "round-trips through YAML" do
+      roundtrip = described_class.from_yaml(subject.to_yaml)
+      expect(roundtrip.international).to eq(true)
+    end
+  end
+
+  describe "#absent" do
+    it "is inherited from Base" do
+      abbr = described_class.from_yaml({
+        "designation" => "N/A",
+        "absent" => true,
+        "acronym" => true,
+      }.to_yaml)
+      expect(abbr.absent).to eq(true)
+    end
+  end
+
+  describe "#field_of_application" do
+    it "is inherited from Expression" do
+      abbr = described_class.from_yaml({
+        "designation" => "N/A",
+        "field_of_application" => "in computing",
+        "acronym" => true,
+      }.to_yaml)
+      expect(abbr.field_of_application).to eq("in computing")
+    end
+  end
 end
