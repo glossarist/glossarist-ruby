@@ -31,7 +31,7 @@ RSpec.describe Glossarist::ConceptData do
       .to change { subject.lineage_source_similarity }.to(80)
   end
 
-  it "accepts string as release" do
+  it "accepts strings as release" do
     expect { subject.release = "1.0" }
       .to change { subject.release }.to("1.0")
   end
@@ -57,11 +57,116 @@ RSpec.describe Glossarist::ConceptData do
       .to change { subject.review_decision_event }.to("published")
   end
 
+  describe "#script" do
+    it "accepts ISO 15924 script codes" do
+      expect { subject.script = "Hans" }
+        .to change { subject.script }.to("Hans")
+    end
+
+    it "round-trips through YAML" do
+      subject.language_code = "zho"
+      subject.script = "Hans"
+      roundtrip = described_class.from_yaml(subject.to_yaml)
+      expect(roundtrip.script).to eq("Hans")
+    end
+  end
+
+  describe "#system" do
+    it "accepts ISO 24229 conversion system codes" do
+      expect { subject.system = "Var:jpn-Hrkt:Latn:Hepburn-1886" }
+        .to change { subject.system }.to("Var:jpn-Hrkt:Latn:Hepburn-1886")
+    end
+
+    it "round-trips through YAML" do
+      subject.language_code = "jpn"
+      subject.script = "Latn"
+      subject.system = "Var:jpn-Hrkt:Latn:Hepburn-1886"
+      roundtrip = described_class.from_yaml(subject.to_yaml)
+      expect(roundtrip.language_code).to eq("jpn")
+      expect(roundtrip.script).to eq("Latn")
+      expect(roundtrip.system).to eq("Var:jpn-Hrkt:Latn:Hepburn-1886")
+    end
+  end
+
+  describe "#domain" do
+    it "accepts relative URI references" do
+      expect { subject.domain = "section-103-01" }
+        .to change { subject.domain }.to("section-103-01")
+    end
+
+    it "accepts absolute URI references" do
+      uri = "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=103-01"
+      expect { subject.domain = uri }
+        .to change { subject.domain }.to(uri)
+    end
+
+    it "accepts URN references" do
+      urn = "urn:iec:std:iec:60050-103-01"
+      expect { subject.domain = urn }
+        .to change { subject.domain }.to(urn)
+    end
+
+    it "round-trips relative URIs through YAML" do
+      subject.domain = "section-103-01"
+      roundtrip = described_class.from_yaml(subject.to_yaml)
+      expect(roundtrip.domain).to eq("section-103-01")
+    end
+
+    it "round-trips absolute URIs through YAML" do
+      subject.domain = "https://example.org/concepts/103-01"
+      roundtrip = described_class.from_yaml(subject.to_yaml)
+      expect(roundtrip.domain).to eq("https://example.org/concepts/103-01")
+    end
+
+    it "round-trips URNs through YAML" do
+      subject.domain = "urn:iec:std:iec:60050-103-01"
+      roundtrip = described_class.from_yaml(subject.to_yaml)
+      expect(roundtrip.domain).to eq("urn:iec:std:iec:60050-103-01")
+    end
+  end
+
   describe "#terms_from_yaml" do
     it "converts yaml to term objects" do
       term_data = [{ "type" => "expression", "designation" => "test term" }]
       subject.terms_from_yaml(subject, term_data)
       expect(subject.terms.first).to be_an_instance_of(Glossarist::Designation::Expression)
+    end
+
+    it "preserves field_of_application on expression terms" do
+      term_data = [{
+        "type" => "expression",
+        "designation" => "information",
+        "field_of_application" => "in communication theory",
+      }]
+      subject.terms_from_yaml(subject, term_data)
+      expect(subject.terms.first.field_of_application).to eq("in communication theory")
+    end
+
+    it "preserves absent flag on terms" do
+      term_data = [{
+        "type" => "expression",
+        "designation" => "test",
+        "absent" => true,
+      }]
+      subject.terms_from_yaml(subject, term_data)
+      expect(subject.terms.first.absent).to eq(true)
+    end
+
+    it "preserves pronunciation on terms" do
+      term_data = [{
+        "type" => "expression",
+        "designation" => "quality",
+        "pronunciation" => [
+          { "content" => "ˈkwɒl.ɪ.ti", "language" => "eng", "script" => "Latn",
+            "system" => "IPA" },
+        ],
+      }]
+      subject.terms_from_yaml(subject, term_data)
+      pron = subject.terms.first.pronunciation.first
+      expect(pron.content).to eq("ˈkwɒl.ɪ.ti")
+      expect(pron.language).to eq("eng")
+      expect(pron.script).to eq("Latn")
+      expect(pron.system).to eq("IPA")
     end
   end
 
@@ -95,6 +200,39 @@ RSpec.describe Glossarist::ConceptData do
       expect(roundtrip.id).to eq("test-123")
       expect(roundtrip.language_code).to eq("eng")
       expect(roundtrip.entry_status).to eq("valid")
+    end
+
+    it "round-trips all designation metadata" do
+      term = Glossarist::Designation::Expression.new(
+        designation: "information",
+        normative_status: "preferred",
+        field_of_application: "in communication theory",
+        usage_info: "telecom",
+        absent: false,
+        pronunciation: [
+          Glossarist::Pronunciation.new(
+            content: "ˌɪnfərˈmeɪʃən",
+            language: "eng",
+            script: "Latn",
+            system: "IPA",
+          ),
+        ],
+        international: true,
+      )
+      subject.terms = [term]
+      subject.domain = "section-103-01"
+
+      roundtrip = described_class.from_yaml(subject.to_yaml)
+      rt_term = roundtrip.terms.first
+      expect(rt_term.designation).to eq("information")
+      expect(rt_term.field_of_application).to eq("in communication theory")
+      expect(rt_term.usage_info).to eq("telecom")
+      expect(rt_term.pronunciation.first.content).to eq("ˌɪnfərˈmeɪʃən")
+      expect(rt_term.pronunciation.first.language).to eq("eng")
+      expect(rt_term.pronunciation.first.script).to eq("Latn")
+      expect(rt_term.pronunciation.first.system).to eq("IPA")
+      expect(rt_term.international).to eq(true)
+      expect(roundtrip.domain).to eq("section-103-01")
     end
   end
 end

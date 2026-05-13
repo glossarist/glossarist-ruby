@@ -23,7 +23,7 @@ All model classes use `Lutaml::Model::Serializable` for serialization.
 - **`ManagedConcept`** (`managed_concept.rb`) — a managed concept with `ManagedConceptData` (groups, localized_concepts map, sources), related concepts, dates, and status. Delegates localization via `add_l10n`/`localization(lang)`.
 - **`Concept`** (`concept.rb`) — base concept with `ConceptData` (definition, terms/designations, notes, examples, sources, dates, language_code). Parent of `LocalizedConcept`.
 - **`LocalizedConcept`** (`localized_concept.rb`) — extends `Concept` with `classification`, `entry_status`, `review_type`.
-- **`ConceptData`** (`concept_data.rb`) — the data payload inside `Concept`: definition, terms, examples, notes, sources, language_code. Uses `DetailedDefinition` collections for definition/examples/notes.
+- **`ConceptData`** (`concept_data.rb`) — the data payload inside `Concept`: definition, terms, examples, notes, sources, language_code (ISO 639), script (ISO 15924), system (ISO 24229 conversion system code). Uses `DetailedDefinition` collections for definition/examples/notes.
 - **`ManagedConceptData`** (`managed_concept_data.rb`) — the data payload inside `ManagedConcept`: id, localized_concepts hash (lang_code => uuid), groups, sources.
 
 ### UUID Generation
@@ -33,6 +33,16 @@ Concepts use deterministic UUID v5 (SHA-1) derived from their serialized YAML co
 ### Designation (STI-like pattern)
 
 `Designation::Base` (`designation/base.rb`) uses a self-referencing factory pattern (`of_yaml`) that dispatches to subclasses based on `type` field: `Expression`, `Symbol`, `Abbreviation`, `GraphicalSymbol`, `LetterSymbol`. The bi-directional mapping is in `SERIALIZED_TYPES` (`designation.rb`).
+
+Designation inheritance hierarchy (MECE):
+- **Base** — `designation`, `normative_status`, `geographical_area`, `type`, `language`/ISO 639, `script`/ISO 15924, `system`/ISO 24229, `international`, `absent`, `pronunciation` (collection of `Pronunciation` objects with `content`, `language`/ISO 639, `script`/ISO 15924, `country`/ISO 3166-1, `system`/ISO 24229)
+- **Expression < Base** — `prefix`, `usage_info`, `field_of_application` (IEC "specific use"), `grammar_info`
+- **Abbreviation < Expression** — abbreviation type booleans (`acronym`, `initialism`, `truncation`) from `config.yml`
+- **Symbol < Base** — (no additional attributes)
+- **LetterSymbol < Symbol** — `text`
+- **GraphicalSymbol < Symbol** — `text`, `image`
+
+`ConceptData#domain` stores URI references (relative like `section-103-01`, URN like `urn:iec:std:iec:60050-103-01`, or URL like `https://...`) to subject area concepts.
 
 ### YAML Serialization
 

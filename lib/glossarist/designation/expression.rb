@@ -5,6 +5,7 @@ module Glossarist
     class Expression < Base
       attribute :prefix, :string
       attribute :usage_info, :string
+      attribute :field_of_application, :string
 
       attribute :gender, :string
       attribute :plurality, :string
@@ -16,6 +17,8 @@ module Glossarist
         map :type, to: :type, render_default: true
         map :prefix, to: :prefix
         map %i[usage_info usageInfo], to: :usage_info
+        map %i[field_of_application fieldOfApplication],
+            to: :field_of_application
         map %i[grammar_info grammarInfo], to: :grammar_info
       end
 

@@ -6,12 +6,24 @@ module Glossarist
       attribute :normative_status, :string,
                 values: Glossarist::GlossaryDefinition::DESIGNATION_BASE_NORMATIVE_STATUSES
       attribute :type, :string
+      attribute :language, :string
+      attribute :script, :string
+      attribute :system, :string
+      attribute :international, :boolean
+      attribute :absent, :boolean
+      attribute :pronunciation, Pronunciation, collection: true
 
       key_value do
         map :type, to: :type
         map %i[normative_status normativeStatus], to: :normative_status
         map %i[geographical_area geographicalArea], to: :geographical_area
         map :designation, to: :designation
+        map :language, to: :language
+        map :script, to: :script
+        map :system, to: :system
+        map :international, to: :international
+        map :absent, to: :absent
+        map :pronunciation, to: :pronunciation
       end
 
       def self.of_yaml(hash, options = {})
@@ -34,7 +46,9 @@ module Glossarist
       end
 
       def self.infer_designation_type(hash)
-        if hash["international"] || hash["abbreviation_type"]
+        if hash["abbreviation_type"]
+          "abbreviation"
+        elsif hash["international"]
           "symbol"
         else
           "expression"
