@@ -101,7 +101,7 @@ related:: Array of <<related-concept,RelatedConcept>>
 status:: Enum for the normative status of the term.
 dates:: Array of <<concept-date,ConceptDate>>
 localized_concepts:: Hash of all localizations where keys are language codes and values are uuid of the localized concept.
-groups:: Array of groups in string format
+domains:: Array of <<concept-reference,ConceptReference>> — upper concepts (subject areas, concept schemes, organizing concepts) that this concept belongs to across all languages. Each domain is a typed reference (e.g. `{ concept_id: "103", ref_type: "domain" }`).
 localizations:: Hash of all localizations for this concept where keys are language codes and values are instances of <<localized-concept,LocalizedConcept>>.
 
 There are two ways to initialize and populate a managed concept
@@ -118,9 +118,8 @@ concept = Glossarist::ManagedConcept.new({
       "eng" => "<uuid>"
     },
     "localizations" => <Array of localized concepts or localized concept hashes>,
-    "groups" => [
-      "foo",
-      "bar",
+    "domains" => [
+      { "concept_id" => "103", "ref_type" => "domain" },
     ],
   },
 })
@@ -132,7 +131,9 @@ concept = Glossarist::ManagedConcept.new({
 ----
 concept = Glossarist::ManagedConcept.new
 concept.id = "123"
-concept.groups = ["foo", "bar"]
+concept.data.domains = [
+  Glossarist::ConceptReference.new(concept_id: "103", ref_type: "domain"),
+]
 concept.localizations = <Array of localized concepts or localized concept hashes>
 ----
 
@@ -146,7 +147,8 @@ Localized concept has the following fields
 id:: An optional identifier for the term, to be used in cross-references.
 uuid:: UUID for the concept
 designations:: Array of <<designation,Designations>> under which the term being defined is known. This method will also accept an array of hashes for designation and will convert them to their respective classes.
-domain:: URI reference to the subject area or section concept. Can be a relative URI (e.g. `section-103-01`), a URN (e.g. `urn:iec:std:iec:60050-103-01`), or a URL (e.g. `https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=103-01`).
+domain:: URI reference to the subject area or section concept. Can be a relative URI (e.g. `section-103-01`), a URN (e.g. `urn:iec:std:iec:60050-103-01`), or a URL (e.g. `https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=103-01`). This is the per-language upper concept reference — the subject area for this specific localization. Different languages may assign the same abstract concept to different domains.
+related:: Array of <<related-concept,RelatedConcept>> — per-language concept relationships. Concept hierarchies can differ across languages (e.g. Russian distinguishes голубой/siniy as coordinate basic colors, while English unifies them under "blue"). Language-specific broader/narrower/equivalent relationships go here.
 subject:: Subject of the term.
 definition:: Array of <<detailed-definition,Detailed Definition>> of the term.
 non_verb_rep:: Array of <<non-verbal,non-verbal>> representations used to help define the term.

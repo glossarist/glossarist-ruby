@@ -42,12 +42,19 @@ module Glossarist
           mc.add_localization(LocalizedConcept.of_yaml({ "data" => data }))
         end
 
+        assign_domains(mc) if groups.is_a?(Array) && groups.any?
         assign_references(mc) if references.is_a?(Array) && references.any?
 
         mc
       end
 
       private
+
+      def assign_domains(concept)
+        concept.data.domains = groups.map do |g|
+          ConceptReference.new(concept_id: g.to_s, ref_type: "domain")
+        end
+      end
 
       def assign_references(concept)
         l10n = concept.localization("eng") || concept.localizations.values.first
