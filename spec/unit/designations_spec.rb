@@ -192,6 +192,59 @@ RSpec.describe Glossarist::Designation::Base do
         expect(gs.international).to eq(true)
       end
     end
+
+    describe "#sources" do
+      it "accepts a collection of ConceptSource objects" do
+        expr = described_class.new(designation: "test")
+        source = Glossarist::ConceptSource.new(type: "authoritative")
+        expect { expr.sources = [source] }
+          .to change { expr.sources&.count || 0 }.from(0).to(1)
+      end
+
+      it "round-trips sources through YAML" do
+        src = {
+          "type" => "expression",
+          "designation" => "information",
+          "sources" => [
+            { "type" => "authoritative", "status" => "identical" },
+          ],
+        }.to_yaml
+
+        expr = described_class.from_yaml(src)
+        expect(expr.sources.count).to eq(1)
+        expect(expr.sources.first.type).to eq("authoritative")
+        expect(expr.sources.first.status).to eq("identical")
+
+        roundtrip = described_class.from_yaml(expr.to_yaml)
+        expect(roundtrip.sources.count).to eq(1)
+        expect(roundtrip.sources.first.type).to eq("authoritative")
+      end
+
+      it "is available on Symbol via inheritance" do
+        source = Glossarist::ConceptSource.new(type: "authoritative")
+        sym = Glossarist::Designation::Symbol.new(designation: "Ω", sources: [source])
+        expect(sym.sources.count).to eq(1)
+        expect(sym.sources.first).to eq(source)
+      end
+
+      it "is available on Abbreviation via inheritance" do
+        source = Glossarist::ConceptSource.new(type: "lineage")
+        abbr = Glossarist::Designation::Abbreviation.new(designation: "NASA", sources: [source])
+        expect(abbr.sources.first.type).to eq("lineage")
+      end
+
+      it "is available on LetterSymbol via inheritance" do
+        source = Glossarist::ConceptSource.new(type: "authoritative")
+        ls = Glossarist::Designation::LetterSymbol.new(designation: "A", text: "A", sources: [source])
+        expect(ls.sources.count).to eq(1)
+      end
+
+      it "is available on GraphicalSymbol via inheritance" do
+        source = Glossarist::ConceptSource.new(type: "authoritative")
+        gs = Glossarist::Designation::GraphicalSymbol.new(designation: "♔", text: "king", sources: [source])
+        expect(gs.sources.count).to eq(1)
+      end
+    end
   end
 
   describe "#language and #script" do

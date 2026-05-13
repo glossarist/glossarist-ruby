@@ -1,51 +1,83 @@
 # frozen_string_literal: true
 
 RSpec.describe Glossarist::NonVerbRep do
-  let(:subject) { described_class.new }
-  let(:attributes) do
-    {
-      type: "authoritative",
-      status: "identical",
-    }.to_yaml
-  end
-
   let(:source) do
-    Glossarist::ConceptSource.from_yaml(attributes)
+    Glossarist::ConceptSource.from_yaml({
+      "type" => "authoritative",
+      "status" => "identical",
+    }.to_yaml)
   end
 
-  describe "#image=" do
-    it "sets the image" do
-      subject.image = "image"
-      expect(subject.image).to eq("image")
+  describe "attributes" do
+    it "accepts type as image, table, or formula" do
+      %w[image table formula].each do |t|
+        nvr = described_class.new(type: t, ref: "assets/diagram.svg")
+        expect(nvr.type).to eq(t)
+        expect(nvr.ref).to eq("assets/diagram.svg")
+      end
+    end
+
+    it "accepts ref as URI reference" do
+      nvr = described_class.new(
+        type: "image",
+        ref: "assets/images/figure-1.svg",
+        text: "Diagram of the concept",
+      )
+      expect(nvr.ref).to eq("assets/images/figure-1.svg")
+      expect(nvr.text).to eq("Diagram of the concept")
+    end
+
+    it "accepts sources collection" do
+      nvr = described_class.new(
+        type: "formula",
+        ref: "assets/formula-1.svg",
+        sources: [source],
+      )
+      expect(nvr.sources.size).to eq(1)
+      expect(nvr.sources.first.type).to eq("authoritative")
     end
   end
 
-  describe "#table=" do
-    it "sets the table" do
-      subject.table = "table"
-      expect(subject.table).to eq("table")
+  describe "YAML round-trip" do
+    it "round-trips through YAML" do
+      src = {
+        "type" => "image",
+        "ref" => "assets/images/figure-1.svg",
+        "text" => "Diagram showing the concept",
+        "sources" => [
+          { "type" => "authoritative", "status" => "identical" },
+        ],
+      }.to_yaml
+
+      nvr = described_class.from_yaml(src)
+      expect(nvr.type).to eq("image")
+      expect(nvr.ref).to eq("assets/images/figure-1.svg")
+      expect(nvr.text).to eq("Diagram showing the concept")
+      expect(nvr.sources.size).to eq(1)
+
+      roundtrip = described_class.from_yaml(nvr.to_yaml)
+      expect(roundtrip.type).to eq("image")
+      expect(roundtrip.ref).to eq("assets/images/figure-1.svg")
+      expect(roundtrip.text).to eq("Diagram showing the concept")
+      expect(roundtrip.sources.size).to eq(1)
     end
-  end
 
-  describe "#formula=" do
-    it "sets the formula" do
-      subject.formula = "formula"
-      expect(subject.formula).to eq("formula")
+    it "handles external URL references" do
+      nvr = described_class.new(
+        type: "image",
+        ref: "https://example.org/images/figure-1.png",
+      )
+      roundtrip = described_class.from_yaml(nvr.to_yaml)
+      expect(roundtrip.ref).to eq("https://example.org/images/figure-1.png")
     end
-  end
 
-  describe "#sources=" do
-    it "sets the sources" do
-      subject.sources = [source]
-
-      expected_yaml = <<~YAML
-        ---
-        status: identical
-        type: authoritative
-      YAML
-
-      expect(subject.sources.size).to eq(1)
-      expect(subject.sources.first.to_yaml).to eq(expected_yaml)
+    it "handles URN references" do
+      nvr = described_class.new(
+        type: "table",
+        ref: "urn:gcr:assets:table-103-01",
+      )
+      roundtrip = described_class.from_yaml(nvr.to_yaml)
+      expect(roundtrip.ref).to eq("urn:gcr:assets:table-103-01")
     end
   end
 end

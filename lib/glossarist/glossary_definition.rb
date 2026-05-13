@@ -28,5 +28,10 @@ module Glossarist
     CONCEPT_DATE_TYPES = config.dig("concept_date", "type").freeze
 
     CONCEPT_STATUSES = config.dig("concept", "status").freeze
+
+    DESIGNATION_RELATIONSHIP_TYPES = config.dig("designation",
+                                                 "relationship_type")&.freeze
+
+    ISO12620_TERM_TYPES = config.dig("iso12620", "term_type").freeze
   end
 end

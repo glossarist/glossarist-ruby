@@ -17,6 +17,15 @@ RSpec.describe Glossarist::ConceptReference do
       expect(ref.source).to eq("urn:iec:std:iec:60050")
       expect(ref.ref_type).to eq("urn")
     end
+
+    it "builds with direct urn" do
+      ref = described_class.new(
+        term: "test",
+        urn: "urn:iec:std:iec:60050-102-102-04-22",
+        ref_type: "urn",
+      )
+      expect(ref.urn).to eq("urn:iec:std:iec:60050-102-102-04-22")
+    end
   end
 
   describe "#local?" do
@@ -71,6 +80,19 @@ RSpec.describe Glossarist::ConceptReference do
       expect(loaded.ref_type).to eq("urn")
     end
 
+    it "handles urn field" do
+      ref = described_class.new(
+        term: "test",
+        urn: "urn:iec:std:iec:60050-102-102-04-22",
+        ref_type: "urn",
+      )
+
+      yaml = ref.to_yaml
+      loaded = described_class.from_yaml(yaml)
+
+      expect(loaded.urn).to eq("urn:iec:std:iec:60050-102-102-04-22")
+    end
+
     it "handles internal references (nil source)" do
       ref = described_class.new(
         term: "geodetic latitude",
@@ -101,19 +123,6 @@ RSpec.describe Glossarist::ConceptReference do
       expect(concept_data.references).to eq([ref])
     end
 
-    it "ConceptData serializes references in YAML" do
-      ref = described_class.new(term: "equality", concept_id: "102-01-01",
-                                source: "urn:iec:std:iec:60050", ref_type: "urn")
-      concept_data = Glossarist::ConceptData.new(
-        id: "200",
-        references: [ref],
-      )
-
-      yaml_hash = concept_data.to_yaml_hash
-      expect(yaml_hash["references"]).to be_a(Array)
-      expect(yaml_hash["references"].first["term"]).to eq("equality")
-    end
-
     it "ConceptData round-trips with references" do
       ref = described_class.new(term: "equality", concept_id: "102-01-01",
                                 source: "urn:iec:std:iec:60050", ref_type: "urn")
@@ -129,81 +138,6 @@ RSpec.describe Glossarist::ConceptReference do
       expect(loaded.references.first.term).to eq("equality")
       expect(loaded.references.first.concept_id).to eq("102-01-01")
       expect(loaded.references.first.source).to eq("urn:iec:std:iec:60050")
-    end
-  end
-
-  describe "#to_urn" do
-    it "reconstructs IEC URN from source + concept_id" do
-      ref = described_class.new(term: "equality", concept_id: "102-01-01",
-                                source: "urn:iec:std:iec:60050", ref_type: "urn")
-      expect(ref.to_urn).to eq("urn:iec:std:iec:60050-102-01-01")
-    end
-
-    it "reconstructs ISO URN from source + concept_id" do
-      ref = described_class.new(term: "lat", concept_id: "3.1.32",
-                                source: "urn:iso:std:iso:19111", ref_type: "urn")
-      expect(ref.to_urn).to eq("urn:iso:std:iso:19111:term:3.1.32")
-    end
-
-    it "returns nil for local references" do
-      ref = described_class.new(term: "test", concept_id: "200",
-                                ref_type: "local")
-      expect(ref.to_urn).to be_nil
-    end
-
-    it "returns nil for designation references" do
-      ref = described_class.new(term: "geodetic latitude",
-                                ref_type: "designation")
-      expect(ref.to_urn).to be_nil
-    end
-
-    it "returns nil when source is missing" do
-      ref = described_class.new(term: "test", concept_id: "1", ref_type: "urn")
-      expect(ref.to_urn).to be_nil
-    end
-  end
-
-  describe "#to_gcr_hash" do
-    it "produces flat hash with all fields for external reference" do
-      ref = described_class.new(
-        term: "equality",
-        concept_id: "102-01-01",
-        source: "urn:iec:std:iec:60050",
-        ref_type: "urn",
-      )
-
-      expect(ref.to_gcr_hash).to eq({
-                                      "term" => "equality",
-                                      "concept_id" => "102-01-01",
-                                      "source" => "urn:iec:std:iec:60050",
-                                      "ref_type" => "urn",
-                                    })
-    end
-
-    it "omits nil source for internal reference" do
-      ref = described_class.new(
-        term: "latitude",
-        concept_id: "200",
-        ref_type: "local",
-      )
-
-      expect(ref.to_gcr_hash).to eq({
-                                      "term" => "latitude",
-                                      "concept_id" => "200",
-                                      "ref_type" => "local",
-                                    })
-    end
-
-    it "omits nil concept_id for designation reference" do
-      ref = described_class.new(
-        term: "geodetic latitude",
-        ref_type: "designation",
-      )
-
-      h = ref.to_gcr_hash
-      expect(h["term"]).to eq("geodetic latitude")
-      expect(h).not_to have_key("concept_id")
-      expect(h["ref_type"]).to eq("designation")
     end
   end
 end

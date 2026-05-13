@@ -96,20 +96,24 @@ RSpec.describe "Concept mention resolution pipeline" do
     end
   end
 
-  describe "ConceptReference#to_urn round-trip" do
-    it "reconstructs IEC URN from source + concept_id" do
+  describe "UrnResolver from ConceptReference" do
+    it "resolves IEC ConceptReference to Electropedia URL" do
       refs = extractor.extract_from_text("{{equality, urn:iec:std:iec:60050-102-01-01}}")
-      expect(refs.first.to_urn).to eq("urn:iec:std:iec:60050-102-01-01")
+      url = Glossarist::UrnResolver.resolve(refs.first)
+      expect(url).to include("electropedia.org")
+      expect(url).to include("102-01-01")
     end
 
-    it "reconstructs ISO URN from source + concept_id" do
+    it "resolves ISO ConceptReference to OBP URL" do
       refs = extractor.extract_from_text("{{lat, urn:iso:std:iso:19111:ed-3:v1:en:term:3.1.32}}")
-      expect(refs.first.to_urn).to eq("urn:iso:std:iso:19111:term:3.1.32")
+      url = Glossarist::UrnResolver.resolve(refs.first)
+      expect(url).to include("iso.org/obp")
     end
 
     it "returns nil for local references" do
       refs = extractor.extract_from_text("{{test, 200}}")
-      expect(refs.first.to_urn).to be_nil
+      url = Glossarist::UrnResolver.resolve(refs.first)
+      expect(url).to be_nil
     end
   end
 

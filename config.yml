@@ -26,23 +26,90 @@ designation:
   base:
     normative_status:
       - preferred
-      - deprecated
       - admitted
+      - deprecated
+      - superseded
       - <símbolo> # in iev-data => '<symbol>'
       - 티에스 # in iev-data => translates to 'TS' I think it is a synonym and not status.
       - prąd startowy # in iev-data => 'starting current' I think it is a synonym and not status.
+  relationship_type:
+    # Term-level (designation-to-designation within the same concept entry)
+    - abbreviated_form_for
+    - short_form_for
 
 related_concept:
   type:
+    # Lifecycle (ISO 10241-1)
     - deprecates
     - supersedes
     - superseded_by
+    # Hierarchical (ISO 10241-1 / ISO 25964)
     - narrower
     - broader
+    # Hierarchical sub-types — ISO 25964 generic (BTG/NTG)
+    - broader_generic
+    - narrower_generic
+    # Hierarchical sub-types — ISO 25964 partitive (BTP/NTP)
+    - broader_partitive
+    - narrower_partitive
+    # Hierarchical sub-types — ISO 25964 instantial (BTI/NTI)
+    - broader_instantial
+    - narrower_instantial
+    # Equivalence (ISO 10241-1 / ISO 25964 exactMatch / SKOS)
     - equivalent
+    # Approximate equivalence (ISO 25964 closeMatch / SKOS)
+    - close_match
+    # Cross-vocabulary mapping (SKOS)
+    - broad_match
+    - narrow_match
+    - related_match
+    # Comparative (ISO 10241-1)
     - compare
     - contrast
+    # Associative (ISO 10241-1 / ISO 25964 RT / TBX crossReference)
     - see
+    # Associative sub-types (ISO 25964 / TBX)
+    - related_concept
+    - related_concept_broader
+    - related_concept_narrower
+    # Associative — spatial/temporal (ISO 25964 / TBX)
+    - sequentially_related_concept
+    - spatially_related_concept
+    - temporally_related_concept
+    # Lexical (ISO 12620 / TBX)
+    - homograph
+    - false_friend
+
+iso12620:
+  term_type:
+    # ISO 12620 term type classification for designations.
+    # Orthographic / structural:
+    - abbreviation
+    - acronym
+    - clipped_term
+    - full_form
+    - initialism
+    - short_form
+    - transliterated_form
+    - transcribed_form
+    - variant
+    # Symbolic / formulaic:
+    - equation
+    - formula
+    - logical_expression
+    - symbol
+    # Usage / provenance:
+    - common_name
+    - entry_term
+    - internationalism
+    - international_scientific_term
+    - part_number
+    - phraseological_unit
+    - shortcut
+    - sku
+    - standard_text
+    - synonym
+    - synonymous_phrase
 
 abbreviation:
   type:
