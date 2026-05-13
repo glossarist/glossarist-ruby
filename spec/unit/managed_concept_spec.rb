@@ -11,9 +11,9 @@ RSpec.describe Glossarist::ManagedConcept do
           "ara" => "uuid",
         },
         "localizations" => [localized_concept],
-        "groups" => [
-          "foo",
-          "bar",
+        "domains" => [
+          { "concept_id" => "foo", "ref_type" => "domain" },
+          { "concept_id" => "bar", "ref_type" => "domain" },
         ],
       },
       "status" => "valid",
@@ -88,19 +88,26 @@ RSpec.describe Glossarist::ManagedConcept do
     end
   end
 
-  describe "#groups" do
-    context "when string is given" do
-      it "should convert it to array and set the groups list for the concept" do
-        expect { subject.data.groups = ["foobar"] }
-          .to change { subject.data.groups }.to(["foobar"])
-      end
+  describe "#domains" do
+    it "sets domain references as ConceptReference objects" do
+      ref = Glossarist::ConceptReference.new(concept_id: "103", ref_type: "domain")
+      expect { subject.data.domains = [ref] }
+        .to change { subject.data.domains }.to([ref])
+      expect(subject.data.domains.first).to be_a(Glossarist::ConceptReference)
+      expect(subject.data.domains.first.concept_id).to eq("103")
     end
 
-    context "when array is given" do
-      it "sets the groups list for the concept" do
-        expect { subject.data.groups = ["general", "group"] }
-          .to change { subject.data.groups }.to(["general", "group"])
-      end
+    it "migrates legacy groups strings to domain references" do
+      mc = described_class.from_yaml({
+        "data" => {
+          "id" => "123",
+          "groups" => ["foo", "bar"],
+          "localized_concepts" => { "eng" => "uuid" },
+        },
+      }.to_yaml)
+      expect(mc.data.domains.length).to eq(2)
+      expect(mc.data.domains.first.concept_id).to eq("foo")
+      expect(mc.data.domains.first.ref_type).to eq("domain")
     end
   end
 
@@ -130,9 +137,9 @@ RSpec.describe Glossarist::ManagedConcept do
           "localized_concepts" => {
             "ara" => "uuid",
           },
-          "groups" => [
-            "foo",
-            "bar",
+          "domains" => [
+            { "concept_id" => "foo", "ref_type" => "domain" },
+            { "concept_id" => "bar", "ref_type" => "domain" },
           ],
         },
         "id" => "ebb21fa2-87a9-5895-84f6-37f022f4f550",
