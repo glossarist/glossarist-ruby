@@ -94,10 +94,11 @@ module Glossarist
         end
 
         def register_non_verb_rep(index, l10n)
-          nvr = l10n.non_verb_rep
-          return unless nvr.is_a?(String) && !nvr.strip.empty?
+          Array(l10n.non_verb_rep).each do |nvr|
+            next unless nvr.is_a?(NonVerbRep) && nvr.ref && !nvr.ref.strip.empty?
 
-          nvr.strip.split.each { |p| index.register(p) }
+            index.register(nvr.ref.strip)
+          end
         end
 
         def register_graphical_symbols(index, l10n)

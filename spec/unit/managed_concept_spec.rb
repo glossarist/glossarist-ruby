@@ -63,6 +63,19 @@ RSpec.describe Glossarist::ManagedConcept do
       expect(subject.related.first.type).to eq("supersedes")
       expect(subject.related.first.content).to eq("Example content")
     end
+
+    it "generates dynamic *_concepts methods for all relationship types" do
+      subject.related = [
+        Glossarist::RelatedConcept.new(type: "broader_generic", content: "Vehicle"),
+        Glossarist::RelatedConcept.new(type: "broader_partitive", content: "Engine"),
+        Glossarist::RelatedConcept.new(type: "narrower", content: "Truck"),
+      ]
+
+      expect(subject.broader_generic_concepts.map(&:content)).to eq(["Vehicle"])
+      expect(subject.broader_partitive_concepts.map(&:content)).to eq(["Engine"])
+      expect(subject.narrower_concepts.map(&:content)).to eq(["Truck"])
+      expect(subject.broader_concepts).to be_empty
+    end
   end
 
   describe "#dates=" do

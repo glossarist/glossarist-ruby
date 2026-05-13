@@ -12,6 +12,9 @@ module Glossarist
       attribute :international, :boolean
       attribute :absent, :boolean
       attribute :pronunciation, Pronunciation, collection: true
+      attribute :sources, ConceptSource, collection: true
+      attribute :term_type, :string
+      attribute :related, RelatedConcept, collection: true
 
       key_value do
         map :type, to: :type
@@ -24,6 +27,9 @@ module Glossarist
         map :international, to: :international
         map :absent, to: :absent
         map :pronunciation, to: :pronunciation
+        map :sources, to: :sources
+        map %i[term_type termType], to: :term_type
+        map :related, to: :related
       end
 
       def self.of_yaml(hash, options = {})

@@ -167,7 +167,7 @@ inheritance hierarchy based on ISO 10241-1 and the Metanorma concept model.
 ==== Designation::Base (common to all types)
 
 designation:: String — the term text or symbol.
-normative_status:: Enum — one of `preferred`, `deprecated`, `admitted`.
+normative_status:: Enum — one of `preferred`, `admitted`, `deprecated`, `superseded`.
 geographical_area:: String — geographic usage region (ISO 3166-1 country code).
 language:: String — language of this designation (ISO 639 code). Usually inherited from the LocalizedConcept's `language_code`, but can differ for borrowed terms.
 script:: String — script of the designation text (ISO 15924 code, e.g. `Hani` for Kanji, `Latn` for Latin, `Cyrl` for Cyrillic).
@@ -175,6 +175,9 @@ system:: String — ISO 24229 conversion system code used to produce this design
 international:: Boolean — whether the designation is used internationally.
 absent:: Boolean — whether the designation is intentionally absent in this language.
 pronunciation:: Collection of `Pronunciation` entries — phonetic or romanized representations of the designation.
+sources:: Collection of `ConceptSource` entries — bibliographic sources for this designation (ISO 10241-1 §6.8).
+term_type:: Enum (ISO 12620) — optional classification of the designation's term type. See <<iso12620-term-types>> below.
+related:: Collection of `RelatedConcept` entries — term-level (designation-to-designation) relationships within the same concept entry. Used for linking abbreviated forms to full forms, short forms to expanded forms, etc. (TBX xref types).
 +
 Each `Pronunciation` entry has:
 +
@@ -224,8 +227,6 @@ No additional attributes beyond Base.
 ==== Designation::LetterSymbol (inherits Symbol)
 
 text:: String — the letter symbol text.
-language:: String — language code.
-script:: String — script code (e.g. `Latn`, `Cyrl`).
 
 ==== Designation::GraphicalSymbol (inherits Symbol)
 
@@ -264,16 +265,132 @@ abbr = Designation::Base.from_h({
 })
 ----
 
+[[iso12620-term-types]]
+==== ISO 12620 Term Types
+
+The `term_type` attribute on `Designation::Base` classifies designations
+according to ISO 12620 (also used as TBX `termType`). This is orthogonal to
+the structural designation `type` (expression/abbreviation/symbol): the
+structural type determines how the designation is serialized, while
+`term_type` provides ISO 12620 semantic classification.
+
+[cols="1,2"]
+|===
+|Term type |Description
+
+|`abbreviation`
+|A shortened form of a word or phrase (general category)
+
+|`acronym`
+|An abbreviation pronounced as a word (e.g. NATO, laser)
+
+|`clipped_term`
+|A term formed by clipping part of a longer term (e.g. "phone" from "telephone")
+
+|`common_name`
+|A name in common use for a concept (e.g. "water" vs H₂O)
+
+|`entry_term`
+|The headword or main term in a terminological entry
+
+|`equation`
+|A mathematical equation used as a designation
+
+|`formula`
+|A chemical or mathematical formula (e.g. H₂O, E=mc²)
+
+|`full_form`
+|The complete, unabbreviated form of a designation (e.g. "World Wide Web")
+
+|`initialism`
+|An abbreviation pronounced letter by letter (e.g. "URL", "FBI")
+
+|`internationalism`
+|A term used with the same meaning across many languages (e.g. "computer", "algorithm")
+
+|`international_scientific_term`
+|A term established by international scientific agreement (e.g. "hydrogen")
+
+|`logical_expression`
+|A logical or Boolean expression used as a designation
+
+|`part_number`
+|A part number or catalog identifier used as a designation
+
+|`phraseological_unit`
+|A multi-word expression or phrase functioning as a term (e.g. "software engineering")
+
+|`transcribed_form`
+|A designation produced by phonetic transcription from another script
+
+|`transliterated_form`
+|A designation produced by transliteration from another script (e.g. "Moskva" from "Москва")
+
+|`short_form`
+|A shortened form of a designation that is not an abbreviation (e.g. "US" for "United States")
+
+|`shortcut`
+|A keyboard shortcut or command sequence (e.g. "Ctrl+V" for paste)
+
+|`sku`
+|A stock keeping unit identifier
+
+|`standard_text`
+|A standardized text passage used as a designation
+
+|`symbol`
+|A non-verbal symbol representing the concept (e.g. Ω for ohm)
+
+|`synonym`
+|A term with the same meaning in the same language, used as an alternative designation
+
+|`synonymous_phrase`
+|A phrase that is synonymous with the preferred designation
+
+|`variant`
+|A spelling, regional, or stylistic variant of another designation
+|===
+
+==== Designation-Level Relationships (TBX xref)
+
+Designations can have intra-entry relationships — links between
+designations of the *same* concept. These correspond to TBX `xref`
+elements on term information groups (`<tig>`).
+
+[cols="1,2"]
+|===
+|Relationship type |Description
+
+|`abbreviated_form_for`
+|This designation is an abbreviated form of the target (e.g. "WWW" → "World Wide Web")
+
+|`short_form_for`
+|This designation is a short form of the target (e.g. "US" → "United States of America")
+|===
+
+Example:
+[,yaml]
+----
+terms:
+  - designation: WWW
+    type: abbreviation
+    term_type: acronym
+    related:
+      - type: abbreviated_form_for
+        content: "World Wide Web"
+  - designation: World Wide Web
+    type: expression
+    term_type: full_form
+----
+
 [[id,related-concept]]
 === RelatedConcept
 
-A term related to the current term.
+A concept related to the current concept with a typed relationship.
 
-Following fields are available for the Related Concept
-
-type:: An enum to denote the relation of the term to the current term.
-content:: The designation of the related term.
-ref:: A <<citation, citation>> of the related term, in a Termbase.
+type:: Enum — the relationship type (see <<relationship-types,Relationship Types>> below).
+content:: String — free-text content describing the related concept.
+ref:: A <<citation,Citation>> reference to the related concept.
 
 There are two ways to initialize and populate a related concept
 
@@ -296,6 +413,208 @@ related_concept = Glossarist::RelatedConcept.new
 related_concept.type = "supersedes"
 related_concept.content = "designation of the related concept"
 related_concept.ref = <Citation object>
+----
+
+[[relationship-types]]
+==== Relationship Types
+
+Relationship types are drawn from ISO 10241-1, ISO 25964/SKOS, and ISO 12620/TBX. The table below shows each type with its provenance and cross-standard equivalents.
+
+[cols="1,1,1,1,1"]
+|===
+|Glossarist type |Category |ISO 10241-1 |ISO 25964 / SKOS |ISO 12620 / TBX
+
+|`deprecates`
+|Lifecycle
+|deprecates
+|—
+|—
+
+|`supersedes`
+|Lifecycle
+|supersedes
+|—
+|—
+
+|`superseded_by`
+|Lifecycle
+|superseded by
+|—
+|—
+
+|`broader`
+|Hierarchical
+|broader concept
+|BT (broaderTerm)
+|broaderTerm
+
+|`narrower`
+|Hierarchical
+|narrower concept
+|NT (narrowerTerm)
+|narrowerTerm
+
+|`broader_generic`
+|Hierarchical (generic)
+|—
+|BTG (broaderGeneric, is-a)
+|broaderTermGeneric
+
+|`narrower_generic`
+|Hierarchical (generic)
+|—
+|NTG (narrowerGeneric)
+|narrowerTermGeneric
+
+|`broader_partitive`
+|Hierarchical (partitive)
+|—
+|BTP (broaderPartitive, part-whole)
+|broaderTermPartitive
+
+|`narrower_partitive`
+|Hierarchical (partitive)
+|—
+|NTP (narrowerPartitive)
+|narrowerTermPartitive
+
+|`broader_instantial`
+|Hierarchical (instantial)
+|—
+|BTI (broaderInstantial, instance-of)
+|broaderTermInstantial
+
+|`narrower_instantial`
+|Hierarchical (instantial)
+|—
+|NTI (narrowerInstantial)
+|narrowerTermInstantial
+
+|`equivalent`
+|Equivalence
+|equivalent
+|exactMatch
+|—
+
+|`close_match`
+|Approx. equiv.
+|—
+|closeMatch
+|—
+
+|`broad_match`
+|Cross-vocab mapping
+|—
+|broadMatch
+|—
+
+|`narrow_match`
+|Cross-vocab mapping
+|—
+|narrowMatch
+|—
+
+|`related_match`
+|Cross-vocab mapping
+|—
+|relatedMatch
+|—
+
+|`compare`
+|Comparative
+|compare
+|—
+|—
+
+|`contrast`
+|Comparative
+|contrast
+|—
+|—
+
+|`see`
+|Associative
+|see also
+|RT (relatedTerm)
+|crossReference
+
+|`related_concept`
+|Associative
+|—
+|—
+|relatedConcept
+
+|`related_concept_broader`
+|Associative (broader)
+|—
+|—
+|relatedConceptBroader
+
+|`related_concept_narrower`
+|Associative (narrower)
+|—
+|—
+|relatedConceptNarrower
+
+|`sequentially_related_concept`
+|Associative (sequential)
+|—
+|—
+|sequentiallyRelatedConcept
+
+|`spatially_related_concept`
+|Associative (spatial)
+|—
+|—
+|spatiallyRelatedConcept
+
+|`temporally_related_concept`
+|Associative (temporal)
+|—
+|—
+|temporallyRelatedConcept
+
+|`homograph`
+|Lexical
+|—
+|—
+|homograph
+
+|`false_friend`
+|Lexical
+|—
+|—
+|falseFriend
+|===
+
+[[id,concept-reference]]
+=== ConceptReference
+
+A typed reference to another concept, either local (within the same glossary) or external (in another concept registry).
+
+term:: String — the display text for the referenced concept.
+concept_id:: String — the identifier of the target concept.
+source:: String — the registry URI prefix for external references (e.g. `urn:iec:std:iec:60050`).
+ref_type:: String — the reference type: `local`, `designation`, or `urn`.
+urn:: String — a direct URN for the target concept (e.g. `urn:iec:std:iec:60050-102-01-01`).
+
+Local references use `concept_id` without `source`. External references use `source` + `concept_id` or a direct `urn`.
+
+[,ruby]
+----
+# Local reference
+ref = Glossarist::ConceptReference.new(term: "latitude", concept_id: "200", ref_type: "local")
+
+# External reference via URN
+ref = Glossarist::ConceptReference.new(
+  term: "equality",
+  concept_id: "102-01-01",
+  source: "urn:iec:std:iec:60050",
+  ref_type: "urn",
+)
+
+ref.local?    # => false
+ref.external? # => true
 ----
 
 [[id,concept-date]]
@@ -403,12 +722,27 @@ citation.clause = "some clause"
 
 === NonVerbRep
 
-Non-verbal Representation have the following fields
+Non-verbal representations are associated resources (images, tables, formulas) used to help define a concept (ISO 10241-1 §6.5). They live outside the concept model and are referenced by URI. Resources can be shared across concepts and belong either to the dataset package (relative path) or are externally referenced (URL/URN).
 
-image:: An image used to help define a term.
-table:: A table used to help define a term.
-formula:: A formula used to help define a term.
-sources:: Bibliographic <<concept-source,concept source>> for the non-verbal representation of the term.
+type:: String — the type of representation: `image`, `table`, or `formula`.
+ref:: String — URI reference to the resource (relative path within the GCR package, URN, or URL).
+text:: String — optional text description or alt text.
+sources:: Collection of <<concept-source,ConceptSource>> entries — bibliographic sources for the representation.
+
+Example:
++
+[,yaml]
+----
+non_verbal_rep:
+  - type: image
+    ref: assets/images/figure-1.svg
+    text: Diagram showing the concept hierarchy
+  - type: formula
+    ref: urn:gcr:assets:formula-eq1
+    sources:
+      - type: authoritative
+        status: identical
+----
 
 [[id,concept-source]]
 === ConceptSource

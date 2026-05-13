@@ -58,4 +58,36 @@ RSpec.describe Glossarist::Designation::Abbreviation do
       expect(abbr.field_of_application).to eq("in computing")
     end
   end
+
+  describe "#term_type" do
+    it "accepts ISO 12620 term type" do
+      abbr = described_class.new(designation: "WWW", acronym: true,
+                                 term_type: "acronym")
+      expect(abbr.term_type).to eq("acronym")
+    end
+
+    it "round-trips through YAML" do
+      abbr = described_class.from_yaml({
+        "designation" => "WWW",
+        "acronym" => true,
+        "term_type" => "acronym",
+      }.to_yaml)
+      expect(abbr.term_type).to eq("acronym")
+
+      roundtrip = described_class.from_yaml(abbr.to_yaml)
+      expect(roundtrip.term_type).to eq("acronym")
+    end
+  end
+
+  describe "#related" do
+    it "accepts designation-level relationships" do
+      abbr = described_class.new(designation: "WWW", acronym: true)
+      abbr.related = [
+        Glossarist::RelatedConcept.new(type: "abbreviated_form_for",
+                                       content: "World Wide Web"),
+      ]
+      expect(abbr.related.first.type).to eq("abbreviated_form_for")
+      expect(abbr.related.first.content).to eq("World Wide Web")
+    end
+  end
 end

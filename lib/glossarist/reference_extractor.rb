@@ -157,11 +157,9 @@ module Glossarist
       refs = []
 
       concept.localizations.each do |l10n|
-        nvr = l10n.non_verb_rep
-        if nvr.is_a?(String) && !nvr.strip.empty?
-          nvr.strip.split.each do |p|
-            refs << AssetReference.new(path: p) unless p.empty?
-          end
+        Array(l10n.non_verb_rep).each do |nvr|
+          next unless nvr.is_a?(NonVerbRep) && nvr.ref && !nvr.ref.strip.empty?
+          refs << AssetReference.new(path: nvr.ref.strip)
         end
 
         (l10n.data&.terms || []).each do |term|

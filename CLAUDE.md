@@ -23,8 +23,23 @@ All model classes use `Lutaml::Model::Serializable` for serialization.
 - **`ManagedConcept`** (`managed_concept.rb`) — a managed concept with `ManagedConceptData` (groups, localized_concepts map, sources), related concepts, dates, and status. Delegates localization via `add_l10n`/`localization(lang)`.
 - **`Concept`** (`concept.rb`) — base concept with `ConceptData` (definition, terms/designations, notes, examples, sources, dates, language_code). Parent of `LocalizedConcept`.
 - **`LocalizedConcept`** (`localized_concept.rb`) — extends `Concept` with `classification`, `entry_status`, `review_type`.
-- **`ConceptData`** (`concept_data.rb`) — the data payload inside `Concept`: definition, terms, examples, notes, sources, language_code (ISO 639), script (ISO 15924), system (ISO 24229 conversion system code). Uses `DetailedDefinition` collections for definition/examples/notes.
+- **`ConceptData`** (`concept_data.rb`) — the data payload inside `Concept`: definition, terms, examples, notes, sources, non_verb_rep (collection of `NonVerbRep` resource references), language_code (ISO 639), script (ISO 15924), system (ISO 24229 conversion system code). Uses `DetailedDefinition` collections for definition/examples/notes.
 - **`ManagedConceptData`** (`managed_concept_data.rb`) — the data payload inside `ManagedConcept`: id, localized_concepts hash (lang_code => uuid), groups, sources.
+
+### NonVerbRep (Resource Reference)
+
+`NonVerbRep` (`non_verb_rep.rb`) models non-verbal representations as URI references to external resources (images, tables, formulas), not embedded content. Attributes: `type` (image/table/formula), `ref` (URI — relative path, URN, or URL), `text` (alt text), `sources` (ConceptSource collection).
+
+### ConceptReference & RelatedConcept
+
+- **`ConceptReference`** (`concept_reference.rb`) — a typed reference to another concept. Local refs use `concept_id` alone; external refs use `source` (URN prefix) + `concept_id` or a direct `urn` field. Has `local?`/`external?` predicates. No `to_gcr_hash` or `from_urn` — model-driven architecture uses lutaml-model for serialization; URN construction/parsing belongs in `UrnResolver`.
+- **`RelatedConcept`** (`related_concept.rb`) — a concept with a typed relationship. Relationship types cover ISO 10241-1 (deprecates/supersedes/superseded_by/compare/contrast/see), ISO 25964/SKOS (broader/narrower/broader_generic/narrower_generic/broader_partitive/narrower_partitive/broader_instantial/narrower_instantial/equivalent/close_match/broad_match/narrow_match/related_match), ISO 12620/TBX (homograph/false_friend/related_concept/related_concept_broader/related_concept_narrower/sequentially_related_concept/spatially_related_concept/temporally_related_concept), and designation-level (abbreviated_form_for/short_form_for). Types are defined in `config.yml` under `related_concept.type`.
+
+### Reference Resolution
+
+- **`ReferenceExtractor`** (`reference_extractor.rb`) — extracts `ConceptReference` and `AssetReference` objects from `{{...}}` mentions and `image::...[]` references in concept text fields.
+- **`ReferenceResolver`** (`reference_resolver.rb`) — resolves references via adapter chain (local → package → remote). Supports route overrides for URI remapping.
+- **`UrnResolver`** (`urn_resolver.rb`) — converts URNs to canonical HTTP URLs (IEC Electropedia, ISO OBP). Extensible via `register_scheme`. All URN construction/parsing logic lives here, not in the model.
 
 ### UUID Generation
 
@@ -35,7 +50,7 @@ Concepts use deterministic UUID v5 (SHA-1) derived from their serialized YAML co
 `Designation::Base` (`designation/base.rb`) uses a self-referencing factory pattern (`of_yaml`) that dispatches to subclasses based on `type` field: `Expression`, `Symbol`, `Abbreviation`, `GraphicalSymbol`, `LetterSymbol`. The bi-directional mapping is in `SERIALIZED_TYPES` (`designation.rb`).
 
 Designation inheritance hierarchy (MECE):
-- **Base** — `designation`, `normative_status`, `geographical_area`, `type`, `language`/ISO 639, `script`/ISO 15924, `system`/ISO 24229, `international`, `absent`, `pronunciation` (collection of `Pronunciation` objects with `content`, `language`/ISO 639, `script`/ISO 15924, `country`/ISO 3166-1, `system`/ISO 24229)
+- **Base** — `designation`, `normative_status` (preferred/admitted/deprecated/superseded), `geographical_area`, `type`, `language`/ISO 639, `script`/ISO 15924, `system`/ISO 24229, `international`, `absent`, `pronunciation` (collection of `Pronunciation` objects), `sources` (collection of `ConceptSource` — per-designation sources per ISO 10241-1 §6.8), `term_type` (ISO 12620 term type classification — 24 values from `config.yml`), `related` (collection of `RelatedConcept` — designation-level intra-entry relationships: `abbreviated_form_for`, `short_form_for`)
 - **Expression < Base** — `prefix`, `usage_info`, `field_of_application` (IEC "specific use"), `grammar_info`
 - **Abbreviation < Expression** — abbreviation type booleans (`acronym`, `initialism`, `truncation`) from `config.yml`
 - **Symbol < Base** — (no additional attributes)

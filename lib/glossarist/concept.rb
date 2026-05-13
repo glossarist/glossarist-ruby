@@ -4,7 +4,7 @@ module Glossarist
     attribute :id, :string
     attribute :uuid, :string
     attribute :subject, :string
-    attribute :non_verb_rep, :string
+    attribute :non_verb_rep, NonVerbRep, collection: true
     attribute :extension_attributes, :string
     attribute :lineage_source, :string
     attribute :localizations, :hash
