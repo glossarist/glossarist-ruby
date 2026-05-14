@@ -2,8 +2,8 @@
 
 module Glossarist
   module Transforms
-    autoload :ConceptToSkosTransform,
-             "glossarist/transforms/concept_to_skos_transform"
+    autoload :ConceptToGlossTransform,
+             "glossarist/transforms/concept_to_gloss_transform"
     autoload :ConceptToTbxTransform,
              "glossarist/transforms/concept_to_tbx_transform"
   end
