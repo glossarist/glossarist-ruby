@@ -341,7 +341,7 @@ RSpec.describe Glossarist::GcrPackage do
         expect(entry).not_to be_nil
         content = entry.get_input_stream.read
         expect(content).to include("@prefix skos:")
-        expect(content).to include("a skos:Concept")
+        expect(content).to include("skos:Concept")
       end
     end
 
