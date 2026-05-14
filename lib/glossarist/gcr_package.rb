@@ -215,19 +215,21 @@ module Glossarist
     end
 
     def write_compiled_skos(zip_file, concepts, formats, opts, name) # rubocop:disable Metrics/MethodLength
-      require "glossarist/transforms/concept_to_skos_transform"
-      vocab = Transforms::ConceptToSkosTransform.transform_document(concepts,
-                                                                    opts)
+      require "glossarist/transforms/concept_to_gloss_transform"
 
-      if formats.include?("jsonld")
-        zip_file.get_output_stream("compiled/#{name}.jsonld") do |f|
-          f.write(vocab.to_jsonld)
+      if formats.include?("jsonld") || formats.include?("turtle")
+        transform = Transforms::ConceptToGlossTransform.new(nil, opts)
+
+        if formats.include?("jsonld")
+          zip_file.get_output_stream("compiled/#{name}.jsonld") do |f|
+            f.write(transform.to_jsonld(concepts))
+          end
         end
-      end
 
-      if formats.include?("turtle")
-        zip_file.get_output_stream("compiled/#{name}.ttl") do |f|
-          f.write(vocab.to_turtle)
+        if formats.include?("turtle")
+          zip_file.get_output_stream("compiled/#{name}.ttl") do |f|
+            f.write(transform.to_turtle(concepts))
+          end
         end
       end
 
@@ -235,8 +237,8 @@ module Glossarist
 
       zip_file.get_output_stream("compiled/#{name}.jsonl") do |f|
         concepts.each do |concept|
-          skos = Transforms::ConceptToSkosTransform.transform(concept, opts)
-          f.write(skos.to_jsonld)
+          transform = Transforms::ConceptToGlossTransform.new(concept, opts)
+          f.write(transform.to_jsonl_line)
           f.write("\n")
         end
       end
