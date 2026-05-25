@@ -190,9 +190,13 @@ module Glossarist
 
             l10n = LocalizedConcept.from_yaml(File.read(lc_file))
             mc.add_localization(l10n)
+          rescue StandardError
+            next
           end
 
           yield mc
+        rescue StandardError
+          next
         end
       end
 
