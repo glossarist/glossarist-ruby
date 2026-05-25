@@ -162,7 +162,7 @@ RSpec.describe "Concept mention resolution pipeline" do
 
       pkg = Glossarist::GcrPackage.load(output)
       expect(pkg.concepts.length).to eq(1)
-      expect(pkg.metadata["uri_prefix"]).to eq("urn:example:test")
+      expect(pkg.metadata.uri_prefix).to eq("urn:example:test")
 
       loaded_mc = pkg.concepts.first
       expect(loaded_mc).to be_a(Glossarist::ManagedConcept)

@@ -24,7 +24,6 @@ module Glossarist
             lang = l10n.language_code || "unknown"
             terms = l10n.data&.terms || []
             terms.each_with_index do |term, idx|
-              next unless term.respond_to?(:normative_status)
               next if term.normative_status.nil? || term.normative_status.to_s.strip.empty?
 
               unless VALID_STATUSES.include?(term.normative_status.to_s)

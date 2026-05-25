@@ -16,7 +16,7 @@ module Glossarist
           return [] if l10ns.any?
 
           [issue("#{fname}: no localizations found",
-                 code: code, severity: "error")]
+                 code: code, severity: "warning")]
         end
       end
     end

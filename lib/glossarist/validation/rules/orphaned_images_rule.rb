@@ -18,10 +18,8 @@ module Glossarist
           referenced_paths = Set.new
 
           context.concepts.each do |concept|
-            # Text-embedded image refs
             concept.localizations.each do |l10n|
-              texts = extract_texts(l10n)
-              texts.each do |text|
+              l10n.text_content.each do |text|
                 next unless text
                 extractor.extract_from_text(text).each do |ref|
                   if ref.is_a?(AssetReference)
@@ -31,9 +29,17 @@ module Glossarist
               end
             end
 
-            # Model-level asset refs
             extractor.extract_asset_refs_from_concept(concept).each do |ref|
               referenced_paths.add(ref.path)
+            end
+          end
+
+          images_file = load_images_file(context)
+          if images_file
+            context.bibliography_index.entries.each_value do |entry|
+              next unless entry[:source].is_a?(V3::ImageEntry)
+              path = entry[:source].path
+              referenced_paths.add(path) if path
             end
           end
 
@@ -54,15 +60,14 @@ module Glossarist
 
         private
 
-        def extract_texts(l10n)
-          texts = []
-          (l10n.data&.definition || []).each { |d| texts << d.content if d.content }
-          (l10n.data&.notes || []).each { |n| texts << n.content if n.content }
-          (l10n.data&.examples || []).each { |e| texts << e.content if e.content }
-          texts
+        def load_images_file(context)
+          return @images_file if defined?(@images_file)
+
+          @images_file = V3::ImageFile.from_file(
+            File.join(context.path, "images.yaml")
+          )
         end
       end
     end
   end
 end
-

@@ -28,14 +28,12 @@ Lutaml::Rdf::Mapping.class_eval do
 
   def deep_dup
     self.class.new.tap do |new_mapping|
-      new_mapping.instance_variable_set(:@namespace_set, @namespace_set)
-      new_mapping.instance_variable_set(:@rdf_subject, @rdf_subject)
-      new_mapping.instance_variable_set(:@rdf_type, @rdf_type)
-      if instance_variable_defined?(:@rdf_types) && @rdf_types
-        new_mapping.instance_variable_set(:@rdf_types, @rdf_types.dup)
-      end
-      new_mapping.instance_variable_set(:@rdf_predicates, @rdf_predicates.dup)
-      new_mapping.instance_variable_set(:@rdf_members, @rdf_members.dup)
+      new_mapping.namespace_set = @namespace_set
+      new_mapping.rdf_subject = @rdf_subject
+      new_mapping.rdf_type = @rdf_type
+      new_mapping.rdf_types = @rdf_types&.dup
+      new_mapping.rdf_predicates = @rdf_predicates.dup
+      new_mapping.rdf_members = @rdf_members.dup
     end
   end
 end

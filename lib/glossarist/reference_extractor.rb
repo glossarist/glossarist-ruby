@@ -62,11 +62,7 @@ module Glossarist
     end
 
     def extract_from_localized_concept(l10n)
-      texts = []
-      l10n.data.definition&.each { |d| texts << d.content if d.content }
-      l10n.data.notes&.each { |n| texts << n.content if n.content }
-      l10n.data.examples&.each { |e| texts << e.content if e.content }
-      texts.flat_map { |t| extract_from_text(t) }
+      l10n.text_content.flat_map { |t| extract_from_text(t) }
     end
 
     # Unified concept mention dispatcher.
@@ -159,6 +155,7 @@ module Glossarist
       concept.localizations.each do |l10n|
         Array(l10n.non_verb_rep).each do |nvr|
           next unless nvr.is_a?(NonVerbRep) && nvr.ref && !nvr.ref.strip.empty?
+
           refs << AssetReference.new(path: nvr.ref.strip)
         end
 
@@ -176,19 +173,23 @@ module Glossarist
     def extract_bib_refs_from_concept(concept)
       refs = []
       concept.localizations.each do |l10n|
-        gather_all_sources(l10n).each do |source|
+        l10n.all_sources.each do |source|
           origin = source.origin
           next unless origin
 
-          if origin.text && !origin.text.strip.empty?
-            refs << BibliographicReference.new(anchor: origin.text)
+          ref = origin.ref
+          next unless ref
+
+          source_text = ref.source
+          if source_text && !source_text.strip.empty?
+            refs << BibliographicReference.new(anchor: source_text)
           end
 
-          next unless origin.source && origin.id
+          next unless ref.source && ref.id
 
-          key = "#{origin.source} #{origin.id}"
+          key = "#{ref.source} #{ref.id}"
           refs << BibliographicReference.new(anchor: key)
-          refs << BibliographicReference.new(anchor: origin.id.to_s)
+          refs << BibliographicReference.new(anchor: ref.id.to_s)
         end
       end
       refs
@@ -282,14 +283,6 @@ module Glossarist
 
     register_identifier_resolver("urn:") do |ext, identifier, display|
       ext.resolve_generic_urn(identifier, display)
-    end
-
-    def gather_all_sources(l10n)
-      sources = Array(l10n.data&.sources)
-      sources += Array((l10n.data&.definition || []).flat_map(&:sources).compact)
-      sources += Array((l10n.data&.notes || []).flat_map(&:sources).compact)
-      sources += Array((l10n.data&.examples || []).flat_map(&:sources).compact)
-      sources
     end
   end
 end

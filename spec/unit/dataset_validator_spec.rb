@@ -180,7 +180,7 @@ RSpec.describe Glossarist::DatasetValidator do
       File.write(File.join(target, "concepts", "100.yaml"), YAML.dump(concept))
 
       result = validator.validate(target, reference_path: ref_dir)
-      cross_ref_warnings = result.warnings.grep_v(/preferred|authoritative/)
+      cross_ref_warnings = result.warnings.grep_v(/preferred|authoritative|schema_version/)
       expect(cross_ref_warnings).to be_empty
     end
 
@@ -221,7 +221,7 @@ RSpec.describe Glossarist::DatasetValidator do
       GC.start
 
       result = validator.validate(output, reference_path: ref_dir)
-      cross_ref_warnings = result.warnings.grep_v(/preferred|authoritative/)
+      cross_ref_warnings = result.warnings.grep_v(/preferred|authoritative|schema_version/)
       expect(cross_ref_warnings).to be_empty
     end
   end

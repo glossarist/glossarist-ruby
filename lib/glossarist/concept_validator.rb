@@ -4,8 +4,9 @@ module Glossarist
   class ConceptValidator
     attr_reader :path, :errors, :warnings
 
-    def initialize(path)
+    def initialize(path, on_progress: nil)
       @path = path
+      @on_progress = on_progress
       @errors = []
       @warnings = []
     end
@@ -14,9 +15,12 @@ module Glossarist
       result = ValidationResult.new
       context = Validation::Rules::DatasetContext.new(@path)
       concept_rules = Validation::Rules::Registry.for_scope(:concept)
+      total = ConceptCollector.count(@path)
       file_idx = 0
 
       ConceptCollector.each_concept(@path) do |concept|
+        context.add_concept(concept)
+
         fname = concept_file_name(concept, file_idx)
         concept_context = Validation::Rules::ConceptContext.new(
           concept, file_name: fname, collection_context: context
@@ -29,6 +33,7 @@ module Glossarist
         end
 
         file_idx += 1
+        @on_progress&.call(file_idx, total)
       end
 
       if file_idx.zero?

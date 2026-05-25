@@ -28,7 +28,7 @@ module Glossarist
         parts = [source.status, source.type, source.modification]
         origin = source.origin
         if origin
-          parts << origin.text << origin.source << origin.id << origin.version << origin.link
+          parts << origin.source << origin.id << origin.version << origin.link
         end
         Digest::MD5.hexdigest(parts.compact.join("|"))[0..11]
       end

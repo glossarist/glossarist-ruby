@@ -115,7 +115,7 @@ RSpec.describe Glossarist::ManagedConcept do
     let(:source) do
       {
         "status" => "identical",
-        "origin" => { "text" => "Concept level source" },
+        "origin" => { "ref" => { "source" => "Concept level source" } },
       }
     end
 
@@ -125,7 +125,7 @@ RSpec.describe Glossarist::ManagedConcept do
       subject.sources = [Glossarist::ConceptSource.from_yaml(source.to_yaml)]
 
       expect(subject.sources.first.status).to eq(source["status"])
-      expect(subject.sources.first.origin.text).to eq(source["origin"]["text"])
+      expect(subject.sources.first.origin.ref.source).to eq("Concept level source")
     end
   end
 

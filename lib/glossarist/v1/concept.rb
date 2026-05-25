@@ -48,23 +48,6 @@ module Glossarist
         mc
       end
 
-      private
-
-      def assign_domains(concept)
-        concept.data.domains = groups.map do |g|
-          ConceptReference.new(concept_id: g.to_s, ref_type: "domain")
-        end
-      end
-
-      def assign_references(concept)
-        l10n = concept.localization("eng") || concept.localizations.values.first
-        return unless l10n
-
-        l10n.data.references = references.map do |r|
-          ConceptReference.new(r.transform_keys(&:to_sym))
-        end
-      end
-
       def lang_blocks_from(model, value)
         blocks = {}
         value.each do |key, v|
@@ -81,6 +64,23 @@ module Glossarist
       def lang_blocks_to(model, doc)
         model.language_blocks.each do |lang, data|
           doc[lang] = data
+        end
+      end
+
+      private
+
+      def assign_domains(concept)
+        concept.data.domains = groups.map do |g|
+          ConceptReference.new(concept_id: g.to_s, ref_type: "domain")
+        end
+      end
+
+      def assign_references(concept)
+        l10n = concept.localization("eng") || concept.localizations.values.first
+        return unless l10n
+
+        l10n.data.references = references.map do |r|
+          ConceptReference.new(r.transform_keys(&:to_sym))
         end
       end
     end

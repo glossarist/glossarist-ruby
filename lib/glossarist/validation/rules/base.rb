@@ -4,6 +4,11 @@ module Glossarist
   module Validation
     module Rules
       class Base
+        def self.inherited(subclass)
+          super
+          Registry.register(subclass)
+        end
+
         def code
           nil
         end

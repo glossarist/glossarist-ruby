@@ -37,5 +37,13 @@ module Glossarist
     def entry_status=(value)
       data.entry_status = value
     end
+
+    def all_sources
+      data.all_sources
+    end
+
+    def text_content
+      data.text_content
+    end
   end
 end

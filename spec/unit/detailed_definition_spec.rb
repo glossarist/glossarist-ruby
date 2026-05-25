@@ -15,7 +15,7 @@ RSpec.describe Glossarist::DetailedDefinition do
       source = Glossarist::ConceptSource.from_yaml({
         "type" => "lineage",
         "status" => "identical",
-        "origin" => { "text" => "origin" },
+        "origin" => { "ref" => { "source" => "origin" } },
         "modification" => "note",
       }.to_yaml)
 
@@ -23,7 +23,7 @@ RSpec.describe Glossarist::DetailedDefinition do
         Glossarist::ConceptSource.from_yaml({
           "type" => "lineage",
           "status" => "identical",
-          "origin" => { "text" => "url" },
+          "origin" => { "ref" => { "source" => "url" } },
           "modification" => "some modification",
         }.to_yaml),
         source,
@@ -33,7 +33,7 @@ RSpec.describe Glossarist::DetailedDefinition do
       expect(detailed_definition.sources.first).to be_a(Glossarist::ConceptSource)
       expect(detailed_definition.sources.first.type).to eq("lineage")
       expect(detailed_definition.sources.first.status).to eq("identical")
-      expect(detailed_definition.sources.first.origin.text).to eq("url")
+      expect(detailed_definition.sources.first.origin.ref.source).to eq("url")
       expect(detailed_definition.sources.first.modification).to eq("some modification")
 
       expect(detailed_definition.sources[1]).to be(source)
@@ -47,7 +47,7 @@ RSpec.describe Glossarist::DetailedDefinition do
         Glossarist::ConceptSource.from_yaml({
           type: "lineage",
           status: "identical",
-          origin: { "text" => "origin" },
+          origin: { "ref" => { "source" => "origin" } },
           modification: "some modification",
         }.to_yaml),
       ]
@@ -57,7 +57,8 @@ RSpec.describe Glossarist::DetailedDefinition do
         content: content
         sources:
         - origin:
-            ref: origin
+            ref:
+              source: origin
           status: identical
           type: lineage
           modification: some modification

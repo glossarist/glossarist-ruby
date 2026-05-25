@@ -35,8 +35,36 @@ module Glossarist
       end
     end
 
+    def self.count(dir)
+      dir = File.expand_path(dir)
+      return 0 unless File.directory?(dir)
+
+      if managed_concepts?(dir)
+        Dir.glob(File.join(dir, "concepts", "concept", "*.yaml")).length
+      elsif v2_concepts?(dir)
+        count_v2(dir)
+      elsif v1_concepts?(dir)
+        Dir.glob(File.join(dir, "concepts", "*.yaml")).length
+      else
+        0
+      end
+    end
+
     class << self
       private
+
+      def count_v2(dir)
+        if v2_flat_concepts?(dir)
+          Dir.glob(File.join(dir, "concepts", "*.yaml")).length
+        else
+          v2_dir = File.join(dir, "geolexica-v2")
+          if File.directory?(File.join(v2_dir, "concepts"))
+            Dir.glob(File.join(v2_dir, "concepts", "concept", "*.yaml")).length
+          else
+            Dir.glob(File.join(v2_dir, "*.yaml")).length
+          end
+        end
+      end
 
       def v1_concepts?(dir)
         concepts_dir = File.join(dir, "concepts")
@@ -124,6 +152,7 @@ module Glossarist
       def each_grouped_v2_concepts(v2_dir, &block)
         collection = ManagedConceptCollection.new
         manager = ConceptManager.new(path: v2_dir)
+        manager.version = detect_schema_version(v2_dir)
         manager.load_from_files(collection: collection)
         collection.each(&block)
       end
@@ -131,6 +160,7 @@ module Glossarist
       def collect_grouped_v2_concepts(v2_dir)
         collection = ManagedConceptCollection.new
         manager = ConceptManager.new(path: v2_dir)
+        manager.version = detect_schema_version(v2_dir)
         manager.load_from_files(collection: collection)
         collection.to_a
       end
@@ -177,6 +207,20 @@ module Glossarist
           return d if File.directory?(d)
         end
         nil
+      end
+
+      def detect_schema_version(dir)
+        concepts_dir = File.join(dir, "concepts")
+        search_dir = File.directory?(concepts_dir) ? concepts_dir : dir
+        sample = Dir.glob(File.join(search_dir, "*.yaml")).first
+        return "2" unless sample
+
+        raw = File.read(sample, encoding: "utf-8")
+        doc = ConceptDocument.from_yamls(raw)
+        ver = doc.concept&.schema_version.to_s
+        ver == "3" ? "3" : "2"
+      rescue StandardError
+        "2"
       end
     end
   end

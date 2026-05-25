@@ -392,7 +392,7 @@ A concept related to the current concept with a typed relationship.
 
 type:: Enum — the relationship type (see <<relationship-types,Relationship Types>> below).
 content:: String — free-text content describing the related concept.
-ref:: A <<citation,Citation>> reference to the related concept.
+ref:: A <<concept-ref,ConceptRef>> reference to the related concept (`source + id`, no version or locality).
 
 There are two ways to initialize and populate a related concept
 
@@ -684,42 +684,94 @@ detailed_definition.sources = [<list of citations>]
 [[id,citation]]
 === Citation
 
-Citation can be either structured or unstructured. A citation is structured if its reference contains one or all of the following keys `{ id: "id", source: "source", version: "version"}` and is unstructured if its reference is plain text. This also has 2 methods `structured?` and `plain?` to check if citation is structured or not.
+A bibliographic citation used in <<concept-source,ConceptSource>> entries. The
+`ref` field is always a structured hash (`Citation::Ref`), never a plain string.
 
 Citation has the following attributes.
 
-ref:: A hash or string based on type of citation. Hash if citation is structured or string if citation is plain.
-clause:: Referred clause of the document.
-link:: Link to document.
+ref:: A `Citation::Ref` object (always a hash). See below.
+locality:: A `Locality` with `type`, `reference_from`, and `reference_to`.
+link:: URL link to the source document.
+original:: Pre-parsed original citation text.
+custom_locality:: Array of `{ name:, value: }` pairs for non-standard locality types.
 
-There are two ways to initialize and populate a Citation
+`Citation::Ref` inner class:
 
-1. Setting the fields by using a hash while initializing
-+
+source:: String — the document series or termbase (e.g. `"ISO"`, `"IEC"`).
+id:: String — the document identifier within the series (e.g. `"1087-1:2000"`).
+version:: String — optional version of the document.
+
+`Citation#label` returns a display string combining source and id.
+
 [,ruby]
 ----
-# Unstructured Citation
-citation = Glossarist::Citation.new({
-  ref: "plain text reference",
-  clause: "clause",
-  link: "link",
-})
+# Create a Citation
+citation = Glossarist::Citation.new(
+  ref: Glossarist::Citation::Ref.new(source: "ISO", id: "9000"),
+  locality: Glossarist::Locality.new(type: "clause", reference_from: "3.3.3"),
+  link: "https://www.iso.org/standard/45481.html",
+)
 
-# Structured Citation
-citation = Glossarist::Citation.new({
-  ref: { id: "123", source: "source", version: "1.1" },
-  clause: "clause",
-  link: "link",
-})
+citation.label  # => "ISO 9000"
 ----
 
-2. Setting the fields after creating an object
-+
+YAML serialization (always this shape):
+
+[,yaml]
+----
+origin:
+  ref:
+    source: ISO
+    id: "1087-1:2000"
+  locality:
+    type: clause
+    reference_from: "3.2.9"
+  link: https://www.iso.org/standard/20057.html
+----
+
+=== ConceptRef
+
+A concept reference used in <<related-concept,RelatedConcept>> entries. Has
+`source` and `id` only — no version, locality, or link.
+
 [,ruby]
 ----
-citation = Glossarist::Citation.new
-citation.ref = <plain or structured ref>
-citation.clause = "some clause"
+ref = Glossarist::ConceptRef.new(source: "IEC", id: "102-01-01")
+----
+
+=== V2 and V3 Namespaces
+
+Glossarist provides versioned model namespaces for forward and backward
+compatibility:
+
+* `Glossarist::V2::*` — loads V2 datasets where `ref` may be a plain string.
+  Maps string refs to a `text` attribute internally.
+* `Glossarist::V3::*` — canonical V3 models with structured `Citation::Ref`
+  hashes, `BibliographyEntry`, `BibliographyFile`, `ImageEntry`, `ImageFile`.
+
+The `ConceptDocument.for_version("2"|"3")` method dispatches to the correct
+namespace. `ConceptCollector.detect_schema_version(dir)` auto-detects from the
+data by checking `schema_version` in the first concept file.
+
+=== Concept Comparison
+
+Compare two concept datasets to identify additions, removals, and changes:
+
+[,bash]
+----
+glossarist compare path/to/v1 path/to/v2
+----
+
+Ruby API:
+
+[,ruby]
+----
+comparator = Glossarist::ConceptComparator.new
+result = comparator.compare(old_concepts, new_concepts)
+result.matched_count    # concepts present in both
+result.new_only_count   # concepts only in new set
+result.old_only_count   # concepts only in old set
+result.diffs            # Array of ConceptDiff with similarity scores
 ----
 
 === NonVerbRep
@@ -1277,6 +1329,15 @@ Glossarist::Validation::Rules::Registry.register(MyCustomRule)
 
 Custom rules are automatically picked up by `DatasetValidator`, `GcrValidator`,
 and `ConceptValidator` on the next validation run.
+
+=== compare
+
+Compare two concept datasets and report differences.
+
+[,bash]
+----
+glossarist compare PATH_OLD PATH_NEW [--format text|json|yaml]
+----
 
 === upgrade
 

@@ -71,7 +71,6 @@ RSpec.describe Glossarist::Concept do
           "ref" => {
             "source" => "Example Source",
             "id" => "12345",
-            "version" => "7",
           },
         },
       ]
@@ -82,7 +81,6 @@ RSpec.describe Glossarist::Concept do
           "ref" => {
             "source" => "Example Source",
             "id" => "12345",
-            "version" => "7",
           },
         },
       ]
@@ -103,7 +101,9 @@ RSpec.describe Glossarist::Concept do
             {
               "type" => "authoritative",
               "status" => "identical",
-              "origin" => { "text" => "url" },
+              "origin" => {
+                "ref" => { "source" => "url" },
+              },
             },
           ],
           "related" => [
@@ -112,7 +112,6 @@ RSpec.describe Glossarist::Concept do
               "ref" => {
                 "source" => "Example Source",
                 "id" => "12345",
-                "version" => "7",
               },
             },
           ],
@@ -130,7 +129,7 @@ RSpec.describe Glossarist::Concept do
       expect(retval.sources.size).to eq(1)
       expect(retval.sources.first.type).to eq("authoritative")
       expect(retval.sources.first.status).to eq("identical")
-      expect(retval.sources.first.origin.to_yaml_hash).to eq({ "ref" => "url" })
+      expect(retval.sources.first.origin.ref.source).to eq("url")
     end
   end
 
@@ -143,12 +142,12 @@ RSpec.describe Glossarist::Concept do
             {
               "type" => "authoritative",
               "status" => "identical",
-              "origin" => { "text" => "url" },
+              "origin" => { "ref" => { "source" => "url" } },
             },
             {
               "type" => "lineage",
               "status" => "identical",
-              "origin" => { "text" => "url" },
+              "origin" => { "ref" => { "source" => "url" } },
             },
           ],
         },
@@ -161,7 +160,7 @@ RSpec.describe Glossarist::Concept do
           "type" => "authoritative",
           "status" => "identical",
           "origin" => {
-            "ref" => "url",
+            "ref" => { "source" => "url" },
           },
         },
       ]

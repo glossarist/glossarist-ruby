@@ -52,7 +52,7 @@ RSpec.describe Glossarist::Validation::BibliographyIndex do
                                                       }],
                                                       "sources" => [{
                                                         "type" => "authoritative",
-                                                        "origin" => { "text" => "ISO 9000" },
+                                                        "origin" => { "ref" => { "source" => "ISO 9000" } },
                                                       }],
                                                     },
                                                   })
@@ -76,7 +76,7 @@ RSpec.describe Glossarist::Validation::BibliographyIndex do
                                                       "definition" => [{
                                                         "content" => "a definition",
                                                         "sources" => [{ "type" => "authoritative",
-                                                                        "origin" => { "text" => "ISO 19115" } }],
+                                                                        "origin" => { "ref" => { "source" => "ISO 19115" } } }],
                                                       }],
                                                     },
                                                   })
@@ -85,38 +85,99 @@ RSpec.describe Glossarist::Validation::BibliographyIndex do
       expect(index.resolve?("ISO 19115")).to be true
     end
 
-    it "indexes bibliography.yaml when provided" do
-      yaml = "ISO_9000:\n  id: ISO_9000\n  type: standard"
-      index = described_class.build_from_concepts(
-        [], bibliography_yaml: yaml
-      )
-      expect(index.resolve?("ISO_9000")).to be true
-    end
-
     it "indexes bibliography.yaml from dataset path" do
       Dir.mktmpdir do |dir|
-        File.write(File.join(dir, "bibliography.yaml"),
-                   "IEC_60050:\n  id: IEC_60050\n  type: standard")
+        File.write(File.join(dir, "bibliography.yaml"), <<~YAML)
+          ---
+          - id: IEC_60050
+            reference: IEC 60050
+            type: standard
+          - id: ISO_9000
+            reference: ISO 9000
+            type: standard
+        YAML
+
         index = described_class.build_from_concepts([], dataset_path: dir)
         expect(index.resolve?("IEC_60050")).to be true
+        expect(index.resolve?("ISO_9000")).to be true
       end
     end
 
-    it "handles malformed bibliography YAML gracefully" do
-      yaml = "invalid: [yaml: unclosed"
-      index = described_class.build_from_concepts(
-        [], bibliography_yaml: yaml
-      )
+    it "indexes images.yaml from dataset path" do
+      Dir.mktmpdir do |dir|
+        File.write(File.join(dir, "images.yaml"), <<~YAML)
+          ---
+          - id: fig_A.1
+            path: images/fig_A.1.png
+            type: image
+          - id: fig_A.23
+            path: images/fig_A.23.png
+            type: image
+        YAML
+
+        index = described_class.build_from_concepts([], dataset_path: dir)
+        expect(index.resolve?("fig_A.1")).to be true
+        expect(index.resolve?("fig_A.23")).to be true
+      end
+    end
+
+    it "handles missing bibliography.yaml gracefully" do
+      Dir.mktmpdir do |dir|
+        index = described_class.build_from_concepts([], dataset_path: dir)
+        expect(index.anchors).to be_empty
+      end
+    end
+  end
+
+  describe ".build_from_yaml" do
+    it "indexes concepts and bibliography from YAML strings" do
+      mc = Glossarist::ManagedConcept.new(data: { id: "1" })
+      l10n = Glossarist::LocalizedConcept.of_yaml({
+                                                    "data" => {
+                                                      "language_code" => "eng",
+                                                      "terms" => [{
+                                                        "type" => "expression", "designation" => "test"
+                                                      }],
+                                                      "sources" => [{
+                                                        "type" => "authoritative",
+                                                        "origin" => { "ref" => { "source" => "ISO 9000" } },
+                                                      }],
+                                                    },
+                                                  })
+      mc.add_localization(l10n)
+
+      bib_yaml = <<~YAML
+        ---
+        - id: ISO_9000
+          reference: ISO 9000
+          type: standard
+      YAML
+
+      index = described_class.build_from_yaml([mc], bibliography_yaml: bib_yaml)
+      expect(index.resolve?("ISO 9000")).to be true
+      expect(index.resolve?("ISO_9000")).to be true
+    end
+
+    it "indexes images from YAML strings" do
+      images_yaml = <<~YAML
+        ---
+        - id: fig_A.1
+          path: images/fig_A.1.png
+          type: image
+      YAML
+
+      index = described_class.build_from_yaml([], images_yaml: images_yaml)
+      expect(index.resolve?("fig_A.1")).to be true
+    end
+
+    it "handles nil YAML strings gracefully" do
+      index = described_class.build_from_yaml([], bibliography_yaml: nil, images_yaml: nil)
       expect(index.anchors).to be_empty
     end
 
-    it "handles bibliography.yaml with array format" do
-      yaml = "- id: ISO_9000\n  type: standard\n- id: IEC_60050\n  type: standard"
-      index = described_class.build_from_concepts(
-        [], bibliography_yaml: yaml
-      )
-      expect(index.resolve?("ISO_9000")).to be true
-      expect(index.resolve?("IEC_60050")).to be true
+    it "handles invalid YAML gracefully" do
+      index = described_class.build_from_yaml([], bibliography_yaml: "invalid: [yaml: unclosed")
+      expect(index.anchors).to be_empty
     end
   end
 end

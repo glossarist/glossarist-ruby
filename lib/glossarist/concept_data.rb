@@ -78,5 +78,21 @@ module Glossarist
 
       sources.select(&:authoritative?)
     end
+
+    def all_sources
+      list = sources.to_a
+      definition.each { |d| list.concat(d.sources.to_a) }
+      notes.each { |n| list.concat(n.sources.to_a) }
+      examples.each { |e| list.concat(e.sources.to_a) }
+      list
+    end
+
+    def text_content
+      texts = []
+      definition.each { |d| texts << d.content if d.content }
+      notes.each { |n| texts << n.content if n.content }
+      examples.each { |e| texts << e.content if e.content }
+      texts
+    end
   end
 end

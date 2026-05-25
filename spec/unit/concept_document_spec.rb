@@ -10,7 +10,8 @@ RSpec.describe Glossarist::ConceptDocument do
           eng: da24b782-1551-5128-a043-ba6135a25acf
         sources:
         - origin:
-            ref: ISO 1087-1:2000
+            ref:
+              source: ISO 1087-1:2000
             locality:
               type: clause
               reference_from: 3.2.9
@@ -36,7 +37,8 @@ RSpec.describe Glossarist::ConceptDocument do
         release: '5'
         sources:
         - origin:
-            ref: ISO 19160-4:2017
+            ref:
+              source: ISO 19160-4:2017
             locality:
               type: clause
               reference_from: '3.12'
@@ -75,7 +77,7 @@ RSpec.describe Glossarist::ConceptDocument do
 
     it "parses concept sources" do
       source = doc.concept.data.sources.first
-      expect(source.origin.text).to eq("ISO 1087-1:2000")
+      expect(source.origin.ref.source).to eq("ISO 1087-1:2000")
       expect(source.type).to eq("authoritative")
     end
 

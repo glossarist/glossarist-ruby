@@ -18,9 +18,8 @@ module Glossarist
           return [] unless bib_content
 
           begin
-            data = YAML.safe_load(bib_content)
-            return [] if data.nil? || data.is_a?(Hash) || data.is_a?(Array)
-          rescue Psych::SyntaxError => e
+            V3::BibliographyFile.from_yaml(bib_content)
+          rescue StandardError => e
             return [issue(
               "bibliography.yaml is invalid YAML: #{e.message}",
               code: code, severity: severity,

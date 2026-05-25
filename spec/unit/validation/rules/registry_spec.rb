@@ -29,14 +29,16 @@ RSpec.describe Glossarist::Validation::Rules::Registry do
     end
   end
 
-  describe ".register" do
-    it "adds a rule class to the registry" do
-      described_class.register(dummy_rule)
-      expect(described_class.all).to include(a_kind_of(dummy_rule))
+  describe "auto-registration via inherited hook" do
+    it "automatically registers rules when subclassed" do
+      dummy_rule
+      expect(described_class.rule_classes).to include(dummy_rule)
     end
+  end
 
+  describe ".register" do
     it "does not duplicate registrations" do
-      described_class.register(dummy_rule)
+      dummy_rule
       described_class.register(dummy_rule)
       expect(described_class.rule_classes.count(dummy_rule)).to eq(1)
     end
@@ -44,8 +46,8 @@ RSpec.describe Glossarist::Validation::Rules::Registry do
 
   describe ".all" do
     it "returns instances of all registered rule classes" do
-      described_class.register(dummy_rule)
-      described_class.register(collection_rule)
+      dummy_rule
+      collection_rule
       instances = described_class.all
       expect(instances.size).to eq(2)
       expect(instances.map(&:class)).to contain_exactly(dummy_rule, collection_rule)
@@ -58,21 +60,21 @@ RSpec.describe Glossarist::Validation::Rules::Registry do
 
   describe ".for_category" do
     it "returns rules matching the given category" do
-      described_class.register(dummy_rule)
-      described_class.register(collection_rule)
+      dummy_rule
+      collection_rule
       expect(described_class.for_category(:structure).map(&:class)).to eq([dummy_rule])
     end
 
     it "returns empty when no rules match" do
-      described_class.register(dummy_rule)
+      dummy_rule
       expect(described_class.for_category(:localization)).to eq([])
     end
   end
 
   describe ".for_scope" do
     it "returns rules matching the given scope" do
-      described_class.register(dummy_rule)
-      described_class.register(collection_rule)
+      dummy_rule
+      collection_rule
       expect(described_class.for_scope(:concept).map(&:class)).to eq([dummy_rule])
       expect(described_class.for_scope(:collection).map(&:class)).to eq([collection_rule])
     end
@@ -80,7 +82,7 @@ RSpec.describe Glossarist::Validation::Rules::Registry do
 
   describe ".find" do
     it "returns the rule instance matching the code" do
-      described_class.register(dummy_rule)
+      dummy_rule
       found = described_class.find("TEST-001")
       expect(found).to be_a(dummy_rule)
     end
@@ -92,7 +94,7 @@ RSpec.describe Glossarist::Validation::Rules::Registry do
 
   describe ".reset!" do
     it "removes all registered rules" do
-      described_class.register(dummy_rule)
+      dummy_rule
       described_class.reset!
       expect(described_class.all).to eq([])
     end

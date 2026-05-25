@@ -5,7 +5,6 @@ require "lutaml/model"
 module Glossarist
   module Rdf
     class GlossCitation < Lutaml::Model::Serializable
-      attribute :text, :string
       attribute :source, :string
       attribute :id, :string
       attribute :version, :string
@@ -19,7 +18,6 @@ module Glossarist
 
         types "gloss:Citation"
 
-        predicate :citationText, namespace: Namespaces::GlossaristNamespace, to: :text
         predicate :citationSource, namespace: Namespaces::GlossaristNamespace, to: :source
         predicate :citationId, namespace: Namespaces::GlossaristNamespace, to: :id
         predicate :citationVersion, namespace: Namespaces::GlossaristNamespace, to: :version
@@ -30,7 +28,7 @@ module Glossarist
 
       def self.slug(citation)
         slug = [citation.source, citation.id].compact.join("/")
-        slug = Digest::MD5.hexdigest(citation.text || "")[0..11] if slug.empty?
+        slug = Digest::MD5.hexdigest(citation.source || "")[0..11] if slug.empty?
         slug
       end
     end

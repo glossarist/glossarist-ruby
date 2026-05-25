@@ -48,7 +48,7 @@ module Glossarist
 
           return if date_value.nil?
 
-          str = date_value.respond_to?(:iso8601) ? date_value.iso8601 : date_value.to_s
+          str = date_value.is_a?(Date) || date_value.is_a?(Time) ? date_value.iso8601 : date_value.to_s
 
           begin
             DateTime.parse(str)

@@ -3,9 +3,6 @@
 module Glossarist
   module Validation
     class BibliographyIndex
-      BIB_ENTRY_KEYS = %w[id ref text anchor].freeze
-      private_constant :BIB_ENTRY_KEYS
-
       attr_reader :entries
 
       def initialize
@@ -28,14 +25,22 @@ module Glossarist
         @entries.each_value(&block)
       end
 
-      def self.build_from_concepts(concepts, dataset_path: nil,
-bibliography_yaml: nil)
+      def self.build_from_concepts(concepts, dataset_path: nil)
         index = new
 
         concepts.each { |concept| index_concept_sources(index, concept) }
+        index_bibliography_file(index, dataset_path)
+        index_images_file(index, dataset_path)
 
-        yaml = bibliography_yaml || read_bibliography_file(dataset_path)
-        index_bibliography_yaml(index, yaml) if yaml
+        index
+      end
+
+      def self.build_from_yaml(concepts, bibliography_yaml: nil, images_yaml: nil)
+        index = new
+
+        concepts.each { |concept| index_concept_sources(index, concept) }
+        index_bib_from_yaml_string(index, bibliography_yaml)
+        index_images_from_yaml_string(index, images_yaml)
 
         index
       end
@@ -48,13 +53,6 @@ bibliography_yaml: nil)
 
       class << self
         private
-
-        def read_bibliography_file(dataset_path)
-          return nil unless dataset_path
-
-          bib_path = File.join(dataset_path, "bibliography.yaml")
-          File.exist?(bib_path) ? File.read(bib_path) : nil
-        end
 
         def index_concept_sources(index, concept)
           concept.localizations.each do |l10n|
@@ -86,33 +84,66 @@ bibliography_yaml: nil)
         end
 
         def register_origin_text(index, origin)
-          return unless origin.text && !origin.text.strip.empty?
+          ref = origin.ref
+          return unless ref && ref.source && !ref.source.strip.empty?
 
-          index.register(origin.text, origin)
+          index.register(ref.source, origin)
         end
 
         def register_origin_ref(index, origin)
-          return unless origin.source && origin.id
+          ref = origin.ref
+          return unless ref && ref.source && ref.id
 
-          key = "#{origin.source} #{origin.id}"
+          key = "#{ref.source} #{ref.id}"
           index.register(key, origin)
-          index.register(origin.id.to_s, origin)
+          index.register(ref.id.to_s, origin)
         end
 
-        def index_bibliography_yaml(index, yaml_content)
-          data = YAML.safe_load(yaml_content)
-          return unless data.is_a?(Hash) || data.is_a?(Array)
+        def index_bibliography_file(index, dataset_path)
+          return unless dataset_path
 
-          entries = data.is_a?(Hash) ? data.values : data
-          entries.each do |entry|
-            next unless entry.is_a?(Hash)
+          bib = V3::BibliographyFile.from_file(
+            File.join(dataset_path, "bibliography.yaml"),
+          )
+          return unless bib
 
-            BIB_ENTRY_KEYS.each do |key|
-              val = entry[key]
-              index.register(val.to_s, entry) if val && !val.to_s.strip.empty?
-            end
+          bib.entries.each do |entry|
+            index.register(entry.id, entry)
+            index.register(entry.reference, entry) if entry.reference
           end
-        rescue Psych::SyntaxError, Psych::DisallowedClass
+        end
+
+        def index_images_file(index, dataset_path)
+          return unless dataset_path
+
+          images = V3::ImageFile.from_file(
+            File.join(dataset_path, "images.yaml"),
+          )
+          return unless images
+
+          images.entries.each do |entry|
+            index.register(entry.id, entry)
+          end
+        end
+
+        def index_bib_from_yaml_string(index, yaml_content)
+          return unless yaml_content
+
+          bib = V3::BibliographyFile.from_yaml(yaml_content)
+          bib.entries.each do |entry|
+            index.register(entry.id, entry)
+            index.register(entry.reference, entry) if entry.reference
+          end
+        rescue StandardError
+          nil
+        end
+
+        def index_images_from_yaml_string(index, yaml_content)
+          return unless yaml_content
+
+          images = V3::ImageFile.from_yaml(yaml_content)
+          images.entries.each { |entry| index.register(entry.id, entry) }
+        rescue StandardError
           nil
         end
       end

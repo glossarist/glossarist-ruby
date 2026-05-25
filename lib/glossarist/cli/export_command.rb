@@ -48,8 +48,8 @@ module Glossarist
       end
 
       def resolve_metadata_from_package(package)
-        @options[:shortname] ||= package.metadata["shortname"]
-        @options[:uri_prefix] ||= package.metadata["uri_prefix"]
+        @options[:shortname] ||= package.metadata.shortname
+        @options[:uri_prefix] ||= package.metadata.uri_prefix
       end
 
       def resolve_shortname

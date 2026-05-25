@@ -9,6 +9,7 @@ module Glossarist
     autoload :ValidateCommand, "#{__dir__}/cli/validate_command"
     autoload :ImportCommand,   "#{__dir__}/cli/import_command"
     autoload :ExportCommand,   "#{__dir__}/cli/export_command"
+    autoload :CompareCommand,  "#{__dir__}/cli/compare_command"
     desc "generate_latex", "Convert Concepts to Latex format"
 
     option :concepts_path, aliases: :p, required: true,
@@ -118,6 +119,23 @@ module Glossarist
                    desc: "Dataset title for document header"
     def export(path)
       CLI::ExportCommand.new(path, options).run
+    end
+
+    desc "compare NEW_PATH OLD_PATH", "Compare two concept datasets"
+    option :format, type: :string, default: "text",
+                    enum: %w[text json yaml],
+                    desc: "Output format"
+    option :report, type: :string,
+                    desc: "Write report to file"
+    option :no_diffs, type: :boolean, default: false,
+                      desc: "Skip per-concept diff computation"
+    def compare(new_path, old_path)
+      CLI::CompareCommand.new(new_path, old_path, options).run
+    end
+
+    desc "version", "Show Glossarist version"
+    def version
+      puts Glossarist::VERSION
     end
 
     def method_missing(*args)
