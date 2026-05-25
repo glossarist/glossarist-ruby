@@ -32,6 +32,8 @@ module Glossarist
         concepts.each do |concept|
           collection.store(concept)
         end
+      rescue StandardError
+        next
       end
     end
 

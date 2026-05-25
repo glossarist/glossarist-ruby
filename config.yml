@@ -150,3 +150,5 @@ concept_date:
     - accepted
     - amended
     - retired
+    - review
+    - review_decision

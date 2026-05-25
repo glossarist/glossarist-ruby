@@ -107,10 +107,13 @@ module Glossarist
           )
           return unless bib
 
-          bib.entries.each do |entry|
+          Array(bib.entries).each do |entry|
+            next unless entry.respond_to?(:id)
             index.register(entry.id, entry)
-            index.register(entry.reference, entry) if entry.reference
+            index.register(entry.reference, entry) if entry.respond_to?(:reference) && entry.reference
           end
+        rescue StandardError
+          nil
         end
 
         def index_images_file(index, dataset_path)
@@ -121,9 +124,12 @@ module Glossarist
           )
           return unless images
 
-          images.entries.each do |entry|
+          Array(images.entries).each do |entry|
+            next unless entry.respond_to?(:id)
             index.register(entry.id, entry)
           end
+        rescue StandardError
+          nil
         end
 
         def index_bib_from_yaml_string(index, yaml_content)

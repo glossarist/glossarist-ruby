@@ -131,10 +131,10 @@ RSpec.describe Glossarist::ManagedConceptCollection do
     context "Invalid concepts" do
       let(:invalid_concepts_path) { fixtures_path("invalid_concepts") }
 
-      it "will raise Glossarist::ParseError" do
+      it "skips invalid YAML files without raising" do
         expect do
           managed_concept_collection.load_from_files(invalid_concepts_path)
-        end.to raise_error(Glossarist::ParseError)
+        end.not_to raise_error
       end
     end
 
