@@ -62,11 +62,11 @@ RSpec.describe Glossarist::ConceptValidator do
       end
     end
 
-    it "reports no localizations" do
+    it "reports no localizations as warning" do
       Dir.mktmpdir do |dir|
         write_concept(dir, "1.yaml", { "termid" => "1" })
         result = described_class.new(dir).validate_all
-        expect(result.errors).to include(a_string_matching(/no localizations/))
+        expect(result.warnings).to include(a_string_matching(/no localizations/))
       end
     end
 

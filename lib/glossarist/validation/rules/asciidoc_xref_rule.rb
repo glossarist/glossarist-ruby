@@ -21,12 +21,10 @@ module Glossarist
 
           concept.localizations.each do |l10n|
             lang = l10n.language_code || "unknown"
-            texts = extract_texts(l10n)
 
-            texts.each do |text|
+            l10n.text_content.each do |text|
               next unless text
-              refs = extractor.extract_from_text(text)
-              refs.each do |ref|
+              extractor.extract_from_text(text).each do |ref|
                 next unless ref.is_a?(BibliographicReference)
                 next if context.bibliography_index.resolve?(ref.anchor)
 
@@ -43,18 +41,7 @@ module Glossarist
 
           issues
         end
-
-        private
-
-        def extract_texts(l10n)
-          texts = []
-          (l10n.data&.definition || []).each { |d| texts << d.content if d.content }
-          (l10n.data&.notes || []).each { |n| texts << n.content if n.content }
-          (l10n.data&.examples || []).each { |e| texts << e.content if e.content }
-          texts
-        end
       end
     end
   end
 end
-

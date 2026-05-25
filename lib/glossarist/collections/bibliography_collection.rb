@@ -39,9 +39,11 @@ module Glossarist
       def populate_bibliographies(concepts)
         concepts.each do |concept|
           concept.default_lang.sources.each do |source|
-            next if source.origin.text.nil?
+            next if source.origin.ref.nil?
+            ref_text = source.origin.ref.source
+            next if ref_text.nil?
 
-            fetch(source.origin.text)
+            fetch(ref_text)
           end
         end
       end

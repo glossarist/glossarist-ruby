@@ -16,7 +16,8 @@ module Glossarist
         def check(context)
           concept = context.concept
           fname = context.file_name
-          all_sources = gather_all_sources(concept)
+
+          all_sources = concept.localizations.flat_map(&:all_sources)
 
           return [] if all_sources.any? { |s| s.type == "authoritative" }
 
@@ -27,21 +28,7 @@ module Glossarist
             suggestion: "Add at least one source with type: authoritative",
           )]
         end
-
-        private
-
-        def gather_all_sources(concept)
-          sources = []
-          concept.localizations.each do |l10n|
-            (l10n.data&.sources || []).each { |s| sources << s }
-            (l10n.data&.definition || []).each { |d| (d.sources || []).each { |s| sources << s } }
-            (l10n.data&.notes || []).each { |n| (n.sources || []).each { |s| sources << s } }
-            (l10n.data&.examples || []).each { |e| (e.sources || []).each { |s| sources << s } }
-          end
-          sources
-        end
       end
     end
   end
 end
-

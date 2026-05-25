@@ -18,46 +18,24 @@ module Glossarist
           fname = context.file_name
           issues = []
 
-          gather_all_sources(concept).each_with_index do |source, idx|
+          concept.localizations.flat_map(&:all_sources).each_with_index do |source, idx|
             origin = source.origin
             next unless origin
 
-            if origin.text.nil? && origin.source.nil? && origin.id.nil?
+            ref = origin.ref
+            if ref.nil? || (ref.source.nil? && ref.id.nil?)
               issues << issue(
-                "source #{idx + 1} has empty origin (no text, source, or id)",
+                "source #{idx + 1} has empty origin (no ref source or id)",
                 code: "GLS-304", severity: severity,
                 location: fname,
-                suggestion: "Add at minimum an origin.text or origin.source + origin.id",
+                suggestion: "Add at minimum an origin.ref with source or id",
               )
             end
-
-            next unless origin.structured? && origin.source.nil?
-
-            issues << issue(
-              "source #{idx + 1} is structured but missing source field",
-              code: "GLS-304", severity: severity,
-              location: fname,
-              suggestion: "Add origin.source to the citation",
-            )
           end
 
           issues
-        end
-
-        private
-
-        def gather_all_sources(concept)
-          sources = []
-          concept.localizations.each do |l10n|
-            (l10n.data&.sources || []).each { |s| sources << s }
-            (l10n.data&.definition || []).each { |d| (d.sources || []).each { |s| sources << s } }
-            (l10n.data&.notes || []).each { |n| (n.sources || []).each { |s| sources << s } }
-            (l10n.data&.examples || []).each { |e| (e.sources || []).each { |s| sources << s } }
-          end
-          sources
         end
       end
     end
   end
 end
-

@@ -8,7 +8,7 @@ module Glossarist
 
     attribute :related, RelatedConcept, collection: true
     attribute :dates, ConceptDate, collection: true
-    attribute :sources, ConceptSource
+    attribute :sources, ConceptSource, collection: true
     attribute :date_accepted, ConceptDate
     attribute :status, :string,
               values: Glossarist::GlossaryDefinition::CONCEPT_STATUSES
@@ -19,6 +19,8 @@ module Glossarist
 
     attribute :uuid, :string
 
+    attribute :schema_version, :string
+
     key_value do
       map :data, to: :data
       map :id, with: { to: :identifier_to_yaml, from: :identifier_from_yaml }
@@ -26,11 +28,13 @@ module Glossarist
           with: { to: :identifier_to_yaml, from: :identifier_from_yaml }
       map :related, to: :related
       map :dates, to: :dates
+      map :sources, to: :sources
       map %i[date_accepted dateAccepted],
           with: { from: :date_accepted_from_yaml, to: :date_accepted_to_yaml }
       map :status, to: :status
 
       map :uuid, to: :uuid, with: { from: :uuid_from_yaml, to: :uuid_to_yaml }
+      map :schema_version, to: :schema_version
     end
 
     def localizations
@@ -65,7 +69,7 @@ module Glossarist
     def uuid
       @uuid ||= Glossarist::Utilities::UUID.uuid_v5(
         Glossarist::Utilities::UUID::OID_NAMESPACE,
-        to_yaml(except: [:uuid]),
+        to_yaml(except: %i[uuid schema_version]),
       )
     end
 
@@ -109,6 +113,7 @@ module Glossarist
       data.localized_concepts ||= {}
       data.localized_concepts[lang] =
         data.localized_concepts[lang] || localized_concept.uuid
+      localized_concept.uuid = data.localized_concepts[lang]
       localizations.store(lang, localized_concept)
     end
     alias :add_l10n :add_localization
@@ -136,6 +141,34 @@ module Glossarist
 
     def default_lang
       localization("eng") || localizations.values.first
+    end
+
+    def schema_version
+      @schema_version
+    end
+
+    def assign_uuid(new_uuid)
+      @uuid = new_uuid
+    end
+
+    def self.detect_schema_version(concept) # rubocop:disable Metrics/PerceivedComplexity
+      raw = concept.schema_version
+      if raw && !%w[legacy nil].include?(raw.to_s)
+        return raw.to_s
+      end
+
+      return "3" if concept.related&.any?
+      return "3" if concept.sources&.any?
+      return "3" if concept.data&.domains&.any?
+      return "3" if localization_has_references?(concept)
+
+      "2"
+    end
+
+    def self.localization_has_references?(concept)
+      concept.localizations&.any? do |l10n|
+        l10n.is_a?(LocalizedConcept) && l10n.data&.references&.any?
+      end
     end
 
     Glossarist::GlossaryDefinition::RELATED_CONCEPT_TYPES.each do |type|

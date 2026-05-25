@@ -86,7 +86,7 @@ RSpec.describe Glossarist::Sts::TermMapper do
         end
         expect(auth_sources.length).to be >= 1
         first_source = auth_sources.first
-        expect(first_source.origin.text).to eq("ISO 12345:2021")
+        expect(first_source.origin.ref.source).to eq("ISO 12345:2021")
       end
 
       it "sets entry_status to valid" do
@@ -259,7 +259,7 @@ RSpec.describe Glossarist::Sts::TermMapper do
         concept = subject.map(extracted_term)
         l10n = concept.localization("eng")
         expect(l10n.data.sources.count).to eq(1)
-        expect(l10n.data.sources.first.origin.text).to eq("Some external source")
+        expect(l10n.data.sources.first.origin.ref.source).to eq("Some external source")
       end
     end
 

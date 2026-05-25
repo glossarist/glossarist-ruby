@@ -190,6 +190,97 @@ RSpec.describe Glossarist::ConceptData do
     end
   end
 
+  describe "#all_sources" do
+    it "returns top-level sources" do
+      source = Glossarist::ConceptSource.new(type: "authoritative")
+      subject.sources = [source]
+
+      expect(subject.all_sources).to eq([source])
+    end
+
+    it "includes sources from definitions" do
+      def_source = Glossarist::ConceptSource.new(type: "authoritative")
+      definition = Glossarist::DetailedDefinition.new(
+        content: "test", sources: [def_source],
+      )
+      subject.definition = [definition]
+
+      expect(subject.all_sources).to include(def_source)
+    end
+
+    it "includes sources from notes" do
+      note_source = Glossarist::ConceptSource.new(type: "authoritative")
+      note = Glossarist::DetailedDefinition.new(
+        content: "note", sources: [note_source],
+      )
+      subject.notes = [note]
+
+      expect(subject.all_sources).to include(note_source)
+    end
+
+    it "includes sources from examples" do
+      ex_source = Glossarist::ConceptSource.new(type: "authoritative")
+      example = Glossarist::DetailedDefinition.new(
+        content: "example", sources: [ex_source],
+      )
+      subject.examples = [example]
+
+      expect(subject.all_sources).to include(ex_source)
+    end
+
+    it "aggregates sources from all fields" do
+      top = Glossarist::ConceptSource.new(type: "lineage")
+      def_s = Glossarist::ConceptSource.new(type: "authoritative")
+      note_s = Glossarist::ConceptSource.new(type: "authoritative")
+      ex_s = Glossarist::ConceptSource.new(type: "authoritative")
+
+      subject.sources = [top]
+      subject.definition = [Glossarist::DetailedDefinition.new(content: "d", sources: [def_s])]
+      subject.notes = [Glossarist::DetailedDefinition.new(content: "n", sources: [note_s])]
+      subject.examples = [Glossarist::DetailedDefinition.new(content: "e", sources: [ex_s])]
+
+      expect(subject.all_sources).to eq([top, def_s, note_s, ex_s])
+    end
+
+    it "returns empty array when no sources" do
+      expect(subject.all_sources).to eq([])
+    end
+  end
+
+  describe "#text_content" do
+    it "returns definition content" do
+      subject.definition = [Glossarist::DetailedDefinition.new(content: "a definition")]
+      expect(subject.text_content).to eq(["a definition"])
+    end
+
+    it "returns note content" do
+      subject.notes = [Glossarist::DetailedDefinition.new(content: "a note")]
+      expect(subject.text_content).to eq(["a note"])
+    end
+
+    it "returns example content" do
+      subject.examples = [Glossarist::DetailedDefinition.new(content: "an example")]
+      expect(subject.text_content).to eq(["an example"])
+    end
+
+    it "aggregates content from all fields in order" do
+      subject.definition = [Glossarist::DetailedDefinition.new(content: "def1")]
+      subject.notes = [Glossarist::DetailedDefinition.new(content: "note1")]
+      subject.examples = [Glossarist::DetailedDefinition.new(content: "ex1")]
+
+      expect(subject.text_content).to eq(%w[def1 note1 ex1])
+    end
+
+    it "skips nil content" do
+      subject.definition = [Glossarist::DetailedDefinition.new(content: nil)]
+      expect(subject.text_content).to eq([])
+    end
+
+    it "returns empty array when no content" do
+      expect(subject.text_content).to eq([])
+    end
+  end
+
   describe "#to_yaml" do
     it "serializes to valid yaml format" do
       subject.id = "test-123"

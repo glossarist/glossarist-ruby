@@ -92,7 +92,7 @@ RSpec.describe Glossarist::GcrValidator do
     end
 
     it "accepts valid bibliography.yaml without errors" do
-      gcr = create_valid_gcr_with_bibliography("ISO_19111:\n  type: standard")
+      gcr = create_valid_gcr_with_bibliography("- id: ISO_19111\n  reference: ISO 19111\n  type: standard")
       result = validator.validate(gcr)
       expect(result.errors).not_to include(a_string_matching(/bibliography.yaml/))
     end

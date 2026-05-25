@@ -1,3 +1,6 @@
+require "spec_helper"
+require "glossarist/v2"
+
 RSpec.describe "Serialization and deserialization" do
   context "when localized_concept (with underscore as separator)" do
     let(:concept_folder) { "concept_collection_v2" }
@@ -14,7 +17,7 @@ RSpec.describe "Serialization and deserialization" do
       collection.load_from_files(fixtures_path(concept_folder))
 
       concept_files.each do |filename|
-        concept_from_file = Glossarist::ManagedConcept.from_yaml(File.read(filename))
+        concept_from_file = Glossarist::V2::ManagedConcept.from_yaml(File.read(filename))
         concept = collection[concept_from_file.identifier]
 
         expect(concept.to_yaml_hash["data"]).to eq(concept_from_file.to_yaml_hash["data"])
@@ -22,7 +25,7 @@ RSpec.describe "Serialization and deserialization" do
         concept.localized_concepts.each do |lang, id|
           localized_concept_path = File.join(localized_concepts_folder,
                                              "#{id}.yaml")
-          localized_concept = Glossarist::LocalizedConcept.from_yaml(File.read(localized_concept_path))
+          localized_concept = Glossarist::V2::LocalizedConcept.from_yaml(File.read(localized_concept_path))
 
           expect(localized_concept.to_yaml_hash["data"]).to eq(concept.localizations[lang].to_yaml_hash["data"])
         end
@@ -62,8 +65,8 @@ RSpec.describe "Serialization and deserialization" do
       collection.load_from_files(fixtures_path(concept_folder))
 
       concept_files.each do |filename|
-        concept_from_file = Glossarist::ManagedConcept.from_yaml(File.read(filename))
-        reference_concept = Glossarist::ManagedConcept.from_yaml(File.read(File.join(
+        concept_from_file = Glossarist::V2::ManagedConcept.from_yaml(File.read(filename))
+        reference_concept = Glossarist::V2::ManagedConcept.from_yaml(File.read(File.join(
                                                                              fixtures_path(reference_folder), "concept", File.basename(filename)
                                                                            )))
 
@@ -106,7 +109,7 @@ RSpec.describe "Serialization and deserialization" do
       collection.load_from_files(fixtures_path(concept_folder))
 
       concept_files.each do |filename|
-        concept_from_file = Glossarist::ManagedConcept.from_yaml(File.read(filename))
+        concept_from_file = Glossarist::V2::ManagedConcept.from_yaml(File.read(filename))
         concept = collection[concept_from_file.identifier]
 
         expect(concept.to_yaml_hash["data"]).to eq(concept_from_file.to_yaml_hash["data"])
@@ -114,7 +117,7 @@ RSpec.describe "Serialization and deserialization" do
         concept.localized_concepts.each do |lang, id|
           localized_concept_path = File.join(localized_concepts_folder,
                                              "#{id}.yaml")
-          localized_concept = Glossarist::LocalizedConcept.from_yaml(File.read(localized_concept_path))
+          localized_concept = Glossarist::V2::LocalizedConcept.from_yaml(File.read(localized_concept_path))
 
           expect(localized_concept.to_yaml_hash["data"]).to eq(concept.localizations[lang].to_yaml_hash["data"])
         end

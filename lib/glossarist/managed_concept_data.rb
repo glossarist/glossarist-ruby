@@ -10,6 +10,7 @@ module Glossarist
     attribute :localizations, LocalizedConcept,
               collection: Collections::LocalizationCollection,
               initialize_empty: true
+    attribute :related, RelatedConcept, collection: true
 
     key_value do
       map %i[id identifier], to: :id,
@@ -17,7 +18,7 @@ module Glossarist
       map :uri, to: :uri
       map %i[localized_concepts localizedConcepts], to: :localized_concepts
       map %i[domains groups], to: :domains,
-                             with: { from: :domains_from_yaml, to: :domains_to_yaml }
+                              with: { from: :domains_from_yaml, to: :domains_to_yaml }
       map :sources, to: :sources
       map :localizations, to: :localizations,
                           with: { from: :localizations_from_yaml, to: :localizations_to_yaml }

@@ -1,55 +1,45 @@
 # frozen_string_literal: true
 
 module Glossarist
-  class ValidationResult
-    attr_reader :issues
+  class ValidationResult < Lutaml::Model::Serializable
+    attribute :issues, Validation::ValidationIssue, collection: true,
+                                                    initialize_empty: true
 
-    def initialize(errors: [], warnings: [], issues: [])
-      @issues = []
-      errors.each { |e| add_error(e) }
-      warnings.each { |w| add_warning(w) }
-      issues.each { |i| add_issue(i) }
+    key_value do
+      map :issues, to: :issues
     end
 
     def valid?
-      @issues.none?(&:error?)
+      issues.none?(&:error?)
     end
 
     def errors
-      @issues.select(&:error?).map(&:message)
+      issues.select(&:error?).map(&:to_s)
     end
 
     def warnings
-      @issues.select(&:warning?).map(&:message)
+      issues.select(&:warning?).map(&:to_s)
     end
 
     def add_error(message)
-      @issues << Validation::ValidationIssue.new(
+      issues << Validation::ValidationIssue.new(
         severity: "error", message: message,
       )
     end
 
     def add_warning(message)
-      @issues << Validation::ValidationIssue.new(
+      issues << Validation::ValidationIssue.new(
         severity: "warning", message: message,
       )
     end
 
     def add_issue(issue)
-      @issues << issue
+      issues << issue
     end
 
     def merge(other)
-      other.issues.each { |i| @issues << i }
+      other.issues.each { |i| issues << i }
       self
-    end
-
-    def to_h
-      {
-        "valid" => valid?,
-        "errors" => errors,
-        "warnings" => warnings,
-      }
     end
   end
 end

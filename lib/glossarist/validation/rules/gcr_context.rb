@@ -10,21 +10,20 @@ module Glossarist
 
         def initialize(zip_path)
           @zip_path = zip_path
+          @accumulated_concepts = []
           @metadata = nil
-          @concepts = nil
           @bibliography_index = nil
           @asset_index = nil
           @zip_entries = nil
-          @localization_index = nil
+        end
+
+        def add_concept(concept)
+          @accumulated_concepts << concept
+          @concept_ids = nil
         end
 
         def concepts
-          @concepts ||= begin
-            pkg = GcrPackage.load(@zip_path)
-            pkg.concepts
-          rescue StandardError
-            []
-          end
+          @accumulated_concepts
         end
 
         def concept_ids
@@ -41,11 +40,11 @@ module Glossarist
         end
 
         def bibliography_index
-          @bibliography_index ||= begin
-            bib_yaml = read_zip_file("bibliography.yaml")
-            BibliographyIndex.build_from_concepts(concepts,
-                                                  bibliography_yaml: bib_yaml)
-          end
+          @bibliography_index ||= BibliographyIndex.build_from_yaml(
+            concepts,
+            bibliography_yaml: read_zip_file("bibliography.yaml"),
+            images_yaml: read_zip_file("images.yaml"),
+          )
         end
 
         def asset_index

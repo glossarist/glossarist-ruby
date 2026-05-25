@@ -14,7 +14,6 @@ RSpec.describe Glossarist::RelatedConcept do
       ref: {
         source: "Test source",
         id: "Test id",
-        version: "Test version",
       },
     }.to_yaml
   end
@@ -28,7 +27,6 @@ RSpec.describe Glossarist::RelatedConcept do
         ref:
           source: Test source
           id: Test id
-          version: Test version
       YAML
 
       expect(subject.to_yaml).to eq(expected_yaml)

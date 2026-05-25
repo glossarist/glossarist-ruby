@@ -7,6 +7,8 @@ module Glossarist
 
       index_by :language_code
 
+      alias :length :size
+
       def [](lang_code)
         find_by(:language_code, lang_code.to_s)
       end

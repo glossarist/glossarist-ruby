@@ -9,8 +9,10 @@ RSpec.describe Glossarist::ConceptSource do
     {
       type: "authoritative",
       status: "identical",
-      origin: { "id" => "123", "source" => "wikipedia",
-                "version" => "Test version" },
+      origin: {
+        "ref" => { "source" => "wikipedia", "id" => "123",
+                   "version" => "Test version" },
+      },
       modification: "Test modification",
     }.to_yaml
   end

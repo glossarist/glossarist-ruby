@@ -21,7 +21,7 @@ module Glossarist
           fname = context.file_name
           issues = []
 
-          gather_all_sources(concept).each_with_index do |source, idx|
+          concept.localizations.flat_map(&:all_sources).each_with_index do |source, idx|
             unless VALID_TYPES.include?(source.type)
               issues << issue(
                 "source #{idx + 1} has invalid type '#{source.type}'",
@@ -43,21 +43,7 @@ module Glossarist
 
           issues
         end
-
-        private
-
-        def gather_all_sources(concept)
-          sources = []
-          concept.localizations.each do |l10n|
-            (l10n.data&.sources || []).each { |s| sources << s }
-            (l10n.data&.definition || []).each { |d| (d.sources || []).each { |s| sources << s } }
-            (l10n.data&.notes || []).each { |n| (n.sources || []).each { |s| sources << s } }
-            (l10n.data&.examples || []).each { |e| (e.sources || []).each { |s| sources << s } }
-          end
-          sources
-        end
       end
     end
   end
 end
-

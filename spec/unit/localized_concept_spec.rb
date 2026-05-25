@@ -133,9 +133,11 @@ RSpec.describe Glossarist::LocalizedConcept do
     it "loads localized concept definition from a yaml" do
       source = {
         "origin" => {
-          "source" => "wikipedia",
-          "id" => "123",
-          "version" => "71",
+          "ref" => {
+            "source" => "wikipedia",
+            "id" => "123",
+            "version" => "71",
+          },
         },
         "type" => "authoritative",
       }
@@ -168,10 +170,7 @@ RSpec.describe Glossarist::LocalizedConcept do
       expect(retval.terms.first.class).to eq(Glossarist::Designation::Expression)
       expect(retval.terms.first.normative_status).to eq("preferred")
       expect(retval.terms.first.designation).to eq("Example Designation")
-      expect(retval.sources.map(&:to_yaml_hash)).to eq([{
-                                                         "origin" => { "ref" => { "id" => "123", "source" => "wikipedia",
-                                                                                  "version" => "71" } }, "type" => "authoritative"
-                                                       }])
+      expect(retval.sources.map(&:to_yaml_hash)).to eq([source])
     end
 
     it "should work iev-data for grammar_info" do

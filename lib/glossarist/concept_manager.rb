@@ -2,11 +2,25 @@ module Glossarist
   class ConceptManager < Lutaml::Model::Serializable
     attribute :path, :string
     attribute :localized_concepts_path, :string
+    attribute :version, :string, default: -> { "2" }
 
     key_value do
       map :path, to: :path
       map %i[localized_concepts_path localizedConceptsPath],
           to: :localized_concepts_path
+    end
+
+    def concept_document_class
+      ConceptDocument.for_version(version)
+    end
+
+    def localized_concept_class
+      if version.to_s == "2"
+        require_relative "v2"
+        V2::LocalizedConcept
+      else
+        LocalizedConcept
+      end
     end
 
     def load_from_files(collection: nil)
@@ -35,7 +49,7 @@ module Glossarist
 
     def load_concept_from_file(filename) # rubocop:disable Metrics/CyclomaticComplexity
       raw = File.read(filename, encoding: "utf-8")
-      doc = ConceptDocument.from_yamls(raw)
+      doc = concept_document_class.from_yamls(raw)
       concept = doc.concept
       unless concept
         raise Glossarist::ParseError.new(filename: filename)
@@ -44,7 +58,7 @@ module Glossarist
       concept_uuid = concept.identifier || concept.data&.id || File.basename(
         filename, ".*"
       )
-      concept.instance_variable_set(:@uuid, concept_uuid)
+      concept.uuid = concept_uuid
 
       concept.data.localized_concepts.each_value do |id|
         localized_concept = load_localized_concept(id, doc.localizations)
@@ -60,15 +74,15 @@ module Glossarist
       if inline_localizations
         l10n = inline_localizations.find { |l| l.id == id }
         if l10n
-          l10n.instance_variable_set(:@uuid, id)
+          l10n.uuid = id
           return l10n
         end
       end
 
-      l10n = LocalizedConcept.from_yaml(
+      l10n = localized_concept_class.from_yaml(
         File.read(localized_concept_path(id), encoding: "utf-8"),
       )
-      l10n.instance_variable_set(:@uuid, id)
+      l10n.uuid = id
       l10n
     rescue Psych::SyntaxError => e
       raise Glossarist::ParseError.new(filename: filename, line: e.line)

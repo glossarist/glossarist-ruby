@@ -18,6 +18,7 @@ module Glossarist
   autoload :Collections,              "glossarist/collections"
   autoload :Concept,                  "glossarist/concept"
   autoload :ConceptData,              "glossarist/concept_data"
+  autoload :ConceptRef,               "glossarist/concept_ref"
   autoload :ConceptReference,         "glossarist/concept_reference"
   autoload :ReferenceExtractor,       "glossarist/reference_extractor"
   autoload :ReferenceResolver,        "glossarist/reference_resolver"
@@ -28,6 +29,9 @@ module Glossarist
   autoload :ConceptSource,            "glossarist/concept_source"
   autoload :ConceptValidator,         "glossarist/concept_validator"
   autoload :ConceptCollector, "glossarist/concept_collector"
+  autoload :ConceptComparator, "glossarist/concept_comparator"
+  autoload :ComparisonResult, "glossarist/comparison_result"
+  autoload :ConceptDiff, "glossarist/concept_diff"
   autoload :ConceptDocument,          "glossarist/concept_document"
   autoload :ConceptEnricher,          "glossarist/concept_enricher"
   autoload :Config,                   "glossarist/config"
@@ -64,6 +68,8 @@ module Glossarist
   autoload :RegisterData,             "glossarist/register_data"
   autoload :ValidationResult,         "glossarist/validation_result"
   autoload :V1,                       "glossarist/v1"
+  autoload :V2,                       "glossarist/v2"
+  autoload :V3,                       "glossarist/v3"
 end
 
 require_relative "glossarist/version"
@@ -73,6 +79,9 @@ require_relative "glossarist/glossary_definition"
 module Glossarist
   LANG_CODES = %w[eng ara deu fra spa ita jpn kor pol por srp swe zho rus fin
                   dan nld msa nob nno].freeze
+
+  SCHEMA_VERSION = "3"
+  V3_SCHEMA_VERSION = "3"
 
   def self.configure
     config = Glossarist::Config.instance

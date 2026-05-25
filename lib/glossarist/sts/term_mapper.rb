@@ -98,7 +98,7 @@ module Glossarist
           sources << {
             "status" => "identical",
             "type" => "authoritative",
-            "origin" => { "text" => source_ref },
+            "origin" => { "ref" => { "source" => source_ref } },
           }
         end
 
@@ -107,7 +107,7 @@ module Glossarist
 
           sources << {
             "type" => "authoritative",
-            "origin" => { "text" => text },
+            "origin" => { "ref" => { "source" => text } },
           }
         end
 

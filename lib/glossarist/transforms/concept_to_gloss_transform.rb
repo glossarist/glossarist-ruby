@@ -252,12 +252,12 @@ module Glossarist
 
       def build_gloss_citation(citation)
         locality = citation.locality ? build_gloss_locality(citation.locality) : nil
+        ref = citation.ref
 
         Rdf::GlossCitation.new(
-          text: citation.text,
-          source: citation.source,
-          id: citation.id,
-          version: citation.version,
+          source: ref&.source,
+          id: ref&.id,
+          version: ref&.version,
           link: citation.link,
           locality: locality,
         )

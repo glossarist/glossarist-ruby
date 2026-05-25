@@ -8,14 +8,19 @@ module Glossarist
 
         def initialize(path)
           @path = File.expand_path(path)
-          @concepts = nil
+          @accumulated_concepts = []
           @bibliography_index = nil
           @asset_index = nil
           @declared_languages = nil
         end
 
+        def add_concept(concept)
+          @accumulated_concepts << concept
+          @concept_ids = nil
+        end
+
         def concepts
-          @concepts ||= ConceptCollector.collect(@path)
+          @accumulated_concepts
         end
 
         def concept_ids
@@ -77,7 +82,7 @@ module Glossarist
           reg_path = File.join(@path, "register.yaml")
           return nil unless File.exist?(reg_path)
 
-          YAML.safe_load_file(reg_path)
+          RegisterData.from_file(reg_path)
         end
 
         def build_localization_index

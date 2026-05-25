@@ -43,11 +43,7 @@ module Glossarist
         private
 
         def designation_type(term)
-          if term.is_a?(Hash)
-            term["type"]
-          elsif term.respond_to?(:type)
-            term.type
-          end
+          term.type if term.is_a?(Designation::Base)
         end
       end
     end

@@ -329,7 +329,7 @@ RSpec.describe Glossarist::ReferenceExtractor do
                                                       }],
                                                       "sources" => [{
                                                         "type" => "authoritative",
-                                                        "origin" => { "text" => "ISO 9000:2015" },
+                                                        "origin" => { "ref" => { "source" => "ISO 9000:2015" } },
                                                       }],
                                                     },
                                                   })

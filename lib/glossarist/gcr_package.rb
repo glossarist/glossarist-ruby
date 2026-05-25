@@ -156,31 +156,41 @@ module Glossarist
     end
 
     def read_file_assets(zip_file)
-      DATASET_ASSETS.each do |asset|
-        next unless asset[:type] == :file && asset[:attr]
-
-        entry = zip_file.find_entry(asset[:path])
-        next unless entry
-
-        instance_variable_set("@#{asset[:attr]}", entry.get_input_stream.read)
-      end
+      entry = zip_file.find_entry("bibliography.yaml")
+      @bibliography = entry.get_input_stream.read if entry
     end
 
     def read_concepts(zip_file)
+      doc_class = concept_document_class_for_read
       zip_file.entries.each do |entry|
         next unless entry.name.start_with?("concepts/") && entry.name.end_with?(".yaml")
 
         raw = entry.get_input_stream.read
-        doc = ConceptDocument.from_yamls(raw)
+        doc = doc_class.from_yamls(raw)
         @concepts << doc.to_managed_concept
       end
     end
 
     private
 
+    def concept_document_class_for_read
+      version = @metadata&.schema_version.to_s
+      ConceptDocument.for_version(version)
+    end
+
+    def concept_document_class_for_write(concept)
+      version = if concept.schema_version.to_s == "2"
+                  "2"
+                else
+                  "3"
+                end
+      ConceptDocument.for_version(version)
+    end
+
     def write_concept(zip_file, concept)
       termid = concept.data.id.to_s
-      doc = ConceptDocument.from_managed_concept(concept)
+      doc_class = concept_document_class_for_write(concept)
+      doc = doc_class.from_managed_concept(concept)
       zip_file.get_output_stream("concepts/#{termid}.yaml") do |f|
         f.write(doc.to_yamls)
       end
@@ -345,7 +355,7 @@ compiled_formats: [], **opts)
           languages: languages.sort,
           created_at: Time.now.utc.iso8601,
           glossarist_version: Glossarist::VERSION,
-          schema_version: register_data&.dig("schema_version") || SchemaMigration::CURRENT_SCHEMA_VERSION,
+          schema_version: register_data&.[]("schema_version") || SchemaMigration::CURRENT_SCHEMA_VERSION,
           uri_prefix: opts[:uri_prefix],
           concept_uri_template: opts[:concept_uri_template],
         )

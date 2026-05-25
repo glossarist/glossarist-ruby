@@ -126,8 +126,8 @@ RSpec.describe Glossarist::GcrPackage do
       create_test_gcr
 
       package = described_class.load(gcr_path)
-      expect(package.metadata["title"]).to eq("Test Dataset")
-      expect(package.metadata["concept_count"]).to eq(2)
+      expect(package.metadata.title).to eq("Test Dataset")
+      expect(package.metadata.concept_count).to eq(2)
     end
   end
 
@@ -234,7 +234,7 @@ RSpec.describe Glossarist::GcrPackage do
       )
 
       pkg = described_class.load(output)
-      ext_refs = pkg.metadata["external_references"]
+      ext_refs = pkg.metadata.external_references
       expect(ext_refs).to be_a(Array)
       uris = ext_refs.map { |r| r["uri"] }
       expect(uris).to include("urn:iec:std:iec:60050")
@@ -253,7 +253,7 @@ RSpec.describe Glossarist::GcrPackage do
       )
 
       pkg = described_class.load(output)
-      expect(pkg.metadata["uri_prefix"]).to eq("urn:iso:std:iso:19111")
+      expect(pkg.metadata.uri_prefix).to eq("urn:iso:std:iso:19111")
     end
   end
 

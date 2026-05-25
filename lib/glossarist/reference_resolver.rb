@@ -116,7 +116,7 @@ module Glossarist
 
     def infer_uri_prefix(package_or_concepts)
       case package_or_concepts
-      when GcrPackage then package_or_concepts.metadata&.dig("uri_prefix")
+      when GcrPackage then package_or_concepts.metadata&.uri_prefix
       end
     end
 
@@ -128,7 +128,7 @@ module Glossarist
         next unless File.exist?(gcr_path)
 
         gcr = GcrPackage.load(gcr_path)
-        prefix = pkg["uri_prefix"] || gcr.metadata&.dig("uri_prefix")
+        prefix = pkg["uri_prefix"] || gcr.metadata&.uri_prefix
         register_package(gcr, uri_prefix: prefix)
       end
 
@@ -145,7 +145,7 @@ module Glossarist
     def load_gcr_directory(dir)
       Dir.glob(File.join(dir, "*.gcr")).each do |gcr_path|
         pkg = GcrPackage.load(gcr_path)
-        prefix = pkg.metadata&.dig("uri_prefix")
+        prefix = pkg.metadata&.uri_prefix
         register_package(pkg, uri_prefix: prefix)
       end
     end

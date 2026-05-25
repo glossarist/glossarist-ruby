@@ -2,16 +2,19 @@
 
 module Glossarist
   module Validation
-    class ValidationIssue
-      attr_reader :severity, :code, :message, :location, :suggestion
+    class ValidationIssue < Lutaml::Model::Serializable
+      attribute :severity, :string
+      attribute :code, :string
+      attribute :message, :string
+      attribute :location, :string
+      attribute :suggestion, :string
 
-      def initialize(severity:, message:, code: nil, location: nil,
-suggestion: nil)
-        @severity = severity
-        @code = code
-        @message = message
-        @location = location
-        @suggestion = suggestion
+      key_value do
+        map :severity, to: :severity
+        map :code, to: :code
+        map :message, to: :message
+        map :location, to: :location
+        map :suggestion, to: :suggestion
       end
 
       def error?
@@ -29,9 +32,9 @@ suggestion: nil)
       def to_s
         parts = ["[#{severity.upcase}]"]
         parts << "[#{code}]" if code
-        parts << (location ? "#{location}: " : "")
+        parts << "#{location}: " if location
         parts << message
-        parts << " (#{suggestion})" if suggestion
+        parts << "(#{suggestion})" if suggestion
         parts.join(" ")
       end
     end

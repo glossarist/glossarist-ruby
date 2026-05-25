@@ -4,6 +4,10 @@ require "zip"
 
 module Glossarist
   class GcrValidator
+    def initialize(on_progress: nil)
+      @on_progress = on_progress
+    end
+
     def validate(zip_path)
       result = ValidationResult.new
 
@@ -24,27 +28,36 @@ module Glossarist
         return result
       end
 
-      begin
-        context = Validation::Rules::GcrContext.new(zip_path)
-      rescue StandardError => e
-        result.add_error("Failed to load GCR: #{e.message}")
-        return result
-      end
+      context, all_concepts = load_gcr_context(zip_path, result)
+      return result if all_concepts.nil?
 
-      # Collection-level rules (metadata, structure, integrity)
-      collection_rules = Validation::Rules::Registry.for_scope(:collection)
-      collection_rules.each do |rule|
-        next unless rule.applicable?(context)
+      validate_concepts(context, all_concepts, result)
+      validate_collection(context, result)
 
-        rule.check(context).each { |i| result.add_issue(i) }
-      end
+      result
+    end
 
-      # Per-concept rules
+    private
+
+    def load_gcr_context(zip_path, result)
+      context = Validation::Rules::GcrContext.new(zip_path)
+      pkg = GcrPackage.load(zip_path)
+      [context, pkg.concepts]
+    rescue StandardError => e
+      result.add_error("Failed to load GCR: #{e.message}")
+      [nil, nil]
+    end
+
+    def validate_concepts(context, all_concepts, result)
       concept_rules = Validation::Rules::Registry.for_scope(:concept)
-      context.concepts.each_with_index do |concept, idx|
-        fname = concept.data&.id ? "concepts/#{concept.data.id}.yaml" : "concepts/concept-#{idx}.yaml"
+      total = all_concepts.length
+
+      all_concepts.each_with_index do |concept, idx|
+        context.add_concept(concept)
         concept_context = Validation::Rules::ConceptContext.new(
-          concept, file_name: fname, collection_context: context
+          concept,
+          file_name: concept.data&.id ? "concepts/#{concept.data.id}.yaml" : "concepts/concept-#{idx}.yaml",
+          collection_context: context,
         )
 
         concept_rules.each do |rule|
@@ -52,9 +65,17 @@ module Glossarist
 
           rule.check(concept_context).each { |i| result.add_issue(i) }
         end
-      end
 
-      result
+        @on_progress&.call(idx + 1, total)
+      end
+    end
+
+    def validate_collection(context, result)
+      Validation::Rules::Registry.for_scope(:collection).each do |rule|
+        next unless rule.applicable?(context)
+
+        rule.check(context).each { |i| result.add_issue(i) }
+      end
     end
   end
 end

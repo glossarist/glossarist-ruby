@@ -10,42 +10,60 @@ RSpec.describe Glossarist::ValidationResult do
     end
 
     it "returns false when errors present" do
-      result = described_class.new
-      result.add_error("something broke")
+      issue = Glossarist::Validation::ValidationIssue.new(
+        severity: "error", message: "something broke",
+      )
+      result = described_class.new(issues: [issue])
       expect(result).not_to be_valid
     end
 
     it "returns true when only warnings present" do
-      result = described_class.new
-      result.add_warning("minor issue")
+      issue = Glossarist::Validation::ValidationIssue.new(
+        severity: "warning", message: "minor issue",
+      )
+      result = described_class.new(issues: [issue])
       expect(result).to be_valid
     end
   end
 
   describe "#merge" do
     it "combines errors from both results" do
-      a = described_class.new(errors: ["error 1"])
-      b = described_class.new(errors: ["error 2"])
+      a = described_class.new(issues: [
+                                Glossarist::Validation::ValidationIssue.new(severity: "error", message: "error 1"),
+                              ])
+      b = described_class.new(issues: [
+                                Glossarist::Validation::ValidationIssue.new(severity: "error", message: "error 2"),
+                              ])
 
       a.merge(b)
-      expect(a.errors).to eq(["error 1", "error 2"])
+      expect(a.errors).to eq(["[ERROR] error 1", "[ERROR] error 2"])
     end
 
     it "combines warnings from both results" do
-      a = described_class.new(warnings: ["warn 1"])
-      b = described_class.new(warnings: ["warn 2"])
+      a = described_class.new(issues: [
+                                Glossarist::Validation::ValidationIssue.new(severity: "warning", message: "warn 1"),
+                              ])
+      b = described_class.new(issues: [
+                                Glossarist::Validation::ValidationIssue.new(severity: "warning", message: "warn 2"),
+                              ])
 
       a.merge(b)
-      expect(a.warnings).to eq(["warn 1", "warn 2"])
+      expect(a.warnings).to eq(["[WARNING] warn 1", "[WARNING] warn 2"])
     end
 
     it "combines errors and warnings independently" do
-      a = described_class.new(errors: ["e1"], warnings: ["w1"])
-      b = described_class.new(errors: ["e2"], warnings: ["w2"])
+      a = described_class.new(issues: [
+                                Glossarist::Validation::ValidationIssue.new(severity: "error", message: "e1"),
+                                Glossarist::Validation::ValidationIssue.new(severity: "warning", message: "w1"),
+                              ])
+      b = described_class.new(issues: [
+                                Glossarist::Validation::ValidationIssue.new(severity: "error", message: "e2"),
+                                Glossarist::Validation::ValidationIssue.new(severity: "warning", message: "w2"),
+                              ])
 
       a.merge(b)
-      expect(a.errors).to eq(["e1", "e2"])
-      expect(a.warnings).to eq(["w1", "w2"])
+      expect(a.errors).to eq(["[ERROR] e1", "[ERROR] e2"])
+      expect(a.warnings).to eq(["[WARNING] w1", "[WARNING] w2"])
     end
 
     it "returns self for chaining" do
@@ -55,15 +73,19 @@ RSpec.describe Glossarist::ValidationResult do
     end
   end
 
-  describe "#to_h" do
-    it "produces hash with valid, errors, warnings" do
-      result = described_class.new
-      result.add_warning("test")
+  describe "#to_hash" do
+    it "produces hash with issues serialized via lutaml-model" do
+      issue = Glossarist::Validation::ValidationIssue.new(
+        severity: "warning", message: "test",
+      )
+      result = described_class.new(issues: [issue])
 
-      h = result.to_h
-      expect(h["valid"]).to be true
-      expect(h["errors"]).to eq([])
-      expect(h["warnings"]).to eq(["test"])
+      h = result.to_hash
+      expect(h["issues"].length).to eq(1)
+      expect(h["issues"].first).to include(
+        "severity" => "warning",
+        "message" => "test",
+      )
     end
   end
 end

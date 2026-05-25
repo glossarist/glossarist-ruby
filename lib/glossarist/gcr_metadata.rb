@@ -12,7 +12,7 @@ module Glossarist
     attribute :languages, :string, collection: true
     attribute :created_at, :string
     attribute :glossarist_version, :string
-    attribute :schema_version, :string, default: -> { "1.0.0" }
+    attribute :schema_version, :string, default: -> { Glossarist::SCHEMA_VERSION }
     attribute :statistics, GcrStatistics
     attribute :homepage, :string
     attribute :repository, :string
@@ -46,18 +46,19 @@ module Glossarist
 
     def self.from_concepts(concepts, register_data: nil, options: {})
       stats = GcrStatistics.from_concepts(concepts)
+      rd = register_data
       new(
-        shortname: options[:shortname] || register_data&.dig("shortname") || register_data&.dig("id"),
-        version: options[:version] || register_data&.dig("version"),
-        title: options[:title] || register_data&.dig("name"),
-        description: options[:description] || register_data&.dig("description"),
+        shortname: options[:shortname] || rd&.[]("shortname") || rd&.[]("id"),
+        version: options[:version] || rd&.[]("version"),
+        title: options[:title] || rd&.[]("name"),
+        description: options[:description] || rd&.[]("description"),
         owner: options[:owner],
         tags: options[:tags] || [],
         concept_count: concepts.length,
         languages: stats.languages,
         created_at: Time.now.utc.iso8601,
         glossarist_version: Glossarist::VERSION,
-        schema_version: register_data&.dig("schema_version") || SchemaMigration::CURRENT_SCHEMA_VERSION,
+        schema_version: rd&.[]("schema_version") || SchemaMigration::CURRENT_SCHEMA_VERSION,
         statistics: stats,
         uri_prefix: options[:uri_prefix],
         concept_uri_template: options[:concept_uri_template],
@@ -77,14 +78,6 @@ module Glossarist
         end
       end
       sources.map { |uri| { "uri" => uri } }
-    end
-
-    def [](key)
-      to_yaml_hash[key]
-    end
-
-    def dig(*keys)
-      to_yaml_hash.dig(*keys)
     end
   end
 end

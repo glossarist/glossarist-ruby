@@ -429,8 +429,7 @@ RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
   describe "designation-level relationships" do
     let(:rel_concept) do
       rc = Glossarist::RelatedConcept.new(type: "abbreviated_form_for")
-      rc.ref = Glossarist::Citation.new(text: "light-emitting diode")
-      rc.ref.id = "led_full"
+      rc.ref = Glossarist::ConceptRef.new(source: "light-emitting diode", id: "led_full")
 
       desig = Glossarist::Designation::Abbreviation.new(
         designation: "LED", type: "abbreviation",

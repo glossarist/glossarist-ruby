@@ -58,9 +58,7 @@ module Glossarist
           ref = rel.ref
           return nil unless ref
 
-          if ref.is_a?(Glossarist::Citation)
-            ref.id || ref.text
-          end
+          ref.id || ref.source
         end
 
         def detect_cycles(graph)

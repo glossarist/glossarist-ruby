@@ -40,46 +40,13 @@ require_relative "rules/date_type_rule"
 require_relative "rules/language_code_format_rule"
 require_relative "rules/designation_type_rule"
 require_relative "rules/date_validity_rule"
-
-# Register all built-in rules
-module Glossarist
-  module Validation
-    module Rules
-      R = Registry
-
-      R.register(ConceptIdRule)
-      R.register(ConceptIdUniquenessRule)
-      R.register(LocalizationPresenceRule)
-      R.register(EntryStatusRule)
-      R.register(AsciidocXrefRule)
-      R.register(ImageReferenceRule)
-      R.register(ConceptMentionRule)
-      R.register(ConceptCountRule)
-      R.register(LanguageListRule)
-      R.register(LanguageCoverageRule)
-      R.register(FilenameIdRule)
-      R.register(L10nUuidIntegrityRule)
-      R.register(OrphanedL10nFilesRule)
-      R.register(OrphanedBibliographyRule)
-      R.register(OrphanedImagesRule)
-      R.register(DefinitionContentRule)
-      R.register(PreferredTermRule)
-      R.register(DuplicateTermRule)
-      R.register(CitationCompletenessRule)
-      R.register(AuthoritativeSourceRule)
-      R.register(RelatedConceptRule)
-      R.register(ConceptStatusRule)
-      R.register(SourceEnumRule)
-      R.register(TermsPresenceRule)
-      R.register(BibliographyYamlRule)
-      R.register(ConceptUriRule)
-      R.register(RelatedConceptSymmetryRule)
-      R.register(RelatedConceptCycleRule)
-      R.register(DesignationStatusRule)
-      R.register(DateTypeRule)
-      R.register(LanguageCodeFormatRule)
-      R.register(DesignationTypeRule)
-      R.register(DateValidityRule)
-    end
-  end
-end
+require_relative "rules/schema_version_rule"
+require_relative "rules/ref_shape_rule"
+require_relative "rules/locality_completeness_rule"
+require_relative "rules/domain_ref_rule"
+require_relative "rules/uuid_format_rule"
+require_relative "rules/localization_consistency_rule"
+require_relative "rules/related_concept_target_rule"
+require_relative "rules/domain_target_rule"
+require_relative "rules/source_urn_format_rule"
+require_relative "rules/model_validity_rule"
