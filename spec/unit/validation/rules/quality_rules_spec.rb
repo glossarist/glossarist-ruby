@@ -110,7 +110,7 @@ RSpec.describe "Quality rules" do
 
     it "warns when no authoritative source is defined" do
       mc = make_concept(id: "1", langs: {
-                          eng: { sources: [{ "type" => "lineage", "origin" => { "text" => "ref" } }] },
+                          eng: { sources: [{ "type" => "lineage", "origin" => { "ref" => { "source" => "test" } } }] },
                         })
       ctx = make_context(mc)
       issues = rule.check(ctx)

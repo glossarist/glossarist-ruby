@@ -68,7 +68,7 @@ RSpec.describe "Schema rules" do
 
     it "flags invalid source type" do
       mc = make_concept(id: "1", langs: {
-                          eng: { sources: [{ "type" => "invalid_type", "origin" => { "text" => "ref" } }] },
+                          eng: { sources: [{ "type" => "invalid_type", "origin" => { "ref" => { "source" => "test" } } }] },
                         })
       ctx = make_context(mc)
       expect(rule).to be_applicable(ctx)
