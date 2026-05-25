@@ -403,7 +403,7 @@ There are two ways to initialize and populate a related concept
 related_concept = Glossarist::RelatedConcept.new({
   content: "Test content",
   type: :supersedes,
-  ref: <concept citation>
+  ref: Glossarist::ConceptRef.new(source: "IEC", id: "102-03-02"),
 })
 ----
 
@@ -414,7 +414,7 @@ related_concept = Glossarist::RelatedConcept.new({
 related_concept = Glossarist::RelatedConcept.new
 related_concept.type = "supersedes"
 related_concept.content = "designation of the related concept"
-related_concept.ref = <Citation object>
+related_concept.ref = Glossarist::ConceptRef.new(source: "IEC", id: "102-03-02")
 ----
 
 [[relationship-types]]
@@ -658,7 +658,7 @@ A definition of the managed term.
 It has the following attributes:
 
 content:: The text of the definition of the managed term.
-sources:: List of Bibliographic references(<<citation,Citation>>) for this particular definition of the managed term.
+sources:: List of <<concept-source,bibliographic sources>> for this particular definition of the managed term.
 
 There are two ways to initialize and populate a detailed definition
 
@@ -805,7 +805,7 @@ Concept Source has the following fields
 
 status:: The status of the managed term in the present context, relative to the term as found in the bibliographic source.
 type:: The type of the managed term in the present context.
-origin:: The bibliographic <<citation,citation>> for the managed term. This is also aliased as `ref`.
+origin:: The bibliographic <<citation,citation>> for the managed term.
 modification:: A description of the modification to the cited definition of the term, if any, as it is to be applied in the present context.
 
 
