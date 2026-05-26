@@ -15,13 +15,21 @@ module Glossarist
       result = ValidationResult.new
       context = Validation::Rules::DatasetContext.new(@path)
       concept_rules = Validation::Rules::Registry.for_scope(:concept)
-      total = ConceptCollector.count(@path)
-      file_idx = 0
 
-      ConceptCollector.each_concept(@path) do |concept|
-        context.add_concept(concept)
+      all_concepts = ConceptCollector.collect(@path)
+      total = all_concepts.length
 
-        fname = concept_file_name(concept, file_idx)
+      if total.zero?
+        yaml_files = find_yaml_files
+        if yaml_files.any?
+          result.add_error("YAML files found but no parseable concepts")
+        end
+      end
+
+      all_concepts.each { |c| context.add_concept(c) }
+
+      all_concepts.each_with_index do |concept, idx|
+        fname = concept_file_name(concept, idx)
         concept_context = Validation::Rules::ConceptContext.new(
           concept, file_name: fname, collection_context: context
         )
@@ -32,15 +40,7 @@ module Glossarist
           rule.check(concept_context).each { |i| result.add_issue(i) }
         end
 
-        file_idx += 1
-        @on_progress&.call(file_idx, total)
-      end
-
-      if file_idx.zero?
-        yaml_files = find_yaml_files
-        if yaml_files.any?
-          result.add_error("YAML files found but no parseable concepts")
-        end
+        @on_progress&.call(idx + 1, total)
       end
 
       # Run collection-level rules

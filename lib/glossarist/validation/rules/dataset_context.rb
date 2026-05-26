@@ -38,7 +38,7 @@ module Glossarist
         end
 
         def asset_index
-          @asset_index ||= AssetIndex.build_from_directory(@path)
+          @asset_index ||= AssetIndex.build_from_concepts(concepts, @path)
         end
 
         def declared_languages

@@ -28,9 +28,14 @@ module Glossarist
       end
 
       def self.build_from_directory(dataset_path)
+        concepts = ConceptCollector.collect(dataset_path)
+        build_from_concepts(concepts, dataset_path)
+      end
+
+      def self.build_from_concepts(concepts, dataset_path)
         index = new
         index_image_files(index, dataset_path)
-        index_model_assets(index, dataset_path)
+        index_concept_assets(index, concepts)
         index
       end
 
@@ -61,11 +66,6 @@ module Glossarist
             relative = file.sub("#{base}/", "")
             index.register(relative)
           end
-        end
-
-        def index_model_assets(index, dataset_path)
-          concepts = ConceptCollector.collect(dataset_path)
-          index_concept_assets(index, concepts)
         end
 
         def index_zip_images(index, zip_path)
