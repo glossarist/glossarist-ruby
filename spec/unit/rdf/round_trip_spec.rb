@@ -5,7 +5,8 @@ require "rdf/turtle"
 require "glossarist/transforms/concept_to_gloss_transform"
 
 module RoundTripConstants
-  EXAMPLES_DIR = File.expand_path("../../../../concept-model/schemas/v2/examples", __dir__)
+  V2_EXAMPLES_DIR = File.expand_path("../../fixtures/concept-model-examples/v2", __dir__)
+  V3_EXAMPLES_DIR = File.expand_path("../../fixtures/concept-model-examples/v3", __dir__)
   GLOSS = Glossarist::Rdf::Namespaces::GlossaristNamespace.uri
   SKOS = Glossarist::Rdf::Namespaces::SkosNamespace.uri
   XL = Glossarist::Rdf::Namespaces::SkosxlNamespace.uri
@@ -25,11 +26,20 @@ RSpec.describe "Round-trip: YAML → Ruby → Turtle → verify triples" do
     RoundTripConstants::GLOSS
   end
 
-  # ── Localized concept examples ────────────────────────────────────────
+  def minimal_l10n
+    l = Glossarist::LocalizedConcept.new
+    l.data.language_code = "eng"
+    l.data.terms = [Glossarist::Designation::Expression.new(designation: "placeholder", type: "expression", normative_status: "preferred")]
+    l
+  end
 
-  describe "localized concept examples" do
-    RoundTripConstants::EXAMPLES_DIR.then do |dir|
-      Dir.glob(File.join(dir, "*.yaml")).sort.each do |path|
+  # Shared examples for both v2 and v3 example directories.
+  # Tests that every example YAML parses and produces valid RDF.
+  shared_examples "concept model examples" do |version_label, examples_dir|
+    skip "#{version_label} examples not available at #{examples_dir}" unless Dir.exist?(examples_dir)
+
+    describe "#{version_label} localized concept examples" do
+      Dir.glob(File.join(examples_dir, "*.yaml")).sort.each do |path|
         basename = File.basename(path, ".yaml")
         data = YAML.safe_load(File.read(path), permitted_classes: [Date, Time])
         next unless data.is_a?(Hash) && data.dig("data", "language_code")
@@ -48,20 +58,9 @@ RSpec.describe "Round-trip: YAML → Ruby → Turtle → verify triples" do
         end
       end
     end
-  end
 
-  # ── Managed concept examples ──────────────────────────────────────────
-
-  describe "managed concept examples" do
-    let(:minimal_l10n) do
-      l = Glossarist::LocalizedConcept.new
-      l.data.language_code = "eng"
-      l.data.terms = [Glossarist::Designation::Expression.new(designation: "placeholder", type: "expression", normative_status: "preferred")]
-      l
-    end
-
-    RoundTripConstants::EXAMPLES_DIR.then do |dir|
-      Dir.glob(File.join(dir, "*.yaml")).sort.each do |path|
+    describe "#{version_label} managed concept examples" do
+      Dir.glob(File.join(examples_dir, "*.yaml")).sort.each do |path|
         basename = File.basename(path, ".yaml")
         data = YAML.safe_load(File.read(path), permitted_classes: [Date, Time])
         next unless data.is_a?(Hash) && (data.dig("data", "localized_concepts") || data.dig("data", "identifier"))
@@ -83,6 +82,9 @@ RSpec.describe "Round-trip: YAML → Ruby → Turtle → verify triples" do
       end
     end
   end
+
+  include_examples "concept model examples", "V2", RoundTripConstants::V2_EXAMPLES_DIR
+  include_examples "concept model examples", "V3", RoundTripConstants::V3_EXAMPLES_DIR
 
   # ── Specific fixture-based round-trip verification ────────────────────
 
