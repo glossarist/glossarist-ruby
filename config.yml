@@ -57,6 +57,7 @@ related_concept:
     - narrower_instantial
     # Equivalence (ISO 10241-1 / ISO 25964 exactMatch / SKOS)
     - equivalent
+    - exact_match
     # Approximate equivalence (ISO 25964 closeMatch / SKOS)
     - close_match
     # Cross-vocabulary mapping (SKOS)
@@ -92,11 +93,19 @@ iso12620:
     - short_form
     - transliterated_form
     - transcribed_form
+    - truncation
     - variant
     # Symbolic / formulaic:
+    - code
     - equation
+    - figure_symbol
     - formula
+    - graphic_symbol
+    - letter_symbol
     - logical_expression
+    - mathematical_expression
+    - reference_symbol
+    - roman_numeral
     - symbol
     # Usage / provenance:
     - common_name
@@ -104,7 +113,9 @@ iso12620:
     - internationalism
     - international_scientific_term
     - part_number
+    - phrase
     - phraseological_unit
+    - scientific_name
     - shortcut
     - sku
     - standard_text
