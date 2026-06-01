@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "tmpdir"
-require_relative "import_result"
 
 module Glossarist
   module Sts

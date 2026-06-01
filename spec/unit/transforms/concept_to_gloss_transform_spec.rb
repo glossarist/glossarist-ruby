@@ -207,7 +207,6 @@ RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
 
     it "links dates to concept via gloss:hasDate" do
       date_links = graph.query([nil, RDF::URI("#{gloss}hasDate"), nil])
-      # Dates may or may not be present depending on fixture data
       expect(date_links.count).to be >= 0
     end
   end
@@ -215,7 +214,7 @@ RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
   # ── Relationships ─────────────────────────────────────────────────
 
   describe "relationships" do
-    it "builds relationship triples from REL_PROPERTY_MAP" do
+    it "populates typed target attributes from related concepts" do
       mc = Glossarist::ManagedConcept.new(
         data: { id: "test" },
         related: [
@@ -225,10 +224,8 @@ RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
       )
 
       result = described_class.transform(mc)
-      expect(result.relationship_triples).to include(
-        ["#{skos}broader", "concept/parent"],
-        ["#{skos}related", "concept/other"],
-      )
+      expect(result.broader_targets).to eq(["concept/parent"])
+      expect(result.see_targets).to eq(["concept/other"])
     end
 
     it "skips unknown relationship types" do
@@ -240,7 +237,9 @@ RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
       )
 
       result = described_class.transform(mc)
-      expect(result.relationship_triples).to be_empty
+      all_empty = Glossarist::Rdf::RelationshipPredicates::CONCEPT_REL_PREDICATES.each_key
+        .all? { |type| result.send(:"#{type}_targets").empty? }
+      expect(all_empty).to be true
     end
 
     it "skips relationships without a target id" do
@@ -252,7 +251,7 @@ RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
       )
 
       result = described_class.transform(mc)
-      expect(result.relationship_triples).to be_empty
+      expect(result.broader_targets).to be_empty
     end
   end
 
@@ -451,11 +450,11 @@ RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
       g
     end
 
-    it "builds relationship triples from designation related concepts" do
+    it "populates designation target attributes from related concepts" do
       result = described_class.transform(rel_concept)
 
       desig_gc = result.localizations.first.designations.first
-      expect(desig_gc.relationship_triples).not_to be_empty
+      expect(desig_gc.abbreviated_form_for_targets).not_to be_empty
     end
 
     it "emits relationship triples in Turtle output" do
@@ -480,7 +479,6 @@ RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
         source: nil,
         id: nil,
       )
-      slug1 = described_class::GLOSS # just to verify module access
       subject1 = Glossarist::Rdf::GlossCitation.slug(citation)
       subject2 = Glossarist::Rdf::GlossCitation.slug(citation)
       expect(subject1).to eq(subject2)
@@ -509,6 +507,7 @@ RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
     it "each resource has @type" do
       parsed["@graph"].each do |resource|
         next unless resource.is_a?(Hash)
+
         expect(resource).to have_key("@type").or have_key("gloss:identifier")
       end
     end
@@ -536,7 +535,9 @@ RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
         related: [],
       )
       result = described_class.transform(mc)
-      expect(result.relationship_triples).to be_empty
+      all_empty = Glossarist::Rdf::RelationshipPredicates::CONCEPT_REL_PREDICATES.each_key
+        .all? { |type| result.send(:"#{type}_targets").empty? }
+      expect(all_empty).to be true
     end
 
     it "to_turtle returns empty string for nil concept" do

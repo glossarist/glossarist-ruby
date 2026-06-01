@@ -19,8 +19,8 @@ module Glossarist
 
         types "gloss:GrammarInfo"
 
-        predicate :gender, namespace: Namespaces::GlossaristNamespace, to: :gender, as: :uri
-        predicate :number, namespace: Namespaces::GlossaristNamespace, to: :number, as: :uri
+        predicate :gender, namespace: Namespaces::GlossaristNamespace, to: :gender, uri_reference: true
+        predicate :number, namespace: Namespaces::GlossaristNamespace, to: :number, uri_reference: true
         predicate :isNoun, namespace: Namespaces::GlossaristNamespace, to: :noun?
         predicate :isVerb, namespace: Namespaces::GlossaristNamespace, to: :verb?
         predicate :isAdjective, namespace: Namespaces::GlossaristNamespace, to: :adjective?

@@ -6,8 +6,8 @@ module Glossarist
   module Rdf
     COMMON_DESIGNATION_PREDICATES = lambda { |dsl|
       dsl.predicate :literalForm, namespace: Namespaces::SkosxlNamespace, to: :designation
-      dsl.predicate :normativeStatus, namespace: Namespaces::GlossaristNamespace, to: :normative_status, as: :uri
-      dsl.predicate :hasTermType, namespace: Namespaces::GlossaristNamespace, to: :term_type, as: :uri
+      dsl.predicate :normativeStatus, namespace: Namespaces::GlossaristNamespace, to: :normative_status, uri_reference: true
+      dsl.predicate :hasTermType, namespace: Namespaces::GlossaristNamespace, to: :term_type, uri_reference: true
       dsl.predicate :isInternational, namespace: Namespaces::GlossaristNamespace, to: :international
       dsl.predicate :isAbsent, namespace: Namespaces::GlossaristNamespace, to: :absent
       dsl.predicate :geographicalArea, namespace: Namespaces::GlossaristNamespace, to: :language
@@ -16,6 +16,10 @@ module Glossarist
       dsl.predicate :conversionSystem, namespace: Namespaces::GlossaristNamespace, to: :system
       dsl.members :pronunciations, link: "gloss:hasPronunciation"
       dsl.members :sources
+
+      RelationshipPredicates::DESIGNATION_REL_PREDICATES.each do |type, (ns, name)|
+        dsl.predicate name, namespace: ns, to: :"#{type}_targets", uri_reference: true
+      end
     }.freeze
 
     DESIGNATION_NAMESPACES = [
@@ -27,8 +31,6 @@ module Glossarist
     ].freeze
 
     class GlossDesignation < Lutaml::Model::Serializable
-      include Relationships
-
       attribute :designation, :string
       attribute :normative_status, :string
       attribute :type, :string
@@ -43,6 +45,10 @@ module Glossarist
       attribute :index, :string
       attribute :pronunciations, GlossPronunciation, collection: true
       attribute :sources, GlossConceptSource, collection: true
+
+      RelationshipPredicates::DESIGNATION_REL_PREDICATES.each_key do |type|
+        attribute :"#{type}_targets", :string, collection: true
+      end
 
       rdf do
         namespace(*DESIGNATION_NAMESPACES)

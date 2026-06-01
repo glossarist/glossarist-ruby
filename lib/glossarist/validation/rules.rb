@@ -1,52 +1,21 @@
 # frozen_string_literal: true
 
-require_relative "rules/base"
-require_relative "rules/registry"
-require_relative "rules/dataset_context"
-require_relative "rules/gcr_context"
-require_relative "rules/concept_context"
+module Glossarist
+  module Validation
+    module Rules
+      autoload :Base,           "glossarist/validation/rules/base"
+      autoload :Registry,       "glossarist/validation/rules/registry"
+      autoload :DatasetContext,  "glossarist/validation/rules/dataset_context"
+      autoload :GcrContext,      "glossarist/validation/rules/gcr_context"
+      autoload :ConceptContext,  "glossarist/validation/rules/concept_context"
 
-# Load all rule definitions
-require_relative "rules/concept_id_rule"
-require_relative "rules/concept_id_uniqueness_rule"
-require_relative "rules/localization_presence_rule"
-require_relative "rules/entry_status_rule"
-require_relative "rules/asciidoc_xref_rule"
-require_relative "rules/image_reference_rule"
-require_relative "rules/concept_mention_rule"
-require_relative "rules/concept_count_rule"
-require_relative "rules/language_list_rule"
-require_relative "rules/language_coverage_rule"
-require_relative "rules/filename_id_rule"
-require_relative "rules/l10n_uuid_integrity_rule"
-require_relative "rules/orphaned_l10n_files_rule"
-require_relative "rules/orphaned_bibliography_rule"
-require_relative "rules/orphaned_images_rule"
-require_relative "rules/definition_content_rule"
-require_relative "rules/preferred_term_rule"
-require_relative "rules/duplicate_term_rule"
-require_relative "rules/citation_completeness_rule"
-require_relative "rules/authoritative_source_rule"
-require_relative "rules/related_concept_rule"
-require_relative "rules/concept_status_rule"
-require_relative "rules/source_type_rule"
-require_relative "rules/terms_presence_rule"
-require_relative "rules/bibliography_yaml_rule"
-require_relative "rules/concept_uri_rule"
-require_relative "rules/related_concept_symmetry_rule"
-require_relative "rules/related_concept_cycle_rule"
-require_relative "rules/designation_status_rule"
-require_relative "rules/date_type_rule"
-require_relative "rules/language_code_format_rule"
-require_relative "rules/designation_type_rule"
-require_relative "rules/date_validity_rule"
-require_relative "rules/schema_version_rule"
-require_relative "rules/ref_shape_rule"
-require_relative "rules/locality_completeness_rule"
-require_relative "rules/domain_ref_rule"
-require_relative "rules/uuid_format_rule"
-require_relative "rules/localization_consistency_rule"
-require_relative "rules/related_concept_target_rule"
-require_relative "rules/domain_target_rule"
-require_relative "rules/source_urn_format_rule"
-require_relative "rules/model_validity_rule"
+      RULES_DIR = File.join(__dir__, "rules")
+
+      # Eagerly load all rule files so they self-register via Base.inherited.
+      # Adding a new rule file requires zero changes here — just drop it in.
+      Dir.glob(File.join(RULES_DIR, "*_rule.rb")).each do |path|
+        require path
+      end
+    end
+  end
+end

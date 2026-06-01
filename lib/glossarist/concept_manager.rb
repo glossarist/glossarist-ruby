@@ -16,7 +16,6 @@ module Glossarist
 
     def localized_concept_class
       if version.to_s == "2"
-        require_relative "v2"
         V2::LocalizedConcept
       else
         LocalizedConcept

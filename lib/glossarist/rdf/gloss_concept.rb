@@ -5,14 +5,16 @@ require "lutaml/model"
 module Glossarist
   module Rdf
     class GlossConcept < Lutaml::Model::Serializable
-      include Relationships
-
       attribute :identifier, :string
       attribute :status, :string
       attribute :localizations, GlossLocalizedConcept, collection: true
       attribute :sources, GlossConceptSource, collection: true
       attribute :domains, GlossConceptReference, collection: true
       attribute :dates, GlossConceptDate, collection: true
+
+      RelationshipPredicates::CONCEPT_REL_PREDICATES.each_key do |type|
+        attribute :"#{type}_targets", :string, collection: true
+      end
 
       rdf do
         namespace Namespaces::GlossaristNamespace,
@@ -27,7 +29,7 @@ module Glossarist
         types "gloss:Concept", "skos:Concept"
 
         predicate :identifier, namespace: Namespaces::GlossaristNamespace, to: :identifier
-        predicate :hasStatus, namespace: Namespaces::GlossaristNamespace, to: :status, as: :uri
+        predicate :hasStatus, namespace: Namespaces::GlossaristNamespace, to: :status, uri_reference: true
 
         members :localizations,
                 link: "gloss:hasLocalization"
@@ -37,6 +39,10 @@ module Glossarist
                 link: "gloss:hasDomain"
         members :dates,
                 link: "gloss:hasDate"
+
+        RelationshipPredicates::CONCEPT_REL_PREDICATES.each do |type, (ns, name)|
+          predicate name, namespace: ns, to: :"#{type}_targets", uri_reference: true
+        end
       end
     end
 
