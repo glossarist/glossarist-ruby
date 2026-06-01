@@ -21,8 +21,8 @@ module Glossarist
         @entries.keys
       end
 
-      def each_entry(&block)
-        @entries.each_value(&block)
+      def each_entry(&)
+        @entries.each_value(&)
       end
 
       def self.build_from_concepts(concepts, dataset_path: nil)
@@ -85,14 +85,14 @@ module Glossarist
 
         def register_origin_text(index, origin)
           ref = origin.ref
-          return unless ref && ref.source && !ref.source.strip.empty?
+          return unless ref&.source && !ref.source.strip.empty?
 
           index.register(ref.source, origin)
         end
 
         def register_origin_ref(index, origin)
           ref = origin.ref
-          return unless ref && ref.source && ref.id
+          return unless ref&.source && ref.id
 
           key = "#{ref.source} #{ref.id}"
           index.register(key, origin)
@@ -108,9 +108,10 @@ module Glossarist
           return unless bib
 
           Array(bib.entries).each do |entry|
-            next unless entry.respond_to?(:id)
+            next unless entry&.id
+
             index.register(entry.id, entry)
-            index.register(entry.reference, entry) if entry.respond_to?(:reference) && entry.reference
+            index.register(entry.reference, entry) if entry.reference
           end
         rescue StandardError
           nil
@@ -125,7 +126,8 @@ module Glossarist
           return unless images
 
           Array(images.entries).each do |entry|
-            next unless entry.respond_to?(:id)
+            next unless entry&.id
+
             index.register(entry.id, entry)
           end
         rescue StandardError

@@ -15,36 +15,10 @@ module Glossarist
       DCT    = Rdf::Namespaces::DctermsNamespace.uri
       RDF_NS = Rdf::Namespaces::RdfNamespace.uri
 
-      REL_PROPERTY_MAP = {
-        "broader" => "#{SKOS}broader",
-        "narrower" => "#{SKOS}narrower",
-        "broader_generic" => "#{ISO}broaderGeneric",
-        "narrower_generic" => "#{ISO}narrowerGeneric",
-        "broader_partitive" => "#{ISO}broaderPartitive",
-        "narrower_partitive" => "#{ISO}narrowerPartitive",
-        "broader_instantial" => "#{ISO}broaderInstantial",
-        "narrower_instantial" => "#{ISO}narrowerInstantial",
-        "equivalent" => "#{SKOS}exactMatch",
-        "close_match" => "#{SKOS}closeMatch",
-        "broad_match" => "#{SKOS}broadMatch",
-        "narrow_match" => "#{SKOS}narrowMatch",
-        "related_match" => "#{SKOS}relatedMatch",
-        "see" => "#{SKOS}related",
-        "deprecates" => "#{GLOSS}deprecates",
-        "supersedes" => "#{GLOSS}supersedes",
-        "superseded_by" => "#{GLOSS}supersededBy",
-        "compare" => "#{GLOSS}compares",
-        "contrast" => "#{GLOSS}contrasts",
-        "sequentially_related_concept" => "#{GLOSS}sequentiallyRelated",
-        "spatially_related_concept" => "#{GLOSS}spatiallyRelated",
-        "temporally_related_concept" => "#{GLOSS}temporallyRelated",
-        "homograph" => "#{GLOSS}hasHomograph",
-        "false_friend" => "#{GLOSS}hasFalseFriend",
-        "related_concept_broader" => "#{GLOSS}relatedConceptBroader",
-        "related_concept_narrower" => "#{GLOSS}relatedConceptNarrower",
-        "abbreviated_form_for" => "#{GLOSS}abbreviatedFormFor",
-        "short_form_for" => "#{GLOSS}shortFormFor",
-      }.freeze
+      REL_PROPERTY_MAP = Rdf::RelationshipPredicates::ALL_REL_PREDICATES
+        .transform_values { |ns, name| ns[name] }
+        .transform_keys(&:to_s)
+        .freeze
 
       DATE_TYPE_MAP = {
         "accepted" => "#{GLOSS}status/accepted",
@@ -112,8 +86,6 @@ module Glossarist
 
       attr_reader :concept, :options
 
-      # ── Build RDF view instances from domain model ─────────────────────
-
       def build_gloss_concept(managed_concept)
         identifier = managed_concept.data&.id || managed_concept.identifier
 
@@ -121,17 +93,20 @@ module Glossarist
           build_gloss_localized_concept(l10n, identifier)
         end
 
-        gc = Rdf::GlossConcept.new(
+        rel_targets = Rdf::RelationshipPredicates.related_targets_by_type(
+          managed_concept.related,
+          Rdf::RelationshipPredicates::CONCEPT_REL_PREDICATES,
+        )
+
+        Rdf::GlossConcept.new(
           identifier: identifier.to_s,
           status: status_uri(managed_concept.status),
           localizations: localizations,
           sources: build_gloss_sources(managed_concept.data&.sources),
           domains: build_gloss_domains(managed_concept.data&.domains, identifier),
           dates: build_gloss_dates(managed_concept.dates, identifier),
+          **rel_targets,
         )
-
-        gc.relationship_triples = build_relationship_triples(managed_concept.related)
-        gc
       end
 
       def build_gloss_localized_concept(l10n, concept_id)
@@ -168,24 +143,33 @@ module Glossarist
 
       def build_gloss_designation(desig, concept_id, lang, index)
         common_attrs = designation_common_attrs(desig, concept_id, lang, index)
+        instance = designation_instance_for(desig, common_attrs, concept_id, lang, index)
 
-        instance = case desig
-                   when Designation::Abbreviation
-                     build_gloss_abbreviation(desig, common_attrs, concept_id, lang, index)
-                   when Designation::Expression
-                     build_gloss_expression(desig, common_attrs, concept_id, lang, index)
-                   when Designation::GraphicalSymbol
-                     Rdf::GlossGraphicalSymbol.new(common_attrs.merge(text: desig.text, image: desig.image))
-                   when Designation::LetterSymbol
-                     Rdf::GlossLetterSymbol.new(common_attrs.merge(text: desig.text))
-                   when Designation::Symbol
-                     Rdf::GlossSymbol.new(common_attrs)
-                   else
-                     Rdf::GlossExpression.new(common_attrs)
-                   end
-
-        instance.relationship_triples = build_relationship_triples(desig.related)
+        rel_targets = Rdf::RelationshipPredicates.related_targets_by_type(
+          desig.related,
+          Rdf::RelationshipPredicates::DESIGNATION_REL_PREDICATES,
+        )
+        rel_targets.each do |attr_name, targets|
+          instance.send(:"#{attr_name}=", targets) unless targets.empty?
+        end
         instance
+      end
+
+      def designation_instance_for(desig, common_attrs, concept_id, lang, index)
+        case desig
+        when Designation::Abbreviation
+          build_gloss_abbreviation(desig, common_attrs, concept_id, lang, index)
+        when Designation::Expression
+          build_gloss_expression(desig, common_attrs, concept_id, lang, index)
+        when Designation::GraphicalSymbol
+          Rdf::GlossGraphicalSymbol.new(common_attrs.merge(text: desig.text, image: desig.image))
+        when Designation::LetterSymbol
+          Rdf::GlossLetterSymbol.new(common_attrs.merge(text: desig.text))
+        when Designation::Symbol
+          Rdf::GlossSymbol.new(common_attrs)
+        else
+          Rdf::GlossExpression.new(common_attrs)
+        end
       end
 
       def designation_common_attrs(desig, concept_id, lang, index)
@@ -332,18 +316,6 @@ module Glossarist
             date_type: DATE_TYPE_MAP[date.type] || "gloss:status/#{date.type}",
             concept_id: concept_id.to_s,
           )
-        end
-      end
-
-      def build_relationship_triples(related_concepts)
-        Array(related_concepts).filter_map do |rc|
-          predicate_uri = REL_PROPERTY_MAP[rc.type]
-          next unless predicate_uri
-
-          target_id = rc.ref&.id
-          next unless target_id
-
-          [predicate_uri, "concept/#{target_id}"]
         end
       end
 

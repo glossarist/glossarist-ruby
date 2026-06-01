@@ -33,7 +33,7 @@ module Glossarist
         types "gloss:LocalizedConcept", "skos:Concept"
 
         predicate :language, namespace: Namespaces::DctermsNamespace, to: :language_code
-        predicate :hasEntryStatus, namespace: Namespaces::GlossaristNamespace, to: :entry_status, as: :uri
+        predicate :hasEntryStatus, namespace: Namespaces::GlossaristNamespace, to: :entry_status, uri_reference: true
         predicate :domain, namespace: Namespaces::GlossaristNamespace, to: :domain
         predicate :release, namespace: Namespaces::GlossaristNamespace, to: :release
         predicate :lineageSimilarity, namespace: Namespaces::GlossaristNamespace, to: :lineage_similarity

@@ -6,6 +6,7 @@ module Glossarist
     attribute :uri, :string
     attribute :localized_concepts, :hash
     attribute :domains, ConceptReference, collection: true
+    attribute :tags, :string, collection: true
     attribute :sources, ConceptSource, collection: true
     attribute :localizations, LocalizedConcept,
               collection: Collections::LocalizationCollection,
@@ -19,6 +20,7 @@ module Glossarist
       map %i[localized_concepts localizedConcepts], to: :localized_concepts
       map %i[domains groups], to: :domains,
                               with: { from: :domains_from_yaml, to: :domains_to_yaml }
+      map :tags, to: :tags
       map :sources, to: :sources
       map :localizations, to: :localizations,
                           with: { from: :localizations_from_yaml, to: :localizations_to_yaml }
