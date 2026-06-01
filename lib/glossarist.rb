@@ -27,11 +27,13 @@ module Glossarist
   autoload :ConceptManager,           "glossarist/concept_manager"
   autoload :ConceptSet,               "glossarist/concept_set"
   autoload :ConceptSource,            "glossarist/concept_source"
+  autoload :ConceptStore,             "glossarist/concept_store"
   autoload :ConceptValidator,         "glossarist/concept_validator"
-  autoload :ConceptCollector, "glossarist/concept_collector"
-  autoload :ConceptComparator, "glossarist/concept_comparator"
-  autoload :ComparisonResult, "glossarist/comparison_result"
-  autoload :ConceptDiff, "glossarist/concept_diff"
+  autoload :ConceptCollector,         "glossarist/concept_collector"
+  autoload :ConceptComparator,        "glossarist/concept_comparator"
+  autoload :ContextConfiguration, "glossarist/context_configuration"
+  autoload :ComparisonResult,         "glossarist/comparison_result"
+  autoload :ConceptDiff,              "glossarist/concept_diff"
   autoload :ConceptDocument,          "glossarist/concept_document"
   autoload :ConceptEnricher,          "glossarist/concept_enricher"
   autoload :Config,                   "glossarist/config"
@@ -44,7 +46,7 @@ module Glossarist
   autoload :GcrMetadata,              "glossarist/gcr_metadata"
   autoload :GcrStatistics,            "glossarist/gcr_statistics"
   autoload :GcrValidator,             "glossarist/gcr_validator"
-  autoload :InvalidTypeError, "glossarist/error/invalid_type_error"
+  autoload :InvalidTypeError,         "glossarist/error/invalid_type_error"
   autoload :InvalidLanguageCodeError,
            "glossarist/error/invalid_language_code_error"
   autoload :ParseError, "glossarist/error/parse_error"
@@ -70,13 +72,9 @@ module Glossarist
   autoload :V1,                       "glossarist/v1"
   autoload :V2,                       "glossarist/v2"
   autoload :V3,                       "glossarist/v3"
-end
+  autoload :VERSION,                  "glossarist/version"
+  autoload :GlossaryDefinition,       "glossarist/glossary_definition"
 
-require_relative "glossarist/version"
-require_relative "glossarist/collections"
-require_relative "glossarist/glossary_definition"
-
-module Glossarist
   LANG_CODES = %w[eng ara deu fra spa ita jpn kor pol por srp swe zho rus fin
                   dan nld msa nob nno].freeze
 

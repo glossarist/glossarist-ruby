@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative "../../context_configuration"
-
 module Glossarist
   module Rdf
     module V3

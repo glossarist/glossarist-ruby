@@ -1,23 +1,23 @@
 # frozen_string_literal: true
 
-require_relative "v3/configuration"
-require_relative "v3/citation"
-require_relative "v3/concept_source"
-require_relative "v3/detailed_definition"
-require_relative "v3/concept_ref"
-require_relative "v3/related_concept"
-require_relative "v3/concept_data"
-require_relative "v3/localized_concept"
-require_relative "v3/managed_concept_data"
-require_relative "v3/managed_concept"
-require_relative "v3/concept_document"
-require_relative "v3/bibliography_entry"
-require_relative "v3/bibliography_file"
-require_relative "v3/image_entry"
-require_relative "v3/image_file"
-
 module Glossarist
   module V3
+    autoload :Configuration, "glossarist/v3/configuration"
+    autoload :Citation, "glossarist/v3/citation"
+    autoload :ConceptSource, "glossarist/v3/concept_source"
+    autoload :DetailedDefinition, "glossarist/v3/detailed_definition"
+    autoload :ConceptRef, "glossarist/v3/concept_ref"
+    autoload :RelatedConcept, "glossarist/v3/related_concept"
+    autoload :ConceptData, "glossarist/v3/concept_data"
+    autoload :LocalizedConcept, "glossarist/v3/localized_concept"
+    autoload :ManagedConceptData, "glossarist/v3/managed_concept_data"
+    autoload :ManagedConcept, "glossarist/v3/managed_concept"
+    autoload :ConceptDocument, "glossarist/v3/concept_document"
+    autoload :BibliographyEntry, "glossarist/v3/bibliography_entry"
+    autoload :BibliographyFile, "glossarist/v3/bibliography_file"
+    autoload :ImageEntry, "glossarist/v3/image_entry"
+    autoload :ImageFile, "glossarist/v3/image_file"
+
     Configuration.register_model(Citation, id: :citation)
     Configuration.register_model(ConceptSource, id: :concept_source)
     Configuration.register_model(DetailedDefinition, id: :detailed_definition)

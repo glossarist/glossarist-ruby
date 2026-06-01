@@ -23,10 +23,8 @@ module Glossarist
     def self.for_version(version)
       case version.to_s
       when "2"
-        require_relative "v2"
         V2::ConceptDocument
       else
-        require_relative "v3"
         V3::ConceptDocument
       end
     end

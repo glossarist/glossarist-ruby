@@ -335,14 +335,17 @@ RSpec.describe Glossarist::Rdf::GlossDesignation do
     expect(status).to be_a(RDF::URI)
   end
 
-  it "includes Relationships module" do
+  it "has designation-level relationship target attributes" do
     d = described_class.new(designation: "test", concept_id: "c1", lang_code: "eng", index: "0")
-    expect(d).to be_a(Glossarist::Rdf::Relationships)
+    expect(d).to respond_to(:abbreviated_form_for_targets)
+    expect(d).to respond_to(:short_form_for_targets)
   end
 
-  it "emits relationship triples" do
-    d = described_class.new(designation: "LED", concept_id: "c1", lang_code: "eng", index: "0")
-    d.relationship_triples = [["#{gloss}abbreviatedFormFor", "concept/full"]]
+  it "emits relationship triples via typed attributes" do
+    d = described_class.new(
+      designation: "LED", concept_id: "c1", lang_code: "eng", index: "0",
+      abbreviated_form_for_targets: ["concept/full"]
+    )
     graph = parse_turtle(described_class.to_turtle(d))
     rels = graph.query([nil, RDF::URI("#{gloss}abbreviatedFormFor"), nil])
     expect(rels.count).to eq(1)
@@ -534,17 +537,18 @@ RSpec.describe Glossarist::Rdf::GlossConcept do
     expect(status).to be_a(RDF::URI)
   end
 
-  it "includes Relationships module" do
+  it "has concept-level relationship target attributes" do
     gc = described_class.new(identifier: "test")
-    expect(gc).to be_a(Glossarist::Rdf::Relationships)
+    expect(gc).to respond_to(:broader_targets)
+    expect(gc).to respond_to(:see_targets)
   end
 
-  it "emits relationship triples" do
-    gc = described_class.new(identifier: "c1")
-    gc.relationship_triples = [
-      ["#{skos}broader", "concept/parent"],
-      ["#{skos}exactMatch", "concept/equivalent"],
-    ]
+  it "emits relationship triples via typed attributes" do
+    gc = described_class.new(
+      identifier: "c1",
+      broader_targets: ["concept/parent"],
+      equivalent_targets: ["concept/equivalent"],
+    )
     graph = parse_turtle(described_class.to_turtle(gc))
     broader = graph.query([nil, RDF::URI("#{skos}broader"), nil])
     expect(broader.count).to eq(1)

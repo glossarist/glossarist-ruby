@@ -5,7 +5,6 @@ source "https://rubygems.org"
 gemspec
 
 gem "canon"
-gem "lutaml-model", "~> 0.8.0"
 gem "nokogiri"
 gem "rake", "~> 13.0"
 gem "relaton", "~> 2.1.0"

@@ -17,7 +17,7 @@ module Glossarist
         types "gloss:ConceptDate"
 
         predicate :dateValue, namespace: Namespaces::GlossaristNamespace, to: :date_value
-        predicate :dateType, namespace: Namespaces::GlossaristNamespace, to: :date_type, as: :uri
+        predicate :dateType, namespace: Namespaces::GlossaristNamespace, to: :date_type, uri_reference: true
       end
     end
   end
