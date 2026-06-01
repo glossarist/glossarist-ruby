@@ -101,7 +101,8 @@ related:: Array of <<related-concept,RelatedConcept>>
 status:: Enum for the normative status of the term.
 dates:: Array of <<concept-date,ConceptDate>>
 localized_concepts:: Hash of all localizations where keys are language codes and values are uuid of the localized concept.
-domains:: Array of <<concept-reference,ConceptReference>> — upper concepts (subject areas, concept schemes, organizing concepts) that this concept belongs to across all languages. Each domain is a typed reference (e.g. `{ concept_id: "103", ref_type: "domain" }`).
+domains:: Array of <<concept-reference,ConceptReference>> — terminological domain references (subject areas, concept schemes) that this concept belongs to. Each domain is a typed reference (e.g. `{ concept_id: "103", ref_type: "domain" }`). These are rendered as `<domain>` in output.
+tags:: Array of strings — organizational tags for grouping and filtering concepts (e.g. `["time-scale-units"]`). Tags are not rendered as terminological domains; they serve as metadata for document structure and retrieval.
 localizations:: Hash of all localizations for this concept where keys are language codes and values are instances of <<localized-concept,LocalizedConcept>>.
 
 There are two ways to initialize and populate a managed concept
@@ -121,6 +122,7 @@ concept = Glossarist::ManagedConcept.new({
     "domains" => [
       { "concept_id" => "103", "ref_type" => "domain" },
     ],
+    "tags" => ["time-scales"],
   },
 })
 ----
@@ -134,6 +136,7 @@ concept.id = "123"
 concept.data.domains = [
   Glossarist::ConceptReference.new(concept_id: "103", ref_type: "domain"),
 ]
+concept.data.tags = ["time-scales"]
 concept.localizations = <Array of localized concepts or localized concept hashes>
 ----
 
