@@ -66,7 +66,7 @@ module Glossarist
           stack = Set.new
           cycles = []
 
-          graph.keys.each do |node|
+          graph.each_key do |node|
             next if visited.include?(node)
 
             dfs(node, graph, visited, stack, [], cycles)
@@ -80,7 +80,7 @@ module Glossarist
 
           if stack.include?(node)
             cycle_start = path.index(node)
-            cycles << path[cycle_start..] + [node] if cycle_start
+            cycles << (path[cycle_start..] + [node]) if cycle_start
             return
           end
 

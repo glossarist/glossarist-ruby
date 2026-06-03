@@ -27,7 +27,7 @@ module Glossarist
               "#{fname}/#{lang}: must have at least 1 term",
               code: code, severity: severity,
               location: "#{fname}/#{lang}",
-              suggestion: "Add at least one term/designation to this localization",
+              suggestion: "Add at least one term/designation to this localization"
             )
           end
 

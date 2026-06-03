@@ -67,8 +67,8 @@ RSpec.describe "Serialization and deserialization" do
       concept_files.each do |filename|
         concept_from_file = Glossarist::V2::ManagedConcept.from_yaml(File.read(filename))
         reference_concept = Glossarist::V2::ManagedConcept.from_yaml(File.read(File.join(
-                                                                             fixtures_path(reference_folder), "concept", File.basename(filename)
-                                                                           )))
+                                                                                 fixtures_path(reference_folder), "concept", File.basename(filename)
+                                                                               )))
 
         expect(concept_from_file.to_yaml_hash["data"]).to eq(reference_concept.to_yaml_hash["data"])
       end

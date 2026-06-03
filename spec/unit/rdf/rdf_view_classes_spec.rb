@@ -31,12 +31,16 @@ RSpec.describe Glossarist::Rdf::GlossLocality do
   end
 
   it "emits locality predicates" do
-    loc = described_class.new(locality_type: "page", reference_from: "42", reference_to: "47")
+    loc = described_class.new(locality_type: "page", reference_from: "42",
+                              reference_to: "47")
     graph = parse_turtle(described_class.to_turtle(loc))
     subj = graph.query([nil, RDF.type, RDF::URI("#{gloss}Locality")]).first.subject
-    expect(graph.query([subj, RDF::URI("#{gloss}localityType"), nil]).first.object.to_s).to eq("page")
-    expect(graph.query([subj, RDF::URI("#{gloss}referenceFrom"), nil]).first.object.to_s).to eq("42")
-    expect(graph.query([subj, RDF::URI("#{gloss}referenceTo"), nil]).first.object.to_s).to eq("47")
+    expect(graph.query([subj, RDF::URI("#{gloss}localityType"),
+                        nil]).first.object.to_s).to eq("page")
+    expect(graph.query([subj, RDF::URI("#{gloss}referenceFrom"),
+                        nil]).first.object.to_s).to eq("42")
+    expect(graph.query([subj, RDF::URI("#{gloss}referenceTo"),
+                        nil]).first.object.to_s).to eq("47")
   end
 
   it "generates deterministic subject URI" do
@@ -60,12 +64,16 @@ RSpec.describe Glossarist::Rdf::GlossCitation do
   end
 
   it "emits citation predicates" do
-    cit = described_class.new(source: "IEC", id: "60050-102", version: "2007", link: "https://example.org")
+    cit = described_class.new(source: "IEC", id: "60050-102", version: "2007",
+                              link: "https://example.org")
     graph = parse_turtle(described_class.to_turtle(cit))
     subj = graph.query([nil, RDF.type, RDF::URI("#{gloss}Citation")]).first.subject
-    expect(graph.query([subj, RDF::URI("#{gloss}citationSource"), nil]).first.object.to_s).to eq("IEC")
-    expect(graph.query([subj, RDF::URI("#{gloss}citationId"), nil]).first.object.to_s).to eq("60050-102")
-    expect(graph.query([subj, RDF::URI("#{gloss}citationVersion"), nil]).first.object.to_s).to eq("2007")
+    expect(graph.query([subj, RDF::URI("#{gloss}citationSource"),
+                        nil]).first.object.to_s).to eq("IEC")
+    expect(graph.query([subj, RDF::URI("#{gloss}citationId"),
+                        nil]).first.object.to_s).to eq("60050-102")
+    expect(graph.query([subj, RDF::URI("#{gloss}citationVersion"),
+                        nil]).first.object.to_s).to eq("2007")
   end
 
   it "uses slug from source/id for subject" do
@@ -81,7 +89,8 @@ RSpec.describe Glossarist::Rdf::GlossCitation do
   end
 
   it "emits locality when present" do
-    loc = Glossarist::Rdf::GlossLocality.new(locality_type: "clause", reference_from: "3.1")
+    loc = Glossarist::Rdf::GlossLocality.new(locality_type: "clause",
+                                             reference_from: "3.1")
     cit = described_class.new(source: "ISO", id: "9001", locality: loc)
     graph = parse_turtle(described_class.to_turtle(cit))
     localities = graph.query([nil, RDF.type, RDF::URI("#{gloss}Locality")])
@@ -95,25 +104,30 @@ RSpec.describe Glossarist::Rdf::GlossConceptSource do
   include_context "rdf graph helpers"
 
   it "emits gloss:ConceptSource type" do
-    src = described_class.new(status: "gloss:srcstatus/identical", type: "gloss:srctype/authoritative")
+    src = described_class.new(status: "gloss:srcstatus/identical",
+                              type: "gloss:srctype/authoritative")
     graph = parse_turtle(described_class.to_turtle(src))
     types = graph.query([nil, RDF.type, RDF::URI("#{gloss}ConceptSource")])
     expect(types).not_to be_empty
   end
 
   it "emits source status and type as URIs" do
-    src = described_class.new(status: "gloss:srcstatus/modified", type: "gloss:srctype/authoritative")
+    src = described_class.new(status: "gloss:srcstatus/modified",
+                              type: "gloss:srctype/authoritative")
     graph = parse_turtle(described_class.to_turtle(src))
     subj = graph.query([nil, RDF.type, RDF::URI("#{gloss}ConceptSource")]).first.subject
-    status_stmt = graph.query([subj, RDF::URI("#{gloss}sourceStatus"), nil]).first
+    status_stmt = graph.query([subj, RDF::URI("#{gloss}sourceStatus"),
+                               nil]).first
     expect(status_stmt.object).to be_a(RDF::URI)
     type_stmt = graph.query([subj, RDF::URI("#{gloss}sourceType"), nil]).first
     expect(type_stmt.object).to be_a(RDF::URI)
   end
 
   it "generates deterministic ID from attributes" do
-    src1 = described_class.new(status: "identical", type: "authoritative", modification: nil)
-    src2 = described_class.new(status: "identical", type: "authoritative", modification: nil)
+    src1 = described_class.new(status: "identical", type: "authoritative",
+                               modification: nil)
+    src2 = described_class.new(status: "identical", type: "authoritative",
+                               modification: nil)
     expect(described_class.deterministic_id(src1)).to eq(described_class.deterministic_id(src2))
   end
 
@@ -125,14 +139,16 @@ RSpec.describe Glossarist::Rdf::GlossConceptSource do
 
   it "includes origin in deterministic ID" do
     origin = Glossarist::Rdf::GlossCitation.new(source: "ISO", id: "10241")
-    src1 = described_class.new(status: "identical", type: "authoritative", origin: origin)
+    src1 = described_class.new(status: "identical", type: "authoritative",
+                               origin: origin)
     src2 = described_class.new(status: "identical", type: "authoritative")
     expect(described_class.deterministic_id(src1)).not_to eq(described_class.deterministic_id(src2))
   end
 
   it "links to citation origin via gloss:sourceOrigin" do
     origin = Glossarist::Rdf::GlossCitation.new(source: "IEC", id: "60050-102")
-    src = described_class.new(status: "gloss:srcstatus/identical", origin: origin)
+    src = described_class.new(status: "gloss:srcstatus/identical",
+                              origin: origin)
     graph = parse_turtle(described_class.to_turtle(src))
     subj = graph.query([nil, RDF.type, RDF::URI("#{gloss}ConceptSource")]).first.subject
     origins = graph.query([subj, RDF::URI("#{gloss}sourceOrigin"), nil])
@@ -187,12 +203,15 @@ RSpec.describe Glossarist::Rdf::GlossPronunciation do
     expect(types).not_to be_empty
 
     subj = types.first.subject
-    expect(graph.query([subj, RDF::URI("#{gloss}pronunciationContent"), nil]).first.object.to_s).to eq("toːkjoː")
-    expect(graph.query([subj, RDF::URI("#{gloss}pronunciationLanguage"), nil]).first.object.to_s).to eq("jpn")
+    expect(graph.query([subj, RDF::URI("#{gloss}pronunciationContent"),
+                        nil]).first.object.to_s).to eq("toːkjoː")
+    expect(graph.query([subj, RDF::URI("#{gloss}pronunciationLanguage"),
+                        nil]).first.object.to_s).to eq("jpn")
   end
 
   it "generates deterministic subject URI" do
-    pron = described_class.new(content: "test", concept_id: "c1", lang_code: "eng", index: "0")
+    pron = described_class.new(content: "test", concept_id: "c1",
+                               lang_code: "eng", index: "0")
     t1 = described_class.to_turtle(pron)
     t2 = described_class.to_turtle(pron)
     expect(t1).to eq(t2)
@@ -205,14 +224,16 @@ RSpec.describe Glossarist::Rdf::GlossGrammarInfo do
   include_context "rdf graph helpers"
 
   it "emits gloss:GrammarInfo type" do
-    gi = described_class.new(gender: ["gloss:gender/m"], number: ["gloss:number/singular"])
+    gi = described_class.new(gender: ["gloss:gender/m"],
+                             number: ["gloss:number/singular"])
     graph = parse_turtle(described_class.to_turtle(gi))
     types = graph.query([nil, RDF.type, RDF::URI("#{gloss}GrammarInfo")])
     expect(types).not_to be_empty
   end
 
   it "emits gender and number as URI collections" do
-    gi = described_class.new(gender: ["gloss:gender/m", "gloss:gender/f"], number: ["gloss:number/plural"])
+    gi = described_class.new(gender: ["gloss:gender/m", "gloss:gender/f"],
+                             number: ["gloss:number/plural"])
     graph = parse_turtle(described_class.to_turtle(gi))
     subj = graph.query([nil, RDF.type, RDF::URI("#{gloss}GrammarInfo")]).first.subject
     genders = graph.query([subj, RDF::URI("#{gloss}gender"), nil])
@@ -222,7 +243,8 @@ RSpec.describe Glossarist::Rdf::GlossGrammarInfo do
   end
 
   it "emits part of speech as boolean predicates" do
-    gi = described_class.new(part_of_speech: "noun", concept_id: "c1", lang_code: "eng", index: "0")
+    gi = described_class.new(part_of_speech: "noun", concept_id: "c1",
+                             lang_code: "eng", index: "0")
     graph = parse_turtle(described_class.to_turtle(gi))
     subj = graph.query([nil, RDF.type, RDF::URI("#{gloss}GrammarInfo")]).first.subject
     noun_stmts = graph.query([subj, RDF::URI("#{gloss}isNoun"), nil])
@@ -231,7 +253,8 @@ RSpec.describe Glossarist::Rdf::GlossGrammarInfo do
   end
 
   it "emits true for matching and false for non-matching part of speech" do
-    gi = described_class.new(part_of_speech: "verb", concept_id: "c1", lang_code: "eng", index: "0")
+    gi = described_class.new(part_of_speech: "verb", concept_id: "c1",
+                             lang_code: "eng", index: "0")
     graph = parse_turtle(described_class.to_turtle(gi))
     subj = graph.query([nil, RDF.type, RDF::URI("#{gloss}GrammarInfo")]).first.subject
     verb_stmts = graph.query([subj, RDF::URI("#{gloss}isVerb"), nil])
@@ -247,14 +270,17 @@ RSpec.describe Glossarist::Rdf::GlossConceptDate do
   include_context "rdf graph helpers"
 
   it "emits gloss:ConceptDate with value and type" do
-    cd = described_class.new(date_value: "2021-05-01", date_type: "gloss:status/accepted", concept_id: "test")
+    cd = described_class.new(date_value: "2021-05-01",
+                             date_type: "gloss:status/accepted", concept_id: "test")
     graph = parse_turtle(described_class.to_turtle(cd))
     types = graph.query([nil, RDF.type, RDF::URI("#{gloss}ConceptDate")])
     expect(types).not_to be_empty
 
     subj = types.first.subject
-    expect(graph.query([subj, RDF::URI("#{gloss}dateValue"), nil]).first.object.to_s).to eq("2021-05-01")
-    date_type = graph.query([subj, RDF::URI("#{gloss}dateType"), nil]).first.object
+    expect(graph.query([subj, RDF::URI("#{gloss}dateValue"),
+                        nil]).first.object.to_s).to eq("2021-05-01")
+    date_type = graph.query([subj, RDF::URI("#{gloss}dateType"),
+                             nil]).first.object
     expect(date_type).to be_a(RDF::URI)
   end
 end
@@ -276,8 +302,10 @@ RSpec.describe Glossarist::Rdf::GlossConceptReference do
     expect(types).not_to be_empty
 
     subj = types.first.subject
-    expect(graph.query([subj, RDF::URI("#{gloss}conceptId"), nil]).first.object.to_s).to eq("103-01")
-    expect(graph.query([subj, RDF::URI("#{gloss}refType"), nil]).first.object.to_s).to eq("domain")
+    expect(graph.query([subj, RDF::URI("#{gloss}conceptId"),
+                        nil]).first.object.to_s).to eq("103-01")
+    expect(graph.query([subj, RDF::URI("#{gloss}refType"),
+                        nil]).first.object.to_s).to eq("domain")
   end
 end
 
@@ -300,8 +328,10 @@ RSpec.describe Glossarist::Rdf::GlossNonVerbalRep do
     expect(types).not_to be_empty
 
     subj = types.first.subject
-    expect(graph.query([subj, RDF::URI("#{gloss}representationType"), nil]).first.object.to_s).to eq("image")
-    expect(graph.query([subj, RDF::URI("#{gloss}representationRef"), nil]).first.object.to_s).to eq("assets/figure-1.svg")
+    expect(graph.query([subj, RDF::URI("#{gloss}representationType"),
+                        nil]).first.object.to_s).to eq("image")
+    expect(graph.query([subj, RDF::URI("#{gloss}representationRef"),
+                        nil]).first.object.to_s).to eq("assets/figure-1.svg")
   end
 end
 
@@ -311,7 +341,8 @@ RSpec.describe Glossarist::Rdf::GlossDesignation do
   include_context "rdf graph helpers"
 
   it "emits gloss:Designation and skosxl:Label types" do
-    d = described_class.new(designation: "mass", concept_id: "c1", lang_code: "eng", index: "0")
+    d = described_class.new(designation: "mass", concept_id: "c1",
+                            lang_code: "eng", index: "0")
     graph = parse_turtle(described_class.to_turtle(d))
     types = graph.query([nil, RDF.type, nil]).map { |s| s.object.to_s }
     expect(types).to include("#{gloss}Designation")
@@ -319,7 +350,8 @@ RSpec.describe Glossarist::Rdf::GlossDesignation do
   end
 
   it "emits skosxl:literalForm" do
-    d = described_class.new(designation: "mass", concept_id: "c1", lang_code: "eng", index: "0")
+    d = described_class.new(designation: "mass", concept_id: "c1",
+                            lang_code: "eng", index: "0")
     graph = parse_turtle(described_class.to_turtle(d))
     subj = graph.query([nil, RDF.type, RDF::URI("#{xl}Label")]).first.subject
     forms = graph.query([subj, RDF::URI("#{xl}literalForm"), nil])
@@ -331,12 +363,14 @@ RSpec.describe Glossarist::Rdf::GlossDesignation do
                             concept_id: "c1", lang_code: "eng", index: "0")
     graph = parse_turtle(described_class.to_turtle(d))
     subj = graph.query([nil, RDF.type, RDF::URI("#{gloss}Designation")]).first.subject
-    status = graph.query([subj, RDF::URI("#{gloss}normativeStatus"), nil]).first.object
+    status = graph.query([subj, RDF::URI("#{gloss}normativeStatus"),
+                          nil]).first.object
     expect(status).to be_a(RDF::URI)
   end
 
   it "has designation-level relationship target attributes" do
-    d = described_class.new(designation: "test", concept_id: "c1", lang_code: "eng", index: "0")
+    d = described_class.new(designation: "test", concept_id: "c1",
+                            lang_code: "eng", index: "0")
     expect(d).to respond_to(:abbreviated_form_for_targets)
     expect(d).to respond_to(:short_form_for_targets)
   end
@@ -369,8 +403,10 @@ RSpec.describe Glossarist::Rdf::GlossExpression do
                             usage_info: "science", field_of_application: "physics")
     graph = parse_turtle(described_class.to_turtle(e))
     subj = graph.query([nil, RDF.type, RDF::URI("#{gloss}Expression")]).first.subject
-    expect(graph.query([subj, RDF::URI("#{gloss}usageInfo"), nil]).first.object.to_s).to eq("science")
-    expect(graph.query([subj, RDF::URI("#{gloss}fieldOfApplication"), nil]).first.object.to_s).to eq("physics")
+    expect(graph.query([subj, RDF::URI("#{gloss}usageInfo"),
+                        nil]).first.object.to_s).to eq("science")
+    expect(graph.query([subj, RDF::URI("#{gloss}fieldOfApplication"),
+                        nil]).first.object.to_s).to eq("physics")
   end
 
   it "emits grammar info members" do
@@ -436,12 +472,14 @@ RSpec.describe Glossarist::Rdf::GlossLetterSymbol do
   include_context "rdf graph helpers"
 
   it "emits gloss:LetterSymbol with text" do
-    ls = described_class.new(designation: "R", text: "R", concept_id: "c1", lang_code: "eng", index: "0")
+    ls = described_class.new(designation: "R", text: "R", concept_id: "c1",
+                             lang_code: "eng", index: "0")
     graph = parse_turtle(described_class.to_turtle(ls))
     types = graph.query([nil, RDF.type, nil]).map { |t| t.object.to_s }
     expect(types).to include("#{gloss}LetterSymbol")
     subj = graph.query([nil, RDF.type, RDF::URI("#{gloss}LetterSymbol")]).first.subject
-    expect(graph.query([subj, RDF::URI("#{gloss}text"), nil]).first.object.to_s).to eq("R")
+    expect(graph.query([subj, RDF::URI("#{gloss}text"),
+                        nil]).first.object.to_s).to eq("R")
   end
 end
 
@@ -455,8 +493,10 @@ RSpec.describe Glossarist::Rdf::GlossGraphicalSymbol do
     types = graph.query([nil, RDF.type, nil]).map { |t| t.object.to_s }
     expect(types).to include("#{gloss}GraphicalSymbol")
     subj = graph.query([nil, RDF.type, RDF::URI("#{gloss}GraphicalSymbol")]).first.subject
-    expect(graph.query([subj, RDF::URI("#{gloss}text"), nil]).first.object.to_s).to eq("general warning")
-    expect(graph.query([subj, RDF::URI("#{gloss}image"), nil]).first.object.to_s).to eq("⚠")
+    expect(graph.query([subj, RDF::URI("#{gloss}text"),
+                        nil]).first.object.to_s).to eq("general warning")
+    expect(graph.query([subj, RDF::URI("#{gloss}image"),
+                        nil]).first.object.to_s).to eq("⚠")
   end
 end
 
@@ -486,7 +526,8 @@ RSpec.describe Glossarist::Rdf::GlossLocalizedConcept do
       designation: "mass", normative_status: "gloss:norm/preferred",
       concept_id: "c1", lang_code: "eng", index: "0"
     )
-    lc = described_class.new(concept_id: "c1", language_code: "eng", designations: [desig])
+    lc = described_class.new(concept_id: "c1", language_code: "eng",
+                             designations: [desig])
     graph = parse_turtle(described_class.to_turtle(lc))
     pref = graph.query([nil, RDF::URI("#{xl}prefLabel"), nil])
     expect(pref.count).to eq(1)
@@ -497,7 +538,8 @@ RSpec.describe Glossarist::Rdf::GlossLocalizedConcept do
       designation: "old term", normative_status: "gloss:norm/deprecated",
       concept_id: "c1", lang_code: "eng", index: "0"
     )
-    lc = described_class.new(concept_id: "c1", language_code: "eng", designations: [desig])
+    lc = described_class.new(concept_id: "c1", language_code: "eng",
+                             designations: [desig])
     graph = parse_turtle(described_class.to_turtle(lc))
     hidden = graph.query([nil, RDF::URI("#{xl}hiddenLabel"), nil])
     expect(hidden.count).to eq(1)
@@ -508,7 +550,8 @@ RSpec.describe Glossarist::Rdf::GlossLocalizedConcept do
       designation: "alternative", normative_status: "gloss:norm/admitted",
       concept_id: "c1", lang_code: "eng", index: "0"
     )
-    lc = described_class.new(concept_id: "c1", language_code: "eng", designations: [desig])
+    lc = described_class.new(concept_id: "c1", language_code: "eng",
+                             designations: [desig])
     graph = parse_turtle(described_class.to_turtle(lc))
     alt = graph.query([nil, RDF::URI("#{xl}altLabel"), nil])
     expect(alt.count).to eq(1)
@@ -529,11 +572,14 @@ RSpec.describe Glossarist::Rdf::GlossConcept do
   end
 
   it "emits identifier and status" do
-    gc = described_class.new(identifier: "102-03-01", status: "gloss:status/valid")
+    gc = described_class.new(identifier: "102-03-01",
+                             status: "gloss:status/valid")
     graph = parse_turtle(described_class.to_turtle(gc))
     subj = graph.query([nil, RDF.type, RDF::URI("#{gloss}Concept")]).first.subject
-    expect(graph.query([subj, RDF::URI("#{gloss}identifier"), nil]).first.object.to_s).to eq("102-03-01")
-    status = graph.query([subj, RDF::URI("#{gloss}hasStatus"), nil]).first.object
+    expect(graph.query([subj, RDF::URI("#{gloss}identifier"),
+                        nil]).first.object.to_s).to eq("102-03-01")
+    status = graph.query([subj, RDF::URI("#{gloss}hasStatus"),
+                          nil]).first.object
     expect(status).to be_a(RDF::URI)
   end
 

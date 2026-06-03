@@ -24,6 +24,7 @@ module Glossarist
 
             l10n.text_content.each do |text|
               next unless text
+
               extractor.extract_from_text(text).each do |ref|
                 next unless ref.is_a?(BibliographicReference)
                 next if context.bibliography_index.resolve?(ref.anchor)
@@ -33,7 +34,7 @@ module Glossarist
                   code: code, severity: severity,
                   location: "#{fname}/#{lang}",
                   suggestion: "add '#{ref.anchor}' as a source, " \
-                              "or verify it exists in bibliography.yaml",
+                              "or verify it exists in bibliography.yaml"
                 )
               end
             end

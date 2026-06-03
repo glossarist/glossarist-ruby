@@ -136,25 +136,25 @@ module Glossarist
         end
       end
 
-      def each_v2_concept(dir, &block)
+      def each_v2_concept(dir, &)
         if v2_flat_concepts?(dir)
-          each_grouped_v2_concepts(File.join(dir, "concepts"), &block)
+          each_grouped_v2_concepts(File.join(dir, "concepts"), &)
         else
           v2_dir = File.join(dir, "geolexica-v2")
           if File.directory?(File.join(v2_dir, "concepts"))
-            each_managed_concept(v2_dir, &block)
+            each_managed_concept(v2_dir, &)
           else
-            each_grouped_v2_concepts(v2_dir, &block)
+            each_grouped_v2_concepts(v2_dir, &)
           end
         end
       end
 
-      def each_grouped_v2_concepts(v2_dir, &block)
+      def each_grouped_v2_concepts(v2_dir, &)
         collection = ManagedConceptCollection.new
         manager = ConceptManager.new(path: v2_dir)
         manager.version = detect_schema_version(v2_dir)
         manager.load_from_files(collection: collection)
-        collection.each(&block)
+        collection.each(&)
       end
 
       def collect_grouped_v2_concepts(v2_dir)

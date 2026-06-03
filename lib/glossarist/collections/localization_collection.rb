@@ -27,12 +27,12 @@ module Glossarist
         to_a
       end
 
-      def each_key(&block)
-        keys.each(&block)
+      def each_key(&)
+        keys.each(&)
       end
 
-      def each_value(&block)
-        values.each(&block)
+      def each_value(&)
+        values.each(&)
       end
     end
   end

@@ -9,7 +9,7 @@ require_relative "../lib/glossarist"
 
 Bundler.require(:development)
 
-Dir["./spec/support/**/*.rb"].sort.each { |file| require file }
+Dir["./spec/support/**/*.rb"].each { |file| require file }
 
 RSpec.configure do |config|
   config.expect_with :rspec do |c|

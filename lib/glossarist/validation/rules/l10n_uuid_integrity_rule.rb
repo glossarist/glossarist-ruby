@@ -27,7 +27,7 @@ module Glossarist
               "localized_concepts '#{lang}' => '#{uuid}' has no matching file",
               code: code, severity: severity,
               location: fname,
-              suggestion: "Add the missing localization file or remove the UUID",
+              suggestion: "Add the missing localization file or remove the UUID"
             )
           end
 
@@ -37,4 +37,3 @@ module Glossarist
     end
   end
 end
-

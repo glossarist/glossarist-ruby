@@ -86,7 +86,8 @@ RSpec.describe Glossarist::ConceptManager, "v2 loading" do
   describe "#load_concept_from_file" do
     it "loads v2 concepts with related inside data" do
       concept_id = write_v2_concept(related: [
-                                      { "type" => "broader", "content" => "Parent concept" },
+                                      { "type" => "broader",
+                                        "content" => "Parent concept" },
                                     ])
 
       manager = described_class.new(path: tmpdir)
@@ -139,7 +140,8 @@ RSpec.describe Glossarist::ConceptManager, "v2 loading" do
 
     it "migrates data.related to concept.related via SchemaMigration" do
       concept_id = write_v2_concept(related: [
-                                      { "type" => "broader", "content" => "Parent" },
+                                      { "type" => "broader",
+                                        "content" => "Parent" },
                                     ])
 
       manager = described_class.new(path: tmpdir)

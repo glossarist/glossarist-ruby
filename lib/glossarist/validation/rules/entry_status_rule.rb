@@ -26,7 +26,7 @@ module Glossarist
               "#{fname}/#{lang}: invalid entry_status '#{status}' " \
               "(expected one of: #{VALID_STATUSES.join(', ')})",
               code: code, severity: "error",
-              location: "#{fname}/#{lang}",
+              location: "#{fname}/#{lang}"
             )
           end
 
@@ -36,4 +36,3 @@ module Glossarist
     end
   end
 end
-

@@ -222,26 +222,30 @@ RSpec.describe Glossarist::Designation::Base do
 
       it "is available on Symbol via inheritance" do
         source = Glossarist::ConceptSource.new(type: "authoritative")
-        sym = Glossarist::Designation::Symbol.new(designation: "Ω", sources: [source])
+        sym = Glossarist::Designation::Symbol.new(designation: "Ω",
+                                                  sources: [source])
         expect(sym.sources.count).to eq(1)
         expect(sym.sources.first).to eq(source)
       end
 
       it "is available on Abbreviation via inheritance" do
         source = Glossarist::ConceptSource.new(type: "lineage")
-        abbr = Glossarist::Designation::Abbreviation.new(designation: "NASA", sources: [source])
+        abbr = Glossarist::Designation::Abbreviation.new(designation: "NASA",
+                                                         sources: [source])
         expect(abbr.sources.first.type).to eq("lineage")
       end
 
       it "is available on LetterSymbol via inheritance" do
         source = Glossarist::ConceptSource.new(type: "authoritative")
-        ls = Glossarist::Designation::LetterSymbol.new(designation: "A", text: "A", sources: [source])
+        ls = Glossarist::Designation::LetterSymbol.new(designation: "A",
+                                                       text: "A", sources: [source])
         expect(ls.sources.count).to eq(1)
       end
 
       it "is available on GraphicalSymbol via inheritance" do
         source = Glossarist::ConceptSource.new(type: "authoritative")
-        gs = Glossarist::Designation::GraphicalSymbol.new(designation: "♔", text: "king", sources: [source])
+        gs = Glossarist::Designation::GraphicalSymbol.new(designation: "♔",
+                                                          text: "king", sources: [source])
         expect(gs.sources.count).to eq(1)
       end
     end

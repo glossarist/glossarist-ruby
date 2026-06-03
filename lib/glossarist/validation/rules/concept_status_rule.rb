@@ -26,11 +26,10 @@ module Glossarist
             "invalid concept status '#{status}'",
             code: code, severity: severity,
             location: fname,
-            suggestion: "Use one of: #{VALID_STATUSES.join(', ')}",
+            suggestion: "Use one of: #{VALID_STATUSES.join(', ')}"
           )]
         end
       end
     end
   end
 end
-

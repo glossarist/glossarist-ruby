@@ -23,7 +23,10 @@ module Glossarist
         end
       end
 
-      raise Error, "Migration chain too long or unresolvable" unless current == target
+      unless current == target
+        raise Error,
+              "Migration chain too long or unresolvable"
+      end
 
       concept.schema_version = target
       concept
@@ -53,8 +56,8 @@ module Glossarist
 
     LANG_CODES = Glossarist::LANG_CODES
 
-    IEV_PATTERN = /\{\{([^,}]+),\s*IEV:([^}]+)\}\}/.freeze
-    URN_PATTERN = /\{urn:iso:std:iso:(\d+):([^,}]+),([^}]+)\}/.freeze
+    IEV_PATTERN = /\{\{([^,}]+),\s*IEV:([^}]+)\}\}/
+    URN_PATTERN = /\{urn:iso:std:iso:(\d+):([^,}]+),([^}]+)\}/
 
     attr_reader :from_version, :to_version
 
@@ -149,7 +152,7 @@ module Glossarist
       src = lc.delete("authoritative_source")
       return if lc.key?("sources")
 
-      sources = (src.is_a?(Array) ? src : [src]).map do |s|
+      sources = (src.is_a?(Array) ? src : [src]).filter_map do |s|
         next unless s.is_a?(Hash)
 
         origin = {}
@@ -166,7 +169,7 @@ module Glossarist
           end
         end
         entry
-      end.compact
+      end
 
       lc["sources"] = sources if sources.any?
     end

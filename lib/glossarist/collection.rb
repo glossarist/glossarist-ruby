@@ -15,8 +15,8 @@ module Glossarist
       @index = {}
     end
 
-    def each(&block)
-      @index.each_value(&block)
+    def each(&)
+      @index.each_value(&)
     end
 
     # Returns concept with given ID, if it is present in collection, or +nil+

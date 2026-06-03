@@ -50,7 +50,8 @@ RSpec.describe Glossarist::Validation::Rules::Registry do
       collection_rule
       instances = described_class.all
       expect(instances.size).to eq(2)
-      expect(instances.map(&:class)).to contain_exactly(dummy_rule, collection_rule)
+      expect(instances.map(&:class)).to contain_exactly(dummy_rule,
+                                                        collection_rule)
     end
 
     it "returns empty array when nothing registered" do

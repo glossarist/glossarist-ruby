@@ -70,7 +70,9 @@ collection.each do |concept|
 
   # Add broader relation to section
   concept.related ||= []
-  unless concept.related.any? { |r| r.type == "broader" && r.ref&.id == section_uri }
+  unless concept.related.any? do |r|
+    r.type == "broader" && r.ref&.id == section_uri
+  end
     concept.related << Glossarist::RelatedConcept.new(
       type: "broader",
       content: section_uri,

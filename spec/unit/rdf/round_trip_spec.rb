@@ -5,8 +5,12 @@ require "rdf/turtle"
 require "glossarist/transforms/concept_to_gloss_transform"
 
 module RoundTripConstants
-  V2_EXAMPLES_DIR = File.expand_path("../../fixtures/concept-model-examples/v2", __dir__)
-  V3_EXAMPLES_DIR = File.expand_path("../../fixtures/concept-model-examples/v3", __dir__)
+  V2_EXAMPLES_DIR = File.expand_path(
+    "../../fixtures/concept-model-examples/v2", __dir__
+  )
+  V3_EXAMPLES_DIR = File.expand_path(
+    "../../fixtures/concept-model-examples/v3", __dir__
+  )
   GLOSS = Glossarist::Rdf::Namespaces::GlossaristNamespace.uri
   SKOS = Glossarist::Rdf::Namespaces::SkosNamespace.uri
   XL = Glossarist::Rdf::Namespaces::SkosxlNamespace.uri
@@ -29,7 +33,9 @@ RSpec.describe "Round-trip: YAML → Ruby → Turtle → verify triples" do
   def minimal_l10n
     l = Glossarist::LocalizedConcept.new
     l.data.language_code = "eng"
-    l.data.terms = [Glossarist::Designation::Expression.new(designation: "placeholder", type: "expression", normative_status: "preferred")]
+    l.data.terms = [Glossarist::Designation::Expression.new(
+      designation: "placeholder", type: "expression", normative_status: "preferred",
+    )]
     l
   end
 
@@ -39,9 +45,9 @@ RSpec.describe "Round-trip: YAML → Ruby → Turtle → verify triples" do
     skip "#{version_label} examples not available at #{examples_dir}" unless Dir.exist?(examples_dir)
 
     describe "#{version_label} localized concept examples" do
-      Dir.glob(File.join(examples_dir, "*.yaml")).sort.each do |path|
+      Dir.glob(File.join(examples_dir, "*.yaml")).each do |path|
         basename = File.basename(path, ".yaml")
-        data = YAML.safe_load(File.read(path), permitted_classes: [Date, Time])
+        data = YAML.safe_load_file(path, permitted_classes: [Date, Time])
         next unless data.is_a?(Hash) && data.dig("data", "language_code")
 
         it "#{basename} produces valid Turtle with at least one type triple" do
@@ -60,10 +66,13 @@ RSpec.describe "Round-trip: YAML → Ruby → Turtle → verify triples" do
     end
 
     describe "#{version_label} managed concept examples" do
-      Dir.glob(File.join(examples_dir, "*.yaml")).sort.each do |path|
+      Dir.glob(File.join(examples_dir, "*.yaml")).each do |path|
         basename = File.basename(path, ".yaml")
-        data = YAML.safe_load(File.read(path), permitted_classes: [Date, Time])
-        next unless data.is_a?(Hash) && (data.dig("data", "localized_concepts") || data.dig("data", "identifier"))
+        data = YAML.safe_load_file(path, permitted_classes: [Date, Time])
+        next unless data.is_a?(Hash) && (data.dig("data",
+                                                  "localized_concepts") || data.dig(
+                                                    "data", "identifier"
+                                                  ))
 
         it "#{basename} produces valid Turtle with gloss:Concept type" do
           mc = Glossarist::ManagedConcept.of_yaml(data)
@@ -103,7 +112,8 @@ RSpec.describe "Round-trip: YAML → Ruby → Turtle → verify triples" do
         expect(turtle).not_to be_empty
 
         graph = parse_graph(turtle)
-        expect(graph.query([nil, RDF.type, RDF::URI("#{gloss_ns}Concept")])).not_to be_empty
+        expect(graph.query([nil, RDF.type,
+                            RDF::URI("#{gloss_ns}Concept")])).not_to be_empty
       end
     end
 
@@ -160,7 +170,8 @@ RSpec.describe "Round-trip: YAML → Ruby → Turtle → verify triples" do
           turtle = transform.to_turtle
           graph = parse_graph(turtle)
 
-          literal_forms = graph.query([nil, RDF::URI("#{RoundTripConstants::XL}literalForm"), nil])
+          literal_forms = graph.query([nil,
+                                       RDF::URI("#{RoundTripConstants::XL}literalForm"), nil])
           expect(literal_forms.count).to be >= l10n.designations.size
         end
       end

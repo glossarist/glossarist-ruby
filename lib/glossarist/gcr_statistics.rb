@@ -21,8 +21,8 @@ module Glossarist
 
       new(
         total_concepts: concepts.length,
-        languages: l10ns.map(&:language_code).compact.sort.uniq,
-        concepts_by_status: l10ns.map(&:entry_status).compact.tally,
+        languages: l10ns.filter_map(&:language_code).sort.uniq,
+        concepts_by_status: l10ns.filter_map(&:entry_status).tally,
         concepts_with_definitions: count_with(l10ns, :definition),
         concepts_with_sources: count_with(l10ns, :sources),
       )

@@ -22,6 +22,7 @@ module Glossarist
             concept.localizations.each do |l10n|
               l10n.text_content.each do |text|
                 next unless text
+
                 extractor.extract_from_text(text).each do |ref|
                   if ref.is_a?(BibliographicReference)
                     referenced_anchors.add(ref.anchor)
@@ -40,7 +41,7 @@ module Glossarist
               "Orphaned bibliography entry: '#{anchor}'",
               code: code, severity: severity,
               location: "bibliography.yaml",
-              suggestion: "Remove the entry or reference it from a concept",
+              suggestion: "Remove the entry or reference it from a concept"
             )
           end
 

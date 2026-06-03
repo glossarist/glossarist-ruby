@@ -27,7 +27,7 @@ module Glossarist
                 "source #{idx + 1} has invalid type '#{source.type}'",
                 code: "GLS-202", severity: severity,
                 location: fname,
-                suggestion: "Use one of: #{VALID_TYPES.join(', ')}",
+                suggestion: "Use one of: #{VALID_TYPES.join(', ')}"
               )
             end
 
@@ -37,7 +37,7 @@ module Glossarist
               "source #{idx + 1} has invalid status '#{source.status}'",
               code: "GLS-203", severity: severity,
               location: fname,
-              suggestion: "Use one of: #{VALID_STATUSES.join(', ')}",
+              suggestion: "Use one of: #{VALID_STATUSES.join(', ')}"
             )
           end
 

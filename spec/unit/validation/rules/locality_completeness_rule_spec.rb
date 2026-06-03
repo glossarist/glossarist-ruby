@@ -8,7 +8,7 @@ RSpec.describe Glossarist::Validation::Rules::LocalityCompletenessRule do
   def make_concept(sources)
     l10n = instance_double(Glossarist::LocalizedConcept)
     allow(l10n).to receive(:data).and_return(
-      instance_double(Glossarist::ConceptData, sources: sources)
+      instance_double(Glossarist::ConceptData, sources: sources),
     )
     concept = instance_double(Glossarist::ManagedConcept)
     allow(concept).to receive(:localizations).and_return([l10n])
@@ -27,7 +27,8 @@ RSpec.describe Glossarist::Validation::Rules::LocalityCompletenessRule do
 
   describe "#check" do
     it "passes for complete locality" do
-      locality = Glossarist::Locality.new(type: "clause", reference_from: "3.1.3.10")
+      locality = Glossarist::Locality.new(type: "clause",
+                                          reference_from: "3.1.3.10")
       ref = Glossarist::Citation::Ref.new(source: "ISO/TS 14812:2022")
       origin = Glossarist::Citation.new(ref: ref, locality: locality)
       source = Glossarist::ConceptSource.new(origin: origin)

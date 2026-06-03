@@ -30,12 +30,16 @@ module Glossarist
 
         types "gloss:Reference"
 
-        predicate :citationText, namespace: Namespaces::GlossaristNamespace, to: :text
-        predicate :source, namespace: Namespaces::GlossaristNamespace, to: :source
+        predicate :citationText, namespace: Namespaces::GlossaristNamespace,
+                                 to: :text
+        predicate :source, namespace: Namespaces::GlossaristNamespace,
+                           to: :source
         predicate :refId, namespace: Namespaces::GlossaristNamespace, to: :id
-        predicate :version, namespace: Namespaces::GlossaristNamespace, to: :version
+        predicate :version, namespace: Namespaces::GlossaristNamespace,
+                            to: :version
         predicate :link, namespace: Namespaces::GlossaristNamespace, to: :link
-        predicate :refType, namespace: Namespaces::GlossaristNamespace, to: :ref_type
+        predicate :refType, namespace: Namespaces::GlossaristNamespace,
+                            to: :ref_type
         predicate :urn, namespace: Namespaces::GlossaristNamespace, to: :urn
         predicate :term, namespace: Namespaces::GlossaristNamespace, to: :term
         members :locality, link: "gloss:hasLocality"

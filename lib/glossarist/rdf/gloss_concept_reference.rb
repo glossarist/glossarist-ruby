@@ -19,9 +19,12 @@ module Glossarist
 
         types "gloss:ConceptReference"
 
-        predicate :refType, namespace: Namespaces::GlossaristNamespace, to: :ref_type
-        predicate :conceptId, namespace: Namespaces::GlossaristNamespace, to: :concept_id
-        predicate :sourceUri, namespace: Namespaces::GlossaristNamespace, to: :source
+        predicate :refType, namespace: Namespaces::GlossaristNamespace,
+                            to: :ref_type
+        predicate :conceptId, namespace: Namespaces::GlossaristNamespace,
+                              to: :concept_id
+        predicate :sourceUri, namespace: Namespaces::GlossaristNamespace,
+                              to: :source
         predicate :urn, namespace: Namespaces::GlossaristNamespace, to: :urn
       end
     end

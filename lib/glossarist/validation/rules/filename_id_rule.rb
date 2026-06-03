@@ -17,7 +17,7 @@ module Glossarist
           concept = context.concept
           fname = context.file_name
           expected_id = concept.data&.id&.to_s
-          actual_name = fname.sub(/\.yaml\z/, "").sub(%r{\Aconcepts/}, "")
+          actual_name = fname.delete_suffix(".yaml").delete_prefix("concepts/")
 
           return [] unless expected_id && expected_id != actual_name
 
@@ -25,11 +25,10 @@ module Glossarist
             "filename '#{actual_name}' does not match concept id '#{expected_id}'",
             code: code, severity: severity,
             location: "concepts/#{fname}",
-            suggestion: "Rename the entry or fix the concept id",
+            suggestion: "Rename the entry or fix the concept id"
           )]
         end
       end
     end
   end
 end
-

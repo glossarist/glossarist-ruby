@@ -17,15 +17,22 @@ module Glossarist
       rdf do
         namespace Namespaces::GlossaristNamespace
 
-        subject { |p| "concept/#{p.concept_id}/#{p.lang_code}/pronunciation/#{p.index}" }
+        subject do |p|
+          "concept/#{p.concept_id}/#{p.lang_code}/pronunciation/#{p.index}"
+        end
 
         types "gloss:Pronunciation"
 
-        predicate :pronunciationContent, namespace: Namespaces::GlossaristNamespace, to: :content
-        predicate :pronunciationLanguage, namespace: Namespaces::GlossaristNamespace, to: :language
-        predicate :pronunciationScript, namespace: Namespaces::GlossaristNamespace, to: :script
-        predicate :pronunciationCountry, namespace: Namespaces::GlossaristNamespace, to: :country
-        predicate :pronunciationSystem, namespace: Namespaces::GlossaristNamespace, to: :system
+        predicate :pronunciationContent,
+                  namespace: Namespaces::GlossaristNamespace, to: :content
+        predicate :pronunciationLanguage,
+                  namespace: Namespaces::GlossaristNamespace, to: :language
+        predicate :pronunciationScript,
+                  namespace: Namespaces::GlossaristNamespace, to: :script
+        predicate :pronunciationCountry,
+                  namespace: Namespaces::GlossaristNamespace, to: :country
+        predicate :pronunciationSystem,
+                  namespace: Namespaces::GlossaristNamespace, to: :system
       end
     end
   end

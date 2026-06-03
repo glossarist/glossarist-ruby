@@ -56,8 +56,14 @@ module Glossarist
 
       doc["locality"] = {}
       doc["locality"]["type"] = model.locality.type
-      doc["locality"]["reference_from"] = model.locality.reference_from if model.locality.reference_from
-      doc["locality"]["reference_to"] = model.locality.reference_to if model.locality.reference_to
+      if model.locality.reference_from
+        doc["locality"]["reference_from"] =
+          model.locality.reference_from
+      end
+      if model.locality.reference_to
+        doc["locality"]["reference_to"] =
+          model.locality.reference_to
+      end
     end
   end
 end

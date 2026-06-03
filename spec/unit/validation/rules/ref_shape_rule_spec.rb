@@ -77,7 +77,8 @@ RSpec.describe Glossarist::Validation::Rules::RefShapeRule do
     end
 
     it "passes for RelatedConcept with valid ref" do
-      concept_ref = Glossarist::ConceptRef.new(source: "ISO/TS 14812", id: "section-3-1")
+      concept_ref = Glossarist::ConceptRef.new(source: "ISO/TS 14812",
+                                               id: "section-3-1")
       related = [Glossarist::RelatedConcept.new(content: "test", type: "broader",
                                                 ref: concept_ref)]
       concept = make_concept(sources: [], related: related)

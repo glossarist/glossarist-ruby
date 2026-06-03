@@ -6,7 +6,7 @@ module Glossarist
       # Verifies that related concept refs point to concepts that exist
       # in the dataset (for local refs) or have valid source/URN (for external).
       class RelatedConceptTargetRule < Base
-        URN_RE = %r{\Aurn:[a-z0-9][a-z0-9-]{0,31}:[a-z0-9()+,\-.:=@;$_!*'%/?#]+\z}i.freeze
+        URN_RE = %r{\Aurn:[a-z0-9][a-z0-9-]{0,31}:[a-z0-9()+,\-.:=@;$_!*'%/?#]+\z}i
 
         def code = "GLS-110"
         def category = :references

@@ -29,10 +29,14 @@ RSpec.describe Glossarist::ValidationResult do
   describe "#merge" do
     it "combines errors from both results" do
       a = described_class.new(issues: [
-                                Glossarist::Validation::ValidationIssue.new(severity: "error", message: "error 1"),
+                                Glossarist::Validation::ValidationIssue.new(
+                                  severity: "error", message: "error 1",
+                                ),
                               ])
       b = described_class.new(issues: [
-                                Glossarist::Validation::ValidationIssue.new(severity: "error", message: "error 2"),
+                                Glossarist::Validation::ValidationIssue.new(
+                                  severity: "error", message: "error 2",
+                                ),
                               ])
 
       a.merge(b)
@@ -41,10 +45,14 @@ RSpec.describe Glossarist::ValidationResult do
 
     it "combines warnings from both results" do
       a = described_class.new(issues: [
-                                Glossarist::Validation::ValidationIssue.new(severity: "warning", message: "warn 1"),
+                                Glossarist::Validation::ValidationIssue.new(
+                                  severity: "warning", message: "warn 1",
+                                ),
                               ])
       b = described_class.new(issues: [
-                                Glossarist::Validation::ValidationIssue.new(severity: "warning", message: "warn 2"),
+                                Glossarist::Validation::ValidationIssue.new(
+                                  severity: "warning", message: "warn 2",
+                                ),
                               ])
 
       a.merge(b)
@@ -53,12 +61,20 @@ RSpec.describe Glossarist::ValidationResult do
 
     it "combines errors and warnings independently" do
       a = described_class.new(issues: [
-                                Glossarist::Validation::ValidationIssue.new(severity: "error", message: "e1"),
-                                Glossarist::Validation::ValidationIssue.new(severity: "warning", message: "w1"),
+                                Glossarist::Validation::ValidationIssue.new(
+                                  severity: "error", message: "e1",
+                                ),
+                                Glossarist::Validation::ValidationIssue.new(
+                                  severity: "warning", message: "w1",
+                                ),
                               ])
       b = described_class.new(issues: [
-                                Glossarist::Validation::ValidationIssue.new(severity: "error", message: "e2"),
-                                Glossarist::Validation::ValidationIssue.new(severity: "warning", message: "w2"),
+                                Glossarist::Validation::ValidationIssue.new(
+                                  severity: "error", message: "e2",
+                                ),
+                                Glossarist::Validation::ValidationIssue.new(
+                                  severity: "warning", message: "w2",
+                                ),
                               ])
 
       a.merge(b)

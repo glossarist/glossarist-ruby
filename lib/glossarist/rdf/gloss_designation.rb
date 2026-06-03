@@ -5,20 +5,30 @@ require "lutaml/model"
 module Glossarist
   module Rdf
     COMMON_DESIGNATION_PREDICATES = lambda { |dsl|
-      dsl.predicate :literalForm, namespace: Namespaces::SkosxlNamespace, to: :designation
-      dsl.predicate :normativeStatus, namespace: Namespaces::GlossaristNamespace, to: :normative_status, uri_reference: true
-      dsl.predicate :hasTermType, namespace: Namespaces::GlossaristNamespace, to: :term_type, uri_reference: true
-      dsl.predicate :isInternational, namespace: Namespaces::GlossaristNamespace, to: :international
-      dsl.predicate :isAbsent, namespace: Namespaces::GlossaristNamespace, to: :absent
-      dsl.predicate :geographicalArea, namespace: Namespaces::GlossaristNamespace, to: :language
-      dsl.predicate :language, namespace: Namespaces::DctermsNamespace, to: :lang_code
-      dsl.predicate :script, namespace: Namespaces::GlossaristNamespace, to: :script
-      dsl.predicate :conversionSystem, namespace: Namespaces::GlossaristNamespace, to: :system
+      dsl.predicate :literalForm, namespace: Namespaces::SkosxlNamespace,
+                                  to: :designation
+      dsl.predicate :normativeStatus,
+                    namespace: Namespaces::GlossaristNamespace, to: :normative_status, uri_reference: true
+      dsl.predicate :hasTermType, namespace: Namespaces::GlossaristNamespace,
+                                  to: :term_type, uri_reference: true
+      dsl.predicate :isInternational,
+                    namespace: Namespaces::GlossaristNamespace, to: :international
+      dsl.predicate :isAbsent, namespace: Namespaces::GlossaristNamespace,
+                               to: :absent
+      dsl.predicate :geographicalArea,
+                    namespace: Namespaces::GlossaristNamespace, to: :language
+      dsl.predicate :language, namespace: Namespaces::DctermsNamespace,
+                               to: :lang_code
+      dsl.predicate :script, namespace: Namespaces::GlossaristNamespace,
+                             to: :script
+      dsl.predicate :conversionSystem,
+                    namespace: Namespaces::GlossaristNamespace, to: :system
       dsl.members :pronunciations, link: "gloss:hasPronunciation"
       dsl.members :sources
 
       RelationshipPredicates::DESIGNATION_REL_PREDICATES.each do |type, (ns, name)|
-        dsl.predicate name, namespace: ns, to: :"#{type}_targets", uri_reference: true
+        dsl.predicate name, namespace: ns, to: :"#{type}_targets",
+                            uri_reference: true
       end
     }.freeze
 
@@ -53,7 +63,9 @@ module Glossarist
       rdf do
         namespace(*DESIGNATION_NAMESPACES)
 
-        subject { |d| "concept/#{d.concept_id}/#{d.lang_code}/designation/#{d.index}" }
+        subject do |d|
+          "concept/#{d.concept_id}/#{d.lang_code}/designation/#{d.index}"
+        end
 
         types "gloss:Designation", "skosxl:Label"
 
@@ -70,14 +82,19 @@ module Glossarist
       rdf do
         namespace(*DESIGNATION_NAMESPACES)
 
-        subject { |d| "concept/#{d.concept_id}/#{d.lang_code}/designation/#{d.index}" }
+        subject do |d|
+          "concept/#{d.concept_id}/#{d.lang_code}/designation/#{d.index}"
+        end
 
         types "gloss:Expression", "skosxl:Label"
 
         COMMON_DESIGNATION_PREDICATES.call(self)
-        predicate :prefix, namespace: Namespaces::GlossaristNamespace, to: :prefix
-        predicate :usageInfo, namespace: Namespaces::GlossaristNamespace, to: :usage_info
-        predicate :fieldOfApplication, namespace: Namespaces::GlossaristNamespace, to: :field_of_application
+        predicate :prefix, namespace: Namespaces::GlossaristNamespace,
+                           to: :prefix
+        predicate :usageInfo, namespace: Namespaces::GlossaristNamespace,
+                              to: :usage_info
+        predicate :fieldOfApplication,
+                  namespace: Namespaces::GlossaristNamespace, to: :field_of_application
         members :grammar_info, link: "gloss:hasGrammarInfo"
       end
     end
@@ -90,18 +107,26 @@ module Glossarist
       rdf do
         namespace(*DESIGNATION_NAMESPACES)
 
-        subject { |d| "concept/#{d.concept_id}/#{d.lang_code}/designation/#{d.index}" }
+        subject do |d|
+          "concept/#{d.concept_id}/#{d.lang_code}/designation/#{d.index}"
+        end
 
         types "gloss:Abbreviation", "skosxl:Label"
 
         COMMON_DESIGNATION_PREDICATES.call(self)
-        predicate :prefix, namespace: Namespaces::GlossaristNamespace, to: :prefix
-        predicate :usageInfo, namespace: Namespaces::GlossaristNamespace, to: :usage_info
-        predicate :fieldOfApplication, namespace: Namespaces::GlossaristNamespace, to: :field_of_application
+        predicate :prefix, namespace: Namespaces::GlossaristNamespace,
+                           to: :prefix
+        predicate :usageInfo, namespace: Namespaces::GlossaristNamespace,
+                              to: :usage_info
+        predicate :fieldOfApplication,
+                  namespace: Namespaces::GlossaristNamespace, to: :field_of_application
         members :grammar_info, link: "gloss:hasGrammarInfo"
-        predicate :isAcronym, namespace: Namespaces::GlossaristNamespace, to: :acronym
-        predicate :isInitialism, namespace: Namespaces::GlossaristNamespace, to: :initialism
-        predicate :isTruncation, namespace: Namespaces::GlossaristNamespace, to: :truncation
+        predicate :isAcronym, namespace: Namespaces::GlossaristNamespace,
+                              to: :acronym
+        predicate :isInitialism, namespace: Namespaces::GlossaristNamespace,
+                                 to: :initialism
+        predicate :isTruncation, namespace: Namespaces::GlossaristNamespace,
+                                 to: :truncation
       end
     end
 
@@ -109,7 +134,9 @@ module Glossarist
       rdf do
         namespace(*DESIGNATION_NAMESPACES)
 
-        subject { |d| "concept/#{d.concept_id}/#{d.lang_code}/designation/#{d.index}" }
+        subject do |d|
+          "concept/#{d.concept_id}/#{d.lang_code}/designation/#{d.index}"
+        end
 
         types "gloss:Symbol", "skosxl:Label"
 
@@ -123,7 +150,9 @@ module Glossarist
       rdf do
         namespace(*DESIGNATION_NAMESPACES)
 
-        subject { |d| "concept/#{d.concept_id}/#{d.lang_code}/designation/#{d.index}" }
+        subject do |d|
+          "concept/#{d.concept_id}/#{d.lang_code}/designation/#{d.index}"
+        end
 
         types "gloss:LetterSymbol", "skosxl:Label"
 
@@ -139,7 +168,9 @@ module Glossarist
       rdf do
         namespace(*DESIGNATION_NAMESPACES)
 
-        subject { |d| "concept/#{d.concept_id}/#{d.lang_code}/designation/#{d.index}" }
+        subject do |d|
+          "concept/#{d.concept_id}/#{d.lang_code}/designation/#{d.index}"
+        end
 
         types "gloss:GraphicalSymbol", "skosxl:Label"
 

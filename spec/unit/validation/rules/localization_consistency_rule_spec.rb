@@ -36,7 +36,8 @@ RSpec.describe Glossarist::Validation::Rules::LocalizationConsistencyRule do
 
     it "flags map entry with no loaded localization" do
       data = instance_double(Glossarist::ManagedConceptData,
-                             localized_concepts: { "eng" => "abc-123", "fra" => "def-456" })
+                             localized_concepts: { "eng" => "abc-123",
+                                                   "fra" => "def-456" })
       concept = instance_double(Glossarist::ManagedConcept, data: data)
       l10n = make_l10n("eng", "abc-123")
       allow(concept).to receive(:localizations).and_return([l10n])

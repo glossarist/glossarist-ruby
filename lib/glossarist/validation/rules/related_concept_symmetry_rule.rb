@@ -40,7 +40,7 @@ module Glossarist
               next unless target_id
 
               targets = index[target_id]
-              next if targets && targets.any? { |r| r.type == inverse }
+              next if targets&.any? { |r| r.type == inverse }
 
               issues << issue(
                 "#{concept_id}: #{rel.type} #{target_id} but #{target_id} has no #{inverse} back-link",

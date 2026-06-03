@@ -176,7 +176,8 @@ RSpec.describe Glossarist::Validation::Rules::DesignationTypeRule do
   end
 
   it "reports unknown designation type from model" do
-    term = Glossarist::Designation::Base.new(type: "unknown_type", designation: "test")
+    term = Glossarist::Designation::Base.new(type: "unknown_type",
+                                             designation: "test")
     issues = rule.check(make_context([term]))
     expect(issues.size).to eq(1)
     expect(issues.first.message).to include("unknown designation type")

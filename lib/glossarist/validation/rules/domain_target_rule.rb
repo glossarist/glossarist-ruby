@@ -6,7 +6,7 @@ module Glossarist
       # Validates that domain references point to concepts that exist in the
       # dataset (for local refs with concept_id) or have a valid URN.
       class DomainTargetRule < Base
-        URN_RE = %r{\Aurn:[a-z0-9][a-z0-9-]{0,31}:[a-z0-9()+,\-.:=@;$_!*'%/?#]+\z}i.freeze
+        URN_RE = %r{\Aurn:[a-z0-9][a-z0-9-]{0,31}:[a-z0-9()+,\-.:=@;$_!*'%/?#]+\z}i
 
         def code = "GLS-111"
         def category = :references

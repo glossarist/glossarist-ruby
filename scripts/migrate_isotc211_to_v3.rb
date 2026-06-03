@@ -26,13 +26,13 @@ ISO_SOURCE_URN = "urn:iso:std:iso"
 def extract_domain_id(ref_text)
   # Match various ISO reference patterns
   patterns = [
-    %r{ISO/IEC/IEEE\s+([\d-]+)},    # ISO/IEC/IEEE 24765:2017
+    %r{ISO/IEC/IEEE\s+([\d-]+)}, # ISO/IEC/IEEE 24765:2017
     %r{ISO/IEC\s+([\d-]+)},          # ISO/IEC 19501:2005
     %r{ISO/TS\s+([\d-]+)},           # ISO/TS 19130:2010
     %r{ISO/TR\s+([\d-]+)},           # ISO/TR 19120:2001
     %r{ISO/IEC\s+Guide\s+([\d-]+)},  # ISO/IEC Guide 98-3:2008
     %r{ISO\s+DIS\s+([\d-]+)},        # ISO DIS 19123-1:2022
-    %r{ISO\s+([\d]+-?[\d]*)},        # ISO 19136-1:2020
+    %r{ISO\s+(\d+-?\d*)}, # ISO 19136-1:2020
   ]
 
   patterns.each do |pat|
@@ -95,7 +95,9 @@ collection.each do |concept|
 
   # Add broader relation to domain concept
   concept.related ||= []
-  unless concept.related.any? { |r| r.type == "broader" && r.ref&.id == domain_id }
+  unless concept.related.any? do |r|
+    r.type == "broader" && r.ref&.id == domain_id
+  end
     concept.related << Glossarist::RelatedConcept.new(
       type: "broader",
       content: domain_id,

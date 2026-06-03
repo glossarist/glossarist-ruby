@@ -12,7 +12,8 @@ module Glossarist
     autoload :GlossLocality,          "#{__dir__}/rdf/gloss_locality"
     autoload :GlossCitation,          "#{__dir__}/rdf/gloss_citation"
     autoload :GlossConceptSource,     "#{__dir__}/rdf/gloss_concept_source"
-    autoload :GlossDetailedDefinition, "#{__dir__}/rdf/gloss_detailed_definition"
+    autoload :GlossDetailedDefinition,
+             "#{__dir__}/rdf/gloss_detailed_definition"
     autoload :GlossPronunciation,     "#{__dir__}/rdf/gloss_pronunciation"
     autoload :GlossGrammarInfo,       "#{__dir__}/rdf/gloss_grammar_info"
     autoload :GlossNonVerbalRep,      "#{__dir__}/rdf/gloss_non_verbal_rep"

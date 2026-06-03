@@ -24,7 +24,8 @@ RSpec.describe Glossarist::Validation::Rules::DomainTargetRule do
       concept = instance_double(Glossarist::ManagedConcept, data: data)
       allow(data).to receive(:domains).and_return([domain])
 
-      issues = rule.check(make_context(concept, concept_ids: Set.new(["section-3-1"])))
+      issues = rule.check(make_context(concept,
+                                       concept_ids: Set.new(["section-3-1"])))
       expect(issues).to be_empty
     end
 
@@ -34,7 +35,8 @@ RSpec.describe Glossarist::Validation::Rules::DomainTargetRule do
       concept = instance_double(Glossarist::ManagedConcept, data: data)
       allow(data).to receive(:domains).and_return([domain])
 
-      issues = rule.check(make_context(concept, concept_ids: Set.new(["section-3-1"])))
+      issues = rule.check(make_context(concept,
+                                       concept_ids: Set.new(["section-3-1"])))
       expect(issues.size).to eq(1)
       expect(issues.first.message).to include("not in dataset")
     end

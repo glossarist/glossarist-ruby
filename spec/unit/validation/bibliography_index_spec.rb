@@ -171,12 +171,14 @@ RSpec.describe Glossarist::Validation::BibliographyIndex do
     end
 
     it "handles nil YAML strings gracefully" do
-      index = described_class.build_from_yaml([], bibliography_yaml: nil, images_yaml: nil)
+      index = described_class.build_from_yaml([], bibliography_yaml: nil,
+                                                  images_yaml: nil)
       expect(index.anchors).to be_empty
     end
 
     it "handles invalid YAML gracefully" do
-      index = described_class.build_from_yaml([], bibliography_yaml: "invalid: [yaml: unclosed")
+      index = described_class.build_from_yaml([],
+                                              bibliography_yaml: "invalid: [yaml: unclosed")
       expect(index.anchors).to be_empty
     end
   end

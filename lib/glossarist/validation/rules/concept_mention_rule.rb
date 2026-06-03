@@ -31,7 +31,7 @@ module Glossarist
               code: "GLS-100", severity: severity,
               location: fname,
               suggestion: "add concept '#{ref.concept_id}' to the dataset " \
-                          "or verify the reference",
+                          "or verify the reference"
             )
           end
 
@@ -41,4 +41,3 @@ module Glossarist
     end
   end
 end
-

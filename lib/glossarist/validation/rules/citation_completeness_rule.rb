@@ -28,7 +28,7 @@ module Glossarist
                 "source #{idx + 1} has empty origin (no ref source or id)",
                 code: "GLS-304", severity: severity,
                 location: fname,
-                suggestion: "Add at minimum an origin.ref with source or id",
+                suggestion: "Add at minimum an origin.ref with source or id"
               )
             end
           end

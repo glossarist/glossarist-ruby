@@ -29,23 +29,28 @@ RSpec.describe "RDF output conformance to glossarist ontology" do
     let(:concept_node) { graph.query([nil, RDF.type, RDF::URI("#{gloss_ns}Concept")]).first.subject }
 
     it "has gloss:Concept type" do
-      expect(graph.query([concept_node, RDF.type, RDF::URI("#{gloss_ns}Concept")])).not_to be_empty
+      expect(graph.query([concept_node, RDF.type,
+                          RDF::URI("#{gloss_ns}Concept")])).not_to be_empty
     end
 
     it "has skos:Concept type" do
-      expect(graph.query([concept_node, RDF.type, RDF::URI("#{skos_ns}Concept")])).not_to be_empty
+      expect(graph.query([concept_node, RDF.type,
+                          RDF::URI("#{skos_ns}Concept")])).not_to be_empty
     end
 
     it "has gloss:identifier" do
-      id_stmts = graph.query([concept_node, RDF::URI("#{gloss_ns}identifier"), nil])
+      id_stmts = graph.query([concept_node, RDF::URI("#{gloss_ns}identifier"),
+                              nil])
       expect(id_stmts).not_to be_empty
       expect(id_stmts.first.object).to be_a(RDF::Literal)
     end
 
     it "has gloss:hasLocalization targeting gloss:LocalizedConcept" do
-      l10n_stmts = graph.query([concept_node, RDF::URI("#{gloss_ns}hasLocalization"), nil])
+      l10n_stmts = graph.query([concept_node,
+                                RDF::URI("#{gloss_ns}hasLocalization"), nil])
       l10n_stmts.each do |stmt|
-        expect(graph.query([stmt.object, RDF.type, RDF::URI("#{gloss_ns}LocalizedConcept")])).not_to be_empty
+        expect(graph.query([stmt.object, RDF.type,
+                            RDF::URI("#{gloss_ns}LocalizedConcept")])).not_to be_empty
       end
     end
   end
@@ -61,7 +66,8 @@ RSpec.describe "RDF output conformance to glossarist ontology" do
 
     it "is connected to Concept via gloss:hasLocalization" do
       concept_node = graph.query([nil, RDF.type, RDF::URI("#{gloss_ns}Concept")]).first.subject
-      l10n_stmts = graph.query([concept_node, RDF::URI("#{gloss_ns}hasLocalization"), l10n_node])
+      l10n_stmts = graph.query([concept_node,
+                                RDF::URI("#{gloss_ns}hasLocalization"), l10n_node])
       expect(l10n_stmts).not_to be_empty
     end
   end
@@ -77,8 +83,11 @@ RSpec.describe "RDF output conformance to glossarist ontology" do
     it "every designation is typed as a glossarist designation class" do
       desig_nodes.each do |node|
         types = graph.query([node, RDF.type, nil]).map { |s| s.object.to_s }
-        designation_types = types.select { |t| t.start_with?(gloss_ns) && !t.include?("Concept") }
-        expect(designation_types).not_to be_empty, "Node #{node} has no glossarist designation type. Types: #{types}"
+        designation_types = types.select do |t|
+          t.start_with?(gloss_ns) && !t.include?("Concept")
+        end
+        expect(designation_types).not_to be_empty,
+                                         "Node #{node} has no glossarist designation type. Types: #{types}"
       end
     end
   end
@@ -94,17 +103,19 @@ RSpec.describe "RDF output conformance to glossarist ontology" do
     it "has gloss:sourceType" do
       source_nodes.each do |node|
         type_stmts = graph.query([node, RDF::URI("#{gloss_ns}sourceType"), nil])
-        expect(type_stmts).not_to be_empty, "ConceptSource #{node} missing gloss:sourceType"
+        expect(type_stmts).not_to be_empty,
+                                  "ConceptSource #{node} missing gloss:sourceType"
       end
     end
   end
 
   describe "v3 example round-trip" do
-    v3_dir = File.expand_path("../../fixtures/concept-model-examples/v3", __dir__)
+    v3_dir = File.expand_path("../../fixtures/concept-model-examples/v3",
+                              __dir__)
 
-    Dir.glob(File.join(v3_dir, "*.yaml")).sort.each do |path|
+    Dir.glob(File.join(v3_dir, "*.yaml")).each do |path|
       basename = File.basename(path, ".yaml")
-      data = YAML.safe_load(File.read(path), permitted_classes: [Date, Time])
+      data = YAML.safe_load_file(path, permitted_classes: [Date, Time])
       next unless data.is_a?(Hash) && data.dig("data", "language_code")
 
       it "#{basename}: designations produce gloss:Designation subclass types" do

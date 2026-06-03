@@ -37,7 +37,8 @@ module Glossarist
         filled = (current.to_f / total * bar_width).round
         bar = "#{'█' * filled}#{'░' * (bar_width - filled)}"
 
-        $stderr.print "\r  #{Paint['Validating', :bold]} #{bar} #{current}/#{total} (#{pct}%)"
+        $stderr.print "\r  #{Paint['Validating',
+                                   :bold]} #{bar} #{current}/#{total} (#{pct}%)"
         $stderr.flush
       end
 
@@ -96,18 +97,33 @@ module Glossarist
         msg_col = 21
 
         puts "    #{label}  #{code}  #{issue.message}"
-        puts "#{' ' * msg_col}#{Paint[issue.suggestion, :green]}" if issue.suggestion
+        if issue.suggestion
+          puts "#{' ' * msg_col}#{Paint[issue.suggestion,
+                                        :green]}"
+        end
       end
 
       def print_summary_line(result)
         error_count = result.issues.count(&:error?)
         warning_count = result.issues.count(&:warning?)
 
-        status = error_count.positive? ? Paint["INVALID", :red, :bold] : Paint["VALID", :green, :bold]
+        status = if error_count.positive?
+                   Paint["INVALID", :red,
+                         :bold]
+                 else
+                   Paint["VALID", :green,
+                         :bold]
+                 end
 
         details = []
-        details << Paint["#{error_count} error(s)", :red] if error_count.positive?
-        details << Paint["#{warning_count} warning(s)", :yellow] if warning_count.positive?
+        if error_count.positive?
+          details << Paint["#{error_count} error(s)",
+                           :red]
+        end
+        if warning_count.positive?
+          details << Paint["#{warning_count} warning(s)",
+                           :yellow]
+        end
 
         puts "  #{status}  #{details.join(', ')}"
       end

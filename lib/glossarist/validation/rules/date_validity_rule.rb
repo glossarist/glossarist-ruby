@@ -13,7 +13,7 @@ module Glossarist
 
         def applicable?(context)
           concept = context.concept
-          (concept.dates&.any?) || concept.date_accepted
+          concept.dates&.any? || concept.date_accepted
         end
 
         def check(context)

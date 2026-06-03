@@ -16,13 +16,18 @@ module Glossarist
       rdf do
         namespace Namespaces::GlossaristNamespace
 
-        subject { |n| "concept/#{n.concept_id}/#{n.lang_code}/nonverbal/#{n.index}" }
+        subject do |n|
+          "concept/#{n.concept_id}/#{n.lang_code}/nonverbal/#{n.index}"
+        end
 
         types "gloss:NonVerbalRepresentation"
 
-        predicate :representationType, namespace: Namespaces::GlossaristNamespace, to: :representation_type
-        predicate :representationRef, namespace: Namespaces::GlossaristNamespace, to: :representation_ref
-        predicate :representationText, namespace: Namespaces::GlossaristNamespace, to: :representation_text
+        predicate :representationType,
+                  namespace: Namespaces::GlossaristNamespace, to: :representation_type
+        predicate :representationRef,
+                  namespace: Namespaces::GlossaristNamespace, to: :representation_ref
+        predicate :representationText,
+                  namespace: Namespaces::GlossaristNamespace, to: :representation_text
 
         members :sources
       end

@@ -66,8 +66,10 @@ RSpec.describe Glossarist::ManagedConcept do
 
     it "generates dynamic *_concepts methods for all relationship types" do
       subject.related = [
-        Glossarist::RelatedConcept.new(type: "broader_generic", content: "Vehicle"),
-        Glossarist::RelatedConcept.new(type: "broader_partitive", content: "Engine"),
+        Glossarist::RelatedConcept.new(type: "broader_generic",
+                                       content: "Vehicle"),
+        Glossarist::RelatedConcept.new(type: "broader_partitive",
+                                       content: "Engine"),
         Glossarist::RelatedConcept.new(type: "narrower", content: "Truck"),
       ]
 
@@ -90,7 +92,8 @@ RSpec.describe Glossarist::ManagedConcept do
 
   describe "#domains" do
     it "sets domain references as ConceptReference objects" do
-      ref = Glossarist::ConceptReference.new(concept_id: "103", ref_type: "domain")
+      ref = Glossarist::ConceptReference.new(concept_id: "103",
+                                             ref_type: "domain")
       expect { subject.data.domains = [ref] }
         .to change { subject.data.domains }.to([ref])
       expect(subject.data.domains.first).to be_a(Glossarist::ConceptReference)

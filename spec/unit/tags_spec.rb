@@ -11,10 +11,12 @@ RSpec.describe "Tags attribute" do
       end
 
       it "round-trips through YAML" do
-        data = described_class.new(tags: ["general", "expressions-and-representations"])
+        data = described_class.new(tags: ["general",
+                                          "expressions-and-representations"])
         yaml = data.to_yaml
         restored = described_class.from_yaml(yaml)
-        expect(restored.tags).to eq(["general", "expressions-and-representations"])
+        expect(restored.tags).to eq(["general",
+                                     "expressions-and-representations"])
       end
 
       it "round-trips through hash" do
@@ -85,7 +87,8 @@ RSpec.describe "Tags attribute" do
           id: "7.10",
           tags: ["time-scale-units"],
           domains: [{ concept_id: "103", ref_type: "domain" }],
-          sources: [{ type: "authoritative", origin: { ref: { source: "ISO", id: "34000" } } }],
+          sources: [{ type: "authoritative",
+                      origin: { ref: { source: "ISO", id: "34000" } } }],
         },
       )
       yaml = concept.to_yaml
@@ -131,7 +134,8 @@ RSpec.describe "Tags attribute" do
   end
 
   describe "ConceptDocument loading path" do
-    fixtures_dir = File.join(File.dirname(__FILE__), "..", "fixtures", "concept-model-examples")
+    fixtures_dir = File.join(File.dirname(__FILE__), "..", "fixtures",
+                             "concept-model-examples")
 
     it "preserves tags through V3 ConceptDocument.from_yamls (ConceptManager path)" do
       path = File.join(fixtures_dir, "v3", "16-tags.yaml")
@@ -155,7 +159,8 @@ RSpec.describe "Tags attribute" do
   end
 
   describe "fixture round-trip" do
-    fixtures_dir = File.join(File.dirname(__FILE__), "..", "fixtures", "concept-model-examples")
+    fixtures_dir = File.join(File.dirname(__FILE__), "..", "fixtures",
+                             "concept-model-examples")
 
     it "round-trips v2 tags fixture" do
       path = File.join(fixtures_dir, "v2", "16-tags.yaml")
