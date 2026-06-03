@@ -21,7 +21,7 @@ module Glossarist
             "no concept URI prefix or template defined in metadata",
             code: code, severity: severity,
             location: "metadata.yaml",
-            suggestion: "Add uri_prefix or concept_uri_template to metadata.yaml",
+            suggestion: "Add uri_prefix or concept_uri_template to metadata.yaml"
           )]
         end
       end

@@ -13,7 +13,7 @@ module Glossarist
 
         def applicable?(context)
           concept = context.concept
-          (concept.dates&.any?) || concept.date_accepted
+          concept.dates&.any? || concept.date_accepted
         end
 
         def check(context)
@@ -23,8 +23,9 @@ module Glossarist
 
           check_date_collection(concept.dates, fname, issues)
 
-          if concept.date_accepted && concept.date_accepted.type
-            validate_date_type(concept.date_accepted, "date_accepted", fname, issues)
+          if concept.date_accepted&.type
+            validate_date_type(concept.date_accepted, "date_accepted", fname,
+                               issues)
           end
 
           issues
@@ -35,6 +36,7 @@ module Glossarist
         def check_date_collection(dates, fname, issues)
           (dates || []).each_with_index do |date, idx|
             next unless date.type
+
             validate_date_type(date, "date #{idx + 1}", fname, issues)
           end
         end

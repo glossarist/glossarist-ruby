@@ -61,7 +61,9 @@ RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
       subject_uri = graph.query([nil, RDF.type, RDF::URI("#{gloss}Concept")]).first&.subject
       expect(subject_uri).not_to be_nil
 
-      types = graph.query([subject_uri, RDF.type, nil]).map { |x| x.object.to_s }
+      types = graph.query([subject_uri, RDF.type, nil]).map do |x|
+        x.object.to_s
+      end
       expect(types).to include("#{gloss}Concept")
       expect(types).to include("#{skos}Concept")
     end
@@ -91,7 +93,8 @@ RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
 
     it "links to managed concept via gloss:hasLocalization" do
       concept_uri = graph.query([nil, RDF.type, RDF::URI("#{gloss}Concept")]).first.subject
-      localization_stmts = graph.query([concept_uri, RDF::URI("#{gloss}hasLocalization"), nil])
+      localization_stmts = graph.query([concept_uri,
+                                        RDF::URI("#{gloss}hasLocalization"), nil])
       expect(localization_stmts.count).to be > 0
     end
 
@@ -374,7 +377,9 @@ RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
       abbrevs = abbr_graph.query([nil, RDF.type, RDF::URI("#{gloss}Abbreviation")])
       expect(abbrevs.count).to be > 0
       abbrevs.each do |stmt|
-        types = abbr_graph.query([stmt.subject, RDF.type, nil]).map { |x| x.object.to_s }
+        types = abbr_graph.query([stmt.subject, RDF.type, nil]).map do |x|
+          x.object.to_s
+        end
         expect(types).to include("#{xl}Label")
       end
     end
@@ -428,7 +433,8 @@ RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
   describe "designation-level relationships" do
     let(:rel_concept) do
       rc = Glossarist::RelatedConcept.new(type: "abbreviated_form_for")
-      rc.ref = Glossarist::ConceptRef.new(source: "light-emitting diode", id: "led_full")
+      rc.ref = Glossarist::ConceptRef.new(source: "light-emitting diode",
+                                          id: "led_full")
 
       desig = Glossarist::Designation::Abbreviation.new(
         designation: "LED", type: "abbreviation",
@@ -458,7 +464,8 @@ RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
     end
 
     it "emits relationship triples in Turtle output" do
-      abbr_triples = rel_graph.query([nil, RDF::URI("#{gloss}abbreviatedFormFor"), nil])
+      abbr_triples = rel_graph.query([nil,
+                                      RDF::URI("#{gloss}abbreviatedFormFor"), nil])
       expect(abbr_triples.count).to eq(1)
       expect(abbr_triples.first.object.to_s).to eq("concept/led_full")
     end

@@ -36,7 +36,7 @@ module Glossarist
     end
 
     def to_latex_from_file(entries_file)
-      File.readlines(entries_file).map do |concept_name|
+      File.readlines(entries_file).filter_map do |concept_name|
         concept = concept_map[concept_name.strip.downcase]
 
         if concept.nil?
@@ -44,7 +44,7 @@ module Glossarist
         else
           latex_template(concept)
         end
-      end.compact.join("\n")
+      end.join("\n")
     end
 
     def read_concepts(concepts)
@@ -72,9 +72,9 @@ module Glossarist
     end
 
     def concept_map
-      @concept_map ||= concepts.managed_concepts.map do |concept|
+      @concept_map ||= concepts.managed_concepts.to_h do |concept|
         [concept.default_designation.downcase, concept]
-      end.to_h
+      end
     end
   end
 end

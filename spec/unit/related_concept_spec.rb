@@ -77,17 +77,20 @@ RSpec.describe Glossarist::RelatedConcept do
     end
 
     it "accepts broad_match type (SKOS mapping)" do
-      rc = described_class.new(type: "broad_match", content: "Vehicle (other vocab)")
+      rc = described_class.new(type: "broad_match",
+                               content: "Vehicle (other vocab)")
       expect(rc.type).to eq("broad_match")
     end
 
     it "accepts narrow_match type (SKOS mapping)" do
-      rc = described_class.new(type: "narrow_match", content: "Electric car (other vocab)")
+      rc = described_class.new(type: "narrow_match",
+                               content: "Electric car (other vocab)")
       expect(rc.type).to eq("narrow_match")
     end
 
     it "accepts related_match type (SKOS mapping)" do
-      rc = described_class.new(type: "related_match", content: "Automobile (other vocab)")
+      rc = described_class.new(type: "related_match",
+                               content: "Automobile (other vocab)")
       expect(rc.type).to eq("related_match")
     end
 
@@ -97,27 +100,32 @@ RSpec.describe Glossarist::RelatedConcept do
     end
 
     it "accepts related_concept_broader type (TBX)" do
-      rc = described_class.new(type: "related_concept_broader", content: "education")
+      rc = described_class.new(type: "related_concept_broader",
+                               content: "education")
       expect(rc.type).to eq("related_concept_broader")
     end
 
     it "accepts related_concept_narrower type (TBX)" do
-      rc = described_class.new(type: "related_concept_narrower", content: "primary school")
+      rc = described_class.new(type: "related_concept_narrower",
+                               content: "primary school")
       expect(rc.type).to eq("related_concept_narrower")
     end
 
     it "accepts sequentially_related_concept type (TBX)" do
-      rc = described_class.new(type: "sequentially_related_concept", content: "next step")
+      rc = described_class.new(type: "sequentially_related_concept",
+                               content: "next step")
       expect(rc.type).to eq("sequentially_related_concept")
     end
 
     it "accepts spatially_related_concept type (TBX)" do
-      rc = described_class.new(type: "spatially_related_concept", content: "adjacent room")
+      rc = described_class.new(type: "spatially_related_concept",
+                               content: "adjacent room")
       expect(rc.type).to eq("spatially_related_concept")
     end
 
     it "accepts temporally_related_concept type (TBX)" do
-      rc = described_class.new(type: "temporally_related_concept", content: "preceding event")
+      rc = described_class.new(type: "temporally_related_concept",
+                               content: "preceding event")
       expect(rc.type).to eq("temporally_related_concept")
     end
 

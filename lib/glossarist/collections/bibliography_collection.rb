@@ -7,7 +7,7 @@ module Glossarist
     class BibliographyCollection < Relaton::Db
       def initialize(_concepts, global_cache, local_cache)
         @version_mismatch = check_cache_version(local_cache) ||
-                            check_cache_version(global_cache)
+          check_cache_version(global_cache)
         super(global_cache, local_cache)
       end
 
@@ -40,6 +40,7 @@ module Glossarist
         concepts.each do |concept|
           concept.default_lang.sources.each do |source|
             next if source.origin.ref.nil?
+
             ref_text = source.origin.ref.source
             next if ref_text.nil?
 

@@ -26,7 +26,7 @@ module Glossarist
                 "related concept #{idx + 1} has invalid type '#{rel.type}'",
                 code: code, severity: severity,
                 location: fname,
-                suggestion: "Use one of: #{VALID_TYPES.join(', ')}",
+                suggestion: "Use one of: #{VALID_TYPES.join(', ')}"
               )
             end
           end
@@ -37,4 +37,3 @@ module Glossarist
     end
   end
 end
-

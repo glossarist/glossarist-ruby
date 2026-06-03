@@ -63,7 +63,9 @@ module Glossarist
 
       def to_jsonld(concepts_or_concept = nil)
         if concepts_or_concept.is_a?(Array)
-          gloss_concepts = concepts_or_concept.map { |c| build_gloss_concept(c) }
+          gloss_concepts = concepts_or_concept.map do |c|
+            build_gloss_concept(c)
+          end
           doc = Rdf::GlossDocument.new(concepts: gloss_concepts)
           Rdf::GlossDocument.to_jsonld(doc)
         else
@@ -103,7 +105,8 @@ module Glossarist
           status: status_uri(managed_concept.status),
           localizations: localizations,
           sources: build_gloss_sources(managed_concept.data&.sources),
-          domains: build_gloss_domains(managed_concept.data&.domains, identifier),
+          domains: build_gloss_domains(managed_concept.data&.domains,
+                                       identifier),
           dates: build_gloss_dates(managed_concept.dates, identifier),
           **rel_targets,
         )
@@ -121,7 +124,8 @@ module Glossarist
         notes = build_gloss_definitions(data&.notes)
         examples = build_gloss_definitions(data&.examples)
         sources = build_gloss_sources(data&.sources)
-        non_verb_reps = build_gloss_non_verbal_reps(l10n.non_verb_rep, concept_id, lang)
+        non_verb_reps = build_gloss_non_verbal_reps(l10n.non_verb_rep,
+                                                    concept_id, lang)
 
         Rdf::GlossLocalizedConcept.new(
           concept_id: concept_id.to_s,
@@ -143,7 +147,8 @@ module Glossarist
 
       def build_gloss_designation(desig, concept_id, lang, index)
         common_attrs = designation_common_attrs(desig, concept_id, lang, index)
-        instance = designation_instance_for(desig, common_attrs, concept_id, lang, index)
+        instance = designation_instance_for(desig, common_attrs, concept_id,
+                                            lang, index)
 
         rel_targets = Rdf::RelationshipPredicates.related_targets_by_type(
           desig.related,
@@ -162,7 +167,8 @@ module Glossarist
         when Designation::Expression
           build_gloss_expression(desig, common_attrs, concept_id, lang, index)
         when Designation::GraphicalSymbol
-          Rdf::GlossGraphicalSymbol.new(common_attrs.merge(text: desig.text, image: desig.image))
+          Rdf::GlossGraphicalSymbol.new(common_attrs.merge(text: desig.text,
+                                                           image: desig.image))
         when Designation::LetterSymbol
           Rdf::GlossLetterSymbol.new(common_attrs.merge(text: desig.text))
         when Designation::Symbol
@@ -187,7 +193,8 @@ module Glossarist
           concept_id: concept_id.to_s,
           lang_code: (desig.language || lang).to_s,
           index: index.to_s,
-          pronunciations: build_gloss_pronunciations(desig.pronunciation, concept_id, lang, index),
+          pronunciations: build_gloss_pronunciations(desig.pronunciation,
+                                                     concept_id, lang, index),
           sources: build_gloss_sources(desig.sources),
         }
       end
@@ -200,7 +207,9 @@ module Glossarist
                                      acronym: desig.acronym,
                                      initialism: desig.initialism,
                                      truncation: desig.truncation,
-                                     grammar_info: build_gloss_grammar_infos(desig.grammar_info, concept_id, lang, index),
+                                     grammar_info: build_gloss_grammar_infos(
+                                       desig.grammar_info, concept_id, lang, index
+                                     ),
                                    ))
       end
 
@@ -209,7 +218,9 @@ module Glossarist
                                    prefix: desig.prefix,
                                    usage_info: desig.usage_info,
                                    field_of_application: desig.field_of_application,
-                                   grammar_info: build_gloss_grammar_infos(desig.grammar_info, concept_id, lang, index),
+                                   grammar_info: build_gloss_grammar_infos(
+                                     desig.grammar_info, concept_id, lang, index
+                                   ),
                                  ))
       end
 
@@ -255,7 +266,8 @@ module Glossarist
         )
       end
 
-      def build_gloss_pronunciations(pronunciations, concept_id, lang, _desig_index)
+      def build_gloss_pronunciations(pronunciations, concept_id, lang,
+_desig_index)
         Array(pronunciations).each_with_index.map do |pron, idx|
           Rdf::GlossPronunciation.new(
             content: pron.content,
@@ -270,7 +282,8 @@ module Glossarist
         end
       end
 
-      def build_gloss_grammar_infos(grammar_infos, concept_id, lang, desig_index)
+      def build_gloss_grammar_infos(grammar_infos, concept_id, lang,
+desig_index)
         Array(grammar_infos).map do |gi|
           Rdf::GlossGrammarInfo.new(
             gender: Array(gi.gender).map { |g| "gloss:gender/#{g}" },

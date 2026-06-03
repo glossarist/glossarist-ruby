@@ -7,12 +7,14 @@ RSpec.describe Glossarist::ConceptComparator do
   def build_managed_concept(termid, designation, definition)
     mc = Glossarist::ManagedConcept.new(data: { id: termid })
     l10n = Glossarist::LocalizedConcept.of_yaml({
-      "data" => {
-        "language_code" => "eng",
-        "terms" => [{ "type" => "expression", "designation" => designation }],
-        "definition" => [{ "content" => definition }],
-      },
-    })
+                                                  "data" => {
+                                                    "language_code" => "eng",
+                                                    "terms" => [{
+                                                      "type" => "expression", "designation" => designation
+                                                    }],
+                                                    "definition" => [{ "content" => definition }],
+                                                  },
+                                                })
     mc.add_localization(l10n)
     mc
   end
@@ -20,7 +22,8 @@ RSpec.describe Glossarist::ConceptComparator do
   describe "#compare" do
     it "reports identical datasets as fully matched" do
       concepts = [build_managed_concept("1", "test", "def")]
-      result = described_class.new(new_concepts: concepts, old_concepts: concepts).compare
+      result = described_class.new(new_concepts: concepts,
+                                   old_concepts: concepts).compare
 
       expect(result.new_count).to eq(1)
       expect(result.old_count).to eq(1)
@@ -32,7 +35,7 @@ RSpec.describe Glossarist::ConceptComparator do
     it "reports concepts only in new dataset" do
       new_concepts = [build_managed_concept("1", "test", "def")]
       result = described_class.new(
-        new_concepts: new_concepts, old_concepts: []
+        new_concepts: new_concepts, old_concepts: [],
       ).compare(show_diffs: false)
 
       expect(result.new_only).to eq(["1"])
@@ -42,7 +45,7 @@ RSpec.describe Glossarist::ConceptComparator do
     it "reports concepts only in old dataset" do
       old_concepts = [build_managed_concept("1", "test", "def")]
       result = described_class.new(
-        new_concepts: [], old_concepts: old_concepts
+        new_concepts: [], old_concepts: old_concepts,
       ).compare(show_diffs: false)
 
       expect(result.old_only).to eq(["1"])
@@ -54,7 +57,7 @@ RSpec.describe Glossarist::ConceptComparator do
       old_concepts = [build_managed_concept("1", "old term", "old def")]
 
       result = described_class.new(
-        new_concepts: new_concepts, old_concepts: old_concepts
+        new_concepts: new_concepts, old_concepts: old_concepts,
       ).compare
 
       expect(result.diffs.length).to eq(1)
@@ -70,7 +73,7 @@ RSpec.describe Glossarist::ConceptComparator do
       old_concepts = [build_managed_concept("1", "test", "def")]
 
       result = described_class.new(
-        new_concepts: new_concepts, old_concepts: old_concepts
+        new_concepts: new_concepts, old_concepts: old_concepts,
       ).compare(show_diffs: false)
 
       expect(result.diffs).to be_empty
@@ -81,7 +84,7 @@ RSpec.describe Glossarist::ConceptComparator do
       old_concepts = [build_managed_concept("1", "old", "def")]
 
       result = described_class.new(
-        new_concepts: new_concepts, old_concepts: old_concepts
+        new_concepts: new_concepts, old_concepts: old_concepts,
       ).compare
 
       expect(result.diffs.first.diff_tree).not_to include("\e[")
@@ -98,17 +101,21 @@ RSpec.describe Glossarist::ConceptComparator do
       ]
 
       result = described_class.new(
-        new_concepts: new_concepts, old_concepts: old_concepts
+        new_concepts: new_concepts, old_concepts: old_concepts,
       ).compare
 
       ids = result.diffs.map(&:concept_id)
-      expect(ids).to eq(ids.sort_by { |id| result.diffs.find { |d| d.concept_id == id }.similarity }.reverse)
+      expect(ids).to eq(ids.sort_by { |id|
+        result.diffs.find { |d|
+          d.concept_id == id
+        }.similarity
+      }.reverse)
     end
 
     it "returns ComparisonResult serializable to JSON" do
       concepts = [build_managed_concept("1", "test", "def")]
       result = described_class.new(
-        new_concepts: concepts, old_concepts: concepts
+        new_concepts: concepts, old_concepts: concepts,
       ).compare(show_diffs: false)
 
       json = result.to_json
@@ -120,7 +127,7 @@ RSpec.describe Glossarist::ConceptComparator do
     it "returns ComparisonResult serializable to YAML" do
       concepts = [build_managed_concept("1", "test", "def")]
       result = described_class.new(
-        new_concepts: concepts, old_concepts: concepts
+        new_concepts: concepts, old_concepts: concepts,
       ).compare(show_diffs: false)
 
       yaml = result.to_yaml
@@ -130,7 +137,7 @@ RSpec.describe Glossarist::ConceptComparator do
 
     it "returns empty result for two empty datasets" do
       result = described_class.new(
-        new_concepts: [], old_concepts: []
+        new_concepts: [], old_concepts: [],
       ).compare
 
       expect(result.new_count).to eq(0)

@@ -37,12 +37,14 @@ RSpec.describe Glossarist::Validation::Rules::ModelValidityRule do
     it "returns no issues for a valid concept" do
       mc = Glossarist::ManagedConcept.new(data: { id: "1" })
       l10n = Glossarist::LocalizedConcept.of_yaml({
-        "data" => {
-          "language_code" => "eng",
-          "terms" => [{ "type" => "expression", "designation" => "test" }],
-          "definition" => [{ "content" => "a definition" }],
-        },
-      })
+                                                    "data" => {
+                                                      "language_code" => "eng",
+                                                      "terms" => [{
+                                                        "type" => "expression", "designation" => "test"
+                                                      }],
+                                                      "definition" => [{ "content" => "a definition" }],
+                                                    },
+                                                  })
       mc.add_localization(l10n)
       context = Glossarist::Validation::Rules::ConceptContext.new(
         mc, file_name: "1.yaml", collection_context: nil
@@ -67,12 +69,14 @@ RSpec.describe Glossarist::Validation::Rules::ModelValidityRule do
     it "recurses into nested serializable attributes" do
       mc = Glossarist::ManagedConcept.new(data: { id: "1" })
       l10n = Glossarist::LocalizedConcept.of_yaml({
-        "data" => {
-          "language_code" => "eng",
-          "terms" => [{ "type" => "expression", "designation" => "term" }],
-          "definition" => [{ "content" => "def" }],
-        },
-      })
+                                                    "data" => {
+                                                      "language_code" => "eng",
+                                                      "terms" => [{
+                                                        "type" => "expression", "designation" => "term"
+                                                      }],
+                                                      "definition" => [{ "content" => "def" }],
+                                                    },
+                                                  })
       mc.add_localization(l10n)
       context = Glossarist::Validation::Rules::ConceptContext.new(
         mc, file_name: "1.yaml", collection_context: nil
@@ -86,12 +90,14 @@ RSpec.describe Glossarist::Validation::Rules::ModelValidityRule do
       mc = Glossarist::ManagedConcept.new(data: { id: "1" })
       # Add multiple localizations to test array recursion
       l10n_eng = Glossarist::LocalizedConcept.of_yaml({
-        "data" => {
-          "language_code" => "eng",
-          "terms" => [{ "type" => "expression", "designation" => "test" }],
-          "definition" => [{ "content" => "definition" }],
-        },
-      })
+                                                        "data" => {
+                                                          "language_code" => "eng",
+                                                          "terms" => [{
+                                                            "type" => "expression", "designation" => "test"
+                                                          }],
+                                                          "definition" => [{ "content" => "definition" }],
+                                                        },
+                                                      })
       mc.add_localization(l10n_eng)
       context = Glossarist::Validation::Rules::ConceptContext.new(
         mc, file_name: "1.yaml", collection_context: nil

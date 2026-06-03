@@ -45,7 +45,7 @@ def add_subject_area_concepts(collection)
     end
   end
 
-  existing_ids = collection.map { |c| c.data.id }.to_set
+  existing_ids = collection.to_set { |c| c.data.id }
 
   areas.each_key do |area_id|
     next if existing_ids.include?(area_id)
@@ -83,7 +83,8 @@ def add_subject_area_concepts(collection)
       ),
     )
 
-    mc.related = [Glossarist::RelatedConcept.new(type: "broader", content: area_id)]
+    mc.related = [Glossarist::RelatedConcept.new(type: "broader",
+                                                 content: area_id)]
 
     section_code = parts.length > 1 ? parts[0..1].join("-") : parts[0]
     l10n = build_domain_localization(section_id, section_code, "eng")
@@ -94,7 +95,7 @@ def add_subject_area_concepts(collection)
   end
 end
 
-def build_domain_localization(id, label, lang_code)
+def build_domain_localization(id, _label, lang_code)
   cd = Glossarist::ConceptData.new(
     id: id,
     language_code: lang_code,
@@ -133,6 +134,7 @@ if add_iev_domains
 
     identifier = concept.data.id.to_s
     next if identifier.empty? || identifier.start_with?("area-", "section-")
+
     parts = identifier.split("-")
     next unless parts.length >= 2
 
@@ -166,11 +168,15 @@ end
 
 # Copy register.yaml if present
 register_src = File.join(File.dirname(source_dir), "register.yaml")
-if File.exist?(register_src) && !File.exist?(File.join(output_dir, "..", "register.yaml"))
-  register_dst_dir = is_managed_format ? File.dirname(output_dir) : output_dir
-  register_dst = if File.exist?(File.join(File.dirname(source_dir), "register.yaml"))
-    File.join(is_managed_format ? File.dirname(output_dir) : File.dirname(output_dir), "register.yaml")
-  end
+if File.exist?(register_src) && !File.exist?(File.join(output_dir, "..",
+                                                       "register.yaml"))
+  is_managed_format ? File.dirname(output_dir) : output_dir
+  register_dst = if File.exist?(File.join(File.dirname(source_dir),
+                                          "register.yaml"))
+                   File.join(
+                     is_managed_format ? File.dirname(output_dir) : File.dirname(output_dir), "register.yaml"
+                   )
+                 end
   if register_dst
     FileUtils.mkdir_p(File.dirname(register_dst))
     FileUtils.cp(register_src, register_dst) unless register_src == register_dst

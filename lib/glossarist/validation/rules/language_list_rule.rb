@@ -24,7 +24,7 @@ module Glossarist
             issues << issue(
               "declared languages not found in concepts: #{missing.sort.join(', ')}",
               code: code, severity: severity,
-              suggestion: "Update the languages list or add missing localizations",
+              suggestion: "Update the languages list or add missing localizations"
             )
           end
 
@@ -33,7 +33,7 @@ module Glossarist
             issues << issue(
               "concepts use languages not declared: #{extra.sort.join(', ')}",
               code: code, severity: severity,
-              suggestion: "Add these languages to the languages list in metadata",
+              suggestion: "Add these languages to the languages list in metadata"
             )
           end
 
@@ -43,4 +43,3 @@ module Glossarist
     end
   end
 end
-

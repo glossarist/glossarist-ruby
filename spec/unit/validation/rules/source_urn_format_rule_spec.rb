@@ -9,7 +9,7 @@ RSpec.describe Glossarist::Validation::Rules::SourceUrnFormatRule do
     l10n = instance_double(Glossarist::LocalizedConcept)
     allow(l10n).to receive(:data).and_return(
       instance_double(Glossarist::ConceptData, sources: sources,
-                                                definition: [], notes: [], examples: [])
+                                               definition: [], notes: [], examples: []),
     )
     data = instance_double(Glossarist::ManagedConceptData, domains: domains)
     concept = instance_double(Glossarist::ManagedConcept)

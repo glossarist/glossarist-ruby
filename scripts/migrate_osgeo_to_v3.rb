@@ -32,7 +32,7 @@ def extract_domain_id(ref_text)
     %r{ISO/IEC\s+([\d-]+)},
     %r{ISO/TS\s+([\d-]+)},
     %r{ISO/TR\s+([\d-]+)},
-    %r{ISO\s+([\d]+-?[\d]*)},
+    %r{ISO\s+(\d+-?\d*)},
   ]
 
   patterns.each do |pat|
@@ -95,7 +95,9 @@ collection.each do |concept|
 
   # Add broader relation to domain concept
   concept.related ||= []
-  unless concept.related.any? { |r| r.type == "broader" && r.ref&.id == domain_id }
+  unless concept.related.any? do |r|
+    r.type == "broader" && r.ref&.id == domain_id
+  end
     concept.related << Glossarist::RelatedConcept.new(
       type: "broader",
       content: domain_id,

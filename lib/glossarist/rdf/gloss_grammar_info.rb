@@ -15,18 +15,28 @@ module Glossarist
       rdf do
         namespace Namespaces::GlossaristNamespace
 
-        subject { |g| "concept/#{g.concept_id}/#{g.lang_code}/designation/#{g.index}/grammar" }
+        subject do |g|
+          "concept/#{g.concept_id}/#{g.lang_code}/designation/#{g.index}/grammar"
+        end
 
         types "gloss:GrammarInfo"
 
-        predicate :gender, namespace: Namespaces::GlossaristNamespace, to: :gender, uri_reference: true
-        predicate :number, namespace: Namespaces::GlossaristNamespace, to: :number, uri_reference: true
-        predicate :isNoun, namespace: Namespaces::GlossaristNamespace, to: :noun?
-        predicate :isVerb, namespace: Namespaces::GlossaristNamespace, to: :verb?
-        predicate :isAdjective, namespace: Namespaces::GlossaristNamespace, to: :adjective?
-        predicate :isAdverb, namespace: Namespaces::GlossaristNamespace, to: :adverb?
-        predicate :isPreposition, namespace: Namespaces::GlossaristNamespace, to: :preposition?
-        predicate :isParticiple, namespace: Namespaces::GlossaristNamespace, to: :participle?
+        predicate :gender, namespace: Namespaces::GlossaristNamespace,
+                           to: :gender, uri_reference: true
+        predicate :number, namespace: Namespaces::GlossaristNamespace,
+                           to: :number, uri_reference: true
+        predicate :isNoun, namespace: Namespaces::GlossaristNamespace,
+                           to: :noun?
+        predicate :isVerb, namespace: Namespaces::GlossaristNamespace,
+                           to: :verb?
+        predicate :isAdjective, namespace: Namespaces::GlossaristNamespace,
+                                to: :adjective?
+        predicate :isAdverb, namespace: Namespaces::GlossaristNamespace,
+                             to: :adverb?
+        predicate :isPreposition, namespace: Namespaces::GlossaristNamespace,
+                                  to: :preposition?
+        predicate :isParticiple, namespace: Namespaces::GlossaristNamespace,
+                                 to: :participle?
       end
 
       def noun?

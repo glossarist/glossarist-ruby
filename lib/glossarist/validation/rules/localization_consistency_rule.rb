@@ -23,7 +23,7 @@ module Glossarist
           issues = []
 
           lc_map = concept.data&.localized_concepts || {}
-          loaded_langs = concept.localizations&.map(&:language_code)&.compact || []
+          loaded_langs = concept.localizations&.filter_map(&:language_code) || []
 
           # Map has entry but no loaded localization
           lc_map.each_key do |lang|

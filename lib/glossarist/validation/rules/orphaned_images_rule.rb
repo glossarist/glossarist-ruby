@@ -21,6 +21,7 @@ module Glossarist
             concept.localizations.each do |l10n|
               l10n.text_content.each do |text|
                 next unless text
+
                 extractor.extract_from_text(text).each do |ref|
                   if ref.is_a?(AssetReference)
                     referenced_paths.add(ref.path)
@@ -38,6 +39,7 @@ module Glossarist
           if images_file
             context.bibliography_index.entries.each_value do |entry|
               next unless entry[:source].is_a?(V3::ImageEntry)
+
               path = entry[:source].path
               referenced_paths.add(path) if path
             end
@@ -51,7 +53,7 @@ module Glossarist
               "Orphaned image: #{path} (not referenced by any concept)",
               code: code, severity: severity,
               location: path,
-              suggestion: "Remove the image or reference it from a concept",
+              suggestion: "Remove the image or reference it from a concept"
             )
           end
 
@@ -61,10 +63,10 @@ module Glossarist
         private
 
         def load_images_file(context)
-          return @images_file if defined?(@images_file)
+          return @load_images_file if defined?(@load_images_file)
 
-          @images_file = V3::ImageFile.from_file(
-            File.join(context.path, "images.yaml")
+          @load_images_file = V3::ImageFile.from_file(
+            File.join(context.path, "images.yaml"),
           )
         end
       end

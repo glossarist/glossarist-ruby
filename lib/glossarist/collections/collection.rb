@@ -18,8 +18,8 @@ module Glossarist
         @collection << @klass.new(object)
       end
 
-      def each(&block)
-        @collection.each(&block)
+      def each(&)
+        @collection.each(&)
       end
 
       def empty?

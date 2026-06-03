@@ -16,9 +16,12 @@ module Glossarist
 
         types "gloss:Locality"
 
-        predicate :localityType, namespace: Namespaces::GlossaristNamespace, to: :locality_type
-        predicate :referenceFrom, namespace: Namespaces::GlossaristNamespace, to: :reference_from
-        predicate :referenceTo, namespace: Namespaces::GlossaristNamespace, to: :reference_to
+        predicate :localityType, namespace: Namespaces::GlossaristNamespace,
+                                 to: :locality_type
+        predicate :referenceFrom, namespace: Namespaces::GlossaristNamespace,
+                                  to: :reference_from
+        predicate :referenceTo, namespace: Namespaces::GlossaristNamespace,
+                                to: :reference_to
       end
     end
   end

@@ -28,7 +28,8 @@ module Glossarist
     end
 
     def validate_directory(path, reference_path: nil)
-      result = ConceptValidator.new(path, on_progress: @on_progress).validate_all
+      result = ConceptValidator.new(path,
+                                    on_progress: @on_progress).validate_all
 
       if reference_path
         ref_result = validate_directory_cross_references(path, reference_path)

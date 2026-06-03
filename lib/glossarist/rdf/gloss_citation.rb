@@ -18,10 +18,14 @@ module Glossarist
 
         types "gloss:Citation"
 
-        predicate :citationSource, namespace: Namespaces::GlossaristNamespace, to: :source
-        predicate :citationId, namespace: Namespaces::GlossaristNamespace, to: :id
-        predicate :citationVersion, namespace: Namespaces::GlossaristNamespace, to: :version
-        predicate :citationLink, namespace: Namespaces::GlossaristNamespace, to: :link
+        predicate :citationSource, namespace: Namespaces::GlossaristNamespace,
+                                   to: :source
+        predicate :citationId, namespace: Namespaces::GlossaristNamespace,
+                               to: :id
+        predicate :citationVersion, namespace: Namespaces::GlossaristNamespace,
+                                    to: :version
+        predicate :citationLink, namespace: Namespaces::GlossaristNamespace,
+                                 to: :link
 
         members :locality, link: "gloss:hasLocality"
       end

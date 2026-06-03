@@ -17,9 +17,12 @@ module Glossarist
 
         types "gloss:ConceptSource"
 
-        predicate :sourceStatus, namespace: Namespaces::GlossaristNamespace, to: :status, uri_reference: true
-        predicate :sourceType, namespace: Namespaces::GlossaristNamespace, to: :type, uri_reference: true
-        predicate :modification, namespace: Namespaces::GlossaristNamespace, to: :modification
+        predicate :sourceStatus, namespace: Namespaces::GlossaristNamespace,
+                                 to: :status, uri_reference: true
+        predicate :sourceType, namespace: Namespaces::GlossaristNamespace,
+                               to: :type, uri_reference: true
+        predicate :modification, namespace: Namespaces::GlossaristNamespace,
+                                 to: :modification
 
         members :origin, link: "gloss:sourceOrigin"
       end

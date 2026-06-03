@@ -35,7 +35,8 @@ module Glossarist
         index
       end
 
-      def self.build_from_yaml(concepts, bibliography_yaml: nil, images_yaml: nil)
+      def self.build_from_yaml(concepts, bibliography_yaml: nil,
+images_yaml: nil)
         index = new
 
         concepts.each { |concept| index_concept_sources(index, concept) }

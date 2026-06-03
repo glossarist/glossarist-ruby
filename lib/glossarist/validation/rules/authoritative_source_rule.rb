@@ -25,7 +25,7 @@ module Glossarist
             "no authoritative source defined",
             code: code, severity: severity,
             location: fname,
-            suggestion: "Add at least one source with type: authoritative",
+            suggestion: "Add at least one source with type: authoritative"
           )]
         end
       end

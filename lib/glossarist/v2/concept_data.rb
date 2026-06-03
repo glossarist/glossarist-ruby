@@ -37,7 +37,8 @@ module Glossarist
         map :system, to: :system
         map %i[entry_status entryStatus], to: :entry_status
         map %i[review_date reviewDate], to: :review_date
-        map %i[review_decision_date reviewDecisionDate], to: :review_decision_date
+        map %i[review_decision_date reviewDecisionDate],
+            to: :review_decision_date
         map %i[review_decision_event reviewDecisionEvent],
             to: :review_decision_event
       end

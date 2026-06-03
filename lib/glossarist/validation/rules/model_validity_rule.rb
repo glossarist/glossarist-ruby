@@ -38,7 +38,7 @@ module Glossarist
         def recurse_attributes(model, location, path)
           issues = []
 
-          model.class.attributes.each do |name, _|
+          model.class.attributes.each_key do |name|
             value = model.public_send(name)
             next if value.nil?
 

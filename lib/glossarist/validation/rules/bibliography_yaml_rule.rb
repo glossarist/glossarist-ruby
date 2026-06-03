@@ -24,7 +24,7 @@ module Glossarist
               "bibliography.yaml is invalid YAML: #{e.message}",
               code: code, severity: severity,
               location: "bibliography.yaml",
-              suggestion: "Fix YAML syntax errors in bibliography.yaml",
+              suggestion: "Fix YAML syntax errors in bibliography.yaml"
             )]
           end
 

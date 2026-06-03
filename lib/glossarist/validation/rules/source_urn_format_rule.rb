@@ -6,7 +6,7 @@ module Glossarist
       # Validates that every URN-format source in citations and references
       # follows a recognized scheme (iso, iec, itu, etc).
       class SourceUrnFormatRule < Base
-        URN_RE = %r{\Aurn:([a-z0-9][a-z0-9-]{0,31}):(.+)\z}i.freeze
+        URN_RE = %r{\Aurn:([a-z0-9][a-z0-9-]{0,31}):(.+)\z}i
 
         KNOWN_SCHEMES = %w[
           iso iec itu iso:std:iso iso:std:iec
@@ -27,7 +27,7 @@ module Glossarist
           issues = []
 
           all_refs(concept).each_with_index do |ref_str, idx|
-            next unless ref_str && ref_str.start_with?("urn:")
+            next unless ref_str&.start_with?("urn:")
 
             match = URN_RE.match(ref_str)
             unless match

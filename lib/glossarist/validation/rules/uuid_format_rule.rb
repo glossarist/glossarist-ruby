@@ -4,7 +4,7 @@ module Glossarist
   module Validation
     module Rules
       class UuidFormatRule < Base
-        UUID_RE = /\A[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\z/i.freeze
+        UUID_RE = /\A[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\z/i
 
         def code = "GLS-016"
         def category = :integrity

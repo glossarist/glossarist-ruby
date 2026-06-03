@@ -23,8 +23,8 @@ module Glossarist
         @paths.include?(normalize_path(path))
       end
 
-      def each_path(&block)
-        @paths.each(&block)
+      def each_path(&)
+        @paths.each(&)
       end
 
       def self.build_from_directory(dataset_path)

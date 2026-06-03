@@ -48,7 +48,9 @@ module Glossarist
         def all_origins(concept)
           origins = []
           concept.localizations.each do |l10n|
-            (l10n.data&.sources || []).each { |s| origins << s.origin if s.origin }
+            (l10n.data&.sources || []).each do |s|
+              origins << s.origin if s.origin
+            end
           end
           origins
         end

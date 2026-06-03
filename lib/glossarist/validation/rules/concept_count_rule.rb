@@ -10,7 +10,7 @@ module Glossarist
         def scope = :collection
 
         def applicable?(context)
-          context.metadata && context.metadata.concept_count
+          context.metadata&.concept_count
         end
 
         def check(context)
@@ -24,11 +24,10 @@ module Glossarist
             "but found #{actual} concept files",
             code: code, severity: severity,
             location: "metadata.yaml",
-            suggestion: "Update concept_count or add/remove concept files",
+            suggestion: "Update concept_count or add/remove concept files"
           )]
         end
       end
     end
   end
 end
-

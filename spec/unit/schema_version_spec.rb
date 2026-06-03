@@ -66,7 +66,8 @@ RSpec.describe Glossarist::ManagedConcept, "schema versioning" do
     it "detects v3 from top-level related concepts" do
       mc = described_class.of_yaml({
                                      "data" => { "id" => "test" },
-                                     "related" => [{ "type" => "broader", "content" => "Parent" }],
+                                     "related" => [{ "type" => "broader",
+                                                     "content" => "Parent" }],
                                    })
       expect(described_class.detect_schema_version(mc)).to eq("3")
     end
@@ -83,7 +84,8 @@ RSpec.describe Glossarist::ManagedConcept, "schema versioning" do
       mc = described_class.of_yaml({
                                      "data" => {
                                        "id" => "test",
-                                       "domains" => [{ "concept_id" => "103", "ref_type" => "domain" }],
+                                       "domains" => [{ "concept_id" => "103",
+                                                       "ref_type" => "domain" }],
                                      },
                                    })
       expect(described_class.detect_schema_version(mc)).to eq("3")
@@ -101,7 +103,9 @@ RSpec.describe Glossarist::ManagedConcept, "schema versioning" do
       l10n = Glossarist::LocalizedConcept.of_yaml({
                                                     "data" => {
                                                       "language_code" => "eng",
-                                                      "references" => [{ "source" => "urn:iec:std:iec:60050", "ref_type" => "urn" }],
+                                                      "references" => [{
+                                                        "source" => "urn:iec:std:iec:60050", "ref_type" => "urn"
+                                                      }],
                                                     },
                                                   })
       mc.add_l10n(l10n)
@@ -168,7 +172,8 @@ RSpec.describe Glossarist::GcrMetadata, "schema_version" do
     concepts = [
       Glossarist::ManagedConcept.of_yaml({ "data" => { "id" => "1" } }),
     ]
-    rd = Glossarist::RegisterData.from_yaml({ "shortname" => "test", "schema_version" => "2" }.to_yaml)
+    rd = Glossarist::RegisterData.from_yaml({ "shortname" => "test",
+                                              "schema_version" => "2" }.to_yaml)
     metadata = described_class.from_concepts(concepts, register_data: rd)
     expect(metadata.schema_version).to eq("2")
   end

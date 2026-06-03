@@ -24,6 +24,7 @@ module Glossarist
 
             l10n.text_content.each do |text|
               next unless text
+
               extractor.extract_from_text(text).each do |ref|
                 next unless ref.is_a?(AssetReference)
                 next if context.asset_index.resolve?(ref.path)
@@ -32,7 +33,7 @@ module Glossarist
                   "unresolved image reference #{ref.path}",
                   code: "GLS-103", severity: severity,
                   location: "#{fname}/#{lang}",
-                  suggestion: "add '#{ref.path}' to the dataset's images/ directory",
+                  suggestion: "add '#{ref.path}' to the dataset's images/ directory"
                 )
               end
             end
@@ -46,7 +47,7 @@ module Glossarist
               "unresolved asset reference #{ref.path}",
               code: "GLS-104", severity: "error",
               location: fname,
-              suggestion: "add '#{ref.path}' to the dataset's images/ directory",
+              suggestion: "add '#{ref.path}' to the dataset's images/ directory"
             )
           end
 

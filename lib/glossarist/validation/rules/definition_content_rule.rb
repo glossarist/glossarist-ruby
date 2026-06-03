@@ -26,7 +26,7 @@ module Glossarist
                   "definition #{idx + 1} has empty content",
                   code: code, severity: severity,
                   location: "#{fname}/#{lang}",
-                  suggestion: "Add definition text or remove the empty entry",
+                  suggestion: "Add definition text or remove the empty entry"
                 )
               end
             end
@@ -38,4 +38,3 @@ module Glossarist
     end
   end
 end
-

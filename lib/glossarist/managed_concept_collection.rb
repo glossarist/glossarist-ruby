@@ -16,8 +16,8 @@ module Glossarist
       }.compact
     end
 
-    def each(&block)
-      @managed_concepts.each(&block)
+    def each(&)
+      @managed_concepts.each(&)
     end
 
     # Returns concept with given ID, if it is present in collection, or +nil+

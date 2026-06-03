@@ -235,9 +235,12 @@ RSpec.describe Glossarist::ConceptData do
       ex_s = Glossarist::ConceptSource.new(type: "authoritative")
 
       subject.sources = [top]
-      subject.definition = [Glossarist::DetailedDefinition.new(content: "d", sources: [def_s])]
-      subject.notes = [Glossarist::DetailedDefinition.new(content: "n", sources: [note_s])]
-      subject.examples = [Glossarist::DetailedDefinition.new(content: "e", sources: [ex_s])]
+      subject.definition = [Glossarist::DetailedDefinition.new(content: "d",
+                                                               sources: [def_s])]
+      subject.notes = [Glossarist::DetailedDefinition.new(content: "n",
+                                                          sources: [note_s])]
+      subject.examples = [Glossarist::DetailedDefinition.new(content: "e",
+                                                             sources: [ex_s])]
 
       expect(subject.all_sources).to eq([top, def_s, note_s, ex_s])
     end

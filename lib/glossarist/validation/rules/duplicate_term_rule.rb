@@ -25,7 +25,7 @@ module Glossarist
               "concepts #{ids.join(', ')}",
               code: code, severity: severity,
               location: lang,
-              suggestion: "Differentiate the terms or consolidate the concepts",
+              suggestion: "Differentiate the terms or consolidate the concepts"
             )
           end
 
@@ -60,4 +60,3 @@ module Glossarist
     end
   end
 end
-

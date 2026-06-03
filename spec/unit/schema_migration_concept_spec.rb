@@ -25,14 +25,16 @@ RSpec.describe Glossarist::SchemaMigration, ".migrate_concept" do
     end
 
     it "merges with existing concept.related and deduplicates" do
-      existing = Glossarist::RelatedConcept.new(type: "compare", content: "Other")
+      existing = Glossarist::RelatedConcept.new(type: "compare",
+                                                content: "Other")
       v2_concept.related = [existing]
       v2_concept.schema_version = "2"
 
       result = described_class.migrate_concept(v2_concept, target_version: "3")
 
       expect(result.related.length).to eq(3)
-      expect(result.related.map(&:type)).to contain_exactly("compare", "broader", "narrower")
+      expect(result.related.map(&:type)).to contain_exactly("compare",
+                                                            "broader", "narrower")
     end
 
     it "is a no-op when data.related is empty" do

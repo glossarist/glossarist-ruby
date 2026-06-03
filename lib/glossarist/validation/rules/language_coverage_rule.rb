@@ -27,11 +27,10 @@ module Glossarist
             "missing localizations for declared languages: #{missing.join(', ')}",
             code: code, severity: severity,
             location: fname,
-            suggestion: "Add localizations for: #{missing.join(', ')}",
+            suggestion: "Add localizations for: #{missing.join(', ')}"
           )]
         end
       end
     end
   end
 end
-

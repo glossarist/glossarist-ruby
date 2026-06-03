@@ -28,8 +28,10 @@ module Glossarist
 
         types "gloss:Concept", "skos:Concept"
 
-        predicate :identifier, namespace: Namespaces::GlossaristNamespace, to: :identifier
-        predicate :hasStatus, namespace: Namespaces::GlossaristNamespace, to: :status, uri_reference: true
+        predicate :identifier, namespace: Namespaces::GlossaristNamespace,
+                               to: :identifier
+        predicate :hasStatus, namespace: Namespaces::GlossaristNamespace,
+                              to: :status, uri_reference: true
 
         members :localizations,
                 link: "gloss:hasLocalization"
@@ -41,7 +43,8 @@ module Glossarist
                 link: "gloss:hasDate"
 
         RelationshipPredicates::CONCEPT_REL_PREDICATES.each do |type, (ns, name)|
-          predicate name, namespace: ns, to: :"#{type}_targets", uri_reference: true
+          predicate name, namespace: ns, to: :"#{type}_targets",
+                          uri_reference: true
         end
       end
     end

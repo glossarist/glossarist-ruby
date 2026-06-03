@@ -28,7 +28,7 @@ module Glossarist
               "has #{terms.size} term(s) but none are preferred",
               code: code, severity: severity,
               location: "#{fname}/#{lang}",
-              suggestion: "Set normative_status: preferred on the primary term",
+              suggestion: "Set normative_status: preferred on the primary term"
             )
           end
 
@@ -38,4 +38,3 @@ module Glossarist
     end
   end
 end
-

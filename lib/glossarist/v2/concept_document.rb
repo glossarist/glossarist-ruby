@@ -10,7 +10,7 @@ module Glossarist
         sequence do
           map_document 0, to: :concept, type: V2::ManagedConcept
           map_document 1.., to: :localizations, type: V2::LocalizedConcept,
-                                             collection: true
+                            collection: true
         end
       end
     end

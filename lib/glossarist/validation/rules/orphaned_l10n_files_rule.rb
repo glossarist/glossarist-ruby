@@ -26,7 +26,7 @@ module Glossarist
               "(not referenced by any concept)",
               code: code, severity: severity,
               location: File.basename(path),
-              suggestion: "Delete the file or add a reference from a managed concept",
+              suggestion: "Delete the file or add a reference from a managed concept"
             )
           end
 
@@ -36,4 +36,3 @@ module Glossarist
     end
   end
 end
-
