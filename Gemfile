@@ -4,6 +4,8 @@ source "https://rubygems.org"
 
 gemspec
 
+gem "lutaml-store", git: "https://github.com/lutaml/lutaml-store.git", branch: "rt-tmp"
+
 gem "canon"
 gem "nokogiri"
 gem "rake", "~> 13.0"

@@ -2,6 +2,7 @@
 
 module Glossarist
   class ConceptDocument < Lutaml::Model::Serializable
+    attribute :id, :string
     attribute :concept, ManagedConcept
     attribute :localizations, LocalizedConcept, collection: true
 
@@ -9,7 +10,7 @@ module Glossarist
       sequence do
         map_document 0, to: :concept, type: ManagedConcept
         map_document 1.., to: :localizations, type: LocalizedConcept,
-                                           collection: true
+                          collection: true
       end
     end
 

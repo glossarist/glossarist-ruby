@@ -11,6 +11,8 @@ module Glossarist
   autoload :Asset,                    "glossarist/asset"
   autoload :AssetReference,           "glossarist/asset_reference"
   autoload :BibliographicReference,   "glossarist/bibliographic_reference"
+  autoload :BibliographyData,         "glossarist/bibliography_data"
+  autoload :BibliographyEntry,        "glossarist/bibliography_entry"
   autoload :Citation,                 "glossarist/citation"
   autoload :CLI,                      "glossarist/cli"
   autoload :CollectionConfig,         "glossarist/collection_config"
@@ -43,6 +45,7 @@ module Glossarist
   autoload :Designation,              "glossarist/designation"
   autoload :Error,                    "glossarist/error"
   autoload :GcrPackage,               "glossarist/gcr_package"
+  autoload :GcrPackageDefinition,     "glossarist/gcr_package_definition"
   autoload :GcrMetadata,              "glossarist/gcr_metadata"
   autoload :GcrStatistics,            "glossarist/gcr_statistics"
   autoload :GcrValidator,             "glossarist/gcr_validator"
@@ -74,6 +77,7 @@ module Glossarist
   autoload :V3,                       "glossarist/v3"
   autoload :VERSION,                  "glossarist/version"
   autoload :GlossaryDefinition,       "glossarist/glossary_definition"
+  autoload :GlossaryStore,            "glossarist/glossary_store"
 
   LANG_CODES = %w[eng ara deu fra spa ita jpn kor pol por srp swe zho rus fin
                   dan nld msa nob nno].freeze
