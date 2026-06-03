@@ -132,13 +132,12 @@ module Glossarist
       if v1_collection?
         File.join(path, "concept-*.{yaml,yml}")
       else
-        # normal v2 collection
-        concepts_glob = File.join(path, "concept", "*.{yaml,yml}")
-        if Dir.glob(concepts_glob).empty?
-          # multiple content YAML files
-          concepts_glob = File.join(path, "*.{yaml,yml}")
-        end
-        concepts_glob
+        candidates = [
+          File.join(path, "concept", "*.{yaml,yml}"),
+          File.join(path, "concepts", "*.{yaml,yml}"),
+          File.join(path, "*.{yaml,yml}"),
+        ]
+        candidates.find { |g| !Dir.glob(g).empty? }
       end
     end
 

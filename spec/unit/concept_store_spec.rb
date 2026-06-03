@@ -4,137 +4,209 @@ require "spec_helper"
 require "tmpdir"
 
 RSpec.describe Glossarist::ConceptStore do
-  let(:store) { described_class.new(adapter: :memory) }
+  let(:tmpdir) { Dir.mktmpdir }
+  after { FileUtils.rm_rf(tmpdir) }
 
-  def build_concept(identifier:, uuid:, status: "valid")
-    Glossarist::ManagedConcept.new(
-      identifier: identifier,
-      uuid: uuid,
-      status: status,
-    )
+  def create_glossary(dir, concepts_data)
+    concepts_dir = File.join(dir, "concepts")
+    FileUtils.mkdir_p(concepts_dir)
+
+    concepts_data.each do |concept|
+      filename = File.join(concepts_dir, "#{concept[:uuid]}.yaml")
+      File.write(filename, concept[:yaml], encoding: "utf-8")
+    end
   end
 
-  describe "#save and #fetch" do
-    it "round-trips a concept preserving uuid and identifier" do
-      concept = build_concept(identifier: "term-1", uuid: "uuid-abc")
-      store.save(concept)
+  let(:concept_a_yaml) do
+    <<~YAML
+      ---
+      data:
+        identifier: "3.1.1"
+        localized_concepts:
+          eng: l10n-aaa-eng
+      status: valid
+      schema_version: '3'
+      id: aaa-111
+      ---
+      data:
+        definition:
+        - content: Test definition A
+        terms:
+        - type: expression
+          normative_status: preferred
+          designation: term alpha
+        language_code: eng
+        entry_status: valid
+      id: l10n-aaa-eng
+    YAML
+  end
 
-      fetched = store.fetch("uuid-abc")
-      expect(fetched.uuid).to eq("uuid-abc")
-      expect(fetched.identifier).to eq("term-1")
-      expect(fetched.status).to eq("valid")
+  let(:concept_b_yaml) do
+    <<~YAML
+      ---
+      data:
+        identifier: "3.1.2"
+        localized_concepts:
+          eng: l10n-bbb-eng
+          fra: l10n-bbb-fra
+      status: valid
+      schema_version: '3'
+      id: bbb-222
+      ---
+      data:
+        definition:
+        - content: Test definition B
+        terms:
+        - type: expression
+          normative_status: preferred
+          designation: term beta
+        language_code: eng
+        entry_status: valid
+      id: l10n-bbb-eng
+      ---
+      data:
+        definition:
+        - content: Definition B en francais
+        terms:
+        - type: expression
+          normative_status: preferred
+          designation: terme beta
+        language_code: fra
+        entry_status: valid
+      id: l10n-bbb-fra
+    YAML
+  end
+
+  let(:glossary_dir) do
+    dir = tmpdir
+    create_glossary(dir, [
+                      { uuid: "aaa-111", yaml: concept_a_yaml },
+                      { uuid: "bbb-222", yaml: concept_b_yaml },
+                    ])
+    dir
+  end
+
+  describe "#load_glossary" do
+    it "loads all concepts from a GCR v3 directory" do
+      store = described_class.new
+      docs = store.load_glossary(glossary_dir)
+
+      expect(docs.length).to eq(2)
+      expect(store.count).to eq(2)
     end
 
-    it "returns nil for non-existent uuid" do
+    it "loads concepts through lutaml-store" do
+      store = described_class.new
+      store.load_glossary(glossary_dir)
+
+      expect(store.db).to be_a(Lutaml::Store::DatabaseStore)
+      expect(store.count).to eq(2)
+    end
+  end
+
+  describe "#fetch" do
+    it "retrieves a concept by UUID" do
+      store = described_class.new
+      store.load_glossary(glossary_dir)
+
+      concept = store.fetch("aaa-111")
+      expect(concept).not_to be_nil
+      expect(concept.uuid).to eq("aaa-111")
+      expect(concept.identifier).to eq("aaa-111")
+      expect(concept.data.id).to eq("3.1.1")
+    end
+
+    it "returns nil for non-existent UUID" do
+      store = described_class.new
+      store.load_glossary(glossary_dir)
+
       expect(store.fetch("nonexistent")).to be_nil
     end
-  end
 
-  describe "#fetch_by_id" do
-    it "finds concept by identifier" do
-      store.save(build_concept(identifier: "find-me", uuid: "uuid-1"))
-      store.save(build_concept(identifier: "other", uuid: "uuid-2"))
+    it "preserves concept localizations" do
+      store = described_class.new
+      store.load_glossary(glossary_dir)
 
-      found = store.fetch_by_id("find-me")
-      expect(found.uuid).to eq("uuid-1")
-    end
+      concept = store.fetch("bbb-222")
+      expect(concept.localizations.keys).to contain_exactly("eng", "fra")
 
-    it "returns nil when not found" do
-      expect(store.fetch_by_id("missing")).to be_nil
-    end
-  end
+      eng_l10n = concept.localization("eng")
+      expect(eng_l10n.data.definition.first.content).to eq("Test definition B")
+      expect(eng_l10n.terms.first.designation).to eq("term beta")
 
-  describe "#update" do
-    it "updates concept attributes" do
-      store.save(build_concept(identifier: "updatable", uuid: "uuid-up"))
-
-      updated = store.update("uuid-up", status: "deprecated")
-      expect(updated.status).to eq("deprecated")
-      expect(updated.identifier).to eq("updatable")
+      fra_l10n = concept.localization("fra")
+      expect(fra_l10n.terms.first.designation).to eq("terme beta")
     end
   end
 
-  describe "#delete" do
-    it "removes a concept" do
-      store.save(build_concept(identifier: "deletable", uuid: "uuid-del"))
+  describe "#concepts" do
+    it "returns all concepts" do
+      store = described_class.new
+      store.load_glossary(glossary_dir)
 
-      expect(store.delete("uuid-del")).to be true
-      expect(store.fetch("uuid-del")).to be_nil
-    end
-
-    it "returns false for non-existent concept" do
-      expect(store.delete("nonexistent")).to be false
-    end
-  end
-
-  describe "#all" do
-    it "returns all stored concepts" do
-      3.times { |i| store.save(build_concept(identifier: "c-#{i}", uuid: "uuid-#{i}")) }
-
-      all = store.all
-      expect(all.size).to eq(3)
-      expect(all.map(&:identifier).sort).to eq(%w[c-0 c-1 c-2])
+      all = store.concepts
+      expect(all.length).to eq(2)
+      expect(all.map(&:uuid).sort).to eq(%w[aaa-111 bbb-222])
     end
   end
 
   describe "#count" do
-    it "returns the number of stored concepts" do
+    it "returns zero for empty store" do
+      store = described_class.new
       expect(store.count).to eq(0)
-      store.save(build_concept(identifier: "c", uuid: "u"))
-      expect(store.count).to eq(1)
+    end
+
+    it "returns the number of loaded concepts" do
+      store = described_class.new
+      store.load_glossary(glossary_dir)
+      expect(store.count).to eq(2)
     end
   end
 
   describe "#exists?" do
-    it "returns true for existing concepts" do
-      store.save(build_concept(identifier: "existing", uuid: "uuid-ex"))
+    it "returns true for existing concept" do
+      store = described_class.new
+      store.load_glossary(glossary_dir)
 
-      expect(store.exists?("uuid-ex")).to be true
-      expect(store.exists?("missing")).to be false
+      expect(store.exists?("aaa-111")).to be true
+      expect(store.exists?("bbb-222")).to be true
+    end
+
+    it "returns false for non-existent concept" do
+      store = described_class.new
+      store.load_glossary(glossary_dir)
+
+      expect(store.exists?("nonexistent")).to be false
     end
   end
 
   describe "#clear" do
     it "removes all concepts" do
-      3.times { |i| store.save(build_concept(identifier: "c-#{i}", uuid: "uuid-#{i}")) }
+      store = described_class.new
+      store.load_glossary(glossary_dir)
 
+      expect(store.count).to eq(2)
       store.clear
       expect(store.count).to eq(0)
     end
   end
 
-  describe "persistence with file I/O" do
-    let(:tmpdir) { Dir.mktmpdir }
-    after { FileUtils.rm_rf(tmpdir) }
+  describe "with real glossary fixtures" do
+    it "loads the isotc204 glossary" do
+      tc204_path = File.expand_path("../../geolexica/isotc204-glossary",
+                                    __dir__)
+      skip "isotc204 glossary not available" unless Dir.exist?(tc204_path)
 
-    it "round-trips concepts through directory" do
-      concepts = [
-        build_concept(identifier: "alpha", uuid: "uuid-a", status: "valid"),
-        build_concept(identifier: "beta", uuid: "uuid-b", status: "valid"),
-      ]
-      concepts.each { |c| store.save(c) }
+      store = described_class.new
+      store.load_glossary(tc204_path)
 
-      store.save_to_directory(tmpdir, format: :yaml, layout: :separate)
+      expect(store.count).to eq(319)
 
-      new_store = described_class.new(adapter: :memory)
-      loaded = new_store.load_from_directory(tmpdir, format: :yaml, layout: :separate)
-      expect(loaded.size).to eq(2)
-      expect(loaded.map(&:status).sort).to eq(%w[valid valid])
-    end
-
-    it "makes loaded concepts queryable" do
-      store.save(build_concept(identifier: "queryable", uuid: "uuid-q"))
-      store.save_to_directory(tmpdir, format: :yaml, layout: :separate)
-
-      new_store = described_class.new(adapter: :memory)
-      new_store.load_from_directory(tmpdir, format: :yaml, layout: :separate)
-
-      expect(new_store.count).to eq(1)
-      # After YAML round-trip, uuid is auto-generated (not "uuid-q").
-      # Verify the concept is queryable by loading all and checking.
-      all_concepts = new_store.all
-      expect(all_concepts.size).to eq(1)
-      expect(all_concepts.first.identifier).to eq("uuid-q")
+      concept = store.concepts.first
+      expect(concept).to be_a(Glossarist::ManagedConcept)
+      expect(concept.uuid).to be_present
+      expect(concept.data.id).to be_present
+      expect(concept.localizations).not_to be_empty
     end
   end
 end

@@ -4,26 +4,23 @@ require "lutaml/store"
 
 module Glossarist
   class ConceptStore
-    # Custom serializer that preserves both uuid and identifier through
-    # YAML string storage. ManagedConcept's key_value mapping writes both
-    # uuid and identifier to the same "id" key, so a naive to_hash/from_hash
-    # round-trip loses one of them. Storing the YAML string preserves the
-    # model exactly, and explicit metadata fields let the store index and
-    # query by uuid/identifier without deserializing.
-    class Serializer
-      def serialize(model)
+    # Serializes ConceptDocument for storage in lutaml-store.
+    # Stores the YAML stream string to preserve the full concept + localizations.
+    class ConceptDocumentSerializer
+      def serialize(concept_document)
         {
-          "_yaml" => model.to_yaml,
-          "_uuid" => model.uuid,
-          "_identifier" => model.identifier,
+          "_yamls" => concept_document.to_yamls,
+          "_id" => concept_document.id,
         }
       end
 
       def deserialize(data, model_class)
-        model = model_class.from_yaml(data["_yaml"])
-        model.assign_uuid(data["_uuid"]) if data["_uuid"]
-        model.identifier = data["_identifier"] if data["_identifier"]
-        model
+        doc = model_class.from_yamls(data["_yamls"])
+        doc.id = data["_id"]
+        concept = doc.concept
+        concept.uuid = doc.id if doc.id && concept
+        doc.localizations.each { |l10n| concept&.add_localization(l10n) }
+        doc
       end
     end
 
@@ -32,62 +29,55 @@ module Glossarist
     def initialize(adapter: :memory)
       @db = Lutaml::Store::DatabaseStore.new(
         adapter: adapter,
-        models: [managed_concept_registration],
+        models: [concept_document_registration],
       )
     end
 
-    def save(concept)
-      db.save(concept)
+    def load_glossary(path)
+      documents = db.load_all(
+        V3::ConceptDocument, path: path, format: :yamls, layout: :grouped
+      )
+
+      documents.each do |doc|
+        concept = doc.concept
+        concept.uuid = doc.id
+        db.save(doc)
+      end
+
+      documents
     end
 
     def fetch(uuid)
-      db.fetch(model: ManagedConcept, uuid: uuid)
+      doc = db.fetch(model: V3::ConceptDocument, id: uuid)
+      doc&.concept
     end
 
-    def fetch_by_id(identifier)
-      db.where(model: ManagedConcept, identifier: identifier).first
-    end
-
-    def update(uuid, **attributes)
-      db.update(model: ManagedConcept, uuid: uuid, attributes: attributes)
-    end
-
-    def delete(uuid)
-      db.destroy(model: ManagedConcept, uuid: uuid)
-    end
-
-    def all
-      db.all(model: ManagedConcept)
+    def concepts
+      db.all(model: V3::ConceptDocument).map(&:concept)
     end
 
     def count
-      db.count(model: ManagedConcept)
+      db.count(model: V3::ConceptDocument)
     end
 
     def exists?(uuid)
-      db.exists?(model: ManagedConcept, uuid: uuid)
+      db.exists?(model: V3::ConceptDocument, id: uuid)
     end
 
     def clear
-      all.each { |concept| delete(concept.uuid) }
-    end
-
-    def load_from_directory(path, format: :yaml, layout: :separate)
-      db.import_all(ManagedConcept, path: path, format: format, layout: layout)
-    end
-
-    def save_to_directory(path, format: :yaml, layout: :separate)
-      db.save_all(all, path: path, format: format, layout: layout)
+      db.all(model: V3::ConceptDocument).each do |doc|
+        db.destroy(model: V3::ConceptDocument, id: doc.id)
+      end
     end
 
     private
 
-    def managed_concept_registration
+    def concept_document_registration
       {
-        model: ManagedConcept,
-        key: :uuid,
-        dir: "concept",
-        serializer: Serializer.new,
+        model: V3::ConceptDocument,
+        key: :id,
+        dir: "concepts",
+        serializer: ConceptDocumentSerializer.new,
       }
     end
   end
