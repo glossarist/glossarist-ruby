@@ -21,6 +21,7 @@ module Glossarist
     attribute :concept_uri_template, :string
     attribute :compiled_formats, :string, collection: true
     attribute :external_references, :hash, collection: true
+    attribute :translations, :hash, default: -> { {} }
 
     key_value do
       map :shortname, to: :shortname
@@ -42,6 +43,7 @@ module Glossarist
       map :concept_uri_template, to: :concept_uri_template
       map :compiled_formats, to: :compiled_formats
       map :external_references, to: :external_references
+      map :translations, to: :translations
     end
 
     def self.from_concepts(concepts, register_data: nil, options: {})
@@ -64,6 +66,7 @@ module Glossarist
         concept_uri_template: options[:concept_uri_template],
         compiled_formats: options[:compiled_formats] || [],
         external_references: derive_external_references(concepts),
+        translations: rd&.dig("translations") || {},
       )
     end
 

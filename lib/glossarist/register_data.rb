@@ -17,6 +17,7 @@ module Glossarist
     attribute :repository, :string
     attribute :license, :string
     attribute :tags, :string, collection: true
+    attribute :translations, :hash, default: -> { {} }
 
     key_value do
       map %i[id shortname], to: :shortname
@@ -33,6 +34,7 @@ module Glossarist
       map "repository", to: :repository
       map "license", to: :license
       map "tags", to: :tags
+      map "translations", to: :translations
     end
 
     def [](key)
@@ -51,6 +53,7 @@ module Glossarist
       when "repository" then repository
       when "license" then license
       when "tags" then tags
+      when "translations" then translations
       end
     end
 
@@ -77,6 +80,7 @@ module Glossarist
       h["repository"] = repository if repository
       h["license"] = license if license
       h["tags"] = tags if tags && !tags.empty?
+      h["translations"] = translations if translations && !translations.empty?
       h
     end
 
