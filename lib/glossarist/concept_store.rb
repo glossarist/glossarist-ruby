@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "lutaml/store"
-
 module Glossarist
   class ConceptStore
     # Serializes ConceptDocument for storage in lutaml-store.

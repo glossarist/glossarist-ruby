@@ -40,7 +40,10 @@ RSpec.describe Glossarist::GcrMetadata do
     end
 
     it "uses register data for title/description" do
-      register = { "name" => "My Dataset", "description" => "A dataset" }
+      register = Glossarist::RegisterData.new(
+        name: "My Dataset",
+        description: "A dataset",
+      )
       metadata = described_class.from_concepts(concepts,
                                                register_data: register)
 

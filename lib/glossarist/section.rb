@@ -16,6 +16,7 @@ module Glossarist
 
     def name(lang = nil)
       return names&.dig("eng") if lang.nil?
+
       names&.dig(lang) || names&.dig("eng")
     end
 
@@ -32,8 +33,7 @@ module Glossarist
     def self.from_file(path)
       return nil unless File.exist?(path)
 
-      data = YAML.safe_load(File.read(path, encoding: "utf-8"))
-      from_yaml(YAML.dump(data))
+      from_yaml(File.read(path, encoding: "utf-8"))
     end
   end
 end

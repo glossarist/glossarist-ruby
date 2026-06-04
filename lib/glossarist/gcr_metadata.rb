@@ -50,23 +50,23 @@ module Glossarist
       stats = GcrStatistics.from_concepts(concepts)
       rd = register_data
       new(
-        shortname: options[:shortname] || rd&.[]("shortname") || rd&.[]("id"),
-        version: options[:version] || rd&.[]("version"),
-        title: options[:title] || rd&.[]("name"),
-        description: options[:description] || rd&.[]("description"),
+        shortname: options[:shortname] || rd&.shortname,
+        version: options[:version] || rd&.version,
+        title: options[:title] || rd&.name,
+        description: options[:description] || rd&.description,
         owner: options[:owner],
         tags: options[:tags] || [],
         concept_count: concepts.length,
         languages: stats.languages,
         created_at: Time.now.utc.iso8601,
         glossarist_version: Glossarist::VERSION,
-        schema_version: rd&.[]("schema_version") || SchemaMigration::CURRENT_SCHEMA_VERSION,
+        schema_version: rd&.schema_version || SchemaMigration::CURRENT_SCHEMA_VERSION,
         statistics: stats,
         uri_prefix: options[:uri_prefix],
         concept_uri_template: options[:concept_uri_template],
         compiled_formats: options[:compiled_formats] || [],
         external_references: derive_external_references(concepts),
-        translations: rd&.dig("translations") || {},
+        translations: rd&.translations || {},
       )
     end
 
