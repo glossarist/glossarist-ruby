@@ -140,4 +140,20 @@ RSpec.describe Glossarist::ConceptReference do
       expect(loaded.references.first.source).to eq("urn:iec:std:iec:60050")
     end
   end
+
+  describe ".domain factory" do
+    it "creates a domain reference" do
+      ref = described_class.domain("mathematics")
+      expect(ref.concept_id).to eq("mathematics")
+      expect(ref.ref_type).to eq("domain")
+    end
+  end
+
+  describe ".section factory" do
+    it "creates a section reference" do
+      ref = described_class.section("section-103-01")
+      expect(ref.concept_id).to eq("section-103-01")
+      expect(ref.ref_type).to eq("section")
+    end
+  end
 end

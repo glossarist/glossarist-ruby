@@ -71,6 +71,8 @@ module Glossarist
   autoload :Utilities,                "glossarist/utilities"
   autoload :Validation,               "glossarist/validation"
   autoload :RegisterData,             "glossarist/register_data"
+  autoload :Section,                 "glossarist/section"
+  autoload :DatasetRegister,         "glossarist/dataset_register"
   autoload :ValidationResult,         "glossarist/validation_result"
   autoload :V1,                       "glossarist/v1"
   autoload :V2,                       "glossarist/v2"

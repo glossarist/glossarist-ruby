@@ -26,6 +26,10 @@ module Glossarist
       new(concept_id: concept_id, ref_type: "domain")
     end
 
+    def self.section(concept_id)
+      new(concept_id: concept_id, ref_type: "section")
+    end
+
     def local?
       %w[local designation].include?(ref_type) ||
         (ref_type.nil? && (source.nil? || source.empty?))
