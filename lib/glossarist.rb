@@ -6,6 +6,7 @@
 require "psych"
 require "thor"
 require "lutaml/model"
+require "lutaml/store"
 
 module Glossarist
   autoload :Asset,                    "glossarist/asset"

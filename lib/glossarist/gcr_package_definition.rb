@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "lutaml/store"
-
 module Glossarist
   module GcrPackageDefinition
     def self.definition(concept_document_class: V3::ConceptDocument)

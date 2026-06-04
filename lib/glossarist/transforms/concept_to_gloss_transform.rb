@@ -155,7 +155,7 @@ module Glossarist
           Rdf::RelationshipPredicates::DESIGNATION_REL_PREDICATES,
         )
         rel_targets.each do |attr_name, targets|
-          instance.send(:"#{attr_name}=", targets) unless targets.empty?
+          instance.public_send(:"#{attr_name}=", targets) unless targets.empty?
         end
         instance
       end

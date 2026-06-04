@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require "lutaml/store"
-require "zip"
-
 module Glossarist
   class GlossaryStore
     attr_reader :package
