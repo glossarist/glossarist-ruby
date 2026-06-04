@@ -98,8 +98,10 @@ RSpec.describe Glossarist::DatasetRegister do
     end
 
     it "reads localized metadata" do
-      expect(register.description).to eq({ "eng" => "A test dataset", "fra" => "Un jeu de données test" })
-      expect(register.about).to eq({ "eng" => "about-eng.md", "fra" => "about-fra.md" })
+      expect(register.description).to eq({ "eng" => "A test dataset",
+                                           "fra" => "Un jeu de données test" })
+      expect(register.about).to eq({ "eng" => "about-eng.md",
+                                     "fra" => "about-fra.md" })
     end
   end
 

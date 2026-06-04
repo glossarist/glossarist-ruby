@@ -4,7 +4,6 @@ source "https://rubygems.org"
 
 gemspec
 
-
 gem "canon"
 gem "nokogiri"
 gem "rake", "~> 13.0"
