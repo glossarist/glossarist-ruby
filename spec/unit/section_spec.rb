@@ -11,7 +11,10 @@ RSpec.describe Glossarist::Section do
     end
 
     it "returns English name by default" do
-      section = described_class.new(id: "1", names: { "eng" => "General", "fra" => "Général" })
+      section = described_class.new(id: "1",
+                                    names: {
+                                      "eng" => "General", "fra" => "Général"
+                                    })
       expect(section.name).to eq("General")
     end
 
@@ -22,9 +25,16 @@ RSpec.describe Glossarist::Section do
   end
 
   describe "hierarchical children" do
-    let(:child1) { described_class.new(id: "103-01", names: { "eng" => "General concepts" }) }
-    let(:child2) { described_class.new(id: "103-02", names: { "eng" => "Functions" }) }
-    let(:parent) { described_class.new(id: "103", names: { "eng" => "Mathematics" }, children: [child1, child2]) }
+    let(:child1) do
+      described_class.new(id: "103-01", names: { "eng" => "General concepts" })
+    end
+    let(:child2) do
+      described_class.new(id: "103-02", names: { "eng" => "Functions" })
+    end
+    let(:parent) do
+      described_class.new(id: "103", names: { "eng" => "Mathematics" },
+                          children: [child1, child2])
+    end
 
     it "has children" do
       expect(parent.children.length).to eq(2)
@@ -46,7 +56,8 @@ RSpec.describe Glossarist::Section do
   describe "YAML serialization" do
     it "round-trips through YAML" do
       child = described_class.new(id: "103-01", names: { "eng" => "General" })
-      parent = described_class.new(id: "103", names: { "eng" => "Math" }, children: [child])
+      parent = described_class.new(id: "103", names: { "eng" => "Math" },
+                                   children: [child])
 
       yaml = parent.to_yaml
       parsed = described_class.from_yaml(yaml)
