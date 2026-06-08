@@ -1,0 +1,25 @@
+# 17 — Annotations (V2)
+#
+# V2 parallel fixture. V2 ConceptData does not have annotations,
+# so this demonstrates a concept with definition, notes, and examples only.
+---
+id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+data:
+  language_code: eng
+  terms:
+  - type: expression
+    designation: annotation example
+    normative_status: preferred
+  definition:
+  - content: a concept demonstrating standard fields without annotations
+  examples:
+  - content: this is an example
+  notes:
+  - content: this is a note
+sources:
+- type: authoritative
+  origin:
+    ref:
+      source: IEC
+      id: 60050-101
+status: valid

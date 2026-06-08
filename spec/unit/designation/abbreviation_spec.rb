@@ -83,11 +83,15 @@ RSpec.describe Glossarist::Designation::Abbreviation do
     it "accepts designation-level relationships" do
       abbr = described_class.new(designation: "WWW", acronym: true)
       abbr.related = [
-        Glossarist::RelatedConcept.new(type: "abbreviated_form_for",
-                                       content: "World Wide Web"),
+        Glossarist::Designation::DesignationRelationship.new(
+          type: "abbreviated_form_for",
+          content: "World Wide Web",
+          target: "World Wide Web",
+        ),
       ]
       expect(abbr.related.first.type).to eq("abbreviated_form_for")
       expect(abbr.related.first.content).to eq("World Wide Web")
+      expect(abbr.related.first.target).to eq("World Wide Web")
     end
   end
 end

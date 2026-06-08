@@ -53,8 +53,25 @@ module Glossarist
 
       ALL_REL_PREDICATES = CONCEPT_REL_PREDICATES.merge(DESIGNATION_REL_PREDICATES).freeze
 
+      DESIGNATION_ONLY_PREDICATES = DESIGNATION_REL_PREDICATES.slice(
+        :abbreviated_form_for, :short_form_for
+      ).freeze
+
       def self.related_targets_by_type(related_concepts, predicate_map)
         targets = group_targets(related_concepts, predicate_map)
+        predicate_map.each_key.to_h do |type|
+          [:"#{type}_targets", targets[:"#{type}_targets"] || []]
+        end
+      end
+
+      def self.designation_targets_by_type(relationships, predicate_map)
+        valid = Array(relationships).select do |r|
+          r.target && predicate_map.key?(r.type.to_sym)
+        end
+        targets = valid
+          .group_by { |r| r.type.to_sym }
+          .transform_values { |rs| rs.map(&:target) }
+          .transform_keys { |type| :"#{type}_targets" }
         predicate_map.each_key.to_h do |type|
           [:"#{type}_targets", targets[:"#{type}_targets"] || []]
         end

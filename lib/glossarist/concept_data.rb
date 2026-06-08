@@ -67,6 +67,10 @@ module Glossarist
       doc["terms"] = model.terms&.map(&:to_yaml_hash)
     end
 
+    def self.detailed_definition_fields
+      %i[definition notes examples]
+    end
+
     def date_accepted
       return nil unless dates
 
@@ -81,17 +85,17 @@ module Glossarist
 
     def all_sources
       list = sources.to_a
-      definition.each { |d| list.concat(d.sources.to_a) }
-      notes.each { |n| list.concat(n.sources.to_a) }
-      examples.each { |e| list.concat(e.sources.to_a) }
+      self.class.detailed_definition_fields.each do |field|
+        send(field).each { |d| list.concat(d.sources.to_a) }
+      end
       list
     end
 
     def text_content
       texts = []
-      definition.each { |d| texts << d.content if d.content }
-      notes.each { |n| texts << n.content if n.content }
-      examples.each { |e| texts << e.content if e.content }
+      self.class.detailed_definition_fields.each do |field|
+        send(field).each { |d| texts << d.content if d.content }
+      end
       texts
     end
   end

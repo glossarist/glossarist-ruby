@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "spec_helper"
-require "rdf"
+require "rdf/turtle"
 require "glossarist/transforms/concept_to_gloss_transform"
 
 RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
@@ -432,14 +432,15 @@ RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
 
   describe "designation-level relationships" do
     let(:rel_concept) do
-      rc = Glossarist::RelatedConcept.new(type: "abbreviated_form_for")
-      rc.ref = Glossarist::ConceptRef.new(source: "light-emitting diode",
-                                          id: "led_full")
+      dr = Glossarist::Designation::DesignationRelationship.new(
+        type: "abbreviated_form_for",
+        target: "light-emitting diode",
+      )
 
       desig = Glossarist::Designation::Abbreviation.new(
         designation: "LED", type: "abbreviation",
       )
-      desig.related = [rc]
+      desig.related = [dr]
 
       l10n = Glossarist::LocalizedConcept.new(language_code: "eng")
       l10n.data.terms = [desig]
@@ -467,7 +468,7 @@ RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
       abbr_triples = rel_graph.query([nil,
                                       RDF::URI("#{gloss}abbreviatedFormFor"), nil])
       expect(abbr_triples.count).to eq(1)
-      expect(abbr_triples.first.object.to_s).to eq("concept/led_full")
+      expect(abbr_triples.first.object.to_s).to eq("light-emitting diode")
     end
   end
 

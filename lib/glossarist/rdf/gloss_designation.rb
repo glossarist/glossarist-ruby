@@ -26,9 +26,18 @@ module Glossarist
       dsl.members :pronunciations, link: "gloss:hasPronunciation"
       dsl.members :sources
 
-      RelationshipPredicates::DESIGNATION_REL_PREDICATES.each do |type, (ns, name)|
-        dsl.predicate name, namespace: ns, to: :"#{type}_targets",
+      # Concept-level lexical relationships mapped to designation RDF predicates (URI refs)
+      {
+        homograph: RelationshipPredicates::DESIGNATION_REL_PREDICATES[:homograph],
+        false_friend: RelationshipPredicates::DESIGNATION_REL_PREDICATES[:false_friend],
+      }.each do |_type, (ns, name)|
+        dsl.predicate name, namespace: ns, to: :"#{_type}_targets",
                             uri_reference: true
+      end
+
+      # Designation-level relationships (literal target text)
+      RelationshipPredicates::DESIGNATION_ONLY_PREDICATES.each do |_type, (ns, name)|
+        dsl.predicate name, namespace: ns, to: :"#{_type}_targets"
       end
     }.freeze
 

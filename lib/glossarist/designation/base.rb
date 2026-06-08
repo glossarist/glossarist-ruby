@@ -14,7 +14,7 @@ module Glossarist
       attribute :pronunciation, Pronunciation, collection: true
       attribute :sources, ConceptSource, collection: true
       attribute :term_type, :string
-      attribute :related, RelatedConcept, collection: true
+      attribute :related, DesignationRelationship, collection: true
 
       key_value do
         map :type, to: :type
