@@ -2,7 +2,9 @@
 
 module Glossarist
   module Designation
-    autoload :Base,              "glossarist/designation/base"
+    autoload :Base, "glossarist/designation/base"
+    autoload :DesignationRelationship,
+             "glossarist/designation/designation_relationship"
     autoload :Expression,        "glossarist/designation/expression"
     autoload :Abbreviation,      "glossarist/designation/abbreviation"
     autoload :GrammarInfo,       "glossarist/designation/grammar_info"

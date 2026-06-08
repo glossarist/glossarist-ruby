@@ -120,9 +120,14 @@ module Glossarist
           build_gloss_designation(desig, concept_id, lang, idx)
         end
 
-        definitions = build_gloss_definitions(data&.definition)
-        notes = build_gloss_definitions(data&.notes)
-        examples = build_gloss_definitions(data&.examples)
+        dd_attrs = if data
+                     data.class.detailed_definition_fields.to_h do |field|
+                       [field, build_gloss_definitions(data.send(field))]
+                     end
+                   else
+                     { definition: [], notes: [], examples: [] }
+                   end
+
         sources = build_gloss_sources(data&.sources)
         non_verb_reps = build_gloss_non_verbal_reps(l10n.non_verb_rep,
                                                     concept_id, lang)
@@ -137,9 +142,7 @@ module Glossarist
           script: data&.script,
           system: data&.system,
           designations: designations,
-          definitions: definitions,
-          notes: notes,
-          examples: examples,
+          **dd_attrs,
           sources: sources,
           non_verb_reps: non_verb_reps,
         )
@@ -150,9 +153,9 @@ module Glossarist
         instance = designation_instance_for(desig, common_attrs, concept_id,
                                             lang, index)
 
-        rel_targets = Rdf::RelationshipPredicates.related_targets_by_type(
+        rel_targets = Rdf::RelationshipPredicates.designation_targets_by_type(
           desig.related,
-          Rdf::RelationshipPredicates::DESIGNATION_REL_PREDICATES,
+          Rdf::RelationshipPredicates::DESIGNATION_ONLY_PREDICATES,
         )
         rel_targets.each do |attr_name, targets|
           instance.public_send(:"#{attr_name}=", targets) unless targets.empty?

@@ -17,6 +17,7 @@ module Glossarist
       attribute :definitions, GlossDetailedDefinition, collection: true
       attribute :notes, GlossDetailedDefinition, collection: true
       attribute :examples, GlossDetailedDefinition, collection: true
+      attribute :annotations, GlossDetailedDefinition, collection: true
       attribute :sources, GlossConceptSource, collection: true
       attribute :non_verb_reps, GlossNonVerbalRep, collection: true
 
@@ -55,6 +56,8 @@ module Glossarist
                 link: "gloss:hasNote"
         members :examples,
                 link: "gloss:hasExample"
+        members :annotations,
+                link: "gloss:hasAnnotation"
         members :sources,
                 link: "gloss:hasSource"
         members :non_verb_reps,

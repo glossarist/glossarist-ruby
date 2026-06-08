@@ -1,0 +1,35 @@
+# 17 — Annotations
+#
+# Demonstrates the annotations field on ConceptData. Annotations are
+# supplementary explanatory remarks attached to a localized concept,
+# distinct from definition, examples, and notes.
+---
+id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+data:
+  language_code: eng
+  terms:
+  - type: expression
+    designation: annotation example
+    normative_status: preferred
+  definition:
+  - content: a concept demonstrating the annotations field
+  examples:
+  - content: this is an example
+  notes:
+  - content: this is a note
+  annotations:
+  - content: editorial remark about usage context
+  - content: cross-reference note from committee review
+    sources:
+    - type: lineage
+      origin:
+        ref:
+          source: IEC
+          id: 60050-101
+sources:
+- type: authoritative
+  origin:
+    ref:
+      source: IEC
+      id: 60050-101
+status: valid
