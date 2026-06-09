@@ -112,14 +112,14 @@ RSpec.describe "V2/V3 namespace architecture" do
       expect(described_class).to be < Glossarist::ManagedConceptData
     end
 
-    it "does not map related in key_value" do
+    it "maps related in key_value" do
       mcd = described_class.new
       mcd.id = "test-1"
       mcd.related = [
         Glossarist::V3::RelatedConcept.new(type: "broader", content: "Parent"),
       ]
       hash = mcd.to_hash
-      expect(hash).not_to have_key("related")
+      expect(hash).to have_key("related")
     end
   end
 

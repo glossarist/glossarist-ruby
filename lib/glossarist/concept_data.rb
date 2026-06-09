@@ -98,5 +98,9 @@ module Glossarist
       end
       texts
     end
+
+    def annotations
+      @annotations ||= Collections::DetailedDefinitionCollection.new
+    end
   end
 end

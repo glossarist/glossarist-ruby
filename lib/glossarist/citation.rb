@@ -15,6 +15,7 @@ module Glossarist
     end
 
     attribute :ref, Ref
+    attribute :text, :string
     attribute :locality, Locality
     attribute :link, :string
     attribute :original, :string
@@ -33,6 +34,10 @@ module Glossarist
     def label
       parts = [ref&.source, ref&.id].compact
       parts.empty? ? nil : parts.join(" ")
+    end
+
+    def text
+      @text || label
     end
 
     def locality_from_yaml(model, value)
