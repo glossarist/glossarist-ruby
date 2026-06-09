@@ -17,6 +17,7 @@ module Glossarist
                                 with: { from: :domains_from_yaml, to: :domains_to_yaml }
         map :tags, to: :tags
         map :sources, to: :sources
+        map :related, to: :related
         map :localizations, to: :localizations,
                             with: { from: :localizations_from_yaml, to: :localizations_to_yaml }
       end

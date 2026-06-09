@@ -50,6 +50,7 @@ module Glossarist
 
     def load_concept_from_file(filename) # rubocop:disable Metrics/CyclomaticComplexity
       raw = File.read(filename, encoding: "utf-8")
+      self.version = detect_version(raw)
       doc = concept_document_class.from_yamls(raw)
       concept = doc.concept
       unless concept
@@ -163,6 +164,14 @@ module Glossarist
           @localized_concepts_path = dir_name
           return actual_path
         end
+      end
+    end
+
+    def detect_version(raw)
+      if (m = raw.match(/^schema_version:\s*v?(\d)/))
+        m[1]
+      else
+        version
       end
     end
 

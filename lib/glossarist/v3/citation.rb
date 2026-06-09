@@ -7,6 +7,8 @@ module Glossarist
         map :ref, to: :ref, with: { from: :ref_from_yaml, to: :ref_to_yaml }
       end
 
+      alias_method :text, :label
+
       def ref_from_yaml(model, value)
         case value
         when Hash
