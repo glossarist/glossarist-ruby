@@ -114,6 +114,22 @@ module Glossarist
       )
     end
 
+    def resolve_cite_key(identifier, display)
+      cleaned = identifier.delete_prefix("cite:").strip
+      return nil if cleaned.empty?
+
+      if cleaned.start_with?('"') && cleaned.end_with?('"') && cleaned.length >= 2
+        cleaned = cleaned[1..-2].gsub('""', '"')
+      end
+
+      ConceptReference.new(
+        concept_id: cleaned,
+        source: nil,
+        term: display || cleaned,
+        ref_type: "cite",
+      )
+    end
+
     def resolve_iec_urn(urn, display)
       concept_id = extract_iec_concept_id(urn)
 
@@ -272,6 +288,10 @@ module Glossarist
       name: :asciidoc_image,
       regex: /image::?([^\[\]]+)\[/,
     ) { |ext, path| ext.resolve_image_ref(path) }
+
+    register_identifier_resolver("cite:") do |ext, identifier, display|
+      ext.resolve_cite_key(identifier, display)
+    end
 
     register_identifier_resolver("urn:iec:std:iec:60050") do |ext, identifier, display|
       ext.resolve_iec_urn(identifier, display)

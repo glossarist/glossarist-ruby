@@ -184,6 +184,48 @@ RSpec.describe Glossarist::ReferenceExtractor do
     end
   end
 
+  describe "cite: form" do
+    it "extracts {{cite:source-id}}" do
+      refs = subject.extract_from_text("See {{cite:source-id}} for details.")
+      expect(refs.length).to eq(1)
+      expect(refs[0].concept_id).to eq("source-id")
+      expect(refs[0].source).to be_nil
+      expect(refs[0].term).to eq("source-id")
+      expect(refs[0].ref_type).to eq("cite")
+      expect(refs[0]).to be_cite
+      expect(refs[0]).to be_local
+    end
+
+    it "extracts {{cite:source-id,display text}} — display is cite key, identifier falls through" do
+      refs = subject.extract_from_text("See {{cite:source-id,display text}}.")
+      expect(refs[0].term).to eq("cite:source-id")
+      expect(refs[0].ref_type).to eq("designation")
+    end
+
+    it "extracts {{display text,cite:source-id}}" do
+      refs = subject.extract_from_text("See {{display text,cite:source-id}}.")
+      expect(refs[0].concept_id).to eq("source-id")
+      expect(refs[0].term).to eq("display text")
+    end
+
+    it "trims whitespace around the key" do
+      refs = subject.extract_from_text("See {{cite:  spaced  }}.")
+      expect(refs[0].concept_id).to eq("spaced")
+      expect(refs[0].term).to eq("spaced")
+    end
+
+    it "does not match the bare {{cite:}} form (empty key)" do
+      refs = subject.extract_from_text("See {{cite:}} for details.")
+      expect(refs.length).to eq(0)
+    end
+
+    it "does not collide with URN forms" do
+      refs = subject.extract_from_text("See {{urn:iec:std:iec:60050:102-01-01}}.")
+      expect(refs[0].source).to start_with("urn:iec:")
+      expect(refs[0]).not_to be_cite
+    end
+  end
+
   describe "edge cases" do
     it "returns empty array for nil text" do
       expect(subject.extract_from_text(nil)).to eq([])

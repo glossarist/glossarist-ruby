@@ -19,6 +19,7 @@ module Glossarist
 
     attribute :uuid, :string
 
+    attribute :version, :string
     attribute :schema_version, :string
 
     key_value do
@@ -141,6 +142,32 @@ module Glossarist
 
     def default_lang
       localization("eng") || localizations.values.first
+    end
+
+    def find_source_by_id(id)
+      return nil if id.nil? || id.to_s.strip.empty?
+
+      Array(sources).each do |source|
+        return source if source.id == id
+      end
+
+      Array(data&.sources).each do |source|
+        return source if source.id == id
+      end
+
+      localizations.each_value do |l10n|
+        Array(l10n.sources).each do |source|
+          return source if source.id == id
+        end
+
+        Array(l10n.terms).each do |term|
+          Array(term.sources).each do |source|
+            return source if source.id == id
+          end
+        end
+      end
+
+      nil
     end
 
     def schema_version

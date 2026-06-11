@@ -32,7 +32,7 @@ manager.load_from_files(collection: collection)
 
 count = 0
 collection.each do |concept|
-  Glossarist::SchemaMigration.migrate_concept(concept)
+  Glossarist::SchemaMigration::V2ToV3.migrate_concept(concept)
   count += 1
 end
 

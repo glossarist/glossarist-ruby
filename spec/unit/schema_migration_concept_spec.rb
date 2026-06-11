@@ -79,7 +79,7 @@ RSpec.describe Glossarist::SchemaMigration, ".migrate_concept" do
 
       expect do
         described_class.migrate_concept(v2_concept, target_version: "100")
-      end.to raise_error(Glossarist::Error, /No concept migration step/)
+      end.to raise_error(Glossarist::Errors::Base, /No concept migration step/)
     end
   end
 

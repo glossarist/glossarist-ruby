@@ -29,7 +29,7 @@ RSpec.describe Glossarist::Collections::BibliographyCollection do
       collection = described_class.new(concepts, nil, cache_dir)
 
       expect { collection.fetch_all }.to raise_error(
-        Glossarist::CacheVersionMismatchError, /version mismatch/
+        Glossarist::Errors::CacheVersionMismatchError, /version mismatch/
       )
     end
 

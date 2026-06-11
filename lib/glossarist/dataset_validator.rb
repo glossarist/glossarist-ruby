@@ -52,7 +52,7 @@ module Glossarist
     def validate_directory_cross_references(path, reference_path)
       extractor = ReferenceExtractor.new
       resolver = build_resolver(reference_path)
-      concepts = ConceptCollector.collect(path)
+      concepts = GlossaryStore.new.tap { |s| s.load(path) }.concepts
       resolver.register_self(concepts)
       resolver.validate_all(concepts, extractor: extractor)
     end

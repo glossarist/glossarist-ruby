@@ -127,6 +127,50 @@ RSpec.describe Glossarist::ManagedConceptCollection do
     end
   end
 
+  describe "#by_id_and" do
+    let(:collection) { described_class.new }
+
+    it "matches on id alone when version is nil" do
+      c = Glossarist::ManagedConcept.of_yaml("data" => { "id" => "uuid-1" })
+      c.version = nil
+      collection.store(c)
+      expect(collection.by_id_and(c.uuid, nil)).to eq(c)
+    end
+
+    it "matches on id alone when version is omitted" do
+      c = Glossarist::ManagedConcept.of_yaml("data" => { "id" => "uuid-1" })
+      collection.store(c)
+      expect(collection.by_id_and(c.uuid)).to eq(c)
+    end
+
+    it "matches on id and version together" do
+      c2010 = Glossarist::ManagedConcept.of_yaml("data" => { "id" => "shared-id" })
+      c2010.version = "2010"
+      c2024 = Glossarist::ManagedConcept.of_yaml("data" => { "id" => "shared-id2" })
+      c2024.version = "2024"
+      collection.store(c2010)
+      collection.store(c2024)
+      expect(collection.by_id_and(c2024.uuid, "2024")).to eq(c2024)
+    end
+
+    it "returns nil when no concept has the (id, version) pair" do
+      c = Glossarist::ManagedConcept.of_yaml("data" => { "id" => "uuid-1" })
+      c.version = "2010"
+      collection.store(c)
+      expect(collection.by_id_and(c.uuid, "2030")).to be_nil
+    end
+
+    it "returns nil when no concept has the id" do
+      expect(collection.by_id_and("anything", "2024")).to be_nil
+    end
+
+    it "returns nil when version is set but concept version is nil" do
+      c = Glossarist::ManagedConcept.of_yaml("data" => { "id" => "uuid-1" })
+      collection.store(c)
+      expect(collection.by_id_and(c.uuid, "2024")).to be_nil
+    end
+  end
+
   describe "#load_from_files" do
     context "Invalid concepts" do
       let(:invalid_concepts_path) { fixtures_path("invalid_concepts") }
@@ -141,7 +185,7 @@ RSpec.describe Glossarist::ManagedConceptCollection do
     context "Valid concepts" do
       let(:valid_concepts_path) { fixtures_path("concept_collection_v2") }
 
-      it "will not raise Glossarist::ParseError" do
+      it "will not raise Glossarist::Errors::Parse" do
         expect do
           managed_concept_collection.load_from_files(valid_concepts_path)
         end.not_to raise_error

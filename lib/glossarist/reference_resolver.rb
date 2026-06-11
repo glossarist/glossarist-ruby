@@ -5,6 +5,7 @@ module Glossarist
     def initialize
       @local_adapter = nil
       @package_adapters = []
+      @bibliography_adapters = []
       @route_adapter = ResolutionAdapter::Route.new
       @remote_adapters = []
     end
@@ -31,12 +32,26 @@ module Glossarist
                                                         endpoint: endpoint)
     end
 
-    def resolve(reference)
+    def register_bibliography(source_id, concepts)
+      @bibliography_adapters << ResolutionAdapter::Bibliography.new(source_id, concepts)
+    end
+
+    def resolve(reference, concept: nil)
+      if concept && reference.is_a?(ConceptReference) && reference.cite?
+        source = concept.find_source_by_id(reference.concept_id)
+        return source&.origin if source
+      end
+
       if reference.local?
         return @local_adapter&.resolve(reference)
       end
 
       routed_ref = apply_routes(reference)
+
+      @bibliography_adapters.each do |adapter|
+        result = adapter.resolve(routed_ref)
+        return result if result
+      end
 
       @package_adapters.each do |adapter|
         result = adapter.resolve(routed_ref)
@@ -54,7 +69,8 @@ module Glossarist
     def resolve_all(concept, extractor: nil)
       extractor ||= ReferenceExtractor.new
       refs = extract_refs(concept, extractor)
-      refs.map { |ref| [ref, resolve(ref)] }
+      source_concept = concept.is_a?(ManagedConcept) ? concept : nil
+      refs.map { |ref| [ref, resolve(ref, concept: source_concept)] }
     end
 
     def validate_all(package_or_concepts, extractor: nil, mode: :multi)
@@ -98,7 +114,52 @@ module Glossarist
       @package_adapters.map(&:uri_prefix)
     end
 
+    def classify(reference, concept: nil)
+      case reference
+      when ConceptReference
+        classify_concept_reference(reference, concept)
+      else
+        "unknown"
+      end
+    end
+
     private
+
+    def classify_concept_reference(reference, concept)
+      if reference.cite?
+        return classify_cite_ref(reference, concept)
+      end
+
+      if reference.external?
+        return classify_external_ref(reference)
+      end
+
+      classify_local_ref(reference)
+    end
+
+    def classify_cite_ref(reference, concept)
+      if concept&.find_source_by_id(reference.concept_id)
+        "self-contained-citation"
+      else
+        "unresolved-citation"
+      end
+    end
+
+    def classify_external_ref(reference)
+      if @bibliography_adapters.any? { |a| a.resolve(reference) }
+        "internal-citation"
+      else
+        "external-citation"
+      end
+    end
+
+    def classify_local_ref(reference)
+      if @local_adapter&.resolve(reference)
+        "same-dataset"
+      else
+        "unresolved"
+      end
+    end
 
     def apply_routes(reference)
       routed = @route_adapter.resolve(reference)

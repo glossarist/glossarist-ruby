@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module Glossarist
-  class Error < StandardError
+  module Errors
+    class Base < StandardError
+    end
   end
 end

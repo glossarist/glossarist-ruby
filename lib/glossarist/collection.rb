@@ -68,7 +68,7 @@ module Glossarist
     def load_concept_from_file(filename)
       Concept.from_yaml(File.read(filename))
     rescue Psych::SyntaxError => e
-      raise Glossarist::ParseError.new(filename: filename, line: e.line)
+      raise Glossarist::Errors::ParseError.new(filename: filename, line: e.line)
     end
 
     def save_concept_to_file(concept)

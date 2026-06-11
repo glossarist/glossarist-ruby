@@ -259,7 +259,9 @@ module Glossarist
 
       def create_batch(dir, output:, shortname:, version:,
 compiled_formats: [], **opts)
-        concepts = ConceptCollector.collect(dir)
+        store = GlossaryStore.new
+        store.load(dir)
+        concepts = store.concepts
         if concepts.empty?
           raise ArgumentError,
                 "No concept files found in #{dir}"
@@ -304,7 +306,7 @@ compiled_formats: [], **opts)
             zos.write(register_data.to_yaml)
           end
 
-          ConceptCollector.each_concept(dir) do |mc|
+          GlossaryStore.new.tap { |s| s.load(dir) }.each_concept do |mc|
             enricher.inject_references([mc])
             if opts[:concept_uri_template]
               enricher.apply_uri_template([mc],

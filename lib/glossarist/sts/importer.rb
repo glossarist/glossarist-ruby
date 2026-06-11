@@ -184,8 +184,7 @@ module Glossarist
           package = GcrPackage.load(path)
           package.concepts.each { |mc| collection.store(mc) }
         else
-          concepts = ConceptCollector.collect(path)
-          concepts.each { |mc| collection.store(mc) }
+          GlossaryStore.new.tap { |s| s.load(path) }.each_concept { |mc| collection.store(mc) }
         end
         collection
       end
@@ -214,11 +213,10 @@ module Glossarist
       end
 
       def save_dataset(concepts, dir)
-        concepts_dir = File.join(dir, "concepts")
-        FileUtils.mkdir_p(concepts_dir)
-        collection = ManagedConceptCollection.new
-        concepts.each { |mc| collection.store(mc) }
-        collection.save_grouped_concepts_to_files(concepts_dir)
+        FileUtils.mkdir_p(dir)
+        store = GlossaryStore.new
+        concepts.each { |mc| store.add_concept(mc) }
+        store.save_directory(dir)
       end
 
       def create_gcr(concepts, output, shortname:, version:, **opts)
@@ -238,12 +236,11 @@ module Glossarist
 
       def build_temp_dataset(concepts)
         tmpdir = Dir.mktmpdir("glossarist-sts-import")
-        concepts_dir = File.join(tmpdir, "concepts")
-        FileUtils.mkdir_p(concepts_dir)
+        FileUtils.mkdir_p(tmpdir)
 
-        collection = ManagedConceptCollection.new
-        concepts.each { |mc| collection.store(mc) }
-        collection.save_grouped_concepts_to_files(concepts_dir)
+        store = GlossaryStore.new
+        concepts.each { |mc| store.add_concept(mc) }
+        store.save_directory(tmpdir)
 
         tmpdir
       end
