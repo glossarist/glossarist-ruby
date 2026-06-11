@@ -12,8 +12,8 @@ module Glossarist
       end
 
       def run
-        new_concepts = ConceptCollector.collect(@new_path)
-        old_concepts = ConceptCollector.collect(@old_path)
+        new_concepts = GlossaryStore.new.tap { |s| s.load(@new_path) }.concepts
+        old_concepts = GlossaryStore.new.tap { |s| s.load(@old_path) }.concepts
 
         result = ConceptComparator.new(
           new_concepts: new_concepts,

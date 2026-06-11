@@ -14,7 +14,7 @@ RSpec.describe Glossarist::SchemaMigration do
     it "raises for unsupported migration path" do
       expect do
         described_class.new({}, from_version: "5", to_version: "99").migrate
-      end.to raise_error(Glossarist::Error, /Unsupported migration/)
+      end.to raise_error(Glossarist::Errors::Base, /Unsupported migration/)
     end
 
     context "v0 -> v1" do

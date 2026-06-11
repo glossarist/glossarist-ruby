@@ -252,4 +252,58 @@ RSpec.describe Glossarist::ManagedConcept do
       expect(subject.default_designation).to eq("Arabic Designation")
     end
   end
+
+  describe "#find_source_by_id" do
+    it "returns nil when no source has the id" do
+      expect(subject.find_source_by_id("anything")).to be_nil
+    end
+
+    it "returns nil for nil or empty id" do
+      expect(subject.find_source_by_id(nil)).to be_nil
+      expect(subject.find_source_by_id("")).to be_nil
+      expect(subject.find_source_by_id("  ")).to be_nil
+    end
+
+    it "finds a concept-level source by id" do
+      source = Glossarist::ConceptSource.new(
+        id: "iso-7301-3-2",
+        type: "authoritative",
+        origin: Glossarist::Citation.new(
+          ref: Glossarist::Citation::Ref.new(source: "ISO", id: "7301"),
+        ),
+      )
+      subject.sources = [source]
+      expect(subject.find_source_by_id("iso-7301-3-2")).to eq(source)
+    end
+
+    it "finds a localization-level source by id" do
+      source = Glossarist::ConceptSource.new(
+        id: "smith-2020",
+        type: "lineage",
+        origin: Glossarist::Citation.new(
+          ref: Glossarist::Citation::Ref.new(source: "DOI", id: "10.1234/abc"),
+        ),
+      )
+      l10n = Glossarist::LocalizedConcept.of_yaml(
+        "data" => {
+          "language_code" => "eng",
+          "terms" => [{ "designation" => "test", "type" => "expression" }],
+          "sources" => [source],
+        },
+      )
+      subject.add_localization(l10n)
+      expect(subject.find_source_by_id("smith-2020")).to eq(source)
+    end
+
+    it "skips sources without an id" do
+      source = Glossarist::ConceptSource.new(
+        type: "authoritative",
+        origin: Glossarist::Citation.new(
+          ref: Glossarist::Citation::Ref.new(source: "ISO", id: "7301"),
+        ),
+      )
+      subject.sources = [source]
+      expect(subject.find_source_by_id("ISO 7301")).to be_nil
+    end
+  end
 end

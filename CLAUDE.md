@@ -59,11 +59,15 @@ Designation inheritance hierarchy (MECE):
 
 `ConceptData#domain` stores URI references (relative like `section-103-01`, URN like `urn:iec:std:iec:60050-103-01`, or URL like `https://...`) to subject area concepts.
 
+### Dataset Loading
+
+- **`GlossaryStore`** (`glossary_store.rb`) — the dataset abstraction. Backed by `Lutaml::Store::PackageStore`, handles loading/saving from directories and ZIPs, concept CRUD, metadata, bibliography, images, and stats. Format detection is model-driven via `ConceptDocument.for_version`. **All callers that need to load concepts from a dataset should use GlossaryStore.**
+- **`ConceptCollector`** (`concept_collector.rb`) — legacy scanner with hand-rolled format detection (file-system heuristics, not model-driven). Being replaced by GlossaryStore. Do not add new callers.
+- **`ConceptManager`** (`concept_manager.rb`) — legacy file I/O used by `ManagedConceptCollection`. Being replaced by GlossaryStore. Do not add new callers.
+- **`ManagedConceptCollection`** (`managed_concept_collection.rb`) — legacy collection that loads via ConceptManager. Being replaced by GlossaryStore.
+
 ### YAML Serialization
 
-- **`ConceptManager`** (`concept_manager.rb`) — handles file I/O. Supports two storage formats:
-  1. Separate `concept/` and `localized_concept/` directories (or `localized-concept/` with dashes)
-  2. Grouped: concept + localized concepts in a single YAML stream file
 - Supports both camelCase and snake_case keys in YAML (e.g., `localizedConcepts` / `localized_concepts`) using `%i[key1 key2]` mapping syntax.
 - Also supports V1 format (`concept-*.yaml` files at root level).
 
@@ -121,3 +125,30 @@ The Gemfile overrides relaton gems from git branches for lutaml-model 0.8 compat
 - Released 2.0.0 gems have untyped lutaml-model attributes that fail with 0.8+
 - relaton-bib 2.1.0 is released but sub-gems pin `~> 2.0.0`, blocking 2.1.0 adoption until upstream updates constraints
 - Remove git overrides once relaton gems release versions with lutaml-model 0.8 support
+
+## Schema Version Subclasses Are NOT Duplication
+
+V2 and V3 namespace classes (e.g. `V2::ManagedConceptData`, `V3::ManagedConceptData`) exist because each schema version has its own `key_value` mapping and its own type references (`V2::LocalizedConcept` vs `V3::LocalizedConcept`). These are version-specific serialization adapters at a **real seam** — two adapters justifies the seam.
+
+Do not attempt to "parameterize" or "collapse" these into the base class:
+
+- **OCP**: Adding a new schema version = adding a new subclass, not modifying the base. This is the pattern working as intended.
+- **lutaml-model DSL is class-level**: `attribute` and `key_value` mappings are declarative DSL invoked at class definition time. They cannot be meaningfully "parameterized" at the instance level without metaprogramming (`Class.new`), which is worse than the current clear, declarative pattern.
+- **Structural similarity ≠ accidental duplication**: The fact that V2 and V3 `ManagedConceptData` look similar is because V3 evolved from V2. Their `localizations_from_yaml` callbacks differ in which class they instantiate, their `key_value` mappings differ in which fields are mapped, and V2 has custom `related` handling that V3 doesn't. These differences will diverge further as the schemas evolve.
+- **Three similar lines is better than a wrong abstraction**: The global instruction applies directly here.
+
+## Architectural Review Findings (2026-06-10)
+
+### Valid deepening opportunities
+
+See `TODO.improve/` for detailed plans.
+
+1. **Migrate callers to GlossaryStore** — ConceptCollector (8 call sites) and ConceptManager (1 call site) duplicate format detection with file-system heuristics. GlossaryStore is model-driven, framework-aligned, and handles both directory and ZIP. All callers should go through GlossaryStore.
+
+2. **Split SchemaMigration into focused modules** — Currently handles V0→V1 hash migration, V2→V3 model migration, and a CLI pipeline at three different abstraction levels. Each should be its own module.
+
+### Rejected candidates (do not re-suggest)
+
+- **Collapse V2/V3 ManagedConceptData** — Version subclasses are a real seam, not duplication. See "Schema Version Subclasses Are NOT Duplication" above.
+- **Extract validation reporter from CLI::ValidateCommand** — 159 lines of terminal formatting in a CLI command is normal. Creating 4 reporter classes to replace a 3-way case statement (where 2 branches are 1 line each) is premature abstraction. CLI commands are leaf nodes, not extension points.
+- **Refactor ConceptToGlossTransform** — The transform is already deep (3 public methods, 343 lines of implementation). Moving mapping to domain models would violate model-driven by leaking RDF knowledge into the domain layer. Using lutaml-model views can't handle the type dispatching and URI construction the transform does. The module has locality (all mapping in one place) and leverage (one interface, N callers).

@@ -16,7 +16,9 @@ module Glossarist
       context = Validation::Rules::DatasetContext.new(@path)
       concept_rules = Validation::Rules::Registry.for_scope(:concept)
 
-      all_concepts = ConceptCollector.collect(@path)
+      store = GlossaryStore.new
+      store.load(@path)
+      all_concepts = store.concepts
       total = all_concepts.length
 
       if total.zero?

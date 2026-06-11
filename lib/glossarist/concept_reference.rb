@@ -13,6 +13,7 @@ module Glossarist
     attribute :source, :string
     attribute :ref_type, :string
     attribute :urn, :string
+    attribute :version, :string
 
     key_value do
       map :term, to: :term
@@ -20,6 +21,7 @@ module Glossarist
       map :source, to: :source
       map :ref_type, to: :ref_type
       map :urn, to: :urn
+      map :version, to: :version
     end
 
     def self.domain(concept_id)
@@ -31,12 +33,16 @@ module Glossarist
     end
 
     def local?
-      %w[local designation].include?(ref_type) ||
+      %w[local designation cite].include?(ref_type) ||
         (ref_type.nil? && (source.nil? || source.empty?))
     end
 
     def external?
       !local?
+    end
+
+    def cite?
+      ref_type == "cite"
     end
 
     def dedup_key

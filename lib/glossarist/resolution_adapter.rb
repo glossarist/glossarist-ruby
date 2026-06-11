@@ -4,6 +4,7 @@ module Glossarist
   class ResolutionAdapter
     autoload :Local, "glossarist/resolution_adapter/local"
     autoload :Package, "glossarist/resolution_adapter/package"
+    autoload :Bibliography, "glossarist/resolution_adapter/bibliography"
     autoload :Route, "glossarist/resolution_adapter/route"
     autoload :Remote, "glossarist/resolution_adapter/remote"
 

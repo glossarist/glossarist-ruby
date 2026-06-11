@@ -1,5 +1,6 @@
 module Glossarist
   class ConceptSource < Lutaml::Model::Serializable
+    attribute :id, :string
     attribute :status, :string,
               values: Glossarist::GlossaryDefinition::CONCEPT_SOURCE_STATUSES
     attribute :type, :string,
@@ -8,8 +9,7 @@ module Glossarist
     attribute :modification, :string
 
     key_value do
-      # TODO: change to `map [:ref, :origin], to: :origin
-      #       when multiple key mapping is supported in lutaml-model
+      map :id, to: :id
       map :origin, to: :origin
       map :status, to: :status
       map :type, to: :type

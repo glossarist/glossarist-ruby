@@ -28,7 +28,7 @@ module Glossarist
       end
 
       def self.build_from_directory(dataset_path)
-        concepts = ConceptCollector.collect(dataset_path)
+        concepts = GlossaryStore.new.tap { |s| s.load(dataset_path) }.concepts
         build_from_concepts(concepts, dataset_path)
       end
 

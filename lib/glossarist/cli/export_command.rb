@@ -41,9 +41,7 @@ module Glossarist
           resolve_metadata_from_package(package)
           package.concepts
         else
-          collection = ManagedConceptCollection.new
-          collection.load_from_files(@path)
-          collection.to_a
+          GlossaryStore.new.tap { |s| s.load(@path) }.concepts
         end
       end
 

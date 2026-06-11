@@ -30,7 +30,7 @@ module Glossarist
           expected = Relaton::Registry.instance.by_type(dir.split("/").last)&.grammar_hash
           next if expected.nil? || actual == expected
 
-          return CacheVersionMismatchError.new(dir, expected, actual)
+          return Errors::CacheVersionMismatchError.new(dir, expected, actual)
         end
 
         nil
