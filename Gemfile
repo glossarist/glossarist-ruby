@@ -7,6 +7,7 @@ gemspec
 gem "canon"
 gem "nokogiri"
 gem "rake", "~> 13.0"
+gem "rdf-turtle", "~> 3.0"
 gem "relaton", "~> 2.1.0"
 gem "rspec", "~> 3.0"
 gem "rubocop"
