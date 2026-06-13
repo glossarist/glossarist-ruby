@@ -76,6 +76,25 @@ RSpec.describe Glossarist::Validation::Rules::CiteRefIntegrityRule do
       expect(issues.first.code).to eq("GLS-110")
     end
 
+    it "warns when a concept-level and l10n-level source share an id" do
+      a = Glossarist::ConceptSource.new(
+        id: "dup",
+        type: "authoritative",
+        origin: Glossarist::Citation.new(ref: Glossarist::Citation::Ref.new(source: "X")),
+      )
+      b = Glossarist::ConceptSource.new(
+        id: "dup",
+        type: "lineage",
+        origin: Glossarist::Citation.new(ref: Glossarist::Citation::Ref.new(source: "Y")),
+      )
+      mc = make_concept(id: "1", sources: [a],
+                        langs: { eng: { sources: [b] } })
+      ctx = make_context(mc)
+      issues = rule.check(ctx)
+      dup_issues = issues.select { |i| i.message.include?("duplicate") }
+      expect(dup_issues.length).to eq(1)
+    end
+
     it "ignores sources without an id" do
       a = Glossarist::ConceptSource.new(
         type: "authoritative",
@@ -99,7 +118,8 @@ RSpec.describe Glossarist::Validation::Rules::CiteRefIntegrityRule do
                             sources: [{
                               "id" => "iso-7301",
                               "type" => "authoritative",
-                              "origin" => { "ref" => { "source" => "ISO", "id" => "7301" } },
+                              "origin" => { "ref" => { "source" => "ISO",
+                                                       "id" => "7301" } },
                             }],
                           },
                         })

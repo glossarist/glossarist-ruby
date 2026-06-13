@@ -16,7 +16,8 @@ module Glossarist
           case current
           when "2" then current = step_v2_to_v3(concept)
           else
-            raise Errors::Base, "No concept migration step from version #{current}"
+            raise Errors::Base,
+                  "No concept migration step from version #{current}"
           end
         end
 

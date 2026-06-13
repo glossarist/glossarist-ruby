@@ -257,7 +257,6 @@ module Glossarist
         mc = doc.concept
         next unless mc&.data&.id
 
-        mc.uuid = mc.identifier || mc.data.id
         load_legacy_localizations(mc, lc_index, version) if lc_index
         @v1_concepts << mc
       rescue Psych::SyntaxError => e
@@ -333,7 +332,6 @@ module Glossarist
         mc = doc.concept
         next unless mc&.data&.id
 
-        mc.uuid = mc.identifier || mc.data.id
         Array(doc.localizations).each { |l10n| mc.add_localization(l10n) }
         @v1_concepts << mc
       rescue Psych::SyntaxError => e

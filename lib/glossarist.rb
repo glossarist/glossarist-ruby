@@ -36,7 +36,7 @@ module Glossarist
   autoload :ComparisonResult,         "glossarist/comparison_result"
   autoload :ConceptDiff,              "glossarist/concept_diff"
   autoload :ConceptDocument,          "glossarist/concept_document"
-  autoload :ConceptEnricher,          "glossarist/concept_enricher"
+  autoload :ConceptEnricher, "glossarist/concept_enricher"
   autoload :Config,                   "glossarist/config"
   autoload :DatasetValidator,         "glossarist/dataset_validator"
   autoload :CustomLocality,           "glossarist/custom_locality"

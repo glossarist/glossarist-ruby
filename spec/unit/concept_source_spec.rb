@@ -56,7 +56,9 @@ RSpec.describe Glossarist::ConceptSource do
       source = described_class.new(
         id: "smith-2020",
         type: "lineage",
-        origin: Glossarist::Citation.new(ref: Glossarist::Citation::Ref.new(source: "DOI", id: "10.1234/abc")),
+        origin: Glossarist::Citation.new(ref: Glossarist::Citation::Ref.new(
+          source: "DOI", id: "10.1234/abc",
+        )),
       )
       yaml = source.to_yaml
       restored = described_class.from_yaml(yaml)

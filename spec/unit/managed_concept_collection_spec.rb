@@ -169,6 +169,13 @@ RSpec.describe Glossarist::ManagedConceptCollection do
       collection.store(c)
       expect(collection.by_id_and(c.uuid, "2024")).to be_nil
     end
+
+    it "looks up by data id when no uuid match" do
+      c = Glossarist::ManagedConcept.of_yaml("data" => { "id" => "my-concept" })
+      c.version = "v1"
+      collection.store(c)
+      expect(collection.by_id_and("my-concept", "v1")).to eq(c)
+    end
   end
 
   describe "#load_from_files" do

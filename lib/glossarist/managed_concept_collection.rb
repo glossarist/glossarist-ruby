@@ -6,9 +6,10 @@ module Glossarist
 
     attr_accessor :managed_concepts
 
-    def initialize
+    def initialize(file_key: nil)
       @managed_concepts = []
       @managed_concepts_ids = {}
+      @file_key = file_key
     end
 
     def to_h
@@ -86,7 +87,7 @@ module Glossarist
       FileUtils.mkdir_p(lc_dir)
 
       @managed_concepts.each do |mc|
-        File.write(File.join(concept_dir, "#{mc.uuid}.yaml"), mc.to_yaml,
+        File.write(File.join(concept_dir, "#{file_key(mc)}.yaml"), mc.to_yaml,
                    encoding: "utf-8")
 
         mc.localized_concepts.each do |lang, uuid|
@@ -108,9 +109,15 @@ module Glossarist
           l10n = mc.localization(lang)
           parts << l10n.to_yaml if l10n
         end
-        File.write(File.join(path, "#{mc.uuid}.yaml"), parts.join("\n"),
+        File.write(File.join(path, "#{file_key(mc)}.yaml"), parts.join("\n"),
                    encoding: "utf-8")
       end
+    end
+
+    private
+
+    def file_key(concept)
+      @file_key ? @file_key.call(concept) : concept.uuid
     end
   end
 end

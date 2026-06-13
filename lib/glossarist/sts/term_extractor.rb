@@ -7,6 +7,7 @@ module Glossarist
         raw = File.read(xml_path)
         @standard = ::Sts::IsoSts::Standard.from_xml(raw)
         @source_ref = extract_source_ref
+        @std_prefix = extract_std_prefix(@source_ref)
       end
 
       def extract
@@ -90,24 +91,101 @@ module Glossarist
         )
       end
 
+      ELEMENT_NAME_TO_ATTR = {
+        "entailedTerm" => :entailed_term,
+        "xref" => :xref,
+        "italic" => :italic,
+        "bold" => :bold,
+        "sup" => :sup,
+        "sub" => :sub,
+        "monospace" => :monospace,
+        "std" => :std,
+        "math" => :math,
+        "inline-formula" => :inline_formula,
+        "list" => :list,
+        "styled-content" => :styled_content,
+        "ext-link" => :ext_link,
+      }.freeze
+
       def extract_definition_text(lang_set)
         definitions = lang_set.definition
         return "" unless definitions&.any?
 
-        definitions.first.value&.join.to_s.strip
+        extract_mixed_text(definitions.first)
       end
 
       def extract_note_texts(lang_set)
         lang_set.note.filter_map do |n|
-          text = n.value&.join.to_s.strip
+          text = extract_mixed_text(n)
           text unless text.empty?
         end
       end
 
       def extract_example_texts(lang_set)
         lang_set.example.filter_map do |e|
-          text = e.value&.join.to_s.strip
+          text = extract_mixed_text(e)
           text unless text.empty?
+        end
+      end
+
+      def extract_mixed_text(mixed_element)
+        indices = Hash.new(0)
+        parts = []
+
+        mixed_element.element_order.each do |elem|
+          if elem.node_type == :text
+            parts << elem.text_content.to_s
+          else
+            attr_name = ELEMENT_NAME_TO_ATTR[elem.name]
+            next unless attr_name
+
+            collection = mixed_element.class.attributes.key?(attr_name) &&
+              mixed_element.public_send(attr_name)
+            next unless collection
+
+            child = collection[indices[elem.name]]
+            if child
+              if elem.name == "entailedTerm"
+                parts << format_entailed_term(child)
+              else
+                text = child_value_text(child)
+                parts << text if text
+              end
+            end
+            indices[elem.name] += 1
+          end
+        end
+
+        normalize_whitespace(parts.join)
+      end
+
+      # entailedTerm → "{{19135:2026:3.5.1,concept}}"
+      # format: {{concept_id, render_text}}
+      def format_entailed_term(entailed)
+        raw_text = entailed.value.to_s
+        designation = raw_text.gsub(/\s+\(\d[\d.]*\)\s*\z/, "").strip
+        section = extract_section_from_target(entailed.target)
+
+        if @std_prefix && section
+          "{{#{@std_prefix}:#{section},#{designation}}}"
+        else
+          raw_text.strip
+        end
+      end
+
+      # "term_3.5.1" → "3.5.1", "term_3.8.2-1" → "3.8.2"
+      def extract_section_from_target(target)
+        return nil unless target
+
+        match = target.match(/term_(\d+(?:\.\d+)*)/)
+        match ? match[1] : nil
+      end
+
+      def child_value_text(child)
+        val = child.value
+        case val
+        when Array then val.join.to_s
+        when String then val
         end
       end
 
@@ -175,11 +253,31 @@ module Glossarist
       end
 
       def extract_ref_text(ref)
-        if ref.value.is_a?(String)
-          ref.value.to_s.strip
+        if ref.respond_to?(:content) && ref.content.is_a?(Array)
+          normalize_whitespace(ref.content.join.to_s)
+        elsif ref.respond_to?(:value)
+          normalize_whitespace(ref.value.to_s)
         else
-          ref.content&.join.to_s.strip
+          ""
         end
+      end
+
+      def normalize_whitespace(text)
+        text.gsub(/[\s\u00a0]+/, " ").strip
+      end
+
+      # "ISO 19101-1:2014" → "19101-1:2014", "ISO/TS 19130-2:2014" → "TS-19130-2:2014"
+      def extract_std_prefix(source_ref)
+        return nil unless source_ref
+
+        match = source_ref.match(/\AISO(?:\/(\p{Upper}+))? (\d+(?:-\d+)?):(\d+)\z/)
+        return nil unless match
+
+        type_part = match[1]
+        number = match[2]
+        year = match[3]
+
+        type_part ? "#{type_part}-#{number}:#{year}" : "#{number}:#{year}"
       end
     end
   end

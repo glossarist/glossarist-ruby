@@ -24,7 +24,6 @@ module Glossarist
 
     key_value do
       map :data, to: :data
-      map :id, with: { to: :identifier_to_yaml, from: :identifier_from_yaml }
       map :identifier,
           with: { to: :identifier_to_yaml, from: :identifier_from_yaml }
       map :related, to: :related
@@ -34,7 +33,8 @@ module Glossarist
           with: { from: :date_accepted_from_yaml, to: :date_accepted_to_yaml }
       map :status, to: :status
 
-      map :uuid, to: :uuid, with: { from: :uuid_from_yaml, to: :uuid_to_yaml }
+      map %i[id uuid], to: :uuid,
+                       with: { from: :uuid_from_yaml, to: :uuid_to_yaml }
       map :schema_version, to: :schema_version
     end
 
@@ -144,30 +144,17 @@ module Glossarist
       localization("eng") || localizations.values.first
     end
 
+    def all_sources
+      list = Array(sources)
+      list.concat(Array(data&.sources))
+      localizations.each_value { |l10n| list.concat(l10n.all_sources) }
+      list
+    end
+
     def find_source_by_id(id)
       return nil if id.nil? || id.to_s.strip.empty?
 
-      Array(sources).each do |source|
-        return source if source.id == id
-      end
-
-      Array(data&.sources).each do |source|
-        return source if source.id == id
-      end
-
-      localizations.each_value do |l10n|
-        Array(l10n.sources).each do |source|
-          return source if source.id == id
-        end
-
-        Array(l10n.terms).each do |term|
-          Array(term.sources).each do |source|
-            return source if source.id == id
-          end
-        end
-      end
-
-      nil
+      all_sources.find { |source| source.id == id }
     end
 
     def schema_version

@@ -34,7 +34,7 @@ RSpec.describe "Concept mention resolution pipeline" do
         "termid" => "100",
         "eng" => {
           "terms" => [{ "type" => "expression", "designation" => "latitude" }],
-          "definition" => [{ "content" => "See {{equality, urn:iec:std:iec:60050-102-01-01}} and {{quantity, 101}}" }],
+          "definition" => [{ "content" => "See {{urn:iec:std:iec:60050-102-01-01, equality}} and {{101, quantity}}" }],
           "notes" => [{ "content" => "Also see {{200}} which does not exist" }],
           "examples" => [],
         },
@@ -98,20 +98,20 @@ RSpec.describe "Concept mention resolution pipeline" do
 
   describe "UrnResolver from ConceptReference" do
     it "resolves IEC ConceptReference to Electropedia URL" do
-      refs = extractor.extract_from_text("{{equality, urn:iec:std:iec:60050-102-01-01}}")
+      refs = extractor.extract_from_text("{{urn:iec:std:iec:60050-102-01-01, equality}}")
       url = Glossarist::UrnResolver.resolve(refs.first)
       expect(url).to include("electropedia.org")
       expect(url).to include("102-01-01")
     end
 
     it "resolves ISO ConceptReference to OBP URL" do
-      refs = extractor.extract_from_text("{{lat, urn:iso:std:iso:19111:ed-3:v1:en:term:3.1.32}}")
+      refs = extractor.extract_from_text("{{urn:iso:std:iso:19111:ed-3:v1:en:term:3.1.32, lat}}")
       url = Glossarist::UrnResolver.resolve(refs.first)
       expect(url).to include("iso.org/obp")
     end
 
     it "returns nil for local references" do
-      refs = extractor.extract_from_text("{{test, 200}}")
+      refs = extractor.extract_from_text("{{200, test}}")
       url = Glossarist::UrnResolver.resolve(refs.first)
       expect(url).to be_nil
     end
@@ -119,7 +119,7 @@ RSpec.describe "Concept mention resolution pipeline" do
 
   describe "UrnResolver integration" do
     it "resolves ConceptReference to HTTP URL" do
-      refs = extractor.extract_from_text("{{equality, urn:iec:std:iec:60050-102-01-01}}")
+      refs = extractor.extract_from_text("{{urn:iec:std:iec:60050-102-01-01, equality}}")
       url = Glossarist::UrnResolver.resolve(refs.first)
 
       expect(url).to include("electropedia.org")
@@ -146,7 +146,7 @@ RSpec.describe "Concept mention resolution pipeline" do
         "term" => "latitude",
         "eng" => {
           "terms" => [{ "type" => "expression", "designation" => "latitude" }],
-          "definition" => [{ "content" => "See {{equality, urn:iec:std:iec:60050-102-01-01}}" }],
+          "definition" => [{ "content" => "See {{urn:iec:std:iec:60050-102-01-01, equality}}" }],
         },
       }
       File.write(File.join(concepts_dir, "100.yaml"), YAML.dump(concept))

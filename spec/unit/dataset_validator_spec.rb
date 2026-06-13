@@ -128,7 +128,7 @@ RSpec.describe Glossarist::DatasetValidator do
         "eng" => {
           "terms" => [{ "type" => "expression", "designation" => "test",
                         "normative_status" => "preferred" }],
-          "definition" => [{ "content" => "See {{missing, urn:unknown:std:999}}" }],
+          "definition" => [{ "content" => "See {{urn:unknown:std:999, missing}}" }],
           "sources" => [{ "type" => "authoritative" }],
         },
       }
@@ -149,7 +149,7 @@ RSpec.describe Glossarist::DatasetValidator do
         "eng" => {
           "terms" => [{ "type" => "expression", "designation" => "test",
                         "normative_status" => "preferred" }],
-          "definition" => [{ "content" => "See {{missing, 999}}" }],
+          "definition" => [{ "content" => "See {{999, missing}}" }],
           "sources" => [{ "type" => "authoritative" }],
         },
       }
@@ -173,7 +173,7 @@ RSpec.describe Glossarist::DatasetValidator do
         "eng" => {
           "terms" => [{ "type" => "expression", "designation" => "test",
                         "normative_status" => "preferred" }],
-          "definition" => [{ "content" => "See {{equality, urn:iec:std:iec:60050-102-01-01}}" }],
+          "definition" => [{ "content" => "See {{urn:iec:std:iec:60050-102-01-01, equality}}" }],
           "sources" => [{ "type" => "authoritative" }],
         },
       }
@@ -202,7 +202,7 @@ RSpec.describe Glossarist::DatasetValidator do
 
       output = File.join(@tmpdir, "target.gcr")
       target_concept = build_managed_concept(
-        "100", "test", "See {{equality, urn:iec:std:iec:60050-102-01-01}}"
+        "100", "test", "See {{urn:iec:std:iec:60050-102-01-01, equality}}"
       )
       metadata = Glossarist::GcrMetadata.new(
         shortname: "target",

@@ -26,9 +26,9 @@ RSpec.describe Glossarist::ConceptEnricher do
     it "injects references per-localization, not across localizations" do
       mc = build_managed_concept("100", {
                                    eng: { designation: "latitude",
-                                          definition: "See {{equality, urn:iec:std:iec:60050-102-01-01}}" },
+                                          definition: "See {{urn:iec:std:iec:60050-102-01-01, equality}}" },
                                    fra: { designation: "latitude",
-                                          definition: "Voir {{egalite, 200}}" },
+                                          definition: "Voir {{200, egalite}}" },
                                  })
 
       enricher.inject_references([mc])
@@ -48,7 +48,7 @@ RSpec.describe Glossarist::ConceptEnricher do
 
     it "preserves existing references" do
       mc = build_managed_concept("100", {
-                                   eng: { designation: "test", definition: "See {{other, 200}}" },
+                                   eng: { designation: "test", definition: "See {{200, other}}" },
                                  })
       existing_ref = Glossarist::ConceptReference.new(
         term: "preexisting", concept_id: "999", source: nil, ref_type: "local",
@@ -64,7 +64,7 @@ RSpec.describe Glossarist::ConceptEnricher do
 
     it "does not duplicate references" do
       mc = build_managed_concept("100", {
-                                   eng: { designation: "test", definition: "See {{X, 100}} and {{Y, 100}}" },
+                                   eng: { designation: "test", definition: "See {{100, X}} and {{100, Y}}" },
                                  })
 
       enricher.inject_references([mc])

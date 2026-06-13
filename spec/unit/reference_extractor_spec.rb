@@ -6,8 +6,8 @@ RSpec.describe Glossarist::ReferenceExtractor do
   subject { described_class.new }
 
   describe "local (intra-set) references" do
-    it "extracts {{geodetic latitude, 200}} (ID with display override)" do
-      refs = subject.extract_from_text("See {{geodetic latitude, 200}} for details.")
+    it "extracts {{200, geodetic latitude}} (ID with display override)" do
+      refs = subject.extract_from_text("See {{200, geodetic latitude}} for details.")
 
       expect(refs.size).to eq(1)
       ref = refs.first
@@ -54,8 +54,8 @@ RSpec.describe Glossarist::ReferenceExtractor do
   end
 
   describe "IEC URN references" do
-    it "extracts {{equality, urn:iec:std:iec:60050-102-01-01}}" do
-      refs = subject.extract_from_text("See {{equality, urn:iec:std:iec:60050-102-01-01}}.")
+    it "extracts {{urn:iec:std:iec:60050-102-01-01, equality}}" do
+      refs = subject.extract_from_text("See {{urn:iec:std:iec:60050-102-01-01, equality}}.")
 
       expect(refs.size).to eq(1)
       ref = refs.first
@@ -78,14 +78,14 @@ RSpec.describe Glossarist::ReferenceExtractor do
     end
 
     it "extracts concept_id from dated IEC URN" do
-      refs = subject.extract_from_text("{{term, urn:iec:std:iec:60050-121-10-34:2016-11}}")
+      refs = subject.extract_from_text("{{urn:iec:std:iec:60050-121-10-34:2016-11, term}}")
 
       expect(refs.first.concept_id).to eq("121-10-34")
       expect(refs.first.source).to eq("urn:iec:std:iec:60050")
     end
 
     it "extracts concept_id from fragment-style IEC URN" do
-      refs = subject.extract_from_text("{{term, urn:iec:std:iec:60050-121:2010-10::#con-121-10-23}}")
+      refs = subject.extract_from_text("{{urn:iec:std:iec:60050-121:2010-10::#con-121-10-23, term}}")
 
       expect(refs.first.concept_id).to eq("121-10-23")
       expect(refs.first.source).to eq("urn:iec:std:iec:60050")
@@ -93,8 +93,8 @@ RSpec.describe Glossarist::ReferenceExtractor do
   end
 
   describe "ISO URN references" do
-    it "extracts {{latitude, urn:iso:std:iso:19111:ed-3:v1:en:term:3.1.32}}" do
-      text = "{{latitude, urn:iso:std:iso:19111:ed-3:v1:en:term:3.1.32}}"
+    it "extracts {{urn:iso:std:iso:19111:ed-3:v1:en:term:3.1.32, latitude}}" do
+      text = "{{urn:iso:std:iso:19111:ed-3:v1:en:term:3.1.32, latitude}}"
       refs = subject.extract_from_text(text)
 
       expect(refs.size).to eq(1)
@@ -106,7 +106,7 @@ RSpec.describe Glossarist::ReferenceExtractor do
     end
 
     it "stores URN prefix as source, not derived shortname" do
-      text = "{{lat, urn:iso:std:iso:19111:ed-3:v1:en:term:3.1.32}}"
+      text = "{{urn:iso:std:iso:19111:ed-3:v1:en:term:3.1.32, lat}}"
       refs = subject.extract_from_text(text)
 
       expect(refs.first.source).to eq("urn:iso:std:iso:19111")
@@ -115,7 +115,7 @@ RSpec.describe Glossarist::ReferenceExtractor do
 
   describe "generic URN references" do
     it "stores the full URN as source when scheme is unknown" do
-      text = "{{term, urn:custom:std:123}}"
+      text = "{{urn:custom:std:123, term}}"
       refs = subject.extract_from_text(text)
 
       expect(refs.size).to eq(1)
@@ -128,7 +128,7 @@ RSpec.describe Glossarist::ReferenceExtractor do
 
   describe "mixed references" do
     it "extracts local and URN references together" do
-      text = "{{local ref, 200}} and {{equality, urn:iec:std:iec:60050-102-01-01}}"
+      text = "{{200, local ref}} and {{urn:iec:std:iec:60050-102-01-01, equality}}"
       refs = subject.extract_from_text(text)
 
       expect(refs.size).to eq(2)
@@ -144,7 +144,7 @@ RSpec.describe Glossarist::ReferenceExtractor do
 
   describe "deduplication" do
     it "deduplicates by source + concept_id" do
-      text = "{{a, 200}} and {{b, 200}}"
+      text = "{{200, a}} and {{200, b}}"
       refs = subject.extract_from_text(text)
 
       expect(refs.size).to eq(1)
@@ -152,7 +152,7 @@ RSpec.describe Glossarist::ReferenceExtractor do
     end
 
     it "deduplicates URN refs by source + concept_id" do
-      text = "{{a, urn:iec:std:iec:60050-102-01-01}} and {{b, urn:iec:std:iec:60050-102-01-01}}"
+      text = "{{urn:iec:std:iec:60050-102-01-01, a}} and {{urn:iec:std:iec:60050-102-01-01, b}}"
       refs = subject.extract_from_text(text)
 
       expect(refs.size).to eq(1)
@@ -177,7 +177,7 @@ RSpec.describe Glossarist::ReferenceExtractor do
 
   describe "multiple references in one text" do
     it "extracts all references" do
-      text = "{{lat, 200}} and {{lon, 201}} and {{eq, urn:iec:std:iec:60050-102-01-01}}"
+      text = "{{200, lat}} and {{201, lon}} and {{urn:iec:std:iec:60050-102-01-01, eq}}"
       refs = subject.extract_from_text(text)
 
       expect(refs.size).to eq(3)
@@ -196,16 +196,17 @@ RSpec.describe Glossarist::ReferenceExtractor do
       expect(refs[0]).to be_local
     end
 
-    it "extracts {{cite:source-id,display text}} — display is cite key, identifier falls through" do
+    it "extracts {{cite:source-id,display text}} — cite key with render term" do
       refs = subject.extract_from_text("See {{cite:source-id,display text}}.")
-      expect(refs[0].term).to eq("cite:source-id")
-      expect(refs[0].ref_type).to eq("designation")
-    end
-
-    it "extracts {{display text,cite:source-id}}" do
-      refs = subject.extract_from_text("See {{display text,cite:source-id}}.")
       expect(refs[0].concept_id).to eq("source-id")
       expect(refs[0].term).to eq("display text")
+      expect(refs[0].ref_type).to eq("cite")
+    end
+
+    it "extracts {{display text,cite:source-id}} — wrong syntax treated as designation" do
+      refs = subject.extract_from_text("See {{display text,cite:source-id}}.")
+      expect(refs[0].ref_type).to eq("designation")
+      expect(refs[0].term).to eq("cite:source-id")
     end
 
     it "trims whitespace around the key" do
@@ -243,9 +244,9 @@ RSpec.describe Glossarist::ReferenceExtractor do
   describe "#extract_from_localized" do
     it "extracts from definition, notes, and examples" do
       lc_hash = {
-        "definition" => [{ "content" => "See {{term1, 100}}" }],
-        "notes" => [{ "content" => "Note about {{term2, urn:iec:std:iec:60050-102-01-01}}" }],
-        "examples" => [{ "content" => "Example: {{term3, 300}}" }],
+        "definition" => [{ "content" => "See {{100, term1}}" }],
+        "notes" => [{ "content" => "Note about {{urn:iec:std:iec:60050-102-01-01, term2}}" }],
+        "examples" => [{ "content" => "Example: {{300, term3}}" }],
       }
 
       refs = subject.extract_from_localized(lc_hash)
@@ -260,12 +261,12 @@ RSpec.describe Glossarist::ReferenceExtractor do
     it "extracts from all language blocks" do
       concept_hash = {
         "eng" => {
-          "definition" => [{ "content" => "See {{term1, 100}}" }],
+          "definition" => [{ "content" => "See {{100, term1}}" }],
           "notes" => [],
           "examples" => [],
         },
         "fra" => {
-          "definition" => [{ "content" => "Voir {{term2, 200}}" }],
+          "definition" => [{ "content" => "Voir {{200, term2}}" }],
           "notes" => [],
           "examples" => [],
         },
@@ -290,7 +291,7 @@ RSpec.describe Glossarist::ReferenceExtractor do
       end
 
       extractor = described_class.new
-      refs = extractor.extract_from_text("See {{paper, doi:10.1234/5678}}")
+      refs = extractor.extract_from_text("See {{doi:10.1234/5678, paper}}")
 
       expect(refs.size).to eq(1)
       expect(refs.first.concept_id).to eq("10.1234/5678")

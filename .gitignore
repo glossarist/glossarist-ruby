@@ -25,3 +25,5 @@ spec/fixtures/relaton_cache/
 TODO*
 
 *.gem
+*.orig
+PROPOSAL.*

@@ -165,7 +165,7 @@ RSpec.describe Glossarist::GcrPackage do
         "term" => "latitude",
         "eng" => {
           "terms" => [{ "type" => "expression", "designation" => "latitude" }],
-          "definition" => [{ "content" => "See {{equality, urn:iec:std:iec:60050-102-01-01}} and {{north, 200}}" }],
+          "definition" => [{ "content" => "See {{urn:iec:std:iec:60050-102-01-01, equality}} and {{200, north}}" }],
         },
       }
       File.write(File.join(concepts_dir, "100.yaml"), YAML.dump(concept))
@@ -201,7 +201,7 @@ RSpec.describe Glossarist::GcrPackage do
         "term" => "latitude",
         "eng" => {
           "terms" => [{ "type" => "expression", "designation" => "latitude" }],
-          "definition" => [{ "content" => "See {{lat, urn:iso:std:iso:19111:ed-3:v1:en:term:3.1.32}}" }],
+          "definition" => [{ "content" => "See {{urn:iso:std:iso:19111:ed-3:v1:en:term:3.1.32, lat}}" }],
         },
       }
       File.write(File.join(concepts_dir, "100.yaml"), YAML.dump(concept))
