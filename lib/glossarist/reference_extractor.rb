@@ -72,8 +72,8 @@ module Glossarist
 
       if content.include?(",")
         parts = content.split(",", 2)
-        display = parts[0].strip
-        identifier = parts[1].strip
+        identifier = parts[0].strip
+        display = parts[1].strip
         resolve_by_identifier(identifier, display)
       else
         resolve_by_identifier(content, nil)

@@ -43,7 +43,7 @@ RSpec.describe "Reference rules" do
 
     it "warns on unresolvable concept mention" do
       mc = make_concept(id: "1", langs: {
-                          eng: { definition: [{ "content" => "See {{missing, 999}}" }] },
+                          eng: { definition: [{ "content" => "See {{999, missing}}" }] },
                         })
       ctx = make_context(mc, concept_ids: Set.new(["1"]))
       expect(rule).to be_applicable(ctx)
@@ -54,7 +54,7 @@ RSpec.describe "Reference rules" do
 
     it "passes for resolvable concept mention" do
       mc = make_concept(id: "1", langs: {
-                          eng: { definition: [{ "content" => "See {{test, 1}}" }] },
+                          eng: { definition: [{ "content" => "See {{1, test}}" }] },
                         })
       ctx = make_context(mc, concept_ids: Set.new(["1"]))
       issues = rule.check(ctx)

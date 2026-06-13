@@ -305,5 +305,50 @@ RSpec.describe Glossarist::ManagedConcept do
       subject.sources = [source]
       expect(subject.find_source_by_id("ISO 7301")).to be_nil
     end
+
+    it "finds a designation-level source by id" do
+      source = Glossarist::ConceptSource.new(
+        id: "term-source",
+        type: "authoritative",
+        origin: Glossarist::Citation.new(
+          ref: Glossarist::Citation::Ref.new(source: "X"),
+        ),
+      )
+      l10n = Glossarist::LocalizedConcept.of_yaml(
+        "data" => {
+          "language_code" => "eng",
+          "terms" => [{
+            "designation" => "test",
+            "type" => "expression",
+            "sources" => [source],
+          }],
+        },
+      )
+      subject.add_localization(l10n)
+      expect(subject.find_source_by_id("term-source")).to eq(source)
+    end
+  end
+
+  describe "#all_sources" do
+    it "aggregates concept-level and l10n-level sources" do
+      top = Glossarist::ConceptSource.new(
+        type: "authoritative",
+        origin: Glossarist::Citation.new(ref: Glossarist::Citation::Ref.new(source: "A")),
+      )
+      l10n_src = Glossarist::ConceptSource.new(
+        type: "lineage",
+        origin: Glossarist::Citation.new(ref: Glossarist::Citation::Ref.new(source: "B")),
+      )
+      subject.sources = [top]
+      l10n = Glossarist::LocalizedConcept.of_yaml(
+        "data" => {
+          "language_code" => "eng",
+          "terms" => [{ "designation" => "test", "type" => "expression" }],
+          "sources" => [l10n_src],
+        },
+      )
+      subject.add_localization(l10n)
+      expect(subject.all_sources).to include(top, l10n_src)
+    end
   end
 end

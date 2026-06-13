@@ -33,13 +33,14 @@ module Glossarist
     end
 
     def register_bibliography(source_id, concepts)
-      @bibliography_adapters << ResolutionAdapter::Bibliography.new(source_id, concepts)
+      @bibliography_adapters << ResolutionAdapter::Bibliography.new(source_id,
+                                                                    concepts)
     end
 
     def resolve(reference, concept: nil)
       if concept && reference.is_a?(ConceptReference) && reference.cite?
         source = concept.find_source_by_id(reference.concept_id)
-        return source&.origin if source
+        return source&.origin
       end
 
       if reference.local?
@@ -81,9 +82,10 @@ module Glossarist
       concepts.each do |concept|
         refs = extract_refs(concept, extractor)
         termid = extract_termid(concept)
+        source_concept = concept.is_a?(ManagedConcept) ? concept : nil
 
         refs.each do |ref|
-          resolved = resolve(ref)
+          resolved = resolve(ref, concept: source_concept)
           if resolved.nil?
             scope = ref.local? ? "intra-set" : "inter-set (#{ref.source})"
             result.add_warning("#{termid}: Unresolvable #{scope} reference: #{ref.term} -> #{ref.concept_id}")
@@ -115,49 +117,21 @@ module Glossarist
     end
 
     def classify(reference, concept: nil)
-      case reference
-      when ConceptReference
-        classify_concept_reference(reference, concept)
-      else
-        "unknown"
-      end
+      return "unknown" unless reference.is_a?(ConceptReference)
+
+      resolved = resolve(reference, concept: concept)
+      classify_from_resolution(reference, resolved)
     end
 
     private
 
-    def classify_concept_reference(reference, concept)
+    def classify_from_resolution(reference, resolved)
       if reference.cite?
-        return classify_cite_ref(reference, concept)
-      end
-
-      if reference.external?
-        return classify_external_ref(reference)
-      end
-
-      classify_local_ref(reference)
-    end
-
-    def classify_cite_ref(reference, concept)
-      if concept&.find_source_by_id(reference.concept_id)
-        "self-contained-citation"
+        resolved ? "self-contained-citation" : "unresolved-citation"
+      elsif reference.external?
+        resolved ? "internal-citation" : "external-citation"
       else
-        "unresolved-citation"
-      end
-    end
-
-    def classify_external_ref(reference)
-      if @bibliography_adapters.any? { |a| a.resolve(reference) }
-        "internal-citation"
-      else
-        "external-citation"
-      end
-    end
-
-    def classify_local_ref(reference)
-      if @local_adapter&.resolve(reference)
-        "same-dataset"
-      else
-        "unresolved"
+        resolved ? "same-dataset" : "unresolved"
       end
     end
 

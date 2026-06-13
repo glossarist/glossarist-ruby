@@ -64,8 +64,8 @@ RSpec.describe Glossarist::ConceptDocument do
       expect(doc.concept).to be_a(Glossarist::ManagedConcept)
     end
 
-    it "parses concept identifier" do
-      expect(doc.concept.identifier).to eq("003a8c14-f962-5688-aefe-38c736bebfb2")
+    it "parses concept uuid from id field" do
+      expect(doc.concept.uuid).to eq("003a8c14-f962-5688-aefe-38c736bebfb2")
     end
 
     it "parses concept data" do

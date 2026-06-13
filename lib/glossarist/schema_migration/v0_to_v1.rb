@@ -29,7 +29,8 @@ module Glossarist
         case [from_version, to_version]
         when ["0", "1"] then migrate_v0_to_v1
         else
-          raise Errors::Base, "Unsupported migration: #{from_version} -> #{to_version}"
+          raise Errors::Base,
+                "Unsupported migration: #{from_version} -> #{to_version}"
         end
         @concept
       end
@@ -45,7 +46,10 @@ module Glossarist
       end
 
       def migrate_termid
-        @concept["termid"] = String(@concept["termid"]) if @concept.key?("termid")
+        if @concept.key?("termid")
+          @concept["termid"] =
+            String(@concept["termid"])
+        end
       end
 
       def migrate_language_block(lang)
@@ -101,7 +105,8 @@ module Glossarist
 
         dates = []
         if l10n_block["date_accepted"]
-          dates << { "type" => "accepted", "date" => l10n_block["date_accepted"] }
+          dates << { "type" => "accepted",
+                     "date" => l10n_block["date_accepted"] }
         end
         if l10n_block["date_amended"]
           dates << { "type" => "amended", "date" => l10n_block["date_amended"] }

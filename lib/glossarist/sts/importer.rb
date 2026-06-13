@@ -184,7 +184,9 @@ module Glossarist
           package = GcrPackage.load(path)
           package.concepts.each { |mc| collection.store(mc) }
         else
-          GlossaryStore.new.tap { |s| s.load(path) }.each_concept { |mc| collection.store(mc) }
+          GlossaryStore.new.tap do |s|
+            s.load(path)
+          end.each_concept { |mc| collection.store(mc) }
         end
         collection
       end

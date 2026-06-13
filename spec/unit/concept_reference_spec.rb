@@ -41,6 +41,12 @@ RSpec.describe Glossarist::ConceptReference do
       expect(ref).to be_local
     end
 
+    it "returns true for cite ref_type" do
+      ref = described_class.new(term: "key", concept_id: "key",
+                                ref_type: "cite")
+      expect(ref).to be_local
+    end
+
     it "returns true when source is empty string" do
       ref = described_class.new(term: "latitude", concept_id: "200",
                                 source: "", ref_type: "local")
@@ -154,6 +160,40 @@ RSpec.describe Glossarist::ConceptReference do
       ref = described_class.section("section-103-01")
       expect(ref.concept_id).to eq("section-103-01")
       expect(ref.ref_type).to eq("section")
+    end
+  end
+
+  describe "#cite?" do
+    it "returns true for cite ref_type" do
+      ref = described_class.new(ref_type: "cite", concept_id: "key")
+      expect(ref).to be_cite
+    end
+
+    it "returns false for local ref_type" do
+      ref = described_class.new(ref_type: "local", concept_id: "200")
+      expect(ref).not_to be_cite
+    end
+
+    it "returns false when ref_type is nil" do
+      ref = described_class.new(concept_id: "200")
+      expect(ref).not_to be_cite
+    end
+  end
+
+  describe "#version field" do
+    it "round-trips version through YAML" do
+      ref = described_class.new(
+        concept_id: "iso-7301",
+        source: "ISO",
+        version: "2024",
+        ref_type: "urn",
+      )
+      loaded = described_class.from_yaml(ref.to_yaml)
+      expect(loaded.version).to eq("2024")
+    end
+
+    it "defaults version to nil" do
+      expect(described_class.new.version).to be_nil
     end
   end
 end

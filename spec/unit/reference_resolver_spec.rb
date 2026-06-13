@@ -120,7 +120,7 @@ RSpec.describe Glossarist::ReferenceResolver do
       concept = {
         "termid" => "100",
         "eng" => {
-          "definition" => [{ "content" => "See {{eq, urn:iec:std:iec:60050-102-01-01}}" }],
+          "definition" => [{ "content" => "See {{urn:iec:std:iec:60050-102-01-01, eq}}" }],
           "terms" => [],
           "notes" => [],
           "examples" => [],
@@ -141,7 +141,7 @@ RSpec.describe Glossarist::ReferenceResolver do
       concept = {
         "termid" => "100",
         "eng" => {
-          "definition" => [{ "content" => "See {{eq, urn:iec:std:iec:60050-102-01-01}}" }],
+          "definition" => [{ "content" => "See {{urn:iec:std:iec:60050-102-01-01, eq}}" }],
           "terms" => [],
           "notes" => [],
           "examples" => [],
@@ -159,7 +159,7 @@ RSpec.describe Glossarist::ReferenceResolver do
       concept = {
         "termid" => "100",
         "eng" => {
-          "definition" => [{ "content" => "See {{missing, 999}}" }],
+          "definition" => [{ "content" => "See {{999, missing}}" }],
           "terms" => [],
           "notes" => [],
           "examples" => [],
@@ -245,6 +245,21 @@ RSpec.describe Glossarist::ReferenceResolver do
       result = resolver.resolve(ref, concept: concept)
       expect(result["termid"]).to eq("102-01-01")
     end
+
+    it "does not fall through to local adapter for unresolved cite-refs" do
+      resolver = described_class.new
+      resolver.register_self(iev_concepts)
+      concept = Glossarist::ManagedConcept.of_yaml("data" => { "id" => "c1" })
+
+      ref = Glossarist::ConceptReference.new(
+        concept_id: "102-01-01",
+        source: nil,
+        term: "102-01-01",
+        ref_type: "cite",
+      )
+      result = resolver.resolve(ref, concept: concept)
+      expect(result).to be_nil
+    end
   end
 
   describe "bibliography resolution" do
@@ -320,7 +335,8 @@ RSpec.describe Glossarist::ReferenceResolver do
         ref_type: "cite",
       )
       resolver = described_class.new
-      expect(resolver.classify(ref, concept: concept)).to eq("self-contained-citation")
+      expect(resolver.classify(ref,
+                               concept: concept)).to eq("self-contained-citation")
     end
 
     it "classifies a cite-ref without matching source as 'unresolved-citation'" do
@@ -331,7 +347,8 @@ RSpec.describe Glossarist::ReferenceResolver do
         ref_type: "cite",
       )
       resolver = described_class.new
-      expect(resolver.classify(ref, concept: concept)).to eq("unresolved-citation")
+      expect(resolver.classify(ref,
+                               concept: concept)).to eq("unresolved-citation")
     end
 
     it "classifies an external ref with matching bibliography adapter as 'internal-citation'" do
@@ -384,6 +401,36 @@ RSpec.describe Glossarist::ReferenceResolver do
     it "returns 'unknown' for unrecognized reference types" do
       resolver = described_class.new
       expect(resolver.classify(:not_a_reference)).to eq("unknown")
+    end
+  end
+
+  describe "#resolve_all with concept context" do
+    it "resolves cite-refs through concept sources" do
+      source = Glossarist::ConceptSource.new(
+        id: "iso-7301",
+        type: "authoritative",
+        origin: Glossarist::Citation.new(
+          ref: Glossarist::Citation::Ref.new(source: "ISO", id: "7301"),
+        ),
+      )
+      concept = Glossarist::ManagedConcept.of_yaml("data" => { "id" => "c1" })
+      concept.sources = [source]
+      l10n = Glossarist::LocalizedConcept.of_yaml(
+        "data" => {
+          "language_code" => "eng",
+          "terms" => [{ "designation" => "test", "type" => "expression" }],
+          "definition" => [{ "content" => "See {{cite:iso-7301}}." }],
+          "entry_status" => "valid",
+        },
+      )
+      concept.add_localization(l10n)
+
+      extractor = Glossarist::ReferenceExtractor.new
+      resolver = described_class.new
+      results = resolver.resolve_all(concept, extractor: extractor)
+      cite_pair = results.find { |ref, _| ref.cite? }
+      expect(cite_pair).not_to be_nil
+      expect(cite_pair[1]).to eq(source.origin)
     end
   end
 

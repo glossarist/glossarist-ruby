@@ -88,6 +88,7 @@ module Glossarist
       self.class.detailed_definition_fields.each do |field|
         send(field).each { |d| list.concat(d.sources.to_a) }
       end
+      Array(terms).each { |t| list.concat(Array(t.sources)) }
       list
     end
 
