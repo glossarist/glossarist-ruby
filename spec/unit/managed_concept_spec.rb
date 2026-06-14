@@ -351,4 +351,32 @@ RSpec.describe Glossarist::ManagedConcept do
       expect(subject.all_sources).to include(top, l10n_src)
     end
   end
+
+  describe "identifier/uuid single source of truth" do
+    it "identifier returns the same value as uuid" do
+      expect(subject.identifier).to eq(subject.uuid)
+    end
+
+    it "id returns the same value as uuid" do
+      expect(subject.id).to eq(subject.uuid)
+    end
+
+    it "setting identifier sets uuid" do
+      subject.identifier = "test-uuid"
+      expect(subject.uuid).to eq("test-uuid")
+    end
+
+    it "setting id sets uuid" do
+      subject.id = "test-uuid-2"
+      expect(subject.uuid).to eq("test-uuid-2")
+    end
+
+    it "persists identifier as uuid through YAML round-trip" do
+      subject.uuid = "round-trip-id"
+      restored = described_class.from_yaml(subject.to_yaml)
+      expect(restored.uuid).to eq("round-trip-id")
+      expect(restored.identifier).to eq("round-trip-id")
+      expect(restored.id).to eq("round-trip-id")
+    end
+  end
 end

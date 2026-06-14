@@ -13,19 +13,28 @@ module Glossarist
     attribute :status, :string,
               values: Glossarist::GlossaryDefinition::CONCEPT_STATUSES
 
-    attribute :identifier, :string
-    alias :id :identifier
-    alias :id= :identifier=
-
     attribute :uuid, :string
 
     attribute :version, :string
     attribute :schema_version, :string
 
+    # identifier and id are aliases for uuid — the concept's canonical
+    # identity. There is one source of truth: uuid, serialized to the
+    # YAML "id" key. Having separate identifier/uuid attributes that both
+    # map to the same key caused dual-mapping fragility.
+    def identifier
+      uuid
+    end
+
+    def identifier=(value)
+      self.uuid = value
+    end
+
+    alias :id :identifier
+    alias :id= :identifier=
+
     key_value do
       map :data, to: :data
-      map :identifier,
-          with: { to: :identifier_to_yaml, from: :identifier_from_yaml }
       map :related, to: :related
       map :dates, to: :dates
       map :sources, to: :sources
@@ -72,15 +81,6 @@ module Glossarist
         Glossarist::Utilities::UUID::OID_NAMESPACE,
         to_yaml(except: %i[uuid schema_version]),
       )
-    end
-
-    def identifier_to_yaml(model, doc)
-      value = model.identifier || model.id
-      doc["id"] = value if value && !doc["id"]
-    end
-
-    def identifier_from_yaml(model, value)
-      model.identifier = value || model.identifier
     end
 
     def localized_concepts=(localized_concepts_collection) # rubocop:disable Metrics/AbcSize
