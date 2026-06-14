@@ -14,33 +14,22 @@ module Glossarist
         end
 
         def check(context)
-          concept = context.concept
           fname = context.file_name
-          extractor = ReferenceExtractor.new
           issues = []
 
-          concept.localizations.each do |l10n|
-            lang = l10n.language_code || "unknown"
+          context.references.each do |ref|
+            next unless ref.is_a?(AssetReference)
+            next if context.asset_index.resolve?(ref.path)
 
-            l10n.text_content.each do |text|
-              next unless text
-
-              extractor.extract_from_text(text).each do |ref|
-                next unless ref.is_a?(AssetReference)
-                next if context.asset_index.resolve?(ref.path)
-
-                issues << issue(
-                  "unresolved image reference #{ref.path}",
-                  code: "GLS-103", severity: severity,
-                  location: "#{fname}/#{lang}",
-                  suggestion: "add '#{ref.path}' to the dataset's images/ directory"
-                )
-              end
-            end
+            issues << issue(
+              "unresolved image reference #{ref.path}",
+              code: "GLS-103", severity: severity,
+              location: fname,
+              suggestion: "add '#{ref.path}' to the dataset's images/ directory"
+            )
           end
 
-          asset_refs = extractor.extract_asset_refs_from_concept(concept)
-          asset_refs.each do |ref|
+          context.asset_references.each do |ref|
             next if context.asset_index.resolve?(ref.path)
 
             issues << issue(

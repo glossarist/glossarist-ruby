@@ -3,6 +3,12 @@
 module Glossarist
   module Validation
     module Rules
+      # Shared context for concept-scoped validation rules.
+      #
+      # Provides lazy-memoized access to extracted references so that multiple
+      # rules examining the same concept share one extraction pass (DRY,
+      # single source of truth). Rules ask the context for references rather
+      # than instantiating their own ReferenceExtractor.
       class ConceptContext
         attr_reader :concept, :file_name, :collection_context
 
@@ -14,6 +20,24 @@ module Glossarist
 
         def concept_id
           @concept.data&.id&.to_s
+        end
+
+        # All references extracted from the concept's text fields
+        # (definitions, notes, examples) via {{...}} mentions, <<xrefs>>,
+        # and image::...[] references. Includes ConceptReference,
+        # BibliographicReference, and AssetReference objects.
+        # Memoized — extracted once per concept, shared across all rules.
+        def references
+          @references ||= ReferenceExtractor.new
+            .extract_from_managed_concept(@concept)
+        end
+
+        # All asset references (NonVerbRep, GraphicalSymbol) extracted
+        # from the concept's model attributes.
+        # Memoized — extracted once per concept, shared across all rules.
+        def asset_references
+          @asset_references ||= ReferenceExtractor.new
+            .extract_asset_refs_from_concept(@concept)
         end
 
         def bibliography_index

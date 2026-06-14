@@ -14,30 +14,20 @@ module Glossarist
         end
 
         def check(context)
-          concept = context.concept
           fname = context.file_name
-          extractor = ReferenceExtractor.new
           issues = []
 
-          concept.localizations.each do |l10n|
-            lang = l10n.language_code || "unknown"
+          context.references.each do |ref|
+            next unless ref.is_a?(BibliographicReference)
+            next if context.bibliography_index.resolve?(ref.anchor)
 
-            l10n.text_content.each do |text|
-              next unless text
-
-              extractor.extract_from_text(text).each do |ref|
-                next unless ref.is_a?(BibliographicReference)
-                next if context.bibliography_index.resolve?(ref.anchor)
-
-                issues << issue(
-                  "unresolved bibliography reference <<#{ref.anchor}>>",
-                  code: code, severity: severity,
-                  location: "#{fname}/#{lang}",
-                  suggestion: "add '#{ref.anchor}' as a source, " \
-                              "or verify it exists in bibliography.yaml"
-                )
-              end
-            end
+            issues << issue(
+              "unresolved bibliography reference <<#{ref.anchor}>>",
+              code: code, severity: severity,
+              location: fname,
+              suggestion: "add '#{ref.anchor}' as a source, " \
+                          "or verify it exists in bibliography.yaml"
+            )
           end
 
           issues
