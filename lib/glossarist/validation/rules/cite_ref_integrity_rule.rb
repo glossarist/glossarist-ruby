@@ -19,7 +19,7 @@ module Glossarist
           issues = []
 
           check_unique_source_ids(concept, fname, issues)
-          check_unresolved_mentions(concept, fname, issues)
+          check_unresolved_mentions(context, concept, fname, issues)
 
           issues
         end
@@ -46,8 +46,8 @@ module Glossarist
           end
         end
 
-        def check_unresolved_mentions(concept, fname, issues)
-          keys = cite_mention_keys(concept)
+        def check_unresolved_mentions(context, concept, fname, issues)
+          keys = cite_mention_keys(context)
           return if keys.empty?
 
           known_ids = concept.all_sources.filter_map(&:id).to_set
@@ -63,9 +63,8 @@ module Glossarist
           end
         end
 
-        def cite_mention_keys(concept)
-          extractor = ReferenceExtractor.new
-          extractor.extract_from_managed_concept(concept)
+        def cite_mention_keys(context)
+          context.references
             .select(&:cite?)
             .filter_map(&:concept_id)
         end

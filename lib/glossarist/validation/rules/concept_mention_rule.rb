@@ -14,12 +14,10 @@ module Glossarist
         end
 
         def check(context)
-          concept = context.concept
           fname = context.file_name
-          extractor = ReferenceExtractor.new
           issues = []
 
-          refs = extractor.extract_from_managed_concept(concept)
+          refs = context.references
             .select { |r| r.is_a?(ConceptReference) && r.local? }
 
           refs.each do |ref|
