@@ -253,9 +253,10 @@ module Glossarist
       end
 
       def extract_ref_text(ref)
-        if ref.respond_to?(:content) && ref.content.is_a?(Array)
+        case ref
+        when ::Sts::IsoSts::StdRef
           normalize_whitespace(ref.content.join.to_s)
-        elsif ref.respond_to?(:value)
+        when ::Sts::NisoSts::StandardRef
           normalize_whitespace(ref.value.to_s)
         else
           ""

@@ -67,7 +67,11 @@ module Glossarist
 
     def normalize_definition(definition)
       definition.gsub(/{{([^}]*)}}/) do |_match|
-        "\\textbf{\\gls{#{Regexp.last_match[1].tr('_', '-')}}}"
+        inner = Regexp.last_match[1]
+        # Mention syntax: {{identifier}} or {{identifier, render term}}
+        # Use the identifier (first part before comma) as the gloss label.
+        label = inner.split(",", 2).first.strip.tr("_", "-")
+        "\\textbf{\\gls{#{label}}}"
       end
     end
 

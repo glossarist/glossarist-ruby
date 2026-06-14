@@ -132,5 +132,15 @@ RSpec.describe Glossarist::ConceptSet do
     it "should convert the definition to latex format" do
       expect(subject.normalize_definition(definition)).to eq(expected_definition)
     end
+
+    it "uses the identifier as gloss label for {{id, render term}}" do
+      result = subject.normalize_definition("See {{200, geodetic latitude}}.")
+      expect(result).to eq("See \\textbf{\\gls{200}}.")
+    end
+
+    it "uses the cite key as gloss label for {{cite:id, render term}}" do
+      result = subject.normalize_definition("See {{cite:iso7301, rice}}.")
+      expect(result).to eq("See \\textbf{\\gls{cite:iso7301}}.")
+    end
   end
 end
