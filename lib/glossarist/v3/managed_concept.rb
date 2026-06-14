@@ -9,15 +9,13 @@ module Glossarist
 
       key_value do
         map :data, to: :data
-        map :id, with: { to: :identifier_to_yaml, from: :identifier_from_yaml }
-        map :identifier,
-            with: { to: :identifier_to_yaml, from: :identifier_from_yaml }
         map :related, to: :related
         map :dates, to: :dates
         map %i[date_accepted dateAccepted],
             with: { from: :date_accepted_from_yaml, to: :date_accepted_to_yaml }
         map :status, to: :status
-        map :uuid, to: :uuid, with: { from: :uuid_from_yaml, to: :uuid_to_yaml }
+        map %i[id uuid], to: :uuid,
+                         with: { from: :uuid_from_yaml, to: :uuid_to_yaml }
         map :schema_version, to: :schema_version
         map :sources, to: :sources
       end
