@@ -228,13 +228,27 @@ RSpec.describe Glossarist::ConceptData do
       expect(subject.all_sources).to include(ex_source)
     end
 
-    it "aggregates sources from all fields" do
+    it "includes sources from terms/designations" do
+      term_source = Glossarist::ConceptSource.new(type: "authoritative")
+      term = Glossarist::Designation::Expression.new(
+        designation: "test term", sources: [term_source],
+      )
+      subject.terms = [term]
+
+      expect(subject.all_sources).to include(term_source)
+    end
+
+    it "aggregates sources from all fields including terms" do
       top = Glossarist::ConceptSource.new(type: "lineage")
       def_s = Glossarist::ConceptSource.new(type: "authoritative")
       note_s = Glossarist::ConceptSource.new(type: "authoritative")
       ex_s = Glossarist::ConceptSource.new(type: "authoritative")
+      term_s = Glossarist::ConceptSource.new(type: "authoritative")
 
       subject.sources = [top]
+      subject.terms = [Glossarist::Designation::Expression.new(
+        designation: "test", sources: [term_s],
+      )]
       subject.definition = [Glossarist::DetailedDefinition.new(content: "d",
                                                                sources: [def_s])]
       subject.notes = [Glossarist::DetailedDefinition.new(content: "n",
@@ -242,7 +256,7 @@ RSpec.describe Glossarist::ConceptData do
       subject.examples = [Glossarist::DetailedDefinition.new(content: "e",
                                                              sources: [ex_s])]
 
-      expect(subject.all_sources).to eq([top, def_s, note_s, ex_s])
+      expect(subject.all_sources).to eq([top, def_s, note_s, ex_s, term_s])
     end
 
     it "returns empty array when no sources" do

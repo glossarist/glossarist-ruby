@@ -122,7 +122,7 @@ module Glossarist
 
         dd_attrs = if data
                      data.class.detailed_definition_fields.to_h do |field|
-                       [field, build_gloss_definitions(data.send(field))]
+                       [field, build_gloss_definitions(data.public_send(field))]
                      end
                    else
                      { definition: [], notes: [], examples: [] }
