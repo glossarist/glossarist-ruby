@@ -117,6 +117,30 @@ RSpec.describe Glossarist::ConceptReference do
     end
   end
 
+  describe "id alias for concept_id" do
+    it "accepts 'id' key in of_yaml (concept-model domain format)" do
+      ref = described_class.of_yaml(
+        "source" => "urn:iso:std:iso:19107",
+        "id" => "3.1",
+        "ref_type" => "section",
+      )
+      expect(ref.concept_id).to eq("3.1")
+      expect(ref.source).to eq("urn:iso:std:iso:19107")
+      expect(ref.ref_type).to eq("section")
+    end
+
+    it "loads domains with id key from ManagedConceptData YAML" do
+      data = Glossarist::ManagedConceptData.of_yaml(
+        "domains" => [
+          { "source" => "urn:example:std:ex:1000:2026", "id" => "3.1",
+            "ref_type" => "section" },
+        ],
+      )
+      expect(data.domains.first.concept_id).to eq("3.1")
+      expect(data.domains.first.ref_type).to eq("section")
+    end
+  end
+
   describe "ConceptData integration" do
     it "ConceptData accepts references collection" do
       ref = described_class.new(term: "equality", concept_id: "102-01-01",

@@ -39,10 +39,17 @@ designation:
 
 related_concept:
   type:
-    # Lifecycle (ISO 10241-1)
+    # Lifecycle (ISO 10241-1 / ISO 19135)
     - deprecates
+    - deprecated_by
     - supersedes
     - superseded_by
+    - replaces
+    - replaced_by
+    - invalidates
+    - invalidated_by
+    - retires
+    - retired_by
     # Hierarchical (ISO 10241-1 / ISO 25964)
     - narrower
     - broader
@@ -52,9 +59,13 @@ related_concept:
     # Hierarchical sub-types — ISO 25964 partitive (BTP/NTP)
     - broader_partitive
     - narrower_partitive
+    - has_part
+    - is_part_of
     # Hierarchical sub-types — ISO 25964 instantial (BTI/NTI)
     - broader_instantial
     - narrower_instantial
+    - instance_of
+    - has_instance
     # Equivalence (ISO 10241-1 / ISO 25964 exactMatch / SKOS)
     - equivalent
     - exact_match
@@ -69,17 +80,30 @@ related_concept:
     - contrast
     # Associative (ISO 10241-1 / ISO 25964 RT / TBX crossReference)
     - see
+    - references
     # Associative sub-types (ISO 25964 / TBX)
     - related_concept
     - related_concept_broader
     - related_concept_narrower
     # Associative — spatial/temporal (ISO 25964 / TBX)
-    - sequentially_related_concept
-    - spatially_related_concept
-    - temporally_related_concept
+    - sequentially_related
+    - spatially_related
+    - temporally_related
     # Lexical (ISO 12620 / TBX)
     - homograph
     - false_friend
+    # Register management (ISO 19135)
+    - has_concept
+    - is_concept_of
+    - has_definition
+    - definition_of
+    - inherits
+    - inherited_by
+    # Versioning / definitional (ISO 19135)
+    - has_version
+    - version_of
+    - current_version
+    - current_version_of
 
 iso12620:
   term_type:
