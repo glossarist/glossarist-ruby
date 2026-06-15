@@ -111,22 +111,22 @@ RSpec.describe Glossarist::RelatedConcept do
       expect(rc.type).to eq("related_concept_narrower")
     end
 
-    it "accepts sequentially_related_concept type (TBX)" do
-      rc = described_class.new(type: "sequentially_related_concept",
+    it "accepts sequentially_related type (TBX)" do
+      rc = described_class.new(type: "sequentially_related",
                                content: "next step")
-      expect(rc.type).to eq("sequentially_related_concept")
+      expect(rc.type).to eq("sequentially_related")
     end
 
-    it "accepts spatially_related_concept type (TBX)" do
-      rc = described_class.new(type: "spatially_related_concept",
+    it "accepts spatially_related type (TBX)" do
+      rc = described_class.new(type: "spatially_related",
                                content: "adjacent room")
-      expect(rc.type).to eq("spatially_related_concept")
+      expect(rc.type).to eq("spatially_related")
     end
 
-    it "accepts temporally_related_concept type (TBX)" do
-      rc = described_class.new(type: "temporally_related_concept",
+    it "accepts temporally_related type (TBX)" do
+      rc = described_class.new(type: "temporally_related",
                                content: "preceding event")
-      expect(rc.type).to eq("temporally_related_concept")
+      expect(rc.type).to eq("temporally_related")
     end
 
     it "accepts homograph type" do
@@ -137,6 +137,31 @@ RSpec.describe Glossarist::RelatedConcept do
     it "accepts false_friend type" do
       rc = described_class.new(type: "false_friend", content: "realize")
       expect(rc.type).to eq("false_friend")
+    end
+
+    it "accepts deprecated_by type" do
+      rc = described_class.new(type: "deprecated_by", content: "old term")
+      expect(rc.type).to eq("deprecated_by")
+    end
+
+    it "accepts has_part type" do
+      rc = described_class.new(type: "has_part", content: "component")
+      expect(rc.type).to eq("has_part")
+    end
+
+    it "accepts is_part_of type" do
+      rc = described_class.new(type: "is_part_of", content: "assembly")
+      expect(rc.type).to eq("is_part_of")
+    end
+
+    it "accepts has_version type" do
+      rc = described_class.new(type: "has_version", content: "2024 edition")
+      expect(rc.type).to eq("has_version")
+    end
+
+    it "accepts references type" do
+      rc = described_class.new(type: "references", content: "related doc")
+      expect(rc.type).to eq("references")
     end
   end
 end

@@ -17,7 +17,7 @@ module Glossarist
 
     key_value do
       map :term, to: :term
-      map :concept_id, to: :concept_id
+      map %i[concept_id id], to: :concept_id
       map :source, to: :source
       map :ref_type, to: :ref_type
       map :urn, to: :urn
