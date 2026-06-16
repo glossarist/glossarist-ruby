@@ -137,6 +137,68 @@ RSpec.describe Glossarist::DatasetRegister do
     end
   end
 
+  describe "section cascading membership" do
+    let(:hierarchical_yaml) do
+      <<~YAML
+        ---
+        schema_type: glossarist
+        schema_version: '3'
+        id: hierarchical
+        urn: "urn:test:hierarchical"
+        sections:
+          - id: "1"
+            names: { eng: "General" }
+          - id: "3"
+            names: { eng: "Geometric" }
+            children:
+              - id: "3.1"
+                names: { eng: "Points" }
+                children:
+                  - id: "3.1.1"
+                    names: { eng: "Pixels" }
+      YAML
+    end
+
+    let(:reg) { described_class.from_yaml(hierarchical_yaml) }
+
+    it "returns ancestor chain for deeply nested section" do
+      expect(reg.section_ancestor_ids("3.1.1")).to eq(%w[3.1 3])
+    end
+
+    it "returns immediate parent for child of top-level" do
+      expect(reg.section_ancestor_ids("3.1")).to eq(["3"])
+    end
+
+    it "returns empty for top-level section" do
+      expect(reg.section_ancestor_ids("1")).to eq([])
+    end
+
+    it "returns empty for non-existent section" do
+      expect(reg.section_ancestor_ids("999")).to eq([])
+    end
+
+    it "resolves concept section IDs with cascading ancestors" do
+      concept = Glossarist::ManagedConcept.new(
+        data: {
+          id: "3.1.1",
+          domains: [{ concept_id: "3.1.1", ref_type: "section" }],
+        },
+      )
+      expect(reg.concept_section_ids(concept)).to eq(%w[3.1.1 3.1 3])
+    end
+
+    it "derives section from term-ID-prefix when no explicit domains" do
+      concept = Glossarist::ManagedConcept.new(data: { id: "3-01-01" })
+      # No explicit domain → derive from "3" prefix
+      expect(reg.concept_section_ids(concept)).to eq(["3"])
+    end
+
+    it "returns empty when concept has no domains and no matching prefix" do
+      concept = Glossarist::ManagedConcept.new(data: { id: "999" })
+      expect(reg.concept_section_ids(concept)).to eq([])
+    end
+  end
+
   describe "from_file" do
     it "loads from an actual register.yaml file" do
       path = File.expand_path("../../fixtures/viml-2022-register.yaml", __dir__)

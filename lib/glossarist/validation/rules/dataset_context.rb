@@ -31,6 +31,13 @@ module Glossarist
           nil
         end
 
+        # Loads the dataset's register.yaml as a DatasetRegister (with
+        # hierarchical sections, urn, ordering). Returns nil if no
+        # register.yaml exists or it uses the legacy format.
+        def dataset_register
+          @dataset_register ||= load_dataset_register
+        end
+
         def bibliography_index
           @bibliography_index ||= BibliographyIndex.build_from_concepts(
             concepts, dataset_path: @path
@@ -97,6 +104,13 @@ module Glossarist
             end
           end
           index
+        end
+
+        def load_dataset_register
+          reg_path = File.join(@path, "register.yaml")
+          return nil unless File.exist?(reg_path)
+
+          DatasetRegister.from_file(reg_path)
         end
       end
     end
