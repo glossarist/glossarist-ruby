@@ -423,7 +423,7 @@ related_concept.ref = Glossarist::ConceptRef.new(source: "IEC", id: "102-03-02")
 [[relationship-types]]
 ==== Relationship Types
 
-Relationship types are drawn from ISO 10241-1, ISO 25964/SKOS, and ISO 12620/TBX. The table below shows each type with its provenance and cross-standard equivalents.
+Relationship types span five standards (ISO 10241-1, ISO 25964/SKOS, ISO 12620/TBX, ISO 19135). The table below shows each of the 52 types with its category and cross-standard equivalents.
 
 [cols="1,1,1,1,1"]
 |===
@@ -432,6 +432,12 @@ Relationship types are drawn from ISO 10241-1, ISO 25964/SKOS, and ISO 12620/TBX
 |`deprecates`
 |Lifecycle
 |deprecates
+|—
+|—
+
+|`deprecated_by`
+|Lifecycle
+|deprecated by
 |—
 |—
 
@@ -444,6 +450,42 @@ Relationship types are drawn from ISO 10241-1, ISO 25964/SKOS, and ISO 12620/TBX
 |`superseded_by`
 |Lifecycle
 |superseded by
+|—
+|—
+
+|`replaces`
+|Lifecycle (ISO 19135)
+|—
+|—
+|—
+
+|`replaced_by`
+|Lifecycle (ISO 19135)
+|—
+|—
+|—
+
+|`invalidates`
+|Lifecycle (ISO 19135)
+|—
+|—
+|—
+
+|`invalidated_by`
+|Lifecycle (ISO 19135)
+|—
+|—
+|—
+
+|`retires`
+|Lifecycle (ISO 19135)
+|—
+|—
+|—
+
+|`retired_by`
+|Lifecycle (ISO 19135)
+|—
 |—
 |—
 
@@ -483,6 +525,18 @@ Relationship types are drawn from ISO 10241-1, ISO 25964/SKOS, and ISO 12620/TBX
 |NTP (narrowerPartitive)
 |narrowerTermPartitive
 
+|`has_part`
+|Hierarchical (partitive)
+|has part
+|—
+|—
+
+|`is_part_of`
+|Hierarchical (partitive)
+|is part of
+|—
+|—
+
 |`broader_instantial`
 |Hierarchical (instantial)
 |—
@@ -494,6 +548,18 @@ Relationship types are drawn from ISO 10241-1, ISO 25964/SKOS, and ISO 12620/TBX
 |—
 |NTI (narrowerInstantial)
 |narrowerTermInstantial
+
+|`instance_of`
+|Hierarchical (instantial)
+|instance of
+|—
+|—
+
+|`has_instance`
+|Hierarchical (instantial)
+|has instance
+|—
+|—
 
 |`equivalent`
 |Equivalence
@@ -543,6 +609,12 @@ Relationship types are drawn from ISO 10241-1, ISO 25964/SKOS, and ISO 12620/TBX
 |RT (relatedTerm)
 |crossReference
 
+|`references`
+|Associative
+|references
+|—
+|—
+
 |`related_concept`
 |Associative
 |—
@@ -561,23 +633,23 @@ Relationship types are drawn from ISO 10241-1, ISO 25964/SKOS, and ISO 12620/TBX
 |—
 |relatedConceptNarrower
 
-|`sequentially_related_concept`
+|`sequentially_related`
 |Associative (sequential)
 |—
 |—
-|sequentiallyRelatedConcept
+|sequentiallyRelated
 
-|`spatially_related_concept`
+|`spatially_related`
 |Associative (spatial)
 |—
 |—
-|spatiallyRelatedConcept
+|spatiallyRelated
 
-|`temporally_related_concept`
+|`temporally_related`
 |Associative (temporal)
 |—
 |—
-|temporallyRelatedConcept
+|temporallyRelated
 
 |`homograph`
 |Lexical
@@ -590,6 +662,66 @@ Relationship types are drawn from ISO 10241-1, ISO 25964/SKOS, and ISO 12620/TBX
 |—
 |—
 |falseFriend
+
+|`has_concept`
+|Register (ISO 19135)
+|—
+|—
+|—
+
+|`is_concept_of`
+|Register (ISO 19135)
+|—
+|—
+|—
+
+|`has_definition`
+|Register (ISO 19135)
+|—
+|—
+|—
+
+|`definition_of`
+|Register (ISO 19135)
+|—
+|—
+|—
+
+|`inherits`
+|Register (ISO 19135)
+|—
+|—
+|—
+
+|`inherited_by`
+|Register (ISO 19135)
+|—
+|—
+|—
+
+|`has_version`
+|Versioning (ISO 19135)
+|—
+|—
+|—
+
+|`version_of`
+|Versioning (ISO 19135)
+|—
+|—
+|—
+
+|`current_version`
+|Versioning (ISO 19135)
+|—
+|—
+|—
+
+|`current_version_of`
+|Versioning (ISO 19135)
+|—
+|—
+|—
 |===
 
 [[id,concept-reference]]
@@ -598,12 +730,12 @@ Relationship types are drawn from ISO 10241-1, ISO 25964/SKOS, and ISO 12620/TBX
 A typed reference to another concept, either local (within the same glossary) or external (in another concept registry).
 
 term:: String — the display text for the referenced concept.
-concept_id:: String — the identifier of the target concept.
+concept_id:: String — the identifier of the target concept. Also accepts the `id` key in YAML (alias for backward compatibility with the concept-model format).
 source:: String — the registry URI prefix for external references (e.g. `urn:iec:std:iec:60050`).
-ref_type:: String — the reference type: `local`, `designation`, or `urn`.
+ref_type:: String — the reference type: `local`, `designation`, `cite`, `section`, `domain`, or `urn`.
 urn:: String — a direct URN for the target concept (e.g. `urn:iec:std:iec:60050-102-01-01`).
 
-Local references use `concept_id` without `source`. External references use `source` + `concept_id` or a direct `urn`.
+Local references use `concept_id` without `source`. External references use `source` + `concept_id` or a direct `urn`. `cite` references resolve against a `ConceptSource#id` in the same concept. `section` references point to a section defined in `register.yaml`.
 
 [,ruby]
 ----
@@ -810,6 +942,58 @@ status:: The status of the managed term in the present context, relative to the 
 type:: The type of the managed term in the present context.
 origin:: The bibliographic <<citation,citation>> for the managed term.
 modification:: A description of the modification to the cited definition of the term, if any, as it is to be applied in the present context.
+
+
+[[dataset-register,Dataset Register]]
+== Dataset Register
+
+A dataset directory may contain a `register.yaml` — the self-describing metadata file. It carries identity (URN, ref, year), structure (ordering, hierarchical sections), provenance (owner, sourceRepo), and relationships (supersedes other datasets).
+
+[,yaml]
+----
+schema_type: glossarist
+schema_version: "3"
+id: iso-19111
+ref: "ISO 19111:2019"
+year: 2019
+urn: "urn:iso:std:iso:19111"
+status: current
+owner: ISO
+languages: [eng, fra]
+ordering: systematic
+sections:
+  - id: "3"
+    names: { eng: "Geometric concepts" }
+    children:
+      - id: "3.1"
+        names: { eng: "Points and lines" }
+----
+
+[[hierarchical-sections,Hierarchical Sections]]
+=== Hierarchical sections
+
+Sections provide structural organization for concepts within a dataset. A section may contain child sections, forming a tree. Concepts reference sections via `domains[]` with `ref_type: section`:
+
+[,yaml]
+----
+data:
+  domains:
+    - source: urn:iso:std:iso:19111
+      id: "3.1"
+      ref_type: section
+----
+
+==== Cascading membership
+
+Section membership is transitive: a concept in section `3.1.1` is also a member of `3.1` and `3` for filtering and display. Use `DatasetRegister#concept_section_ids(concept)` to resolve all sections a concept belongs to, including transitive ancestors.
+
+[,ruby]
+----
+register = Glossarist::DatasetRegister.from_file("path/to/register.yaml")
+register.concept_section_ids(concept)  # => ["3.1", "3"]
+----
+
+When a concept has no explicit `domains[]` entry with `ref_type: section`, section membership is derived from the concept's identifier using the longest registered section prefix (e.g. `103-01-01` → section `103`).
 
 
 == Commands
@@ -1349,6 +1533,15 @@ Upgrade a dataset to the current schema version.
 [,bash]
 ----
 glossarist upgrade SOURCE_DIR -o OUTPUT_DIR
+----
+
+=== version
+
+Show the installed Glossarist version.
+
+[,bash]
+----
+glossarist version
 ----
 
 == Glossarist Concept Repository (GCR)
