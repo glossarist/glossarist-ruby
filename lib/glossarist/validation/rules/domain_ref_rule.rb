@@ -27,6 +27,21 @@ module Glossarist
                 suggestion: "Provide at least concept_id or urn for the domain reference",
               )
             end
+
+            next unless domain.ref_type == "section" && domain.concept_id
+
+            register = context.collection_context.dataset_register
+            next unless register
+
+            unless register.section_exists?(domain.concept_id)
+              issues << issue(
+                "domain #{idx + 1} references section '#{domain.concept_id}' " \
+                "that does not exist in register.yaml",
+                location: fname,
+                suggestion: "Add section '#{domain.concept_id}' to " \
+                            "register.yaml or fix the reference",
+              )
+            end
           end
 
           issues
