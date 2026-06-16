@@ -5,7 +5,6 @@ module Glossarist
     attribute :uuid, :string
     attribute :subject, :string
     attribute :non_verb_rep, NonVerbRep, collection: true
-    attribute :extension_attributes, :string
     attribute :lineage_source, :string
     attribute :localizations, :hash
     attribute :extension_attributes, :hash
@@ -16,8 +15,6 @@ module Glossarist
       map :termid, to: :termid
       map :subject, to: :subject
       map %i[non_verb_rep nonVerbRep], to: :non_verb_rep
-      map %i[extension_attributes extensionAttributes],
-          to: :extension_attributes
       map %i[lineage_source lineageSource], to: :lineage_source
       map :localizations, to: :localizations
       map %i[extension_attributes extensionAttributes],
