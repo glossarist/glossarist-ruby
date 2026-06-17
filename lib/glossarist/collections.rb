@@ -15,6 +15,14 @@ module Glossarist
              "glossarist/collections/detailed_definition_collection"
     autoload :LocalizationCollection,
              "glossarist/collections/localization_collection"
+    autoload :NonVerbalCollection,
+             "glossarist/collections/non_verbal_collection"
+    autoload :FigureCollection,
+             "glossarist/collections/figure_collection"
+    autoload :TableCollection,
+             "glossarist/collections/table_collection"
+    autoload :FormulaCollection,
+             "glossarist/collections/formula_collection"
     autoload :TypedCollection,
              "glossarist/collections/typed_collection"
   end
