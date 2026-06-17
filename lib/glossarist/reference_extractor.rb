@@ -226,6 +226,15 @@ module Glossarist
       AssetReference.new(path: path.strip)
     end
 
+    # Unified non-verbal entity mention resolver for fig:/table:/formula:.
+    # Strips the prefix and produces the appropriate reference type.
+    def resolve_non_verbal_mention(prefix, identifier, display, ref_class)
+      cleaned = identifier.delete_prefix(prefix).strip
+      return nil if cleaned.empty?
+
+      ref_class.new(entity_id: cleaned, display: display)
+    end
+
     private
 
     def gather_texts(lc_hash)
@@ -291,6 +300,18 @@ module Glossarist
 
     register_identifier_resolver("cite:") do |ext, identifier, display|
       ext.resolve_cite_key(identifier, display)
+    end
+
+    register_identifier_resolver("fig:") do |ext, identifier, display|
+      ext.resolve_non_verbal_mention("fig:", identifier, display, FigureReference)
+    end
+
+    register_identifier_resolver("table:") do |ext, identifier, display|
+      ext.resolve_non_verbal_mention("table:", identifier, display, TableReference)
+    end
+
+    register_identifier_resolver("formula:") do |ext, identifier, display|
+      ext.resolve_non_verbal_mention("formula:", identifier, display, FormulaReference)
     end
 
     register_identifier_resolver("urn:iec:std:iec:60050") do |ext, identifier, display|
