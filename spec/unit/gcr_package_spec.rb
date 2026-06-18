@@ -453,10 +453,11 @@ RSpec.describe Glossarist::GcrPackage do
 
     def write_test_bibliography(source)
       bib = {
-        "ISO_19111_2019" => {
+        "bibliography" => [{
+          "id" => "ISO_19111_2019",
           "type" => "standard",
           "title" => "Geographic information — Referencing by coordinates",
-        },
+        }],
       }
       File.write(File.join(source, "bibliography.yaml"), YAML.dump(bib))
     end
@@ -484,7 +485,7 @@ RSpec.describe Glossarist::GcrPackage do
         entry = zf.find_entry("bibliography.yaml")
         expect(entry).not_to be_nil
         parsed = YAML.safe_load(entry.get_input_stream.read)
-        expect(parsed).to have_key("ISO_19111_2019")
+        expect(parsed["bibliography"].map { |e| e["id"] }).to include("ISO_19111_2019")
       end
     end
 
@@ -572,7 +573,7 @@ RSpec.describe Glossarist::GcrPackage do
       pkg = described_class.load(output)
       expect(pkg.bibliography).not_to be_nil
       parsed = YAML.safe_load(pkg.bibliography)
-      expect(parsed).to have_key("ISO_19111_2019")
+      expect(parsed["bibliography"].map { |e| e["id"] }).to include("ISO_19111_2019")
     end
 
     it "returns nil bibliography when GCR has none" do

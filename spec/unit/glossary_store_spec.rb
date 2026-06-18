@@ -92,9 +92,9 @@ RSpec.describe Glossarist::GlossaryStore do
     YAML
 
     bib = Glossarist::BibliographyData.new
-    bib.entries_from_hash(bib, {
-                            "ref_1" => { "reference" => "ISO 704", "title" => "Terminology work" },
-                          })
+    bib.entries << Glossarist::BibliographyEntry.new(
+      id: "ref_1", reference: "ISO 704", title: "Terminology work",
+    )
     File.write(File.join(dir, "bibliography.yaml"), bib.to_yaml,
                encoding: "utf-8")
 

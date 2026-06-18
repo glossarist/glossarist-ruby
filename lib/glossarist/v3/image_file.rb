@@ -2,17 +2,24 @@
 
 module Glossarist
   module V3
-    class ImageFile < Lutaml::Model::Collection
-      instances :entries, ImageEntry
+    # The dataset's images index, persisted as images.yaml.
+    #
+    # Uses the V3 glossarist dataset syntax for a collection file: a YAML
+    # mapping with a single key, +images+, whose value is an array of typed
+    # ImageEntry items (no stray top-level array).
+    class ImageFile < Lutaml::Model::Serializable
+      attribute :entries, ImageEntry, collection: true, initialize_empty: true
 
       key_value do
-        map_instances to: :entries
+        map "images", to: :entries
       end
 
-      def self.from_file(path)
-        return nil unless File.exist?(path)
+      class << self
+        def from_file(path)
+          return nil unless File.exist?(path)
 
-        from_yaml(File.read(path))
+          from_yaml(File.read(path))
+        end
       end
 
       def path_for_anchor(anchor)

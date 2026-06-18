@@ -71,6 +71,31 @@ Designation inheritance hierarchy (MECE):
 - Supports both camelCase and snake_case keys in YAML (e.g., `localizedConcepts` / `localized_concepts`) using `%i[key1 key2]` mapping syntax.
 - Also supports V1 format (`concept-*.yaml` files at root level).
 
+### V3 Dataset Syntax (collection files are single-key mappings)
+
+A dataset collection file — `bibliography.yaml`, `images.yaml`, and any future
+equivalent — is the *V3 glossarist dataset syntax*: a YAML **mapping with a
+single wrapper key** whose value is an **array of typed items**. No keyed maps
+(indexing items by an out-of-band reference string), and no stray top-level
+arrays — the array is always grouped under one named key. Each item carries its
+own `id` field. (A keyed bibliography was tried and rejected as wrong — a
+bibliography is an ordered collection, not a map, and keying forced the entry to
+degenerate into `citation_key` + an untyped `data` hash. A bare top-level array
+was also rejected — the user does not want stray arrays at the document root.)
+
+Canonical models: `BibliographyData` + typed `BibliographyEntry`;
+`V3::ImageFile` + `V3::ImageEntry`. `bibliography.yaml` wraps its entries under a
+single `bibliography:` key. Because the root is a mapping, one `key_value` map
+(`map "bibliography", to: :entries`) drives both the file (`to_yaml`/`from_yaml`)
+and the in-memory store (`to_hash`/`from_hash`) — no overrides, no nested
+Collection, no `YAML.safe_load`. `BibliographyData#shortname` is the
+PackageStore record key only — never serialized. Documentation lives in
+`README.adoc` (`== Bibliography`); this note is internal guidance, not user docs.
+
+The remaining `map nil` keyed patterns live only in the **V1 legacy adapters**
+(`v1/register.rb`, `v1/concept.rb`), which are intentional passthroughs for old
+IEV-format datasets — do not "fix" them; that would break reading V1 data.
+
 ### Configuration & Extensibility
 
 - **`Config`** (`config.rb`) — singleton that holds registered classes for `:localized_concept` and `:managed_concept`. Allows swapping implementations via `register_class`.

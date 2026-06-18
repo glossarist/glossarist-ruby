@@ -18,7 +18,7 @@ module Glossarist
           return [] unless bib_content
 
           begin
-            V3::BibliographyFile.from_yaml(bib_content)
+            BibliographyData.from_yaml(bib_content)
           rescue StandardError => e
             return [issue(
               "bibliography.yaml is invalid YAML: #{e.message}",

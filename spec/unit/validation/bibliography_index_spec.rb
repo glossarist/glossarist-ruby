@@ -89,6 +89,7 @@ RSpec.describe Glossarist::Validation::BibliographyIndex do
       Dir.mktmpdir do |dir|
         File.write(File.join(dir, "bibliography.yaml"), <<~YAML)
           ---
+          bibliography:
           - id: IEC_60050
             reference: IEC 60050
             type: standard
@@ -107,6 +108,7 @@ RSpec.describe Glossarist::Validation::BibliographyIndex do
       Dir.mktmpdir do |dir|
         File.write(File.join(dir, "images.yaml"), <<~YAML)
           ---
+          images:
           - id: fig_A.1
             path: images/fig_A.1.png
             type: image
@@ -148,6 +150,7 @@ RSpec.describe Glossarist::Validation::BibliographyIndex do
 
       bib_yaml = <<~YAML
         ---
+        bibliography:
         - id: ISO_9000
           reference: ISO 9000
           type: standard
@@ -161,6 +164,7 @@ RSpec.describe Glossarist::Validation::BibliographyIndex do
     it "indexes images from YAML strings" do
       images_yaml = <<~YAML
         ---
+        images:
         - id: fig_A.1
           path: images/fig_A.1.png
           type: image

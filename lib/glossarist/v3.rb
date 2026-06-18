@@ -13,8 +13,6 @@ module Glossarist
     autoload :ManagedConceptData, "glossarist/v3/managed_concept_data"
     autoload :ManagedConcept, "glossarist/v3/managed_concept"
     autoload :ConceptDocument, "glossarist/v3/concept_document"
-    autoload :BibliographyEntry, "glossarist/v3/bibliography_entry"
-    autoload :BibliographyFile, "glossarist/v3/bibliography_file"
     autoload :ImageEntry, "glossarist/v3/image_entry"
     autoload :ImageFile, "glossarist/v3/image_file"
 
@@ -28,8 +26,6 @@ module Glossarist
     Configuration.register_model(ManagedConceptData, id: :managed_concept_data)
     Configuration.register_model(ManagedConcept, id: :managed_concept)
     Configuration.register_model(ConceptDocument, id: :concept_document)
-    Configuration.register_model(BibliographyEntry, id: :bibliography_entry)
-    Configuration.register_model(BibliographyFile, id: :bibliography_file)
     Configuration.register_model(ImageEntry, id: :image_entry)
     Configuration.register_model(ImageFile, id: :image_file)
   end
