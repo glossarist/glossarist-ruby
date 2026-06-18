@@ -104,25 +104,6 @@ RSpec.describe Glossarist::Validation::BibliographyIndex do
       end
     end
 
-    it "indexes images.yaml from dataset path" do
-      Dir.mktmpdir do |dir|
-        File.write(File.join(dir, "images.yaml"), <<~YAML)
-          ---
-          images:
-          - id: fig_A.1
-            path: images/fig_A.1.png
-            type: image
-          - id: fig_A.23
-            path: images/fig_A.23.png
-            type: image
-        YAML
-
-        index = described_class.build_from_concepts([], dataset_path: dir)
-        expect(index.resolve?("fig_A.1")).to be true
-        expect(index.resolve?("fig_A.23")).to be true
-      end
-    end
-
     it "handles missing bibliography.yaml gracefully" do
       Dir.mktmpdir do |dir|
         index = described_class.build_from_concepts([], dataset_path: dir)
@@ -161,22 +142,8 @@ RSpec.describe Glossarist::Validation::BibliographyIndex do
       expect(index.resolve?("ISO_9000")).to be true
     end
 
-    it "indexes images from YAML strings" do
-      images_yaml = <<~YAML
-        ---
-        images:
-        - id: fig_A.1
-          path: images/fig_A.1.png
-          type: image
-      YAML
-
-      index = described_class.build_from_yaml([], images_yaml: images_yaml)
-      expect(index.resolve?("fig_A.1")).to be true
-    end
-
     it "handles nil YAML strings gracefully" do
-      index = described_class.build_from_yaml([], bibliography_yaml: nil,
-                                                  images_yaml: nil)
+      index = described_class.build_from_yaml([], bibliography_yaml: nil)
       expect(index.anchors).to be_empty
     end
 

@@ -170,9 +170,14 @@ module Glossarist
 
       concept.localizations.each do |l10n|
         Array(l10n.non_verb_rep).each do |nvr|
-          next unless nvr.is_a?(NonVerbRep) && nvr.ref && !nvr.ref.strip.empty?
+          next unless nvr.is_a?(NonVerbRep)
 
-          refs << AssetReference.new(path: nvr.ref.strip)
+          Array(nvr.images).each do |image|
+            next unless image.is_a?(FigureImage)
+            next if image.src.nil? || image.src.strip.empty?
+
+            refs << AssetReference.new(path: image.src.strip)
+          end
         end
 
         (l10n.data&.terms || []).each do |term|

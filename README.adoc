@@ -911,23 +911,35 @@ result.diffs            # Array of ConceptDiff with similarity scores
 
 === NonVerbRep
 
-Non-verbal representations are associated resources (images, tables, formulas) used to help define a concept (ISO 10241-1 §6.5). They live outside the concept model and are referenced by URI. Resources can be shared across concepts and belong either to the dataset package (relative path) or are externally referenced (URL/URN).
+Non-verbal representations are associated resources (images, tables, formulas) used to help define a concept (ISO 10241-1 §6.5). NonVerbRep is the concept-local form — attached directly to a concept's data; the dataset-shared form is xref:figure[Figure] / Table / Formula. Both share the same accessibility payload via `NonVerbalEntity`.
 
-type:: String — the type of representation: `image`, `table`, or `formula`.
-ref:: String — URI reference to the resource (relative path within the GCR package, URN, or URL).
-text:: String — optional text description or alt text.
+type:: String — the kind of representation: `image`, `table`, or `formula`.
+images:: Collection of `FigureImage` variants (responsive, format fallbacks, dark/light). Used when `type: image`.
+caption:: Localized hash — short title keyed by ISO 639 code (e.g. `{ eng: "..." }`).
+description:: Localized hash — long description for accessibility.
+alt:: Localized hash — short alternative text for screen readers.
 sources:: Collection of <<concept-source,ConceptSource>> entries — bibliographic sources for the representation.
 
 Example:
 +
 [,yaml]
 ----
-non_verbal_rep:
+non_verb_rep:
   - type: image
-    ref: assets/images/figure-1.svg
-    text: Diagram showing the concept hierarchy
+    images:
+      - src: assets/images/figure-1.svg
+        format: svg
+        role: vector
+      - src: assets/images/figure-1.png
+        format: png
+        role: raster
+    caption:
+      eng: Concept hierarchy
+    alt:
+      eng: Diagram showing the concept hierarchy
   - type: formula
-    ref: urn:gcr:assets:formula-eq1
+    images:
+      - src: urn:gcr:assets:formula-eq1
     sources:
       - type: authoritative
         status: identical

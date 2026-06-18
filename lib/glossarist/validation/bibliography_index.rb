@@ -30,18 +30,15 @@ module Glossarist
 
         concepts.each { |concept| index_concept_sources(index, concept) }
         index_bibliography_file(index, dataset_path)
-        index_images_file(index, dataset_path)
 
         index
       end
 
-      def self.build_from_yaml(concepts, bibliography_yaml: nil,
-images_yaml: nil)
+      def self.build_from_yaml(concepts, bibliography_yaml: nil)
         index = new
 
         concepts.each { |concept| index_concept_sources(index, concept) }
         index_bib_from_yaml_string(index, bibliography_yaml)
-        index_images_from_yaml_string(index, images_yaml)
 
         index
       end
@@ -118,23 +115,6 @@ images_yaml: nil)
           nil
         end
 
-        def index_images_file(index, dataset_path)
-          return unless dataset_path
-
-          images = V3::ImageFile.from_file(
-            File.join(dataset_path, "images.yaml"),
-          )
-          return unless images
-
-          Array(images.entries).each do |entry|
-            next unless entry&.id
-
-            index.register(entry.id, entry)
-          end
-        rescue StandardError
-          nil
-        end
-
         def index_bib_from_yaml_string(index, yaml_content)
           return unless yaml_content
 
@@ -143,15 +123,6 @@ images_yaml: nil)
             index.register(entry.id, entry)
             index.register(entry.reference, entry) if entry.reference
           end
-        rescue StandardError
-          nil
-        end
-
-        def index_images_from_yaml_string(index, yaml_content)
-          return unless yaml_content
-
-          images = V3::ImageFile.from_yaml(yaml_content)
-          images.entries.each { |entry| index.register(entry.id, entry) }
         rescue StandardError
           nil
         end

@@ -23,25 +23,13 @@ module Glossarist
                 next unless text
 
                 extractor.extract_from_text(text).each do |ref|
-                  if ref.is_a?(AssetReference)
-                    referenced_paths.add(ref.path)
-                  end
+                  referenced_paths.add(ref.path) if ref.is_a?(AssetReference)
                 end
               end
             end
 
             extractor.extract_asset_refs_from_concept(concept).each do |ref|
               referenced_paths.add(ref.path)
-            end
-          end
-
-          images_file = load_images_file(context)
-          if images_file
-            context.bibliography_index.entries.each_value do |entry|
-              next unless entry[:source].is_a?(V3::ImageEntry)
-
-              path = entry[:source].path
-              referenced_paths.add(path) if path
             end
           end
 
@@ -58,16 +46,6 @@ module Glossarist
           end
 
           issues
-        end
-
-        private
-
-        def load_images_file(context)
-          return @load_images_file if defined?(@load_images_file)
-
-          @load_images_file = V3::ImageFile.from_file(
-            File.join(context.path, "images.yaml"),
-          )
         end
       end
     end
