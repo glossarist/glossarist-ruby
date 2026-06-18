@@ -103,7 +103,7 @@ images_yaml: nil)
         def index_bibliography_file(index, dataset_path)
           return unless dataset_path
 
-          bib = V3::BibliographyFile.from_file(
+          bib = BibliographyData.from_file(
             File.join(dataset_path, "bibliography.yaml"),
           )
           return unless bib
@@ -138,7 +138,7 @@ images_yaml: nil)
         def index_bib_from_yaml_string(index, yaml_content)
           return unless yaml_content
 
-          bib = V3::BibliographyFile.from_yaml(yaml_content)
+          bib = BibliographyData.from_yaml(yaml_content)
           bib.entries.each do |entry|
             index.register(entry.id, entry)
             index.register(entry.reference, entry) if entry.reference

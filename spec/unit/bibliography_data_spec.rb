@@ -6,56 +6,63 @@ RSpec.describe Glossarist::BibliographyData do
   let(:yaml) do
     <<~YAML
       ---
-      ref_1:
+      bibliography:
+      - id: ref_1
         reference: ISO 704
         title: Terminology work
-      ref_2:
+      - id: ref_2
         reference: ISO 10241-1
         title: Terminological entries
     YAML
   end
 
   describe "YAML round-trip" do
-    it "parses YAML into entries" do
+    it "parses the entries from the wrapped mapping" do
       bib = described_class.from_yaml(yaml)
       expect(bib.entries.length).to eq(2)
-      expect(bib.entries.first.citation_key).to eq("ref_1")
-      expect(bib.entries.first.data["reference"]).to eq("ISO 704")
+      expect(bib.entries.first).to be_a(Glossarist::BibliographyEntry)
+      expect(bib.entries.first.id).to eq("ref_1")
+      expect(bib.entries.first.reference).to eq("ISO 704")
     end
 
-    it "round-trips through YAML" do
+    it "round-trips through the wrapped YAML" do
       bib = described_class.from_yaml(yaml)
       reloaded = described_class.from_yaml(bib.to_yaml)
       expect(reloaded.entries.length).to eq(2)
-      expect(reloaded.find("ref_2").data["title"]).to eq("Terminological entries")
+      expect(reloaded.find("ref_2").title).to eq("Terminological entries")
+    end
+
+    it "serializes as a single-key mapping (bibliography: [...]), not a stray array" do
+      parsed = YAML.safe_load(described_class.from_yaml(yaml).to_yaml)
+      expect(parsed.keys).to eq(["bibliography"])
+      expect(parsed["bibliography"]).to be_an(Array)
+      expect(parsed["bibliography"].first).to eq("id" => "ref_1",
+                                                 "reference" => "ISO 704",
+                                                 "title" => "Terminology work")
     end
   end
 
   describe "#find" do
-    it "finds entry by citation key" do
-      bib = described_class.from_yaml(yaml)
-      entry = bib.find("ref_1")
-      expect(entry).not_to be_nil
-      expect(entry.data["reference"]).to eq("ISO 704")
+    it "finds entry by id" do
+      entry = described_class.from_yaml(yaml).find("ref_1")
+      expect(entry).to be_a(Glossarist::BibliographyEntry)
+      expect(entry.reference).to eq("ISO 704")
     end
 
-    it "returns nil for missing key" do
-      bib = described_class.from_yaml(yaml)
-      expect(bib.find("nonexistent")).to be_nil
+    it "returns nil for a missing id" do
+      expect(described_class.from_yaml(yaml).find("nonexistent")).to be_nil
     end
   end
 
   describe "#keys" do
-    it "returns all citation keys" do
-      bib = described_class.from_yaml(yaml)
-      expect(bib.keys).to contain_exactly("ref_1", "ref_2")
+    it "returns all entry ids" do
+      expect(described_class.from_yaml(yaml).keys).to contain_exactly("ref_1", "ref_2")
     end
   end
 
   describe "#[]" do
-    it "returns entry data by citation key" do
-      bib = described_class.from_yaml(yaml)
-      expect(bib["ref_1"]["reference"]).to eq("ISO 704")
+    it "returns the typed entry by id" do
+      expect(described_class.from_yaml(yaml)["ref_1"].reference).to eq("ISO 704")
     end
   end
 
@@ -65,16 +72,30 @@ RSpec.describe Glossarist::BibliographyData do
       expect(bib.entries).to be_empty
       expect(bib.keys).to be_empty
     end
+
+    it "round-trips an empty bibliography" do
+      reloaded = described_class.from_yaml(described_class.new.to_yaml)
+      expect(reloaded.entries).to eq([])
+    end
   end
 
-  describe "with real bibliography fixture" do
-    it "loads isotc204 bibliography" do
-      path = File.expand_path("../../isotc204-glossary/bibliography.yaml",
-                              __dir__)
-      skip "isotc204 fixture not found" unless File.exist?(path)
-      bib = described_class.from_yaml(File.read(path, encoding: "utf-8"))
-      expect(bib.entries.length).to be > 0
-      expect(bib.keys).to include("ref_1")
+  describe "loading a file" do
+    let(:path) do
+      File.expand_path("../fixtures/bibliography.yaml", __dir__)
+    end
+
+    it "loads a V3-syntax bibliography file via from_file" do
+      skip "fixture not found" unless File.exist?(path)
+      bib = described_class.from_file(path)
+      expect(bib).to be_a(Glossarist::BibliographyData)
+      expect(bib.entries).to be_an(Array)
+      expect(bib.entries).not_to be_empty
+      expect(bib.keys).to include("ref_1", "iso_std_iso_15704_en")
+      expect(bib.find("ref_3").link).to match(%r{unece\.org})
+    end
+
+    it "returns nil when the file is absent" do
+      expect(described_class.from_file("/nonexistent/bibliography.yaml")).to be_nil
     end
   end
 end
