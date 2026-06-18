@@ -43,7 +43,6 @@ module Glossarist
           @bibliography_index ||= BibliographyIndex.build_from_yaml(
             concepts,
             bibliography_yaml: read_zip_file("bibliography.yaml"),
-            images_yaml: read_zip_file("images.yaml"),
           )
         end
 

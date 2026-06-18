@@ -1,36 +1,26 @@
 # frozen_string_literal: true
 
 module Glossarist
-  # A non-verbal representation used to help define a concept, following
-  # ISO 10241-1 §6.5.
+  # A concept-local non-verbal representation (ISO 10241-1 §6.5).
   #
-  # Non-verbal representations are associated resources (images, tables,
-  # formulas) that live outside the concept model. They are referenced by URI
-  # and can be shared across concepts. The resource belongs either to the
-  # dataset package (relative path) or is externally referenced (URL/URN).
+  # NonVerbRep is the inline form attached directly to a concept's data.
+  # The dataset-shared form is Figure / Table / Formula. The two share the
+  # same a11y + provenance payload via NonVerbalEntity; NonVerbRep differs
+  # only in that it has no dataset-wide identity (no +id+, no +identifier+)
+  # — its identity is its position inside the parent concept.
   #
-  # Each non-verbal representation specifies:
-  # - +type+: one of "image", "table", "formula"
-  # - +ref+: URI reference to the resource (relative path, URN, or URL)
-  # - +text+: optional text description or alt text
-  # - +caption+: localized title/caption (accessibility)
-  # - +description+: localized long description (accessibility)
-  # - +sources+: bibliographic sources for the representation
-  class NonVerbRep < Lutaml::Model::Serializable
+  # +type+ discriminates the kind of non-verbal content: "image", "table",
+  # or "formula". When +type+ is "image", +images+ carries one or more
+  # FigureImage variants (responsive, format fallback, dark/light). The
+  # caption/description/alt fields are localized (hash keyed by ISO 639
+  # code) for accessibility.
+  class NonVerbRep < NonVerbalEntity
     attribute :type, :string
-    attribute :ref, :string
-    attribute :text, :string
-    attribute :caption, :hash
-    attribute :description, :hash
-    attribute :sources, ConceptSource, collection: true
+    attribute :images, FigureImage, collection: true, initialize_empty: true
 
     key_value do
       map :type, to: :type
-      map :ref, to: :ref
-      map :text, to: :text
-      map :caption, to: :caption
-      map :description, to: :description
-      map :sources, to: :sources
+      map :images, to: :images
     end
   end
 end

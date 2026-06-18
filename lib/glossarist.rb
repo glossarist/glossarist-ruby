@@ -40,6 +40,7 @@ module Glossarist
   autoload :Config,                   "glossarist/config"
   autoload :LocalizedString,          "glossarist/localized_string"
   autoload :NonVerbalEntity,          "glossarist/non_verbal_entity"
+  autoload :SharedNonVerbalEntity,    "glossarist/shared_non_verbal_entity"
   autoload :NonVerbalReference,       "glossarist/non_verbal_reference"
   autoload :Figure,                   "glossarist/figure"
   autoload :FigureImage,              "glossarist/figure_image"

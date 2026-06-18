@@ -13,25 +13,15 @@ module Glossarist
   # subfigures.
   #
   # Caption, description, and alt are localized (hash keyed by ISO 639 code).
-  class Figure < NonVerbalEntity
+  class Figure < SharedNonVerbalEntity
     attribute :images, FigureImage, collection: true
     attribute :subfigures, Figure, collection: true
 
     key_value do
-      map :id, to: :id
-      map :identifier, to: :identifier
-      map :caption, to: :caption
-      map :description, to: :description
-      map :alt, to: :alt
       map :images, to: :images
-      map :sources, to: :sources
       map :subfigures, to: :subfigures
     end
 
-    # Recursively search for a subfigure (or self) by ID.
-    #
-    # @param target_id [String] the figure or subfigure ID
-    # @return [Figure, nil]
     def find_by_id(target_id)
       return self if id == target_id
 
@@ -42,9 +32,6 @@ module Glossarist
       nil
     end
 
-    # Collect this figure's ID and all descendant subfigure IDs.
-    #
-    # @return [Array<String>]
     def all_ids
       [id] + Array(subfigures).flat_map(&:all_ids)
     end

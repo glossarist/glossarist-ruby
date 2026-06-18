@@ -1,47 +1,39 @@
 # frozen_string_literal: true
 
 module Glossarist
-  # Abstract base for dataset-level non-verbal representation entities.
+  # Shared payload for every non-verbal representation, whether it lives
+  # inline on a concept (NonVerbRep) or as a dataset-shared file
+  # (Figure / Table / Formula).
   #
-  # Figures, Tables, and Formulas share common metadata: stable identity,
-  # localized caption/description (accessibility), and provenance sources.
-  # Each is authored once at the dataset level and referenced by any number
-  # of concepts — the same pattern as bibliography entries.
+  # The four attributes here are the common a11y + provenance payload every
+  # non-verbal entity carries, regardless of content type or scope:
   #
-  # This is the dataset-level counterpart to NonVerbRep (ISO 10241-1 §6.5),
-  # which remains the concept-owned inline form.
+  # - +caption+: localized short title (a11y / indexing).
+  # - +description+: localized long description (a11y screen readers).
+  # - +alt+: localized alternative text (a11y short screen-reader label).
+  # - +sources+: bibliographic sources for the representation.
   #
-  # Subclasses (Figure, Table, Formula) add type-specific content fields.
+  # Identity (+id+, +identifier+) belongs on subclasses that have it; see
+  # SharedNonVerbalEntity for the dataset-shared variant.
   class NonVerbalEntity < Lutaml::Model::Serializable
-    attribute :id, :string
-    attribute :identifier, :string
     attribute :caption, :hash
     attribute :description, :hash
     attribute :alt, :hash
     attribute :sources, ConceptSource, collection: true
 
     key_value do
-      map :id, to: :id
-      map :identifier, to: :identifier
       map :caption, to: :caption
       map :description, to: :description
       map :alt, to: :alt
       map :sources, to: :sources
     end
 
-    # Find self by ID. Figure overrides for recursive subfigure search.
-    #
-    # @param target_id [String]
-    # @return [NonVerbalEntity, nil]
-    def find_by_id(target_id)
-      id == target_id ? self : nil
+    def find_by_id(_target_id)
+      nil
     end
 
-    # This entity's IDs. Figure overrides to include subfigure IDs.
-    #
-    # @return [Array<String>]
     def all_ids
-      [id]
+      []
     end
 
     def self.from_file(path)

@@ -95,9 +95,14 @@ module Glossarist
 
         def register_non_verb_rep(index, l10n)
           Array(l10n.non_verb_rep).each do |nvr|
-            next unless nvr.is_a?(NonVerbRep) && nvr.ref && !nvr.ref.strip.empty?
+            next unless nvr.is_a?(NonVerbRep)
 
-            index.register(nvr.ref.strip)
+            Array(nvr.images).each do |image|
+              next unless image.is_a?(FigureImage)
+              next if image.src.nil? || image.src.strip.empty?
+
+              index.register(image.src.strip)
+            end
           end
         end
 

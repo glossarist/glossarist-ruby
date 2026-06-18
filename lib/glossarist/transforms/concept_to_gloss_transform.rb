@@ -303,14 +303,20 @@ desig_index)
         Array(non_verb_reps).each_with_index.map do |nvr, idx|
           Rdf::GlossNonVerbalRep.new(
             representation_type: nvr.type,
-            representation_ref: nvr.ref,
-            representation_text: nvr.text,
+            representation_ref: nvr.images.first&.src,
+            representation_text: localized_alt_for(nvr.alt, lang),
             sources: build_gloss_sources(nvr.sources),
             concept_id: concept_id.to_s,
             lang_code: lang.to_s,
             index: idx.to_s,
           )
         end
+      end
+
+      def localized_alt_for(alt, lang)
+        return nil unless alt.is_a?(Hash) && !alt.empty?
+
+        alt[lang.to_s] || alt[lang.to_sym] || alt.values.first
       end
 
       def build_gloss_domains(domains, concept_id)
