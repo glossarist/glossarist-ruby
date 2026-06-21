@@ -232,6 +232,7 @@ module Glossarist
           Rdf::GlossDetailedDefinition.new(
             content: dd.content,
             sources: build_gloss_sources(dd.sources),
+            examples: build_gloss_definitions(dd.examples),
           )
         end
       end

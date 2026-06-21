@@ -262,6 +262,40 @@ RSpec.describe Glossarist::ConceptData do
     it "returns empty array when no sources" do
       expect(subject.all_sources).to eq([])
     end
+
+    context "with scoped examples nested inside a detailed definition" do
+      it "includes sources from scoped examples (VIM 1993 nesting)" do
+        nested_source = Glossarist::ConceptSource.new(type: "authoritative")
+        note = Glossarist::DetailedDefinition.new(
+          content: "Resistance depends on dimensions.",
+          examples: [
+            Glossarist::DetailedDefinition.new(
+              content: "Copper at 20 C.",
+              sources: [nested_source],
+            ),
+          ],
+        )
+        subject.notes = [note]
+
+        expect(subject.all_sources).to include(nested_source)
+      end
+
+      it "recurses through arbitrary depth of scoped examples" do
+        deep_source = Glossarist::ConceptSource.new(type: "lineage")
+        subject.examples = [
+          Glossarist::DetailedDefinition.new(
+            content: "outer",
+            examples: [
+              Glossarist::DetailedDefinition.new(
+                content: "inner", sources: [deep_source],
+              ),
+            ],
+          ),
+        ]
+
+        expect(subject.all_sources).to include(deep_source)
+      end
+    end
   end
 
   describe "#text_content" do
@@ -295,6 +329,47 @@ RSpec.describe Glossarist::ConceptData do
 
     it "returns empty array when no content" do
       expect(subject.text_content).to eq([])
+    end
+
+    context "with scoped examples nested inside a detailed definition" do
+      it "includes content from scoped examples (VIM 1993 nesting)" do
+        note = Glossarist::DetailedDefinition.new(
+          content: "Resistance depends on dimensions.",
+          examples: [
+            Glossarist::DetailedDefinition.new(
+              content: "Copper at 20 C is about 1.68e-8 Ohm*m.",
+            ),
+          ],
+        )
+        subject.notes = [note]
+
+        expect(subject.text_content).to eq([
+                                             "Resistance depends on dimensions.",
+                                             "Copper at 20 C is about 1.68e-8 Ohm*m.",
+                                           ])
+      end
+
+      it "round-trips a VIM 1993 note-with-scoped-example through YAML" do
+        subject.language_code = "eng"
+        subject.notes = [
+          Glossarist::DetailedDefinition.new(
+            content: "Resistance depends on dimensions.",
+            examples: [
+              Glossarist::DetailedDefinition.new(
+                content: "Copper at 20 C is about 1.68e-8 Ohm*m.",
+              ),
+            ],
+          ),
+        ]
+
+        restored = described_class.from_yaml(subject.to_yaml)
+        rt_note = restored.notes.first
+        expect(rt_note.content).to eq("Resistance depends on dimensions.")
+        expect(rt_note.examples.size).to eq(1)
+        expect(rt_note.examples.first.content).to eq(
+          "Copper at 20 C is about 1.68e-8 Ohm*m.",
+        )
+      end
     end
   end
 

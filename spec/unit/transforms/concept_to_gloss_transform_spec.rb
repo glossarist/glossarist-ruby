@@ -148,6 +148,43 @@ RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
         expect(values.count).to eq(1)
       end
     end
+
+    it "emits gloss:hasExample for scoped examples inside notes (VIM 1993)" do
+      note = Glossarist::V2::DetailedDefinition.new(
+        content: "note with scoped example",
+        examples: [
+          Glossarist::V2::DetailedDefinition.new(
+            content: "scoped example body",
+          ),
+        ],
+      )
+      l10n = Glossarist::V2::LocalizedConcept.new(
+        data: Glossarist::V2::ConceptData.new(
+          id: "test-nested",
+          language_code: "eng",
+          notes: [note],
+        ),
+      )
+      mc = Glossarist::ManagedConcept.new(
+        data: { id: "test-nested" },
+      )
+      mc.add_localization(l10n)
+
+      nested_turtle = described_class.new(mc).to_turtle
+      nested_graph = RDF::Graph.new
+      RDF::Turtle::Reader.new(nested_turtle) { |r| r.each_statement { |s| nested_graph << s } }
+
+      has_example = nested_graph.query([nil, RDF::URI("#{gloss}hasExample"),
+                                        nil])
+      expect(has_example.count).to be >= 1
+
+      example_subj = has_example.first.object
+      expect(nested_graph.query([example_subj, RDF.type,
+                                 RDF::URI("#{gloss}DetailedDefinition")])).not_to be_empty
+      example_value = nested_graph.query([example_subj,
+                                          RDF::URI("#{rdf_ns}value"), nil]).first
+      expect(example_value.object.to_s).to eq("scoped example body")
+    end
   end
 
   # ── Source mapping ────────────────────────────────────────────────

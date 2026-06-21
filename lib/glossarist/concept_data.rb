@@ -86,7 +86,7 @@ module Glossarist
     def all_sources
       list = sources.to_a
       self.class.detailed_definition_fields.each do |field|
-        public_send(field).each { |d| list.concat(d.sources.to_a) }
+        public_send(field).each { |d| list.concat(d.all_sources) }
       end
       Array(terms).each { |t| list.concat(Array(t.sources)) }
       list
@@ -95,7 +95,7 @@ module Glossarist
     def text_content
       texts = []
       self.class.detailed_definition_fields.each do |field|
-        public_send(field).each { |d| texts << d.content if d.content }
+        public_send(field).each { |d| texts.concat(d.text_content) }
       end
       texts
     end

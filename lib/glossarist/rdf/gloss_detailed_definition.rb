@@ -7,6 +7,7 @@ module Glossarist
     class GlossDetailedDefinition < Lutaml::Model::Serializable
       attribute :content, :string
       attribute :sources, GlossConceptSource, collection: true
+      attribute :examples, GlossDetailedDefinition, collection: true
 
       rdf do
         namespace Namespaces::GlossaristNamespace, Namespaces::RdfNamespace
@@ -18,6 +19,7 @@ module Glossarist
         predicate :value, namespace: Namespaces::RdfNamespace, to: :content
 
         members :sources
+        members :examples, link: "gloss:hasExample"
       end
     end
   end
