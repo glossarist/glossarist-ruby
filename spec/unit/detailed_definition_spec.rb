@@ -55,6 +55,108 @@ RSpec.describe Glossarist::DetailedDefinition do
     end
   end
 
+  describe "#all_sources" do
+    it "returns own sources when no examples" do
+      own = Glossarist::ConceptSource.new(type: "authoritative")
+      detailed_definition.sources = [own]
+
+      expect(detailed_definition.all_sources).to eq([own])
+    end
+
+    it "aggregates sources from scoped examples" do
+      own = Glossarist::ConceptSource.new(type: "authoritative")
+      nested = Glossarist::ConceptSource.new(type: "lineage")
+      detailed_definition.sources = [own]
+      detailed_definition.examples = [
+        Glossarist::DetailedDefinition.new(content: "ex", sources: [nested]),
+      ]
+
+      expect(detailed_definition.all_sources).to eq([own, nested])
+    end
+
+    it "recurses through arbitrary depth" do
+      deep = Glossarist::ConceptSource.new(type: "lineage")
+      inner = Glossarist::DetailedDefinition.new(
+        content: "inner", sources: [deep],
+      )
+      outer = Glossarist::DetailedDefinition.new(
+        content: "outer", examples: [inner],
+      )
+      detailed_definition.examples = [outer]
+
+      expect(detailed_definition.all_sources).to eq([deep])
+    end
+
+    it "inherits recursion through V2 subclass" do
+      nested_src = Glossarist::V2::ConceptSource.new(type: "authoritative")
+      v2_dd = Glossarist::V2::DetailedDefinition.new(
+        content: "v2 note",
+        examples: [
+          Glossarist::V2::DetailedDefinition.new(
+            content: "v2 example", sources: [nested_src],
+          ),
+        ],
+      )
+
+      expect(v2_dd.all_sources).to eq([nested_src])
+      expect(v2_dd.all_sources.first).to be_a(Glossarist::V2::ConceptSource)
+    end
+
+    it "inherits recursion through V3 subclass" do
+      nested_src = Glossarist::V3::ConceptSource.new(type: "authoritative")
+      v3_dd = Glossarist::V3::DetailedDefinition.new(
+        content: "v3 note",
+        examples: [
+          Glossarist::V3::DetailedDefinition.new(
+            content: "v3 example", sources: [nested_src],
+          ),
+        ],
+      )
+
+      expect(v3_dd.all_sources).to eq([nested_src])
+      expect(v3_dd.all_sources.first).to be_a(Glossarist::V3::ConceptSource)
+    end
+  end
+
+  describe "#text_content" do
+    it "returns own content when no examples" do
+      detailed_definition.content = "note text"
+      expect(detailed_definition.text_content).to eq(["note text"])
+    end
+
+    it "aggregates content from scoped examples in order" do
+      detailed_definition.content = "note"
+      detailed_definition.examples = [
+        Glossarist::DetailedDefinition.new(content: "example 1"),
+        Glossarist::DetailedDefinition.new(content: "example 2"),
+      ]
+
+      expect(detailed_definition.text_content).to eq(["note", "example 1",
+                                                      "example 2"])
+    end
+
+    it "skips nil content but still descends into examples" do
+      detailed_definition.content = nil
+      detailed_definition.examples = [
+        Glossarist::DetailedDefinition.new(content: "only the example"),
+      ]
+
+      expect(detailed_definition.text_content).to eq(["only the example"])
+    end
+
+    it "recurses through arbitrary depth" do
+      detailed_definition.content = "outer"
+      detailed_definition.examples = [
+        Glossarist::DetailedDefinition.new(
+          content: "middle",
+          examples: [Glossarist::DetailedDefinition.new(content: "inner")],
+        ),
+      ]
+
+      expect(detailed_definition.text_content).to eq(%w[outer middle inner])
+    end
+  end
+
   describe "#to_yaml" do
     it "returns the yaml representation" do
       detailed_definition.content = "content"

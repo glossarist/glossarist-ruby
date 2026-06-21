@@ -384,4 +384,49 @@ RSpec.describe Glossarist::ReferenceExtractor do
       expect(refs.first.anchor).to eq("ISO 9000:2015")
     end
   end
+
+  describe "scoped examples (VIM 1993 nesting)" do
+    it "extracts mentions from text inside scoped examples" do
+      note = Glossarist::DetailedDefinition.new(
+        content: "See also related concepts.",
+        examples: [
+          Glossarist::DetailedDefinition.new(
+            content: "Example referencing {{geodetic latitude}}.",
+          ),
+        ],
+      )
+      l10n = Glossarist::LocalizedConcept.new(
+        data: Glossarist::ConceptData.new(
+          language_code: "eng",
+          notes: [note],
+        ),
+      )
+
+      refs = subject.extract_from_localized_concept(l10n)
+      expect(refs.map(&:term)).to include("geodetic latitude")
+    end
+
+    it "extracts image references from scoped example content" do
+      note = Glossarist::DetailedDefinition.new(
+        content: "Note that the symbol varies.",
+        examples: [
+          Glossarist::DetailedDefinition.new(
+            content: "See image::figures/circuit.png[alt].",
+          ),
+        ],
+      )
+      l10n = Glossarist::LocalizedConcept.new(
+        data: Glossarist::ConceptData.new(
+          language_code: "eng",
+          notes: [note],
+        ),
+      )
+      mc = Glossarist::ManagedConcept.new(data: { id: "1" })
+      mc.add_localization(l10n)
+
+      refs = subject.extract_from_managed_concept(mc)
+      image_refs = refs.grep(Glossarist::AssetReference)
+      expect(image_refs.map(&:path)).to include("figures/circuit.png")
+    end
+  end
 end

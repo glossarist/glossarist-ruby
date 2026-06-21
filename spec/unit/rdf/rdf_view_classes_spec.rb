@@ -180,6 +180,42 @@ RSpec.describe Glossarist::Rdf::GlossDetailedDefinition do
     sources = graph.query([nil, RDF.type, RDF::URI("#{gloss}ConceptSource")])
     expect(sources).not_to be_empty
   end
+
+  it "emits gloss:hasExample for nested scoped examples" do
+    parent = described_class.new(
+      content: "parent note",
+      examples: [
+        described_class.new(content: "scoped example"),
+      ],
+    )
+    graph = parse_turtle(described_class.to_turtle(parent))
+
+    parent_subj = graph.query([nil, RDF.type,
+                               RDF::URI("#{gloss}DetailedDefinition")])
+      .map(&:subject)
+      .find do |s|
+      graph.query([s, RDF::URI("#{rdf_ns}value"),
+                   nil]).first.object.to_s == "parent note"
+    end
+    expect(parent_subj).not_to be_nil
+
+    example_links = graph.query([parent_subj,
+                                 RDF::URI("#{gloss}hasExample"), nil])
+    expect(example_links.count).to eq(1)
+
+    example_subj = example_links.first.object
+    expect(graph.query([example_subj, RDF.type,
+                        RDF::URI("#{gloss}DetailedDefinition")])).not_to be_empty
+    expect(graph.query([example_subj, RDF::URI("#{rdf_ns}value"),
+                        nil]).first.object.to_s).to eq("scoped example")
+  end
+
+  it "omits hasExample when no scoped examples" do
+    dd = described_class.new(content: "lonely definition")
+    graph = parse_turtle(described_class.to_turtle(dd))
+    expect(graph.query([nil, RDF::URI("#{gloss}hasExample"),
+                        nil])).to be_empty
+  end
 end
 
 # ── GlossPronunciation ───────────────────────────────────────────────────
