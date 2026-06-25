@@ -40,4 +40,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "table_tennis", "~> 0.0"
   spec.add_dependency "tbx", "~> 0.1"
   spec.add_dependency "thor"
+
+  spec.add_development_dependency "rdf-turtle", "~> 3.3"
+  spec.add_development_dependency "shacl", "~> 0.4"
 end
