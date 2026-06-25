@@ -122,10 +122,11 @@ module Glossarist
 
         dd_attrs = if data
                      data.class.detailed_definition_fields.to_h do |field|
-                       [field, build_gloss_definitions(data.public_send(field))]
+                       key = field == :definition ? :definitions : field
+                       [key, build_gloss_definitions(data.public_send(field))]
                      end
                    else
-                     { definition: [], notes: [], examples: [] }
+                     { definitions: [], notes: [], examples: [] }
                    end
 
         sources = build_gloss_sources(data&.sources)
