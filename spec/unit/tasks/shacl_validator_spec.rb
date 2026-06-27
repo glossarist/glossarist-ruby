@@ -80,16 +80,15 @@ RSpec.describe Glossarist::Validation::ShaclValidator do
   end
 
   describe ".default_shapes_path" do
-    context "when concept-model gem is not available" do
-      before do
-        allow(described_class).to receive(:default_shapes_path)
-          .and_raise(ArgumentError, /No SHACL shapes path provided/)
-      end
+    it "resolves to the vendored shapes file shipped with the gem" do
+      path = described_class.default_shapes_path
+      expect(path).to eq(described_class::VENDORED_SHAPES_PATH)
+      expect(File.exist?(path)).to be(true)
+    end
 
-      it "raises a helpful ArgumentError" do
-        expect { described_class.default_shapes_path }
-          .to raise_error(ArgumentError, /No SHACL shapes path provided/)
-      end
+    it "lists the vendored shapes file under data/concept-model/shapes/" do
+      expect(described_class::VENDORED_SHAPES_PATH)
+        .to match(%r{data/concept-model/shapes/glossarist\.shacl\.ttl\z})
     end
   end
 end

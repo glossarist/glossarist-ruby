@@ -10,15 +10,14 @@ module Glossarist
     #
     # Shapes resolution order:
     #   1. Explicit :shapes_path option
-    #   2. Glossarist::ConceptModel.path("ontologies/shapes/glossarist.shacl.ttl")
-    #      (when the concept-model gem is available)
-    #   3. Repo-relative fallback (development only)
+    #   2. Vendored shapes at data/concept-model/shapes/glossarist.shacl.ttl
+    #      (shipped with the gem, relative to the gem root)
     class ShaclValidator
-      DEFAULT_SHAPES_PATHS = [
-        "ontologies/shapes/glossarist.shacl.ttl",
-        "concept-model/ontologies/shapes/glossarist.shacl.ttl",
-        "../concept-model/ontologies/shapes/glossarist.shacl.ttl",
-      ].freeze
+      VENDORED_SHAPES_PATH =
+        File.expand_path(
+          "../../../data/concept-model/shapes/glossarist.shacl.ttl",
+          __dir__
+        ).freeze
 
       attr_reader :shapes_path
 
@@ -46,25 +45,12 @@ module Glossarist
 
       class << self
         def default_shapes_path
-          if defined?(::Glossarist::ConceptModel) &&
-             ::Glossarist::ConceptModel.respond_to?(:path)
-            ::Glossarist::ConceptModel
-              .path("ontologies/shapes/glossarist.shacl.ttl")
-          else
-            resolve_fallback_path
-          end
-        end
+          return VENDORED_SHAPES_PATH if File.exist?(VENDORED_SHAPES_PATH)
 
-        private
-
-        def resolve_fallback_path
-          DEFAULT_SHAPES_PATHS.each do |rel|
-            path = File.expand_path(rel, Dir.pwd)
-            return path if File.exist?(path)
-          end
           raise ArgumentError,
-                "No SHACL shapes path provided and concept-model gem not " \
-                "available. Pass shapes: '/path/to/glossarist.shacl.ttl'."
+                "No SHACL shapes path provided and the vendored shapes " \
+                "file (#{VENDORED_SHAPES_PATH}) is missing. Pass " \
+                "shapes_path: '/path/to/glossarist.shacl.ttl'."
         end
       end
 
