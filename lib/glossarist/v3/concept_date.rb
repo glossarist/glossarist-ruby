@@ -26,6 +26,12 @@ module Glossarist
         map :date, to: :date
         map :type, to: :type
       end
+
+      # The `date` is already a free-form string in V3, so the wire form
+      # is the value itself — no iso8601 coercion.
+      def to_yaml_date
+        date
+      end
     end
   end
 end
