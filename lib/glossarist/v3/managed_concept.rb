@@ -5,6 +5,7 @@ module Glossarist
     class ManagedConcept < Glossarist::ManagedConcept
       attribute :data, V3::ManagedConceptData, default: -> { V3::ManagedConceptData.new }
       attribute :related, V3::RelatedConcept, collection: true
+      attribute :dates, V3::ConceptDate, collection: true
       attribute :sources, V3::ConceptSource, collection: true
 
       key_value do
