@@ -63,9 +63,9 @@ module Glossarist
     end
 
     def date_accepted_to_yaml(model, doc)
-      if model.date_accepted
-        doc["date_accepted"] = model.date_accepted.date.iso8601
-      end
+      return unless model.date_accepted
+
+      doc["date_accepted"] = model.date_accepted.to_yaml_date
     end
 
     def uuid_to_yaml(model, doc)

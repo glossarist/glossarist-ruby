@@ -6,6 +6,7 @@ module Glossarist
       attribute :data, V3::ManagedConceptData, default: -> { V3::ManagedConceptData.new }
       attribute :related, V3::RelatedConcept, collection: true
       attribute :dates, V3::ConceptDate, collection: true
+      attribute :date_accepted, V3::ConceptDate
       attribute :sources, V3::ConceptSource, collection: true
 
       key_value do
@@ -19,6 +20,12 @@ module Glossarist
                          with: { from: :uuid_from_yaml, to: :uuid_to_yaml }
         map :schema_version, to: :schema_version
         map :sources, to: :sources
+      end
+
+      def date_accepted_from_yaml(model, value)
+        model.date_accepted = V3::ConceptDate.of_yaml(
+          { "date" => value, "type" => "accepted" },
+        )
       end
     end
   end

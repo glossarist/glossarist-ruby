@@ -12,5 +12,12 @@ module Glossarist
       map :date, to: :date
       map :type, to: :type
     end
+
+    # Returns the date as a string for flat YAML fields such as
+    # ManagedConcept#date_accepted. Subclasses whose `date` is not a
+    # DateTime override this so callers do not need to type-check.
+    def to_yaml_date
+      date&.iso8601
+    end
   end
 end
