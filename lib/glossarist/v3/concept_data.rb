@@ -6,6 +6,7 @@ module Glossarist
       attribute :sources, V3::ConceptSource,
                 collection: Collections::ConceptSourceCollection,
                 initialize_empty: true
+      attribute :dates, V3::ConceptDate, collection: true
       attribute :definition, V3::DetailedDefinition,
                 collection: Collections::DetailedDefinitionCollection,
                 initialize_empty: true

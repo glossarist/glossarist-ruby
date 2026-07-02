@@ -4,6 +4,7 @@ module Glossarist
   module V3
     autoload :Configuration, "glossarist/v3/configuration"
     autoload :Citation, "glossarist/v3/citation"
+    autoload :ConceptDate, "glossarist/v3/concept_date"
     autoload :ConceptSource, "glossarist/v3/concept_source"
     autoload :DetailedDefinition, "glossarist/v3/detailed_definition"
     autoload :ConceptRef, "glossarist/v3/concept_ref"
@@ -15,6 +16,7 @@ module Glossarist
     autoload :ConceptDocument, "glossarist/v3/concept_document"
 
     Configuration.register_model(Citation, id: :citation)
+    Configuration.register_model(ConceptDate, id: :concept_date)
     Configuration.register_model(ConceptSource, id: :concept_source)
     Configuration.register_model(DetailedDefinition, id: :detailed_definition)
     Configuration.register_model(ConceptData, id: :concept_data)
