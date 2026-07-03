@@ -23,6 +23,7 @@ module Glossarist
   autoload :ConceptData,              "glossarist/concept_data"
   autoload :ConceptRef,               "glossarist/concept_ref"
   autoload :ConceptReference,         "glossarist/concept_reference"
+  autoload :Reference, "glossarist/reference"
   autoload :ReferenceExtractor,       "glossarist/reference_extractor"
   autoload :ReferenceResolver,        "glossarist/reference_resolver"
   autoload :ResolutionAdapter,        "glossarist/resolution_adapter"

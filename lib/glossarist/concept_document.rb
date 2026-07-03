@@ -35,5 +35,18 @@ module Glossarist
       localizations.each { |l10n| mc.add_localization(l10n) }
       mc
     end
+
+    # Set concept.uuid from the document's record key (+id+) when the YAML
+    # stream did not provide one. The YAML is the source of truth for the
+    # UUID; +id+ is a layout concern — for the grouped layout it is the
+    # filename stem, which may be a clause identifier (e.g. 3.1.1.1.yaml)
+    # rather than a UUID. Both the load path (ConceptStore#load_glossary)
+    # and the round-trip path (ConceptDocumentSerializer#deserialize) call
+    # this so the rule lives in one place.
+    def ensure_concept_uuid!
+      return unless concept && id
+
+      concept.uuid ||= id
+    end
   end
 end

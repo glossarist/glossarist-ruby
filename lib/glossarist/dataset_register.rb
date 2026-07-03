@@ -123,7 +123,7 @@ module Glossarist
     end
 
     def explicit_section_ids(concept)
-      domains = concept.respond_to?(:data) ? concept.data&.domains : nil
+      domains = concept.is_a?(ManagedConcept) ? concept.data&.domains : nil
       Array(domains).select { |d| d.ref_type == "section" }
         .filter_map(&:concept_id)
     end
@@ -133,7 +133,7 @@ module Glossarist
     # longest registered section prefix.
     # @example "103-01-01" with section "103" registered → ["103"]
     def derive_section_ids_from_id(concept)
-      concept_id = concept.respond_to?(:data) ? concept.data&.id : nil
+      concept_id = concept.is_a?(ManagedConcept) ? concept.data&.id : nil
       return [] unless concept_id
 
       all_section_ids = collect_all_section_ids

@@ -2,6 +2,8 @@
 
 module Glossarist
   class AssetReference
+    include Reference
+
     attr_reader :path, :location
 
     def initialize(path:, location: nil)

@@ -5,13 +5,16 @@ module Glossarist
   # a ConceptReference (a cross-reference to another concept in the same or
   # another registry).
   #
-  # BibliographicReference and ConceptReference share some method names
-  # (`cite?`, `local?`, `external?`) so that validation rules and reference
-  # extractors can call a uniform protocol on mixed collections without
-  # type-checking. BibliographicReference always returns false for these —
-  # it is never an inline `{{cite:id}}` mention, never a local concept link,
-  # never an external concept link. It is its own kind of reference.
+  # BibliographicReference is produced by ReferenceExtractor from AsciiDoc
+  # <<anchor>> xrefs and from model-level source citations. It participates
+  # in the {Reference} protocol so validation rules iterating mixed reference
+  # collections can call `cite?` / `local?` / `external?` without
+  # type-checking. All three predicates default to false (a bibliographic
+  # reference is never an inline `{{cite:id}}` mention, never a concept
+  # cross-ref).
   class BibliographicReference
+    include Reference
+
     attr_reader :anchor, :location
 
     def initialize(anchor:, location: nil)
@@ -21,18 +24,6 @@ module Glossarist
 
     def dedup_key
       anchor
-    end
-
-    def cite?
-      false
-    end
-
-    def local?
-      false
-    end
-
-    def external?
-      false
     end
   end
 end
