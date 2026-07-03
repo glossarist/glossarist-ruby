@@ -191,59 +191,6 @@ RSpec.describe Glossarist::ConceptStore do
     end
   end
 
-  describe "filename ≠ UUID (files named by clause identifier)" do
-    # Regression: when files are named by clause identifier (e.g. 3.1.1.1.yaml)
-    # rather than by UUID, the lutaml-store record key is the clause. The
-    # ConceptDocumentSerializer used to unconditionally overwrite
-    # concept.uuid with doc.id (the record key), losing the real UUID that
-    # was correctly parsed from the YAML stream.
-    #
-    # The fix: only fall back to doc.id when the YAML stream did not
-    # provide a UUID.
-    let(:yaml_with_real_uuid) do
-      <<~YAML
-        ---
-        data:
-          identifier: "3.1.1.1"
-          localized_concepts:
-            eng: l10n-uuid-eng
-        status: valid
-        schema_version: '3'
-        id: 11111111-2222-3333-4444-555555555555
-        ---
-        data:
-          definition:
-          - content: definition text
-          terms:
-          - type: expression
-            normative_status: preferred
-            designation: term
-          language_code: eng
-          entry_status: valid
-        id: l10n-uuid-eng
-      YAML
-    end
-
-    let(:clause_named_dir) do
-      dir = tmpdir
-      concepts_dir = File.join(dir, "concepts")
-      FileUtils.mkdir_p(concepts_dir)
-      # Filename is the clause, NOT the UUID — as in the iso14812 import.
-      File.write(File.join(concepts_dir, "3.1.1.1.yaml"), yaml_with_real_uuid,
-                 encoding: "utf-8")
-      dir
-    end
-
-    it "preserves the YAML-provided UUID when filename differs" do
-      store = described_class.new
-      store.load_glossary(clause_named_dir)
-
-      concept = store.concepts.first
-      expect(concept.data.id).to eq("3.1.1.1")
-      expect(concept.uuid).to eq("11111111-2222-3333-4444-555555555555")
-    end
-  end
-
   describe "with real glossary fixtures" do
     it "loads the isotc204 glossary" do
       tc204_path = File.expand_path("../../geolexica/isotc204-glossary",

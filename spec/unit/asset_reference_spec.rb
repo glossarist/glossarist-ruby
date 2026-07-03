@@ -3,16 +3,20 @@
 require "spec_helper"
 
 RSpec.describe Glossarist::AssetReference do
+  subject(:ref) { described_class.new(path: path) }
+
+  let(:path) { "images/logo.png" }
+
+  it_behaves_like "a Glossarist::Reference"
+
   describe "#initialize" do
     it "stores path" do
-      ref = described_class.new(path: "images/logo.png")
       expect(ref.path).to eq("images/logo.png")
     end
   end
 
   describe "#dedup_key" do
     it "returns the path" do
-      ref = described_class.new(path: "images/logo.png")
       expect(ref.dedup_key).to eq("images/logo.png")
     end
 
@@ -21,5 +25,20 @@ RSpec.describe Glossarist::AssetReference do
       ref2 = described_class.new(path: "images/a.png")
       expect(ref1.dedup_key).to eq(ref2.dedup_key)
     end
+  end
+
+  # AssetReference inherits the protocol defaults (all three predicates
+  # false) from Glossarist::Reference — an image path is never a concept
+  # cross-ref.
+  describe "#cite?" do
+    it { expect(ref).not_to be_cite }
+  end
+
+  describe "#local?" do
+    it { expect(ref).not_to be_local }
+  end
+
+  describe "#external?" do
+    it { expect(ref).not_to be_external }
   end
 end

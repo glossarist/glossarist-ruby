@@ -3,6 +3,10 @@
 require "spec_helper"
 
 RSpec.describe Glossarist::FigureReference do
+  subject(:ref) { described_class.new(entity_id: "fig-a") }
+
+  it_behaves_like "a Glossarist::Reference"
+
   describe ".of_yaml" do
     it "accepts bare string form" do
       ref = described_class.of_yaml("mixed-reflection")
@@ -16,7 +20,8 @@ RSpec.describe Glossarist::FigureReference do
     end
 
     it "accepts object form with display override" do
-      ref = described_class.of_yaml({ "ref" => "fig-3", "display" => "Figure 3" })
+      ref = described_class.of_yaml({ "ref" => "fig-3",
+                                      "display" => "Figure 3" })
       expect(ref.entity_id).to eq("fig-3")
       expect(ref.display).to eq("Figure 3")
     end
@@ -115,4 +120,20 @@ RSpec.describe "structural figure/table/formula references on ManagedConceptData
     expect(yaml).to include("simple")
     expect(yaml).not_to include("ref:")
   end
+end
+
+# TableReference and FormulaReference inherit the Reference protocol and
+# the dedup_key implementation from NonVerbalReference. The shared example
+# verifies the protocol contract; dedup_key collision-avoidance is covered
+# by FigureReference's spec above (same code path, different subclass).
+RSpec.describe Glossarist::TableReference do
+  subject(:ref) { described_class.new(entity_id: "tbl-1") }
+
+  it_behaves_like "a Glossarist::Reference"
+end
+
+RSpec.describe Glossarist::FormulaReference do
+  subject(:ref) { described_class.new(entity_id: "fml-1") }
+
+  it_behaves_like "a Glossarist::Reference"
 end
