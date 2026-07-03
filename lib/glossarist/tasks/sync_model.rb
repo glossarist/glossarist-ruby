@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
-require "open-uri"
 require "json"
 require "fileutils"
+require "net/http"
+require "uri"
 
 module Glossarist
   module Tasks
@@ -50,9 +51,11 @@ module Glossarist
         private
 
         def latest_tag
-          url = "https://api.github.com/repos/#{REPO}/releases/latest"
-          JSON.parse(URI.open(url, "Accept" => "application/vnd.github+json").read)
-              .fetch("tag_name")
+          url = URI("https://api.github.com/repos/#{REPO}/releases/latest")
+          req = Net::HTTP::Get.new(url)
+          req["Accept"] = "application/vnd.github+json"
+          JSON.parse(Net::HTTP.start(url.hostname, url.port, use_ssl: true) { |http| http.request(req) }.body)
+            .fetch("tag_name")
         rescue StandardError => e
           warn "Could not determine latest concept-model tag: #{e.message}"
           exit 1
@@ -70,8 +73,8 @@ module Glossarist
         end
 
         def fetch_file(ref, path)
-          url = "https://raw.githubusercontent.com/#{REPO}/#{ref}/#{path}"
-          URI.open(url).read
+          url = URI("https://raw.githubusercontent.com/#{REPO}/#{ref}/#{path}")
+          Net::HTTP.get(url)
         end
 
         def write_source_manifest(ref)
