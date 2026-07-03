@@ -54,11 +54,25 @@ module Glossarist
           graph
         end
 
+        # Returns a graph node identifier for the target of a relationship.
+        #
+        # For intra-edition references (ref.source is nil), the target is
+        # just ref.id — a clause identifier unique within the dataset.
+        #
+        # Returns nil for cross-edition references (ref.source is a URN,
+        # e.g. a +supersedes+ edge pointing at the previous edition's
+        # concept with the same clause id). Such edges cannot form
+        # cycles within the current dataset and are excluded from the
+        # graph. Without this exclusion, a cross-edition edge from
+        # concept 3.1.1.1 to its predecessor in another edition (which
+        # also has identifier 3.1.1.1) would look like a self-loop and
+        # trip the cycle detector with a false positive.
         def resolve_target_id(rel)
           ref = rel.ref
           return nil unless ref
+          return nil if ref.source
 
-          ref.id || ref.source
+          ref.id
         end
 
         def detect_cycles(graph)
