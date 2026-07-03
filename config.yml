@@ -29,9 +29,6 @@ designation:
       - admitted
       - deprecated
       - superseded
-      - <símbolo> # in iev-data => '<symbol>'
-      - 티에스 # in iev-data => translates to 'TS' I think it is a synonym and not status.
-      - prąd startowy # in iev-data => 'starting current' I think it is a synonym and not status.
   relationship_type:
     # Term-level (designation-to-designation within the same concept entry)
     - abbreviated_form_for
@@ -169,6 +166,8 @@ grammar_info:
     - singular
     - dual
     - plural
+    - mass
+    - other_number
 
 concept:
   status:
