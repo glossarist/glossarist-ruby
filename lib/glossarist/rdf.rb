@@ -4,6 +4,8 @@ require "lutaml/rdf"
 require "lutaml/turtle"
 require "lutaml/jsonld"
 
+require_relative "rdf/lutaml_ext"
+
 module Glossarist
   module Rdf
     autoload :Namespaces,             "#{__dir__}/rdf/namespaces"

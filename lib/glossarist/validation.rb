@@ -8,5 +8,6 @@ module Glossarist
     autoload :Rules,             "glossarist/validation/rules"
     autoload :BibliographyIndex, "glossarist/validation/bibliography_index"
     autoload :AssetIndex,        "glossarist/validation/asset_index"
+    autoload :ShaclValidator,    "glossarist/validation/shacl_validator"
   end
 end

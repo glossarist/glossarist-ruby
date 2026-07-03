@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "digest"
 require "lutaml/model"
 
 module Glossarist
@@ -12,7 +13,7 @@ module Glossarist
       rdf do
         namespace Namespaces::GlossaristNamespace, Namespaces::RdfNamespace
 
-        subject { |d| "definition/#{d.content.hash.abs}" }
+        subject { |d| "definition/#{GlossDetailedDefinition.deterministic_id(d)}" }
 
         types "gloss:DetailedDefinition"
 
@@ -20,6 +21,10 @@ module Glossarist
 
         members :sources
         members :examples, link: "gloss:hasExample"
+      end
+
+      def self.deterministic_id(definition)
+        Digest::MD5.hexdigest(definition.content.to_s)[0..11]
       end
     end
   end

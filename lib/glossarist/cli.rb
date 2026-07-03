@@ -105,8 +105,7 @@ module Glossarist
 
     desc "export PATH", "Export concepts in machine-readable formats"
     option :format, type: :string, required: true,
-                    enum: %w[json jsonld turtle tbx jsonl],
-                    desc: "Output format"
+                    desc: "Output format(s), comma-separated (json, jsonld, turtle, tbx, jsonl, yaml)"
     option :output, aliases: :o, type: :string, required: true,
                     desc: "Output directory"
     option :shortname, type: :string,
@@ -117,6 +116,16 @@ module Glossarist
                       desc: "Base URL of the glossarist site"
     option :title, type: :string,
                    desc: "Dataset title for document header"
+    option :per_concept, type: :boolean, default: false,
+                         desc: "Emit one file per concept (in concepts/ subdirectory)"
+    option :aggregate, type: :boolean, default: nil,
+                       desc: "Emit aggregate files (default: true unless --per-concept only)"
+    option :validate, type: :boolean, default: false,
+                      desc: "Run SHACL validation on every emitted .ttl; fail on violation"
+    option :shapes, type: :string,
+                    desc: "Path to SHACL shapes .ttl (default: bundled concept-model shapes)"
+    option :context, type: :string,
+                     desc: "Path to custom JSON-LD context (default: concept-model context)"
     def export(path)
       CLI::ExportCommand.new(path, options).run
     end
