@@ -15,16 +15,8 @@ module Glossarist
       def deserialize(data, model_class)
         doc = model_class.from_yamls(data["_yamls"])
         doc.id = data["_id"]
+        doc.ensure_concept_uuid!
         concept = doc.concept
-        # doc.id from the store is the record key, which for the grouped
-        # layout is the filename stem. The filename may differ from the
-        # concept's UUID when datasets name files by clause identifier
-        # (e.g. `3.1.1.1.yaml`) rather than by UUID. Only propagate
-        # doc.id to concept.uuid when the YAML stream did not already
-        # provide one — the YAML is the source of truth.
-        if doc.id && concept && concept.uuid.nil?
-          concept.uuid = doc.id
-        end
         doc.localizations.each { |l10n| concept&.add_localization(l10n) }
         doc
       end
@@ -45,10 +37,7 @@ module Glossarist
       )
 
       documents.each do |doc|
-        concept = doc.concept
-        # See ConceptDocumentSerializer#deserialize: only fall back to the
-        # filename-derived doc.id when the YAML stream has no UUID.
-        concept.uuid ||= doc.id
+        doc.ensure_concept_uuid!
         db.save(doc)
       end
 

@@ -17,12 +17,6 @@ RSpec.describe Glossarist::Validation::Rules::RelatedConceptCycleRule do
     rc
   end
 
-  def make_related_cross_edition(type, ref_id, source_urn:)
-    # A cross-edition reference — source URN present. The cycle rule must
-    # exclude these from the intra-edition graph.
-    make_related(type, ref_id, source: source_urn)
-  end
-
   def make_context(concepts)
     ctx = instance_double(Glossarist::Validation::Rules::DatasetContext)
     allow(ctx).to receive(:concepts).and_return(concepts)
@@ -86,12 +80,16 @@ RSpec.describe Glossarist::Validation::Rules::RelatedConceptCycleRule do
     # dataset (qualified by source URN). The target concept may share
     # the clause identifier with the source (e.g. both have id 3.1.1.1).
     # The cycle rule must NOT treat this as a self-loop.
+    def make_related_cross_edition(type, ref_id, source_urn:)
+      make_related(type, ref_id, source: source_urn)
+    end
+
     it "does not flag a supersedes edge to a same-clause predecessor" do
       concepts = [
         make_concept("3.1.1.1", [
-          make_related_cross_edition("supersedes", "3.1.1.1",
-                                      source_urn: "urn:iso:std:iso:ts:14812:2022"),
-        ]),
+                       make_related_cross_edition("supersedes", "3.1.1.1",
+                                                  source_urn: "urn:iso:std:iso:ts:14812:2022"),
+                     ]),
       ]
       issues = rule.check(make_context(concepts))
       expect(issues).to be_empty
@@ -100,10 +98,10 @@ RSpec.describe Glossarist::Validation::Rules::RelatedConceptCycleRule do
     it "still detects a genuine intra-edition cycle when cross-edition edges also exist" do
       concepts = [
         make_concept("1", [
-          make_related("supersedes", "2"),
-          make_related_cross_edition("supersedes", "1",
-                                      source_urn: "urn:other:edition"),
-        ]),
+                       make_related("supersedes", "2"),
+                       make_related_cross_edition("supersedes", "1",
+                                                  source_urn: "urn:other:edition"),
+                     ]),
         make_concept("2", [make_related("supersedes", "1")]),
       ]
       issues = rule.check(make_context(concepts))

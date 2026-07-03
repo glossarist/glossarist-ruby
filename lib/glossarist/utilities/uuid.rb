@@ -65,11 +65,10 @@ module Glossarist
         else
           match_data = namespace.match(/\A(\h{8})-(\h{4})-(\h{4})-(\h{4})-(\h{4})(\h{8})\z/)
 
-          # `match_data` is a MatchData on success, nil on failure. Both
-          # ActiveSupport's `#present?` and a bare truthiness check agree
-          # here — but `#present?` requires ActiveSupport, which is not a
-          # declared dependency of this gem. Use plain nil semantics so the
-          # gem works in any bundle.
+          # `match_data` is a MatchData on success, nil on failure. Do not
+          # use ActiveSupport's `#present?` here — ActiveSupport is not a
+          # declared dependency of this gem, and `#present?` raises
+          # NoMethodError in bundles where it isn't loaded.
           unless match_data
             raise ArgumentError,
                   "Only UUIDs are valid namespace identifiers"

@@ -10,9 +10,5 @@ module Glossarist
       map :entity_id, to: :entity_id
       map :display, to: :display
     end
-
-    def dedup_key
-      [self.class.name, entity_id]
-    end
   end
 end

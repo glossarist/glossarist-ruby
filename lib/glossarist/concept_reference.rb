@@ -7,7 +7,13 @@ module Glossarist
   # Local references use +concept_id+ without +source+. External references
   # use +source+ (a registry URN prefix) and +concept_id+ to identify the
   # target concept, or a direct +urn+ field for formal URN references.
+  #
+  # Includes the {Reference} protocol. Overrides +cite?+, +local?+, and
+  # +external?+ because ConceptReference is the only reference kind whose
+  # predicates depend on runtime state (ref_type, source).
   class ConceptReference < Lutaml::Model::Serializable
+    include Reference
+
     attribute :term, :string
     attribute :concept_id, :string
     attribute :source, :string
