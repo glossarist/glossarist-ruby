@@ -22,4 +22,27 @@ RSpec.describe Glossarist::BibliographicReference do
       expect(ref1.dedup_key).to eq(ref2.dedup_key)
     end
   end
+
+  # A BibliographicReference is never an inline {{cite:...}} mention,
+  # never a local concept cross-ref, never an external concept cross-ref.
+  # These predicates let validation rules (e.g. CiteRefIntegrityRule) call
+  # a uniform protocol on mixed collections of (BibliographicReference,
+  # ConceptReference) without type-checking.
+  describe "#cite?" do
+    it "returns false" do
+      expect(described_class.new(anchor: "x")).not_to be_cite
+    end
+  end
+
+  describe "#local?" do
+    it "returns false" do
+      expect(described_class.new(anchor: "x")).not_to be_local
+    end
+  end
+
+  describe "#external?" do
+    it "returns false" do
+      expect(described_class.new(anchor: "x")).not_to be_external
+    end
+  end
 end
