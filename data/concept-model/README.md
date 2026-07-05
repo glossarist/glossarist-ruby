@@ -12,6 +12,7 @@ concept-model.
 
 | File | Purpose |
 |------|---------|
+| `prefixes.ttl` | Canonical prefix bindings SSOT — consumed verbatim by every Turtle/JSON-LD serializer in the ecosystem |
 | `glossarist.context.jsonld` | JSON-LD term map — reference |
 | `glossarist.ttl` | OWL ontology (reference; not currently read at runtime) |
 | `shapes/glossarist.shacl.ttl` | SHACL shapes — loaded by `Glossarist::Validation::ShaclValidator` at runtime |
@@ -21,8 +22,9 @@ concept-model.
 Update these files from the latest concept-model tag:
 
 ```bash
-rake glossarist:sync:model          # fetches latest from glossarist/concept-model
-rake glossarist:sync:model[v3.0.0]  # pin to a specific tag
+rake glossarist:sync:model          # fetches latest released tag
+rake glossarist:sync:model[v3.1.0]  # pin to a specific tag
+rake glossarist:sync:model[main]    # tracking upstream main (uncommon)
 ```
 
 The sync task fetches via the GitHub raw endpoint (no clone needed).

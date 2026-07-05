@@ -3,6 +3,7 @@
 require "json"
 require "fileutils"
 require "net/http"
+require "time"
 require "uri"
 
 module Glossarist
