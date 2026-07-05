@@ -20,10 +20,17 @@ module Glossarist
         .transform_keys(&:to_s)
         .freeze
 
-      DATE_TYPE_MAP = {
-        "accepted" => "#{GLOSS}status/accepted",
-        "amended" => "#{GLOSS}status/amended",
-        "retired" => "#{GLOSS}status/retired",
+      # Maps each Designation subclass to the method that builds its RDF
+      # counterpart. Lookup is by exact class — a Designation instance is
+      # always exactly one of these classes (the STI pattern in
+      # Designation::Base#of_yaml enforces this). Adding a new Designation
+      # subclass means adding one entry here, not editing a case/when.
+      DESIGNATION_BUILDERS = {
+        Designation::Abbreviation => :build_gloss_abbreviation,
+        Designation::Expression => :build_gloss_expression,
+        Designation::GraphicalSymbol => :build_gloss_graphical_symbol,
+        Designation::LetterSymbol => :build_gloss_letter_symbol,
+        Designation::Symbol => :build_gloss_symbol,
       }.freeze
 
       def self.transform(managed_concept, options = {})
@@ -165,21 +172,21 @@ module Glossarist
       end
 
       def designation_instance_for(desig, common_attrs, concept_id, lang, index)
-        case desig
-        when Designation::Abbreviation
-          build_gloss_abbreviation(desig, common_attrs, concept_id, lang, index)
-        when Designation::Expression
-          build_gloss_expression(desig, common_attrs, concept_id, lang, index)
-        when Designation::GraphicalSymbol
-          Rdf::GlossGraphicalSymbol.new(common_attrs.merge(text: desig.text,
-                                                           image: desig.image))
-        when Designation::LetterSymbol
-          Rdf::GlossLetterSymbol.new(common_attrs.merge(text: desig.text))
-        when Designation::Symbol
-          Rdf::GlossSymbol.new(common_attrs)
-        else
-          Rdf::GlossExpression.new(common_attrs)
-        end
+        builder = DESIGNATION_BUILDERS[desig.class] || :build_gloss_expression
+        send(builder, desig, common_attrs, concept_id, lang, index)
+      end
+
+      def build_gloss_graphical_symbol(desig, common_attrs, *_unused)
+        Rdf::GlossGraphicalSymbol.new(common_attrs.merge(text: desig.text,
+                                                         image: desig.image))
+      end
+
+      def build_gloss_letter_symbol(desig, common_attrs, *_unused)
+        Rdf::GlossLetterSymbol.new(common_attrs.merge(text: desig.text))
+      end
+
+      def build_gloss_symbol(_desig, common_attrs, *_unused)
+        Rdf::GlossSymbol.new(common_attrs)
       end
 
       def designation_common_attrs(desig, concept_id, lang, index)
@@ -337,7 +344,7 @@ desig_index)
         Array(dates).map do |date|
           Rdf::GlossConceptDate.new(
             date_value: date.date&.to_s,
-            date_type: DATE_TYPE_MAP[date.type] || "gloss:status/#{date.type}",
+            date_type: "gloss:status/#{date.type}",
             concept_id: concept_id.to_s,
           )
         end

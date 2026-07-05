@@ -97,7 +97,7 @@ RSpec.describe Glossarist::GcrPackage do
       Zip::File.open(gcr_path) do |zf|
         expect(zf.find_entry("register.yaml")).not_to be_nil
         rd = Glossarist::RegisterData.from_yaml(zf.find_entry("register.yaml").get_input_stream.read)
-        expect(rd["name"]).to eq("Test")
+        expect(rd.name).to eq("Test")
       end
     end
   end

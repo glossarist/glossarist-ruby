@@ -42,55 +42,6 @@ RSpec.describe Glossarist::RegisterData do
     end
   end
 
-  describe "backward-compatible [] access" do
-    let(:rd) do
-      described_class.new(
-        shortname: "tc204",
-        name: "ITS Vocabulary",
-        version: "1.0.0",
-        schema_version: "3",
-      )
-    end
-
-    it "returns shortname for 'shortname' key" do
-      expect(rd["shortname"]).to eq("tc204")
-    end
-
-    it "returns shortname for 'id' key" do
-      expect(rd["id"]).to eq("tc204")
-    end
-
-    it "returns name for 'name' key" do
-      expect(rd["name"]).to eq("ITS Vocabulary")
-    end
-
-    it "returns nil for unknown key" do
-      expect(rd["nonexistent"]).to be_nil
-    end
-  end
-
-  describe "#to_h" do
-    it "returns hash with non-nil attributes" do
-      rd = described_class.new(shortname: "tc204", name: "Test")
-      h = rd.to_h
-      expect(h["shortname"]).to eq("tc204")
-      expect(h["name"]).to eq("Test")
-      expect(h).not_to have_key("version")
-    end
-  end
-
-  describe "#dig" do
-    it "returns attribute value for single key" do
-      rd = described_class.new(shortname: "tc204", name: "Test")
-      expect(rd["shortname"]).to eq("tc204")
-    end
-
-    it "returns nil for empty args" do
-      rd = described_class.new(shortname: "tc204")
-      expect(rd.dig).to be_nil
-    end
-  end
-
   describe ".from_file" do
     let(:tmpdir) { Dir.mktmpdir }
     after { FileUtils.rm_rf(tmpdir) }
