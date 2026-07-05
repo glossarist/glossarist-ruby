@@ -34,10 +34,19 @@
     "ConceptRef":          "gloss:ConceptRef",
     "Reference":           "gloss:Reference",
     "RelatedConcept":      "gloss:RelatedConcept",
+    "DesignationRelationship": "gloss:DesignationRelationship",
     "ConceptDate":         "gloss:ConceptDate",
     "NonVerbalRepresentation": "gloss:NonVerbalRepresentation",
+    "NonVerbalEntity":     "gloss:NonVerbalEntity",
+    "SharedNonVerbalEntity": "gloss:SharedNonVerbalEntity",
+    "Figure":              "gloss:Figure",
+    "Table":               "gloss:Table",
+    "Formula":             "gloss:Formula",
+    "FigureImage":         "gloss:FigureImage",
     "CustomLocality":      "gloss:CustomLocality",
     "Locality":            "gloss:Locality",
+    "DatasetRegister":     "gloss:DatasetRegister",
+    "Section":             "gloss:Section",
 
     "identifier":          { "@id": "gloss:identifier",    "@type": "xsd:string" },
     "uri":                 { "@id": "gloss:uri",           "@type": "xsd:anyURI" },
@@ -54,6 +63,8 @@
     "hasDefinition":       { "@id": "gloss:hasDefinition", "@type": "@id" },
     "hasNote":             { "@id": "gloss:hasNote",       "@type": "@id" },
     "hasExample":          { "@id": "gloss:hasExample",    "@type": "@id" },
+    "hasScopedExample":    { "@id": "gloss:hasScopedExample", "@type": "@id" },
+    "hasAnnotation":       { "@id": "gloss:hasAnnotation", "@type": "@id" },
     "hasNonVerbalRep":     { "@id": "gloss:hasNonVerbalRep", "@type": "@id" },
     "domain":              { "@id": "gloss:domain",        "@type": "xsd:anyURI" },
     "release":             { "@id": "gloss:release",       "@type": "xsd:string" },
@@ -81,6 +92,16 @@
 
     "text":                { "@id": "gloss:text",          "@type": "xsd:string" },
     "image":               { "@id": "gloss:image",         "@type": "xsd:anyURI" },
+    "caption":             { "@id": "gloss:caption",       "@type": "xsd:string" },
+    "altText":             { "@id": "gloss:altText",       "@type": "xsd:string" },
+    "description":         { "@id": "gloss:description",   "@type": "xsd:string" },
+    "expression":          { "@id": "gloss:expression",    "@type": "xsd:string" },
+    "latexForm":           { "@id": "gloss:latexForm",     "@type": "xsd:string" },
+    "content":             { "@id": "gloss:content",       "@type": "xsd:string" },
+    "hasSubfigure":        { "@id": "gloss:hasSubfigure",  "@type": "@id" },
+    "src":                 { "@id": "gloss:src",           "@type": "xsd:string" },
+    "format":              { "@id": "gloss:format",        "@type": "xsd:string" },
+    "role":                { "@id": "gloss:role",          "@type": "xsd:string" },
 
     "pronunciationContent":   { "@id": "gloss:pronunciationContent",  "@type": "xsd:string" },
     "pronunciationLanguage":  { "@id": "gloss:pronunciationLanguage", "@type": "xsd:string" },
@@ -101,6 +122,7 @@
 
     "sourceType":          { "@id": "gloss:sourceType",    "@type": "@id" },
     "sourceStatus":        { "@id": "gloss:sourceStatus",  "@type": "@id" },
+    "sourceId":            { "@id": "gloss:sourceId",      "@type": "xsd:string" },
     "sourceOrigin":        { "@id": "gloss:sourceOrigin",  "@type": "@id" },
     "modification":        { "@id": "gloss:modification",  "@type": "xsd:string" },
 
@@ -115,6 +137,7 @@
 
     "conceptRefSource":    { "@id": "gloss:conceptRefSource", "@type": "xsd:string" },
     "conceptRefId":        { "@id": "gloss:conceptRefId", "@type": "xsd:string" },
+    "conceptRefText":      { "@id": "gloss:conceptRefText", "@type": "xsd:string" },
 
     "customLocalityName":  { "@id": "gloss:customLocalityName", "@type": "xsd:string" },
     "customLocalityValue": { "@id": "gloss:customLocalityValue", "@type": "xsd:string" },
@@ -161,6 +184,11 @@
     "abbreviatedFormFor":  { "@id": "gloss:abbreviatedFormFor", "@type": "@id" },
     "shortFormFor":        { "@id": "gloss:shortFormFor",  "@type": "@id" },
 
+    "hasDesignationRelationship": { "@id": "gloss:hasDesignationRelationship", "@type": "@id" },
+    "designationRelationshipType": { "@id": "gloss:designationRelationshipType", "@type": "@id" },
+    "designationRelationshipContent": { "@id": "gloss:designationRelationshipContent", "@type": "xsd:string" },
+    "relationshipTarget": { "@id": "gloss:relationshipTarget", "@type": "xsd:string" },
+
     "prefLabel":           "skos:prefLabel",
     "altLabel":            "skos:altLabel",
     "hiddenLabel":         "skos:hiddenLabel",
@@ -204,6 +232,30 @@
 
     "type":                { "@id": "@type", "@container": "@set" },
     "id":                  "@id",
-    "value":               "rdf:value"
+    "value":               "rdf:value",
+
+    "datasetId":           { "@id": "gloss:datasetId",        "@type": "xsd:string" },
+    "datasetRef":          { "@id": "gloss:datasetRef",       "@type": "xsd:string" },
+    "datasetYear":         { "@id": "gloss:datasetYear",      "@type": "xsd:integer" },
+    "datasetUrn":          { "@id": "gloss:datasetUrn",       "@type": "xsd:anyURI" },
+    "datasetUrnAlias":     { "@id": "gloss:datasetUrnAlias",  "@type": "xsd:anyURI" },
+    "datasetRefAlias":     { "@id": "gloss:datasetRefAlias",  "@type": "xsd:string" },
+    "datasetStatus":       { "@id": "gloss:datasetStatus",    "@type": "xsd:string" },
+    "supersedesDataset":   { "@id": "gloss:supersedesDataset","@type": "xsd:string" },
+    "owner":               { "@id": "gloss:owner",            "@type": "xsd:string" },
+    "sourceRepo":          { "@id": "gloss:sourceRepo",       "@type": "xsd:anyURI" },
+    "datasetLanguage":     { "@id": "gloss:datasetLanguage",  "@type": "xsd:string" },
+    "languageOrder":       { "@id": "gloss:languageOrder",    "@type": "xsd:string" },
+    "hasSection":          { "@id": "gloss:hasSection",       "@type": "@id" },
+    "hasDefaultOrdering":  { "@id": "gloss:hasDefaultOrdering", "@type": "@id" },
+    "datasetDescription":  { "@id": "gloss:datasetDescription", "@type": "xsd:string" },
+    "aboutPath":           { "@id": "gloss:aboutPath",        "@type": "xsd:string" },
+    "logo":                { "@id": "gloss:logo",             "@type": "xsd:anyURI" },
+
+    "sectionId":           { "@id": "gloss:sectionId",        "@type": "xsd:string" },
+    "sectionName":         { "@id": "gloss:sectionName",      "@type": "xsd:string" },
+    "hasChildSection":     { "@id": "gloss:hasChildSection",  "@type": "@id" },
+    "hasParentSection":    { "@id": "gloss:hasParentSection", "@type": "@id" },
+    "sectionOrdering":     { "@id": "gloss:sectionOrdering",  "@type": "@id" }
   }
 }

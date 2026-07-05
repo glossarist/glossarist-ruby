@@ -14,13 +14,16 @@
 #
 # Every class and property here has a direct correspondence to a field in the
 # Glossarist YAML schema (schemas/v3/concept.yaml, localized-concept.yaml).
+#
+# Prefix bindings: see prefixes.ttl for the canonical SSOT. The declarations
+# below must stay in sync with that file.
 
 @prefix gloss:    <https://www.glossarist.org/ontologies/> .
 @prefix owl:      <http://www.w3.org/2002/07/owl#> .
 @prefix rdf:      <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs:     <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix skos:     <http://www.w3.org/2004/02/skos/core#> .
-@prefix xl:       <http://www.w3.org/2008/05/skos-xl#> .
+@prefix skosxl:    <http://www.w3.org/2008/05/skos-xl#> .
 @prefix iso-thes: <http://purl.org/iso25964/skos-thes#> .
 @prefix dcterms:  <http://purl.org/dc/terms/> .
 @prefix prov:     <http://www.w3.org/ns/prov#> .
@@ -93,11 +96,11 @@ gloss:LocalizedConcept a owl:Class ;
 # ── Designation Hierarchy (MECE) ─────────────────────────────────────────
 
 gloss:Designation a owl:Class ;
-  rdfs:subClassOf xl:Label ;
+  rdfs:subClassOf skosxl:Label ;
   rdfs:label "Designation"@en ;
   rdfs:comment """
     Abstract base for all designation types. A designation is both a
-    gloss:Designation and a skosxl:Label. The xl:literalForm carries the
+    gloss:Designation and a skosxl:Label. The skosxl:literalForm carries the
     designation text.
     Corresponds to Designation::Base in glossarist-ruby.
   """@en .
@@ -192,6 +195,16 @@ gloss:RelatedConcept a owl:Class ;
     A concept with a typed relationship (deprecates, broader, equivalent, etc.).
   """@en .
 
+gloss:DesignationRelationship a owl:Class ;
+  rdfs:subClassOf owl:Thing ;
+  rdfs:label "Designation Relationship"@en ;
+  rdfs:comment """
+    A designation-level relationship between two designations of the same concept
+    (ISO 10241-1). Unlike RelatedConcept (which links concepts by identifier),
+    DesignationRelationship links designations by their text. Types include
+    abbreviated_form_for and short_form_for.
+  """@en .
+
 gloss:ConceptDate a owl:Class ;
   rdfs:label "Concept Date"@en ;
   rdfs:comment """
@@ -229,7 +242,7 @@ gloss:ConceptRef a owl:Class ;
   rdfs:label "Concept Reference"@en ;
   rdfs:comment """
     A reference to a concept in another registry or vocabulary.
-    Has source and id only — no version, locality, or link.
+    Has source, id, and optional text. No version, locality, or link.
     Used as the ref of RelatedConcept.
     Corresponds to ConceptRef in glossarist-ruby.
   """@en .
@@ -237,6 +250,24 @@ gloss:ConceptRef a owl:Class ;
 gloss:Locality a owl:Class ;
   rdfs:label "Locality"@en ;
   rdfs:comment "A locality within a cited document (section, clause, page, etc.)."@en .
+
+# ── Dataset Register Layer ────────────────────────────────────────────────
+
+gloss:DatasetRegister a owl:Class ;
+  rdfs:label "Dataset Register"@en ;
+  rdfs:comment """
+    Self-describing dataset metadata (register.yaml). Each dataset directory
+    contains a register.yaml that carries identity, structure, and relationship
+    metadata. Corresponds to DatasetRegister in the Lutaml model.
+  """@en .
+
+gloss:Section a owl:Class ;
+  rdfs:label "Section"@en ;
+  rdfs:comment """
+    A structural division within a dataset. Sections can be hierarchical:
+    a section may contain child sections (e.g. Part > Section > Subsection)
+    via gloss:hasChildSection.
+  """@en .
 
 # ══════════════════════════════════════════════════════════════════════════
 # OBJECT PROPERTIES — Concept-level
@@ -277,11 +308,11 @@ gloss:tag a owl:DatatypeProperty ;
 gloss:hasRelatedConcept a owl:ObjectProperty ;
   rdfs:domain [
     a owl:Class ;
-    owl:unionOf ( gloss:Concept gloss:LocalizedConcept gloss:Designation )
+    owl:unionOf ( gloss:Concept gloss:LocalizedConcept )
   ] ;
   rdfs:range gloss:RelatedConcept ;
   rdfs:label "has related concept"@en ;
-  rdfs:comment "DATA: Typed semantic relationship — applicable at concept, localization, and designation levels."@en .
+  rdfs:comment "DATA: Typed semantic relationship — applicable at concept and localization levels."@en .
 
 gloss:hasDate a owl:ObjectProperty ;
   rdfs:domain [
@@ -351,7 +382,25 @@ gloss:hasExample a owl:ObjectProperty ;
   rdfs:domain gloss:LocalizedConcept ;
   rdfs:range gloss:DetailedDefinition ;
   rdfs:label "has example"@en ;
-  rdfs:comment "Links a localized concept to an illustrative example."@en .
+  rdfs:comment "Links a localized concept to a concept-level illustrative example."@en .
+
+gloss:hasScopedExample a owl:ObjectProperty ;
+  rdfs:domain gloss:DetailedDefinition ;
+  rdfs:range gloss:DetailedDefinition ;
+  rdfs:label "has scoped example"@en ;
+  rdfs:comment """
+    Links a definition, note, or annotation to a scoped example nested
+    inside it (VIM 1993 style). Distinct from gloss:hasExample, which
+    links a LocalizedConcept to a concept-level example. MECE: concept-
+    level examples use hasExample; definition/note-scoped examples use
+    hasScopedExample.
+  """@en .
+
+gloss:hasAnnotation a owl:ObjectProperty ;
+  rdfs:domain gloss:LocalizedConcept ;
+  rdfs:range gloss:DetailedDefinition ;
+  rdfs:label "has annotation"@en ;
+  rdfs:comment "Editorial annotations about the definition or entry — distinct from notes, which supplement the concept."@en .
 
 gloss:hasNonVerbalRep a owl:ObjectProperty ;
   rdfs:domain gloss:LocalizedConcept ;
@@ -458,6 +507,30 @@ gloss:register a owl:DatatypeProperty ;
   rdfs:range xsd:string ;
   rdfs:label "register"@en ;
   rdfs:comment "Register or usage level of the designation (ISO 12620 / TBX-Linguist: colloquial_register, neutral_register, technical_register, in_house_register, bench_level_register, slang_register, vulgar_register)."@en .
+
+gloss:hasDesignationRelationship a owl:ObjectProperty ;
+  rdfs:domain gloss:Designation ;
+  rdfs:range gloss:DesignationRelationship ;
+  rdfs:label "has designation relationship"@en ;
+  rdfs:comment "Links a designation to a designation-level relationship (e.g. abbreviated_form_for, short_form_for)."@en .
+
+gloss:designationRelationshipType a owl:ObjectProperty ;
+  rdfs:domain gloss:DesignationRelationship ;
+  rdfs:range skos:Concept ;
+  rdfs:label "designation relationship type"@en ;
+  rdfs:comment "The type of designation relationship."@en .
+
+gloss:designationRelationshipContent a owl:DatatypeProperty ;
+  rdfs:domain gloss:DesignationRelationship ;
+  rdfs:range xsd:string ;
+  rdfs:label "designation relationship content"@en ;
+  rdfs:comment "Free-text description of the designation relationship."@en .
+
+gloss:relationshipTarget a owl:DatatypeProperty ;
+  rdfs:domain gloss:DesignationRelationship ;
+  rdfs:range xsd:string ;
+  rdfs:label "relationship target"@en ;
+  rdfs:comment "The target designation text that this designation relates to."@en .
 
 # ── Expression-specific ──────────────────────────────────────────────────
 
@@ -613,6 +686,16 @@ gloss:term a owl:DatatypeProperty ;
 # OBJECT PROPERTIES — Source
 # ══════════════════════════════════════════════════════════════════════════
 
+gloss:sourceId a owl:DatatypeProperty ;
+  rdfs:domain gloss:ConceptSource ;
+  rdfs:range xsd:string ;
+  rdfs:label "source id"@en ;
+  rdfs:comment """
+    Optional stable identifier for the source, used by inline
+    `{{cite:id}}` references. Local to the concept; must be
+    unique within the concept's sources list.
+  """@en .
+
 gloss:sourceType a owl:ObjectProperty ;
   rdfs:domain gloss:ConceptSource ;
   rdfs:range skos:Concept ;
@@ -636,6 +719,28 @@ gloss:modification a owl:DatatypeProperty ;
   rdfs:range xsd:string ;
   rdfs:label "modification"@en ;
   rdfs:comment "How the concept was modified from the source."@en .
+
+# ── Citation resolution ────────────────────────────────────────────────────
+#
+# An inline `{{cite:id}}` mention in a concept's text
+# resolves to a Citation (ConceptSource#origin) in the same
+# concept's sources list. The resolution is deployment-
+# dependent:
+#
+#   1. Self-contained: the inline Citation is rendered as a
+#      flat citation (the source's origin.ref, locality, link).
+#   2. Co-deployed: if the deployment has a bibliographic
+#      dataset registered under the same `Citation::Ref.source`
+#      (e.g. 'bibliography:ISO'), the citation is resolved to
+#      the rich bibliographic record. The inline locality
+#      (if any) is shown as the specific point of reference.
+#   3. External: a URI form (e.g. `urn:iso:std:iso:7301:2024`)
+#      with no co-deployed match renders as the URI as a link.
+#
+# The Reference data structure (extracted by glossarist-js or
+# glossarist-ruby) carries the URI/lookupKey/cite-key;
+# resolution against the deployment's bibliography registry
+# happens at render time.
 
 # ── Citation properties ────────────────────────────────────────────────────
 
@@ -696,6 +801,12 @@ gloss:conceptRefId a owl:DatatypeProperty ;
   rdfs:range xsd:string ;
   rdfs:label "concept ref identifier"@en ;
   rdfs:comment "Concept identifier within the registry."@en .
+
+gloss:conceptRefText a owl:DatatypeProperty ;
+  rdfs:domain gloss:ConceptRef ;
+  rdfs:range xsd:string ;
+  rdfs:label "concept ref text"@en ;
+  rdfs:comment "Target designation text for lexical relationships (e.g. close_match, abbreviated_form_for)."@en .
 
 # ── CustomLocality ─────────────────────────────────────────────────────────
 
@@ -958,3 +1069,259 @@ gloss:shortFormFor a owl:ObjectProperty ;
   rdfs:range gloss:Designation ;
   rdfs:label "short form for"@en ;
   rdfs:comment "This designation is a short form of the target designation."@en .
+
+# ══════════════════════════════════════════════════════════════════════════
+# DATAPROPERTIES — Dataset Register
+# ══════════════════════════════════════════════════════════════════════════
+
+gloss:datasetId a owl:DatatypeProperty ;
+  rdfs:domain gloss:DatasetRegister ;
+  rdfs:range xsd:string ;
+  rdfs:label "dataset id"@en ;
+  rdfs:comment "Dataset identifier, unique within the deployment."@en .
+
+gloss:datasetRef a owl:DatatypeProperty ;
+  rdfs:domain gloss:DatasetRegister ;
+  rdfs:range xsd:string ;
+  rdfs:label "dataset ref"@en ;
+  rdfs:comment "Publication reference string (e.g. OIML V 1:2022)."@en .
+
+gloss:datasetYear a owl:DatatypeProperty ;
+  rdfs:domain gloss:DatasetRegister ;
+  rdfs:range xsd:integer ;
+  rdfs:label "dataset year"@en ;
+  rdfs:comment "Publication year."@en .
+
+gloss:datasetUrn a owl:DatatypeProperty ;
+  rdfs:domain gloss:DatasetRegister ;
+  rdfs:range xsd:anyURI ;
+  rdfs:label "dataset URN"@en ;
+  rdfs:comment "Primary URN for the dataset."@en .
+
+gloss:datasetUrnAlias a owl:DatatypeProperty ;
+  rdfs:domain gloss:DatasetRegister ;
+  rdfs:range xsd:anyURI ;
+  rdfs:label "dataset URN alias"@en ;
+  rdfs:comment "Additional URN patterns for resolution."@en .
+
+gloss:datasetRefAlias a owl:DatatypeProperty ;
+  rdfs:domain gloss:DatasetRegister ;
+  rdfs:range xsd:string ;
+  rdfs:label "dataset ref alias"@en ;
+  rdfs:comment "Alternative publication references."@en .
+
+gloss:datasetStatus a owl:DatatypeProperty ;
+  rdfs:domain gloss:DatasetRegister ;
+  rdfs:range xsd:string ;
+  rdfs:label "dataset status"@en ;
+  rdfs:comment "Dataset lifecycle status: current, superseded, or retired."@en .
+
+gloss:supersedesDataset a owl:DatatypeProperty ;
+  rdfs:domain gloss:DatasetRegister ;
+  rdfs:range xsd:string ;
+  rdfs:label "supersedes dataset"@en ;
+  rdfs:comment "ID of the dataset edition that this one supersedes."@en .
+
+gloss:owner a owl:DatatypeProperty ;
+  rdfs:domain gloss:DatasetRegister ;
+  rdfs:range xsd:string ;
+  rdfs:label "owner"@en ;
+  rdfs:comment "Owning organization (e.g. ISO, IEC, OIML)."@en .
+
+gloss:sourceRepo a owl:DatatypeProperty ;
+  rdfs:domain gloss:DatasetRegister ;
+  rdfs:range xsd:anyURI ;
+  rdfs:label "source repository"@en ;
+  rdfs:comment "URL of the source repository."@en .
+
+gloss:datasetLanguage a owl:DatatypeProperty ;
+  rdfs:domain gloss:DatasetRegister ;
+  rdfs:range xsd:string ;
+  rdfs:label "dataset language"@en ;
+  rdfs:comment "ISO 639-2 language code available in this dataset."@en .
+
+gloss:languageOrder a owl:DatatypeProperty ;
+  rdfs:domain gloss:DatasetRegister ;
+  rdfs:range xsd:string ;
+  rdfs:label "language order"@en ;
+  rdfs:comment "Preferred display order for languages."@en .
+
+gloss:hasSection a owl:ObjectProperty ;
+  rdfs:domain gloss:DatasetRegister ;
+  rdfs:range gloss:Section ;
+  rdfs:label "has section"@en ;
+  rdfs:comment "Top-level section in the dataset's hierarchical section tree."@en .
+
+gloss:hasDefaultOrdering a owl:ObjectProperty ;
+  rdfs:domain gloss:DatasetRegister ;
+  rdfs:range skos:Concept ;
+  rdfs:label "default ordering"@en ;
+  rdfs:comment "Default concept ordering method for the dataset."@en .
+
+gloss:datasetDescription a owl:DatatypeProperty ;
+  rdfs:domain gloss:DatasetRegister ;
+  rdfs:range xsd:string ;
+  rdfs:label "dataset description"@en ;
+  rdfs:comment "Localized dataset description."@en .
+
+gloss:aboutPath a owl:DatatypeProperty ;
+  rdfs:domain gloss:DatasetRegister ;
+  rdfs:range xsd:string ;
+  rdfs:label "about path"@en ;
+  rdfs:comment "Localized path to about-page document."@en .
+
+gloss:logo a owl:DatatypeProperty ;
+  rdfs:domain gloss:DatasetRegister ;
+  rdfs:range xsd:anyURI ;
+  rdfs:label "logo"@en ;
+  rdfs:comment "Relative path to the dataset logo image."@en .
+
+# ══════════════════════════════════════════════════════════════════════════
+# DATAPROPERTIES — Section
+# ══════════════════════════════════════════════════════════════════════════
+
+gloss:sectionId a owl:DatatypeProperty ;
+  rdfs:domain gloss:Section ;
+  rdfs:range xsd:string ;
+  rdfs:label "section id"@en ;
+  rdfs:comment "Section identifier used in concept references and URL routing."@en .
+
+gloss:sectionName a owl:DatatypeProperty ;
+  rdfs:domain gloss:Section ;
+  rdfs:range xsd:string ;
+  rdfs:label "section name"@en ;
+  rdfs:comment "Localized section title."@en .
+
+gloss:hasChildSection a owl:TransitiveProperty ;
+  owl:inverseOf gloss:hasParentSection ;
+  rdfs:domain gloss:Section ;
+  rdfs:range gloss:Section ;
+  rdfs:label "has child section"@en ;
+  rdfs:comment """
+    Hierarchical containment — parent section contains child sections.
+    Transitive: selecting a parent section includes all descendants.
+    This enables cascading membership at any depth (Part > Section > Subsection).
+  """@en .
+
+gloss:hasParentSection a owl:TransitiveProperty ;
+  owl:inverseOf gloss:hasChildSection ;
+  rdfs:domain gloss:Section ;
+  rdfs:range gloss:Section ;
+  rdfs:label "has parent section"@en ;
+  rdfs:comment """
+    Inverse of hasChildSection. Transitive: a section inherits membership
+    from all its ancestors. Used for upward traversal in SPARQL queries.
+  """@en .
+
+gloss:sectionOrdering a owl:ObjectProperty ;
+  rdfs:domain gloss:Section ;
+  rdfs:range skos:Concept ;
+  rdfs:label "section ordering"@en ;
+  rdfs:comment "Per-section ordering override; if absent, inherits dataset default."@en .
+
+# ── Non-Verbal Entities (ISO 10241-1 §6.5) ──────────────────────────────
+
+gloss:NonVerbalEntity a owl:Class ;
+  rdfs:label "Non-Verbal Entity"@en ;
+  rdfs:comment """
+    Abstract base for all non-verbal representation entities
+    (ISO 10241-1 §6.5). Carries the shared accessibility + provenance
+    payload: caption, description, alt, sources.
+  """@en .
+
+gloss:SharedNonVerbalEntity a owl:Class ;
+  rdfs:subClassOf gloss:NonVerbalEntity ;
+  rdfs:label "Shared Non-Verbal Entity"@en ;
+  rdfs:comment """
+    A non-verbal entity that has stable dataset-wide identity. Figure,
+    Table, and Formula inherit from this. Distinct from NonVerbRep,
+    which is concept-local and positional.
+  """@en .
+
+gloss:Figure a owl:Class ;
+  rdfs:subClassOf gloss:SharedNonVerbalEntity ;
+  rdfs:label "Figure"@en ;
+  rdfs:comment """
+    A dataset-level figure entity with localized caption/alt and
+    multiple image variants. May contain recursive subfigures.
+  """@en .
+
+gloss:Table a owl:Class ;
+  rdfs:subClassOf gloss:SharedNonVerbalEntity ;
+  rdfs:label "Table"@en ;
+  rdfs:comment "A dataset-level table entity with localized content."@en .
+
+gloss:Formula a owl:Class ;
+  rdfs:subClassOf gloss:SharedNonVerbalEntity ;
+  rdfs:label "Formula"@en ;
+  rdfs:comment "A dataset-level formula entity with localized expression."@en .
+
+gloss:FigureImage a owl:Class ;
+  rdfs:label "Figure Image"@en ;
+  rdfs:comment "One image variant within a Figure (format, role, dimensions)."@en .
+
+gloss:caption a owl:DatatypeProperty ;
+  rdfs:domain gloss:NonVerbalEntity ;
+  rdfs:range rdf:langString ;
+  rdfs:label "caption"@en ;
+  rdfs:comment "Localized title/caption."@en .
+
+gloss:altText a owl:DatatypeProperty ;
+  rdfs:domain gloss:NonVerbalEntity ;
+  rdfs:range rdf:langString ;
+  rdfs:label "alt text"@en ;
+  rdfs:comment "Localized short alt text for screen readers."@en .
+
+gloss:description a owl:DatatypeProperty ;
+  rdfs:domain gloss:NonVerbalEntity ;
+  rdfs:range rdf:langString ;
+  rdfs:label "description"@en ;
+  rdfs:comment "Localized long description (aria-describedby)."@en .
+
+gloss:image a owl:ObjectProperty ;
+  rdfs:domain gloss:Figure ;
+  rdfs:range gloss:FigureImage ;
+  rdfs:label "image"@en ;
+  rdfs:comment "An image variant of a Figure."@en .
+
+gloss:hasSubfigure a owl:ObjectProperty ;
+  rdfs:domain gloss:Figure ;
+  rdfs:range gloss:Figure ;
+  rdfs:label "has subfigure"@en ;
+  rdfs:comment "Recursive composite subfigure."@en .
+
+gloss:src a owl:DatatypeProperty ;
+  rdfs:domain gloss:FigureImage ;
+  rdfs:range xsd:string ;
+  rdfs:label "src"@en ;
+  rdfs:comment "Image filename relative to images/ directory."@en .
+
+gloss:format a owl:DatatypeProperty ;
+  rdfs:domain gloss:FigureImage ;
+  rdfs:range xsd:string ;
+  rdfs:label "format"@en ;
+  rdfs:comment "Image format (svg, png, jpg, webp, avif, gif)."@en .
+
+gloss:role a owl:DatatypeProperty ;
+  rdfs:domain gloss:FigureImage ;
+  rdfs:range xsd:string ;
+  rdfs:label "role"@en ;
+  rdfs:comment "Variant role (vector, raster, dark, light, print)."@en .
+
+gloss:content a owl:DatatypeProperty ;
+  rdfs:domain gloss:Table ;
+  rdfs:range xsd:string ;
+  rdfs:label "content"@en ;
+  rdfs:comment "Serialized table content (HTML, AsciiDoc, or similar markup)."@en .
+
+gloss:expression a owl:DatatypeProperty ;
+  rdfs:domain gloss:Formula ;
+  rdfs:range xsd:string ;
+  rdfs:label "expression"@en ;
+  rdfs:comment "The formula expression in its source notation (AsciiDoc stem, MathML, etc.)."@en .
+
+gloss:latexForm a owl:DatatypeProperty ;
+  rdfs:domain gloss:Formula ;
+  rdfs:range xsd:string ;
+  rdfs:label "LaTeX form"@en ;
+  rdfs:comment "LaTeX rendering of the formula expression for downstream typesetting."@en .

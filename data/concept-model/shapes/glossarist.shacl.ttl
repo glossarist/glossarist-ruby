@@ -8,11 +8,15 @@
 @prefix gloss:  <https://www.glossarist.org/ontologies/> .
 @prefix sh:     <http://www.w3.org/ns/shacl#> .
 @prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
-@prefix xl:     <http://www.w3.org/2008/05/skos-xl#> .
+@prefix skosxl: <http://www.w3.org/2008/05/skos-xl#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
 @prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix prov:   <http://www.w3.org/ns/prov#> .
+@prefix foaf:   <http://xmlns.com/foaf/0.1/> .
+@prefix dcat:   <http://www.w3.org/ns/dcat#> .
 
 # ══════════════════════════════════════════════════════════════════════════
 # Concept shapes
@@ -94,6 +98,10 @@ gloss:LocalizedConceptShape a sh:NodeShape ;
     sh:class gloss:DetailedDefinition ;
   ] ;
   sh:property [
+    sh:path gloss:hasAnnotation ;
+    sh:class gloss:DetailedDefinition ;
+  ] ;
+  sh:property [
     sh:path gloss:hasEntryStatus ;
     sh:class skos:Concept ;
     sh:valuesFrom <https://www.glossarist.org/ontologies/entstatus> ;
@@ -171,9 +179,9 @@ gloss:ConceptCollectionShape a sh:NodeShape ;
 
 gloss:DesignationShape a sh:NodeShape ;
   sh:targetClass gloss:Designation ;
-  sh:class xl:Label ;
+  sh:class skosxl:Label ;
   sh:property [
-    sh:path xl:literalForm ;
+    sh:path skosxl:literalForm ;
     sh:minCount 1 ;
     sh:maxCount 1 ;
   ] ;
@@ -190,8 +198,8 @@ gloss:DesignationShape a sh:NodeShape ;
     sh:maxCount 1 ;
   ] ;
   sh:property [
-    sh:path gloss:hasRelatedConcept ;
-    sh:class gloss:RelatedConcept ;
+    sh:path gloss:hasDesignationRelationship ;
+    sh:class gloss:DesignationRelationship ;
   ] ;
   sh:property [
     sh:path gloss:hasSource ;
@@ -287,6 +295,25 @@ gloss:PrefixShape a sh:NodeShape ;
 gloss:SuffixShape a sh:NodeShape ;
   sh:targetClass gloss:Suffix .
 
+gloss:DesignationRelationshipShape a sh:NodeShape ;
+  sh:targetClass gloss:DesignationRelationship ;
+  sh:property [
+    sh:path gloss:designationRelationshipType ;
+    sh:class skos:Concept ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+  sh:property [
+    sh:path gloss:designationRelationshipContent ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+  sh:property [
+    sh:path gloss:relationshipTarget ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] .
+
 # ══════════════════════════════════════════════════════════════════════════
 # Supporting class shapes
 # ══════════════════════════════════════════════════════════════════════════
@@ -330,10 +357,19 @@ gloss:DetailedDefinitionShape a sh:NodeShape ;
   sh:property [
     sh:path gloss:hasSource ;
     sh:class gloss:ConceptSource ;
+  ] ;
+  sh:property [
+    sh:path gloss:hasScopedExample ;
+    sh:class gloss:DetailedDefinition ;
   ] .
 
 gloss:ConceptSourceShape a sh:NodeShape ;
   sh:targetClass gloss:ConceptSource ;
+  sh:property [
+    sh:path gloss:sourceId ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
   sh:property [
     sh:path gloss:sourceType ;
     sh:class skos:Concept ;
@@ -396,6 +432,108 @@ gloss:NonVerbalRepresentationShape a sh:NodeShape ;
   sh:property [
     sh:path gloss:hasSource ;
     sh:class gloss:ConceptSource ;
+  ] .
+
+# === K1: Non-verbal entity shapes ===
+# Class declarations (NonVerbalEntity, Figure, Table, Formula, SharedNonVerbalEntity)
+# live in glossarist.ttl — this file contains validation shapes only.
+
+gloss:FigureShape a sh:NodeShape ;
+  sh:targetClass gloss:Figure ;
+  sh:property [
+    sh:path gloss:image ;
+    sh:datatype xsd:anyURI ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path gloss:caption ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+  sh:property [
+    sh:path dcterms:description ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] .
+
+gloss:TableShape a sh:NodeShape ;
+  sh:targetClass gloss:Table ;
+  sh:property [
+    sh:path gloss:content ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path gloss:caption ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+  sh:property [
+    sh:path dcterms:title ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] .
+
+gloss:FormulaShape a sh:NodeShape ;
+  sh:targetClass gloss:Formula ;
+  sh:property [
+    sh:path gloss:expression ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path gloss:latexForm ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+  sh:property [
+    sh:path dcterms:description ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] .
+
+# === K2: Image binary references ===
+
+gloss:ImageShape a sh:NodeShape ;
+  sh:targetClass foaf:Image ;
+  sh:property [
+    sh:path dcterms:format ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path dcterms:language ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+  sh:property [
+    sh:path dcat:byteSize ;
+    sh:datatype xsd:integer ;
+    sh:maxCount 1 ;
+  ] .
+
+# === K4: NonVerbalRepresentation (concept-level NVR) ===
+# Class declaration lives in glossarist.ttl as gloss:NonVerbalRepresentation.
+
+gloss:NonVerbalRepresentationShape a sh:NodeShape ;
+  sh:targetClass gloss:NonVerbalRepresentation ;
+  sh:property [
+    sh:path skosxl:prefLabel ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path gloss:image ;
+    sh:datatype xsd:anyURI ;
+    sh:maxCount 1 ;
+  ] ;
+  sh:property [
+    sh:path dcterms:description ;
+    sh:maxCount 1 ;
+  ] ;
+  sh:property [
+    sh:path prov:wasDerivedFrom ;
+    sh:class prov:Entity ;
+    sh:maxCount 1 ;
   ] .
 
 gloss:ReferenceShape a sh:NodeShape ;
@@ -520,6 +658,11 @@ gloss:ConceptRefShape a sh:NodeShape ;
     sh:path gloss:conceptRefId ;
     sh:datatype xsd:string ;
     sh:maxCount 1 ;
+  ] ;
+  sh:property [
+    sh:path gloss:conceptRefText ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
   ] .
 
 gloss:CustomLocalityShape a sh:NodeShape ;
@@ -571,5 +714,102 @@ gloss:GrammarInfoShape a sh:NodeShape ;
   sh:property [
     sh:path gloss:partOfSpeech ;
     sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] .
+
+# ══════════════════════════════════════════════════════════════════════════
+# Dataset Register shapes
+# ══════════════════════════════════════════════════════════════════════════
+
+gloss:DatasetRegisterShape a sh:NodeShape ;
+  sh:targetClass gloss:DatasetRegister ;
+  sh:property [
+    sh:path gloss:datasetId ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+  sh:property [
+    sh:path gloss:datasetUrn ;
+    sh:datatype xsd:anyURI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+  sh:property [
+    sh:path gloss:datasetRef ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+  sh:property [
+    sh:path gloss:datasetYear ;
+    sh:datatype xsd:integer ;
+    sh:maxCount 1 ;
+  ] ;
+  sh:property [
+    sh:path gloss:datasetStatus ;
+    sh:datatype xsd:string ;
+    sh:in ( "current" "superseded" "retired" ) ;
+    sh:maxCount 1 ;
+  ] ;
+  sh:property [
+    sh:path gloss:supersedesDataset ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+  sh:property [
+    sh:path gloss:owner ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+  sh:property [
+    sh:path gloss:sourceRepo ;
+    sh:datatype xsd:anyURI ;
+    sh:maxCount 1 ;
+  ] ;
+  sh:property [
+    sh:path gloss:datasetLanguage ;
+    sh:datatype xsd:string ;
+  ] ;
+  sh:property [
+    sh:path gloss:hasSection ;
+    sh:class gloss:Section ;
+  ] ;
+  sh:property [
+    sh:path gloss:hasDefaultOrdering ;
+    sh:class skos:Concept ;
+    sh:valuesFrom <https://www.glossarist.org/ontologies/orderingmethod> ;
+    sh:maxCount 1 ;
+  ] ;
+  sh:property [
+    sh:path gloss:logo ;
+    sh:datatype xsd:anyURI ;
+    sh:maxCount 1 ;
+  ] .
+
+gloss:SectionShape a sh:NodeShape ;
+  sh:targetClass gloss:Section ;
+  sh:property [
+    sh:path gloss:sectionId ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+  sh:property [
+    sh:path gloss:sectionName ;
+    sh:datatype xsd:string ;
+  ] ;
+  sh:property [
+    sh:path gloss:hasChildSection ;
+    sh:class gloss:Section ;
+  ] ;
+  sh:property [
+    sh:path gloss:hasParentSection ;
+    sh:class gloss:Section ;
+    sh:maxCount 1 ;
+  ] ;
+  sh:property [
+    sh:path gloss:sectionOrdering ;
+    sh:class skos:Concept ;
+    sh:valuesFrom <https://www.glossarist.org/ontologies/orderingmethod> ;
     sh:maxCount 1 ;
   ] .

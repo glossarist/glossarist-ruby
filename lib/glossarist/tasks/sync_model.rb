@@ -17,6 +17,10 @@ module Glossarist
       OUT_DIR = File.expand_path("data/concept-model", File.join(__dir__, "..", "..", ".."))
 
       TARGETS = {
+        "prefixes.ttl" => %w[
+          ontologies/prefixes.ttl
+          prefixes.ttl
+        ].freeze,
         "glossarist.context.jsonld" => %w[
           ontologies/glossarist.context.jsonld
           glossarist.context.jsonld
