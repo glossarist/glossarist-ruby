@@ -51,8 +51,8 @@ module Glossarist
         def declared_languages
           @declared_languages ||= begin
             reg = load_register_data
-            if reg && reg["languages"].is_a?(Array)
-              reg["languages"]
+            if reg && reg.languages.is_a?(Array)
+              reg.languages
             else
               actual_languages
             end
