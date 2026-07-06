@@ -48,6 +48,24 @@ module ValidationRuleSpecHelper
       collection_context: collection_context,
     )
   end
+
+  # Build a minimal .gcr ZIP archive in tmpdir containing the named files.
+  # files is a hash of { "path/in/zip" => "content" }.
+  # Returns the path to the created zip.
+  def make_gcr_zip(tmpdir, files:, name: "test.gcr")
+    require "zip"
+    zip_path = File.join(tmpdir, name)
+    Zip::File.open(zip_path, create: true) do |zf|
+      files.each do |path, content|
+        zf.get_output_stream(path) { |f| f.write(content) }
+      end
+    end
+    zip_path
+  end
+
+  def make_gcr_context(zip_path)
+    Glossarist::Validation::Rules::GcrContext.new(zip_path)
+  end
 end
 
 RSpec.configure do |config|
