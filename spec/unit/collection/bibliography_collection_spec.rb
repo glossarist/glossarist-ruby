@@ -22,7 +22,9 @@ RSpec.describe Glossarist::Collections::BibliographyCollection do
     it "raises CacheVersionMismatchError on fetch_all when version is wrong" do
       File.write("#{iso_dir}/version", "wrong")
 
-      processor = instance_double("processor", grammar_hash: "correct_hash")
+      # Lightweight processor stub: Relaton processors respond to #grammar_hash.
+      # Use a Struct instead of instance_double per the global "no doubles" rule.
+      processor = Struct.new(:grammar_hash).new("correct_hash")
       allow(Relaton::Registry.instance).to receive(:by_type)
         .with("iso").and_return(processor)
 
