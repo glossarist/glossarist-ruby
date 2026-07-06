@@ -17,16 +17,13 @@ RSpec.describe Glossarist::Validation::Rules::ConceptContext do
     mc
   end
 
+  let(:tmpdir) { Dir.mktmpdir }
+  after { FileUtils.rm_rf(tmpdir) }
+
   let(:collection_context) do
-    instance_double(
-      Glossarist::Validation::Rules::DatasetContext,
-      asset_index: Glossarist::Validation::AssetIndex.new,
-      bibliography_index: Glossarist::Validation::BibliographyIndex.new,
-      concept_ids: Set.new(["1"]),
-      declared_languages: %w[eng],
-      metadata: nil,
-      gcr?: false,
-    )
+    ds = Glossarist::Validation::Rules::DatasetContext.new(tmpdir)
+    ds.add_concept(concept)
+    ds
   end
 
   let(:context) do

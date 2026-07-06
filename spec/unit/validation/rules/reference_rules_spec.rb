@@ -3,6 +3,9 @@
 require "spec_helper"
 
 RSpec.describe "Reference rules" do
+  let(:tmpdir) { Dir.mktmpdir }
+  after { FileUtils.rm_rf(tmpdir) }
+
   def make_concept(id:, langs: {})
     mc = Glossarist::ManagedConcept.new(data: { id: id })
     langs.each do |lang, opts|
@@ -20,22 +23,11 @@ RSpec.describe "Reference rules" do
     mc
   end
 
-  def make_context(concept, stubs = {})
-    asset_index = stubs[:asset_index] || Glossarist::Validation::AssetIndex.new
-    bib_index = stubs[:bibliography_index] || Glossarist::Validation::BibliographyIndex.new
-    concept_ids = stubs[:concept_ids] || Set.new([concept.data&.id&.to_s].compact)
-    cc = instance_double(Glossarist::Validation::Rules::DatasetContext,
-                         asset_index: asset_index,
-                         bibliography_index: bib_index,
-                         concept_ids: concept_ids,
-                         declared_languages: %w[eng],
-                         metadata: nil,
-                         gcr?: false)
-    Glossarist::Validation::Rules::ConceptContext.new(
-      concept,
-      file_name: "concept-#{concept.data.id}.yaml",
-      collection_context: cc,
-    )
+  def make_context(concept, extra_concept_ids: [])
+    ds = make_dataset_context(tmpdir)
+    ds.add_concept(concept)
+    extra_concept_ids.each { |id| ds.add_concept(make_managed_concept(id: id)) }
+    make_concept_context(concept, collection_context: ds)
   end
 
   describe Glossarist::Validation::Rules::ConceptMentionRule do
@@ -45,7 +37,7 @@ RSpec.describe "Reference rules" do
       mc = make_concept(id: "1", langs: {
                           eng: { definition: [{ "content" => "See {{999, missing}}" }] },
                         })
-      ctx = make_context(mc, concept_ids: Set.new(["1"]))
+      ctx = make_context(mc, extra_concept_ids: ["1"])
       expect(rule).to be_applicable(ctx)
       issues = rule.check(ctx)
       expect(issues).not_to be_empty
@@ -56,7 +48,7 @@ RSpec.describe "Reference rules" do
       mc = make_concept(id: "1", langs: {
                           eng: { definition: [{ "content" => "See {{1, test}}" }] },
                         })
-      ctx = make_context(mc, concept_ids: Set.new(["1"]))
+      ctx = make_context(mc, extra_concept_ids: ["1"])
       issues = rule.check(ctx)
       expect(issues).to be_empty
     end
