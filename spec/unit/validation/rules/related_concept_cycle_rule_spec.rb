@@ -17,10 +17,13 @@ RSpec.describe Glossarist::Validation::Rules::RelatedConceptCycleRule do
     rc
   end
 
+  let(:tmpdir) { Dir.mktmpdir }
+  after { FileUtils.rm_rf(tmpdir) }
+
   def make_context(concepts)
-    ctx = instance_double(Glossarist::Validation::Rules::DatasetContext)
-    allow(ctx).to receive(:concepts).and_return(concepts)
-    ctx
+    ds = Glossarist::Validation::Rules::DatasetContext.new(tmpdir)
+    concepts.each { |c| ds.add_concept(c) }
+    ds
   end
 
   it "has correct metadata" do

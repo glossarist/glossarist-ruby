@@ -24,20 +24,14 @@ RSpec.describe Glossarist::Validation::Rules::CiteRefIntegrityRule do
     mc
   end
 
+  let(:tmpdir) { Dir.mktmpdir }
+  after { FileUtils.rm_rf(tmpdir) }
+
   def make_context(concept, concept_ids: nil)
-    ids = concept_ids || Set.new([concept.data&.id&.to_s].compact)
-    cc = instance_double(Glossarist::Validation::Rules::DatasetContext,
-                         asset_index: Glossarist::Validation::AssetIndex.new,
-                         bibliography_index: Glossarist::Validation::BibliographyIndex.new,
-                         concept_ids: ids,
-                         declared_languages: %w[eng],
-                         metadata: nil,
-                         gcr?: false)
-    Glossarist::Validation::Rules::ConceptContext.new(
-      concept,
-      file_name: "concept-#{concept.data.id}.yaml",
-      collection_context: cc,
-    )
+    ds = make_dataset_context(tmpdir)
+    ds.add_concept(concept)
+    (concept_ids || []).each { |id| ds.add_concept(make_managed_concept(id: id)) }
+    make_concept_context(concept, collection_context: ds)
   end
 
   describe "unique source ids" do

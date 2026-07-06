@@ -5,24 +5,18 @@ require "spec_helper"
 RSpec.describe Glossarist::Validation::Rules::RefShapeRule do
   subject(:rule) { described_class.new }
 
+  let(:tmpdir) { Dir.mktmpdir }
+  after { FileUtils.rm_rf(tmpdir) }
+  let(:dataset_context) { make_dataset_context(tmpdir) }
+
   def make_concept(sources:, related: [])
-    data = Glossarist::ConceptData.new(
-      sources: sources,
-      definition: [],
-      notes: [],
-      examples: [],
-    )
-    l10n = Glossarist::LocalizedConcept.new(data: data)
-    concept = instance_double(Glossarist::ManagedConcept)
-    allow(concept).to receive(:localizations).and_return([l10n])
-    allow(concept).to receive(:related).and_return(related)
-    concept
+    mc = make_managed_concept(id: "x", langs: { eng: { sources: sources } })
+    mc.related = related if related.any?
+    mc
   end
 
   def make_context(concept)
-    Glossarist::Validation::Rules::ConceptContext.new(
-      concept, file_name: "test.yaml", collection_context: nil
-    )
+    make_concept_context(concept, collection_context: dataset_context)
   end
 
   describe "#code" do
