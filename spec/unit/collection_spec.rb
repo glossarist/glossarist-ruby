@@ -4,10 +4,15 @@
 #
 
 RSpec.describe Glossarist::Collection do
-  let(:collection_index) { subject.instance_variable_get :@index }
+  # Use a lightweight Struct instead of double() per the global "no doubles"
+  # rule. The Collection only needs an object that responds to #id.
+  let(:concept_struct) { Struct.new(:id) }
+  let(:concept1234) { concept_struct.new("1234") }
+  let(:concept3456) { concept_struct.new("3456") }
 
-  let(:concept1234) { double("concept 1234", id: "1234") }
-  let(:concept3456) { double("concept 3456", id: "3456") }
+  def collection_index
+    subject.instance_variable_get(:@index)
+  end
 
   it "includes Enumerable module" do
     expect(subject).to be_kind_of(Enumerable)
@@ -63,7 +68,7 @@ RSpec.describe Glossarist::Collection do
     end
 
     it "replaces concept of the same ID if one is already in the collection" do
-      collection_index["1234"] = double("old 1234")
+      collection_index["1234"] = concept_struct.new("old-1234")
 
       expect { subject.store(concept1234) }
         .to preserve { collection_index.size }
@@ -101,9 +106,9 @@ RSpec.describe Glossarist::Collection do
       allow(File).to receive(:read).with("path2").and_return("data: 2")
 
       expect(Glossarist::Concept)
-        .to receive(:from_yaml).with("data: 1").and_return(double(id: 1))
+        .to receive(:from_yaml).with("data: 1").and_return(concept_struct.new(1))
       expect(Glossarist::Concept)
-        .to receive(:from_yaml).with("data: 2").and_return(double(id: 2))
+        .to receive(:from_yaml).with("data: 2").and_return(concept_struct.new(2))
 
       expect { subject.load_concepts }.to change { collection_index.size }.by(2)
     end
@@ -112,13 +117,16 @@ RSpec.describe Glossarist::Collection do
   describe "#save_concepts" do
     before { allow(subject).to receive(:path).and_return("concepts/path") }
 
-    before { collection_index["1234"] = concept1234 }
-    before { collection_index["3456"] = concept3456 }
+    # Use a Struct that responds to #to_h, replacing the doubles that
+    # expected :to_h via rspec mocks.
+    let(:savable_concept) { Struct.new(:id, :payload) { def to_h = payload } }
+    let(:savable_1234) { savable_concept.new("1234", { data: 1234 }) }
+    let(:savable_3456) { savable_concept.new("3456", { data: 3456 }) }
+
+    before { collection_index["1234"] = savable_1234 }
+    before { collection_index["3456"] = savable_3456 }
 
     it "writes concepts to YAMLs" do
-      expect(concept1234).to receive(:to_h).and_return({ data: 1234 })
-      expect(concept3456).to receive(:to_h).and_return({ data: 3456 })
-
       expect(File).to receive(:write)
         .with("concepts/path/concept-1234.yaml", /data: 1234/)
       expect(File).to receive(:write)
