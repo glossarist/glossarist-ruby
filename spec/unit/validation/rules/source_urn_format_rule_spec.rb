@@ -5,24 +5,20 @@ require "spec_helper"
 RSpec.describe Glossarist::Validation::Rules::SourceUrnFormatRule do
   subject(:rule) { described_class.new }
 
-  def make_concept(sources:, domains: [], related: [])
-    l10n = instance_double(Glossarist::LocalizedConcept)
-    allow(l10n).to receive(:data).and_return(
-      instance_double(Glossarist::ConceptData, sources: sources,
-                                               definition: [], notes: [], examples: []),
-    )
-    data = instance_double(Glossarist::ManagedConceptData, domains: domains)
-    concept = instance_double(Glossarist::ManagedConcept)
-    allow(concept).to receive(:localizations).and_return([l10n])
-    allow(concept).to receive(:data).and_return(data)
-    allow(concept).to receive(:related).and_return(related)
-    concept
-  end
+  let(:tmpdir) { Dir.mktmpdir }
+  after { FileUtils.rm_rf(tmpdir) }
+  let(:dataset_context) { make_dataset_context(tmpdir) }
 
   def make_context(concept)
     Glossarist::Validation::Rules::ConceptContext.new(
-      concept, file_name: "test.yaml", collection_context: nil
+      concept, file_name: "test.yaml", collection_context: dataset_context
     )
+  end
+
+  def make_concept(sources:, domains: [])
+    mc = make_managed_concept(id: "x", langs: { eng: { sources: sources } })
+    mc.data.domains = domains if domains.any?
+    mc
   end
 
   describe "#code" do
@@ -35,9 +31,7 @@ RSpec.describe Glossarist::Validation::Rules::SourceUrnFormatRule do
       origin = Glossarist::Citation.new(ref: ref)
       source = Glossarist::ConceptSource.new(origin: origin)
       concept = make_concept(sources: [source])
-
-      issues = rule.check(make_context(concept))
-      expect(issues).to be_empty
+      expect(rule.check(make_context(concept))).to be_empty
     end
 
     it "passes for non-URN source" do
@@ -45,9 +39,7 @@ RSpec.describe Glossarist::Validation::Rules::SourceUrnFormatRule do
       origin = Glossarist::Citation.new(ref: ref)
       source = Glossarist::ConceptSource.new(origin: origin)
       concept = make_concept(sources: [source])
-
-      issues = rule.check(make_context(concept))
-      expect(issues).to be_empty
+      expect(rule.check(make_context(concept))).to be_empty
     end
 
     it "flags malformed URN in source" do
@@ -55,7 +47,6 @@ RSpec.describe Glossarist::Validation::Rules::SourceUrnFormatRule do
       origin = Glossarist::Citation.new(ref: ref)
       source = Glossarist::ConceptSource.new(origin: origin)
       concept = make_concept(sources: [source])
-
       issues = rule.check(make_context(concept))
       expect(issues.size).to eq(1)
       expect(issues.first.message).to include("malformed URN")
@@ -67,9 +58,7 @@ RSpec.describe Glossarist::Validation::Rules::SourceUrnFormatRule do
         concept_id: "section-3-1",
       )
       concept = make_concept(sources: [], domains: [domain])
-
-      issues = rule.check(make_context(concept))
-      expect(issues).to be_empty
+      expect(rule.check(make_context(concept))).to be_empty
     end
   end
 end

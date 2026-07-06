@@ -5,9 +5,13 @@ require "spec_helper"
 RSpec.describe Glossarist::Validation::Rules::UuidFormatRule do
   subject(:rule) { described_class.new }
 
+  let(:tmpdir) { Dir.mktmpdir }
+  after { FileUtils.rm_rf(tmpdir) }
+  let(:dataset_context) { make_dataset_context(tmpdir) }
+
   def make_context(concept)
     Glossarist::Validation::Rules::ConceptContext.new(
-      concept, file_name: "test.yaml", collection_context: nil
+      concept, file_name: "test.yaml", collection_context: dataset_context
     )
   end
 
@@ -17,29 +21,29 @@ RSpec.describe Glossarist::Validation::Rules::UuidFormatRule do
 
   describe "#check" do
     it "passes for valid UUID" do
-      concept = instance_double(Glossarist::ManagedConcept,
-                                uuid: "0ce27901-02ce-531e-8ba5-fdb136139d1a")
-      issues = rule.check(make_context(concept))
-      expect(issues).to be_empty
+      mc = make_managed_concept(id: "x")
+      mc.uuid = "0ce27901-02ce-531e-8ba5-fdb136139d1a"
+      expect(rule.check(make_context(mc))).to be_empty
     end
 
     it "passes for nil UUID" do
-      concept = instance_double(Glossarist::ManagedConcept, uuid: nil)
-      issues = rule.check(make_context(concept))
-      expect(issues).to be_empty
+      mc = make_managed_concept(id: "x")
+      mc.uuid = nil
+      expect(rule.check(make_context(mc))).to be_empty
     end
 
     it "flags invalid UUID format" do
-      concept = instance_double(Glossarist::ManagedConcept, uuid: "not-a-uuid")
-      issues = rule.check(make_context(concept))
+      mc = make_managed_concept(id: "x")
+      mc.uuid = "not-a-uuid"
+      issues = rule.check(make_context(mc))
       expect(issues.size).to eq(1)
       expect(issues.first.message).to include("not valid UUID format")
     end
 
     it "flags numeric-only UUID" do
-      concept = instance_double(Glossarist::ManagedConcept, uuid: "12345")
-      issues = rule.check(make_context(concept))
-      expect(issues.size).to eq(1)
+      mc = make_managed_concept(id: "x")
+      mc.uuid = "12345"
+      expect(rule.check(make_context(mc)).size).to eq(1)
     end
   end
 end

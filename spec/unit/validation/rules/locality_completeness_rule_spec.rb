@@ -5,20 +5,13 @@ require "spec_helper"
 RSpec.describe Glossarist::Validation::Rules::LocalityCompletenessRule do
   subject(:rule) { described_class.new }
 
-  def make_concept(sources)
-    l10n = instance_double(Glossarist::LocalizedConcept)
-    allow(l10n).to receive(:data).and_return(
-      instance_double(Glossarist::ConceptData, sources: sources),
-    )
-    concept = instance_double(Glossarist::ManagedConcept)
-    allow(concept).to receive(:localizations).and_return([l10n])
-    concept
-  end
+  let(:tmpdir) { Dir.mktmpdir }
+  after { FileUtils.rm_rf(tmpdir) }
+  let(:dataset_context) { make_dataset_context(tmpdir) }
 
-  def make_context(concept)
-    Glossarist::Validation::Rules::ConceptContext.new(
-      concept, file_name: "test.yaml", collection_context: nil
-    )
+  def make_context(sources)
+    mc = make_managed_concept(id: "x", langs: { eng: { sources: sources } })
+    make_concept_context(mc, collection_context: dataset_context)
   end
 
   describe "#code" do
@@ -32,10 +25,7 @@ RSpec.describe Glossarist::Validation::Rules::LocalityCompletenessRule do
       ref = Glossarist::Citation::Ref.new(source: "ISO/TS 14812:2022")
       origin = Glossarist::Citation.new(ref: ref, locality: locality)
       source = Glossarist::ConceptSource.new(origin: origin)
-      concept = make_concept([source])
-
-      issues = rule.check(make_context(concept))
-      expect(issues).to be_empty
+      expect(rule.check(make_context([source]))).to be_empty
     end
 
     it "flags locality with no type" do
@@ -43,9 +33,7 @@ RSpec.describe Glossarist::Validation::Rules::LocalityCompletenessRule do
       ref = Glossarist::Citation::Ref.new(source: "ISO/TS 14812:2022")
       origin = Glossarist::Citation.new(ref: ref, locality: locality)
       source = Glossarist::ConceptSource.new(origin: origin)
-      concept = make_concept([source])
-
-      issues = rule.check(make_context(concept))
+      issues = rule.check(make_context([source]))
       expect(issues.size).to eq(1)
       expect(issues.first.message).to include("no type")
     end
@@ -55,9 +43,7 @@ RSpec.describe Glossarist::Validation::Rules::LocalityCompletenessRule do
       ref = Glossarist::Citation::Ref.new(source: "ISO/TS 14812:2022")
       origin = Glossarist::Citation.new(ref: ref, locality: locality)
       source = Glossarist::ConceptSource.new(origin: origin)
-      concept = make_concept([source])
-
-      issues = rule.check(make_context(concept))
+      issues = rule.check(make_context([source]))
       expect(issues.size).to eq(1)
       expect(issues.first.message).to include("no reference_from")
     end
@@ -66,10 +52,7 @@ RSpec.describe Glossarist::Validation::Rules::LocalityCompletenessRule do
       ref = Glossarist::Citation::Ref.new(source: "ISO/TS 14812:2022")
       origin = Glossarist::Citation.new(ref: ref)
       source = Glossarist::ConceptSource.new(origin: origin)
-      concept = make_concept([source])
-
-      issues = rule.check(make_context(concept))
-      expect(issues).to be_empty
+      expect(rule.check(make_context([source]))).to be_empty
     end
   end
 end
