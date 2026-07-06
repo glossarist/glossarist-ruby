@@ -51,6 +51,9 @@ module Glossarist
 
     class GlossDocument < Lutaml::Model::Serializable
       attribute :concepts, GlossConcept, collection: true
+      attribute :figures, GlossFigure, collection: true
+      attribute :tables, GlossTable, collection: true
+      attribute :formulas, GlossFormula, collection: true
 
       rdf do
         namespace Namespaces::GlossaristNamespace,
@@ -61,6 +64,9 @@ module Glossarist
                   Namespaces::RdfNamespace
 
         members :concepts
+        members :figures
+        members :tables
+        members :formulas
       end
     end
   end
