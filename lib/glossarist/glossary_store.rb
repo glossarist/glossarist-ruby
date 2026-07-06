@@ -269,7 +269,11 @@ module Glossarist
     end
 
     def load_legacy_localizations(managed_concept, lc_index, version = "3")
-      l10n_class = version.to_s == "2" ? V2::LocalizedConcept : LocalizedConcept
+      l10n_class = case version.to_s
+                   when "2" then V2::LocalizedConcept
+                   when "3" then V3::LocalizedConcept
+                   else LocalizedConcept
+                   end
       lc_map = managed_concept.data.localized_concepts || {}
       lc_map.each_value do |uuid|
         lc_file = lc_index[uuid]
@@ -344,7 +348,7 @@ module Glossarist
     end
 
     def detect_version(raw)
-      if (m = raw.match(/^schema_version:\s*v?(\d)/))
+      if (m = raw.match(/^schema_version:\s*['"]?v?(\d)/))
         m[1]
       else
         "2"
