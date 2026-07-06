@@ -37,8 +37,10 @@ module Glossarist
         new(managed_concept, options).build
       end
 
-      def self.transform_document(concepts, options = {})
-        new(nil, options).build_document(concepts)
+      def self.transform_document(concepts, figures: [], tables: [],
+                                  formulas: [], **options)
+        new(nil, options).build_document(concepts, figures: figures,
+                                                   tables: tables, formulas: formulas)
       end
 
       def initialize(managed_concept, options = {})
@@ -50,9 +52,14 @@ module Glossarist
         build_gloss_concept(concept)
       end
 
-      def build_document(concepts)
+      def build_document(concepts, figures: [], tables: [], formulas: [])
         gloss_concepts = concepts.map { |c| build_gloss_concept(c) }
-        doc = Rdf::GlossDocument.new(concepts: gloss_concepts)
+        doc = Rdf::GlossDocument.new(
+          concepts: gloss_concepts,
+          figures: figures.map { |f| build_gloss_figure(f) },
+          tables: tables.map { |t| build_gloss_table(t) },
+          formulas: formulas.map { |f| build_gloss_formula(f) },
+        )
         Rdf::GlossDocument.to_turtle(doc)
       end
 
@@ -352,6 +359,61 @@ desig_index)
 
       def status_uri(status)
         status ? "gloss:status/#{status}" : nil
+      end
+
+      # ── Dataset-level non-verbal entity builders (concept-model v3.1.0 K1) ──
+      #
+      # The K1 shapes (FigureShape, TableShape, FormulaShape) constrain
+      # caption/description to a single xsd:string per subject. The domain
+      # models store these as language-keyed hashes; we pick one language
+      # (defaulting to eng, falling back to the first available) at build
+      # time. Multi-language emission would require per-language subjects,
+      # which is beyond K1's scope.
+
+      DEFAULT_RDF_LANG = "eng"
+
+      def build_gloss_figure(figure)
+        Rdf::GlossFigure.new(
+          id: figure.id,
+          identifier: figure.identifier,
+          image: figure.images.first&.src,
+          caption: localized_pick(figure.caption),
+          description: localized_pick(figure.description),
+        )
+      end
+
+      def build_gloss_table(table)
+        Rdf::GlossTable.new(
+          id: table.id,
+          identifier: table.identifier,
+          content: serialize_table_content(table.content),
+          caption: localized_pick(table.caption),
+        )
+      end
+
+      def build_gloss_formula(formula)
+        expression_str = localized_pick(formula.expression)
+        Rdf::GlossFormula.new(
+          id: formula.id,
+          identifier: formula.identifier,
+          expression: expression_str,
+          latex_form: formula.notation == "latex" ? expression_str : nil,
+          description: localized_pick(formula.description),
+        )
+      end
+
+      def localized_pick(localized_hash)
+        return nil unless localized_hash.is_a?(Hash) && !localized_hash.empty?
+
+        localized_hash[DEFAULT_RDF_LANG] ||
+          localized_hash[DEFAULT_RDF_LANG.to_sym] ||
+          localized_hash.values.first
+      end
+
+      def serialize_table_content(content)
+        return nil if content.nil?
+
+        content.is_a?(Hash) ? content.to_yaml : content.to_s
       end
     end
   end
