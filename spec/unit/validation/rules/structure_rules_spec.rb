@@ -2,41 +2,18 @@
 
 require "spec_helper"
 
-RSpec.describe "Structure rules" do
-  def make_concept(id:, langs: {}, **overrides)
-    mc = Glossarist::ManagedConcept.new(data: { id: id }.merge(overrides))
-    langs.each do |lang, opts|
-      terms = opts[:terms] || [{ "type" => "expression",
-                                 "designation" => "test", "normative_status" => "preferred" }]
-      data = {
-        "language_code" => lang.to_s,
-        "terms" => terms,
-        "definition" => opts[:definition] || [{ "content" => "a definition" }],
-        "entry_status" => opts[:entry_status] || "valid",
-      }
-      data["sources"] = opts[:sources] if opts[:sources]
-      l10n = Glossarist::LocalizedConcept.of_yaml({ "data" => data })
-      mc.add_localization(l10n)
-    end
-    mc
-  end
+# Aggregate spec for structure-family rules. Each rule also has a dedicated
+# _spec.rb with richer coverage; this file is retained as an additional
+# smoke test using real DatasetContext instances (no doubles).
 
-  def make_context(concept, stubs = {})
-    asset_index = stubs[:asset_index] || Glossarist::Validation::AssetIndex.new
-    bib_index = stubs[:bibliography_index] || Glossarist::Validation::BibliographyIndex.new
-    concept_ids = stubs[:concept_ids] || Set.new([concept.data&.id&.to_s].compact)
-    cc = instance_double(Glossarist::Validation::Rules::DatasetContext,
-                         asset_index: asset_index,
-                         bibliography_index: bib_index,
-                         concept_ids: concept_ids,
-                         declared_languages: %w[eng],
-                         metadata: nil,
-                         gcr?: false)
-    Glossarist::Validation::Rules::ConceptContext.new(
-      concept,
-      file_name: "concept-#{concept.data.id}.yaml",
-      collection_context: cc,
-    )
+RSpec.describe "Structure rules" do
+  let(:tmpdir) { Dir.mktmpdir }
+  after { FileUtils.rm_rf(tmpdir) }
+
+  def make_context(concept)
+    ds = make_dataset_context(tmpdir)
+    ds.add_concept(concept)
+    make_concept_context(concept, collection_context: ds)
   end
 
   describe Glossarist::Validation::Rules::ConceptIdRule do
@@ -44,7 +21,7 @@ RSpec.describe "Structure rules" do
 
     it "flags concept with no id" do
       mc = Glossarist::ManagedConcept.new
-      ctx = make_context(mc, concept_ids: Set.new)
+      ctx = make_context(mc)
       expect(rule).to be_applicable(ctx)
       issues = rule.check(ctx)
       expect(issues).not_to be_empty
@@ -52,7 +29,7 @@ RSpec.describe "Structure rules" do
     end
 
     it "passes for concept with valid id" do
-      mc = make_concept(id: "100")
+      mc = make_managed_concept(id: "100")
       ctx = make_context(mc)
       expect(rule).to be_applicable(ctx)
       expect(rule.check(ctx)).to be_empty
@@ -63,12 +40,11 @@ RSpec.describe "Structure rules" do
     subject(:rule) { described_class.new }
 
     it "flags duplicate concept ids" do
-      c1 = make_concept(id: "1", langs: { eng: {} })
-      c2 = make_concept(id: "1", langs: { eng: {} })
-      ctx = instance_double(Glossarist::Validation::Rules::DatasetContext,
-                            concepts: [c1, c2])
-      expect(rule).to be_applicable(ctx)
-      issues = rule.check(ctx)
+      ds = make_dataset_context(tmpdir)
+      ds.add_concept(make_managed_concept(id: "1", langs: { eng: {} }))
+      ds.add_concept(make_managed_concept(id: "1", langs: { eng: {} }))
+      expect(rule).to be_applicable(ds)
+      issues = rule.check(ds)
       expect(issues).not_to be_empty
       expect(issues.first.message).to include("duplicate id")
     end
@@ -78,14 +54,13 @@ RSpec.describe "Structure rules" do
     subject(:rule) { described_class.new }
 
     it "flags concept with no localizations" do
-      mc = Glossarist::ManagedConcept.new(data: { id: "1" })
+      mc = make_managed_concept(id: "1")
       ctx = make_context(mc)
-      issues = rule.check(ctx)
-      expect(issues).not_to be_empty
+      expect(rule.check(ctx)).not_to be_empty
     end
 
     it "passes for concept with localizations" do
-      mc = make_concept(id: "1", langs: { eng: {} })
+      mc = make_managed_concept(id: "1", langs: { eng: {} })
       ctx = make_context(mc)
       expect(rule.check(ctx)).to be_empty
     end
@@ -95,7 +70,7 @@ RSpec.describe "Structure rules" do
     subject(:rule) { described_class.new }
 
     it "flags invalid entry_status" do
-      mc = make_concept(id: "1", langs: { eng: { entry_status: "Standard" } })
+      mc = make_managed_concept(id: "1", langs: { eng: { entry_status: "Standard" } })
       ctx = make_context(mc)
       expect(rule).to be_applicable(ctx)
       issues = rule.check(ctx)
@@ -104,7 +79,7 @@ RSpec.describe "Structure rules" do
     end
 
     it "passes for valid entry_status" do
-      mc = make_concept(id: "1", langs: { eng: { entry_status: "valid" } })
+      mc = make_managed_concept(id: "1", langs: { eng: { entry_status: "valid" } })
       ctx = make_context(mc)
       expect(rule.check(ctx)).to be_empty
     end
@@ -114,16 +89,8 @@ RSpec.describe "Structure rules" do
     subject(:rule) { described_class.new }
 
     it "flags localization with no terms" do
-      mc = Glossarist::ManagedConcept.new(data: { id: "1" })
-      l10n = Glossarist::LocalizedConcept.of_yaml({
-                                                    "data" => {
-                                                      "language_code" => "eng",
-                                                      "terms" => [],
-                                                      "definition" => [{ "content" => "a definition" }],
-                                                      "entry_status" => "valid",
-                                                    },
-                                                  })
-      mc.add_localization(l10n)
+      mc = make_managed_concept(id: "1", langs: { eng: {} })
+      mc.localization("eng").data.terms = []
       ctx = make_context(mc)
       expect(rule).to be_applicable(ctx)
       issues = rule.check(ctx)
@@ -132,7 +99,7 @@ RSpec.describe "Structure rules" do
     end
 
     it "passes for localization with terms" do
-      mc = make_concept(id: "1", langs: { eng: {} })
+      mc = make_managed_concept(id: "1", langs: { eng: {} })
       ctx = make_context(mc)
       expect(rule.check(ctx)).to be_empty
     end

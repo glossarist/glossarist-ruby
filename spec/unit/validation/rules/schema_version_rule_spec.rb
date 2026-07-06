@@ -5,12 +5,12 @@ require "spec_helper"
 RSpec.describe Glossarist::Validation::Rules::SchemaVersionRule do
   subject(:rule) { described_class.new }
 
-  let(:concept) { instance_double(Glossarist::ManagedConcept) }
+  let(:tmpdir) { Dir.mktmpdir }
+  after { FileUtils.rm_rf(tmpdir) }
+  let(:dataset_context) { make_dataset_context(tmpdir) }
 
   def make_context(concept)
-    Glossarist::Validation::Rules::ConceptContext.new(
-      concept, file_name: "test.yaml", collection_context: nil
-    )
+    make_concept_context(concept, collection_context: dataset_context)
   end
 
   describe "#code" do
@@ -36,8 +36,13 @@ RSpec.describe Glossarist::Validation::Rules::SchemaVersionRule do
     end
 
     it "returns false when concept is not a ManagedConcept" do
-      concept = instance_double(Glossarist::LocalizedConcept)
-      expect(rule.applicable?(make_context(concept))).to be false
+      # Construct a real LocalizedConcept (which is not a ManagedConcept)
+      # instead of using instance_double.
+      l10n = Glossarist::LocalizedConcept.of_yaml({
+                                                    "data" => { "language_code" => "eng",
+                                                                "terms" => [{ "type" => "expression", "designation" => "t" }] },
+                                                  })
+      expect(rule.applicable?(make_context(l10n))).to be false
     end
   end
 
@@ -45,8 +50,7 @@ RSpec.describe Glossarist::Validation::Rules::SchemaVersionRule do
     it "passes for schema_version 3" do
       mc = Glossarist::ManagedConcept.new
       mc.schema_version = "3"
-      issues = rule.check(make_context(mc))
-      expect(issues).to be_empty
+      expect(rule.check(make_context(mc))).to be_empty
     end
 
     it "flags missing schema_version" do
