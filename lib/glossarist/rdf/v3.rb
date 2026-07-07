@@ -25,6 +25,10 @@ module Glossarist
         GlossLocalizedConcept
         GlossConcept
         GlossDocument
+        GlossFigure
+        GlossFigureImage
+        GlossTable
+        GlossFormula
       ].freeze
 
       VIEW_CLASS_NAMES.each do |name|

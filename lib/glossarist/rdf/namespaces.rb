@@ -3,7 +3,9 @@
 module Glossarist
   module Rdf
     module Namespaces
-      autoload :DctermsNamespace, "#{__dir__}/namespaces/dcterms_namespace"
+      autoload :DcatNamespace,       "#{__dir__}/namespaces/dcat_namespace"
+      autoload :DctermsNamespace,    "#{__dir__}/namespaces/dcterms_namespace"
+      autoload :FoafNamespace,       "#{__dir__}/namespaces/foaf_namespace"
       autoload :GlossaristNamespace,
                "#{__dir__}/namespaces/glossarist_namespace"
       autoload :IsoThesNamespace,    "#{__dir__}/namespaces/iso_thes_namespace"
