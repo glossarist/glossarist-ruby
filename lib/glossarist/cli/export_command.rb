@@ -52,13 +52,17 @@ module Glossarist
       private
 
       def load_concepts
-        if @path.end_with?(".gcr")
-          package = GcrPackage.load(@path)
-          resolve_metadata_from_package(package)
-          package.concepts
-        else
-          GlossaryStore.new.tap { |s| s.load(@path) }.concepts
-        end
+        store.concepts
+      end
+
+      def store
+        @store ||= if @path.end_with?(".gcr")
+                     pkg = GcrPackage.load(@path)
+                     resolve_metadata_from_package(pkg)
+                     pkg
+                   else
+                     GlossaryStore.new.tap { |s| s.load(@path) }
+                   end
       end
 
       def resolve_metadata_from_package(package)
@@ -106,6 +110,22 @@ module Glossarist
         @options.fetch(:validate, false)
       end
 
+      # Dataset-level non-verbal entities come from the GlossaryStore (which
+      # lazy-loads figures/tables/formulas from the dataset directory). GCR
+      # packages don't yet expose these — empty arrays keep the call site
+      # uniform. Future: extend GcrPackage to surface them.
+      def dataset_figures
+        @store.is_a?(GlossaryStore) ? @store.figures : []
+      end
+
+      def dataset_tables
+        @store.is_a?(GlossaryStore) ? @store.tables : []
+      end
+
+      def dataset_formulas
+        @store.is_a?(GlossaryStore) ? @store.formulas : []
+      end
+
       def per_concept_supported?(format)
         PER_CONCEPT_FORMATS.include?(format)
       end
@@ -136,7 +156,10 @@ module Glossarist
         transform = Transforms::ConceptToGlossTransform.new(nil,
                                                             transform_options)
         File.write(File.join(output_dir, "#{name}.jsonld"),
-                   transform.to_jsonld(concepts))
+                   transform.to_jsonld(concepts,
+                                       figures: dataset_figures,
+                                       tables: dataset_tables,
+                                       formulas: dataset_formulas))
       end
 
       def export_turtle(concepts, name, output_dir)
@@ -144,7 +167,10 @@ module Glossarist
         transform = Transforms::ConceptToGlossTransform.new(nil,
                                                             transform_options)
         File.write(File.join(output_dir, "#{name}.ttl"),
-                   transform.to_turtle(concepts))
+                   transform.to_turtle(concepts,
+                                       figures: dataset_figures,
+                                       tables: dataset_tables,
+                                       formulas: dataset_formulas))
       end
 
       def export_tbx(concepts, name, output_dir)

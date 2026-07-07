@@ -63,9 +63,11 @@ module Glossarist
         Rdf::GlossDocument.to_turtle(doc)
       end
 
-      def to_turtle(concepts_or_concept = nil)
+      def to_turtle(concepts_or_concept = nil, figures: [], tables: [],
+                    formulas: [])
         if concepts_or_concept.is_a?(Array)
-          build_document(concepts_or_concept)
+          build_document(concepts_or_concept, figures: figures,
+                                              tables: tables, formulas: formulas)
         else
           target = concepts_or_concept || @concept
           return "" unless target
@@ -75,12 +77,18 @@ module Glossarist
         end
       end
 
-      def to_jsonld(concepts_or_concept = nil)
+      def to_jsonld(concepts_or_concept = nil, figures: [], tables: [],
+                    formulas: [])
         if concepts_or_concept.is_a?(Array)
           gloss_concepts = concepts_or_concept.map do |c|
             build_gloss_concept(c)
           end
-          doc = Rdf::GlossDocument.new(concepts: gloss_concepts)
+          doc = Rdf::GlossDocument.new(
+            concepts: gloss_concepts,
+            figures: figures.map { |f| build_gloss_figure(f) },
+            tables: tables.map { |t| build_gloss_table(t) },
+            formulas: formulas.map { |f| build_gloss_formula(f) },
+          )
           Rdf::GlossDocument.to_jsonld(doc)
         else
           target = concepts_or_concept || @concept

@@ -4,10 +4,18 @@ require "lutaml/rdf"
 require "lutaml/turtle"
 require "lutaml/jsonld"
 
-require_relative "rdf/lutaml_ext"
-
 module Glossarist
   module Rdf
+    # lutaml_ext.rb defines EmitsExtraTriples (mixed into RDF model classes
+    # that want to emit extra triples) and LutamlTurtleTransformExt (prepended
+    # into Lutaml::Turtle::Transform so the framework asks each instance for
+    # its extra triples). The prepend must run before the first transform
+    # call; autoload here fires the first time EmitsExtraTriples is
+    # referenced (i.e., when GlossLocalizedConcept includes it during its
+    # own autoload), which is before any transform runs.
+    autoload :EmitsExtraTriples,        "#{__dir__}/rdf/lutaml_ext"
+    autoload :LutamlTurtleTransformExt, "#{__dir__}/rdf/lutaml_ext"
+
     autoload :Namespaces,             "#{__dir__}/rdf/namespaces"
     autoload :LocalizedLiteral,       "#{__dir__}/rdf/localized_literal"
     autoload :RelationshipPredicates, "#{__dir__}/rdf/relationship_predicates"
