@@ -115,7 +115,7 @@ RSpec.describe Glossarist::ConceptSet do
       LATEX_OUTPUT
     end
 
-    let(:concept) { subject.concepts.fetch("200") }
+    let(:concept) { subject.concepts.find { |c| c.data.id == "200" } }
 
     it "should output correct latex" do
       expect(subject.latex_template(concept)).to eq(expected_output)

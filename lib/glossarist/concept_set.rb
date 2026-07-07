@@ -4,7 +4,9 @@ require "set"
 
 module Glossarist
   class ConceptSet
-    # a `Glossarist::ManagedConceptCollection` object
+    # An Enumerable of ManagedConcept (Array, GlossaryStore, or
+    # ManagedConceptCollection). Set by `read_concepts` based on what
+    # the caller passed.
     attr_accessor :concepts
 
     # a `BibliographyCollection` object
@@ -14,8 +16,9 @@ module Glossarist
     attr_accessor :assets
 
     # @parameters
-    #   concepts => a `Glossarist::ManagedConceptCollection` object or
-    #               a string containing the path of the folder with concepts
+    #   concepts => an Enumerable of ManagedConcept, a GlossaryStore, a
+    #               ManagedConceptCollection, or a string containing the
+    #               path of the dataset directory
     #   assets => a collection of Glossarist::Asset
     def initialize(concepts, assets, options = {})
       @concepts = read_concepts(concepts)
@@ -30,7 +33,7 @@ module Glossarist
     def to_latex(filename = nil)
       return to_latex_from_file(filename) if filename
 
-      @concepts.map do |concept|
+      concepts.to_a.map do |concept|
         latex_template(concept)
       end.join("\n")
     end
@@ -47,12 +50,16 @@ module Glossarist
       end.join("\n")
     end
 
+    # Loads concepts via GlossaryStore when given a path string. Accepts
+    # an existing Enumerable (Array, GlossaryStore, ManagedConceptCollection)
+    # as-is — callers that already have an in-memory collection can pass
+    # it directly without paying for a re-load.
     def read_concepts(concepts)
-      return concepts if concepts.is_a?(Glossarist::ManagedConceptCollection)
+      return concepts if concepts.is_a?(Enumerable)
 
-      collection = Glossarist::ManagedConceptCollection.new
-      collection.load_from_files(concepts)
-      collection
+      store = GlossaryStore.new
+      store.load(concepts)
+      store.concepts
     end
 
     def latex_template(concept)
@@ -76,7 +83,7 @@ module Glossarist
     end
 
     def concept_map
-      @concept_map ||= concepts.managed_concepts.to_h do |concept|
+      @concept_map ||= concepts.to_a.to_h do |concept|
         [concept.default_designation.downcase, concept]
       end
     end
