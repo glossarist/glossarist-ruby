@@ -9,11 +9,16 @@ module Glossarist
       @concept_document_class = V3::ConceptDocument
       @v1_concepts = nil
       @localized_concepts_dir_name = nil
+      @dataset_path = nil
+      @figures = nil
+      @tables = nil
+      @formulas = nil
     end
 
     # ── Load ──
 
     def load_directory(path, format: nil)
+      @dataset_path = File.expand_path(path)
       if v1_dataset?(path)
         load_v1_fallback(path)
         return self
@@ -44,6 +49,7 @@ module Glossarist
     end
 
     def load_zip(path, format: nil)
+      @dataset_path = File.expand_path(path)
       metadata = load_metadata_from_zip(path)
       @concept_document_class = resolve_concept_document_class(metadata)
 
@@ -174,6 +180,28 @@ module Glossarist
       @package.asset_paths.select { |p| p.start_with?("images/") }
     end
 
+    # ── Dataset-level non-verbal entities ──
+    #
+    # Loaded lazily from the dataset's figures/, tables/, formulas/
+    # subdirectories. Each YAML file is parsed as the corresponding model
+    # (Figure, Table, Formula). The entities are referenced from
+    # ManagedConceptData via FigureReference/TableReference/FormulaReference
+    # but live as standalone shared entities at the dataset level.
+    # Wired into ConceptToGlossTransform via the figures:/tables:/formulas:
+    # kwargs on transform_document.
+
+    def figures
+      @figures ||= load_dataset_entities("figures", Figure)
+    end
+
+    def tables
+      @tables ||= load_dataset_entities("tables", Table)
+    end
+
+    def formulas
+      @formulas ||= load_dataset_entities("formulas", Formula)
+    end
+
     # ── Stats ──
 
     def stats
@@ -199,6 +227,21 @@ module Glossarist
         concept_document_class: @concept_document_class,
       )
       @package = Lutaml::Store::PackageStore.new(definition)
+    end
+
+    # Scans `{dataset_path}/{subdir}/*.{yaml,yml}` and parses each file as
+    # the given model class. Returns [] when the directory doesn't exist
+    # (e.g., datasets that don't carry this entity kind) — absent directory
+    # is not an error, just an empty collection.
+    def load_dataset_entities(subdir, klass)
+      return [] unless @dataset_path
+
+      dir = File.join(@dataset_path, subdir)
+      return [] unless File.directory?(dir)
+
+      Dir.glob(File.join(dir, "*.{yaml,yml}")).filter_map do |path|
+        klass.from_file(path)
+      end
     end
 
     def resolve_concept_document_class(metadata)

@@ -379,4 +379,117 @@ RSpec.describe Glossarist::GlossaryStore do
     end
     zip_path
   end
+
+  describe "dataset-level non-verbal entities (figures/tables/formulas)" do
+    # End-to-end: the dataset directory carries figures/, tables/, formulas/
+    # subdirectories with YAML entities; GlossaryStore lazy-loads them via
+    # #figures, #tables, #formulas. Wiring into ConceptToGlossTransform
+    # (transform_document kwargs) makes the K1 RDF path reachable from a
+    # plain dataset directory load.
+    let(:figure_yaml) do
+      <<~YAML
+        ---
+        id: fig-mixed-reflection
+        identifier: Figure 7c
+        caption:
+          eng: Mixed reflection
+        description:
+          eng: Diagram showing mixed reflection.
+        images:
+        - src: mixed-reflection.svg
+          format: svg
+          role: vector
+      YAML
+    end
+
+    let(:table_yaml) do
+      <<~YAML
+        ---
+        id: tbl-si-units
+        identifier: Table 2
+        caption:
+          eng: SI base units
+        content:
+          headers: [Unit, Symbol]
+          rows: [[metre, m]]
+      YAML
+    end
+
+    let(:formula_yaml) do
+      <<~YAML
+        ---
+        id: fml-wave-eq
+        identifier: Equation 1
+        expression:
+          eng: \\nabla^2 E = 0
+        notation: latex
+      YAML
+    end
+
+    let(:nvr_dataset_dir) do
+      dir = File.join(tmpdir, "nvr-dataset")
+      %w[figures tables formulas].each do |sub|
+        sub_dir = File.join(dir, sub)
+        FileUtils.mkdir_p(sub_dir)
+      end
+      File.write(File.join(dir, "figures", "fig-mixed-reflection.yaml"),
+                 figure_yaml, encoding: "utf-8")
+      File.write(File.join(dir, "tables", "tbl-si-units.yaml"),
+                 table_yaml, encoding: "utf-8")
+      File.write(File.join(dir, "formulas", "fml-wave-eq.yaml"),
+                 formula_yaml, encoding: "utf-8")
+      dir
+    end
+
+    it "#figures returns Figure instances with parsed fields" do
+      store.load_directory(nvr_dataset_dir)
+      figure = store.figures.first
+      expect(figure).to be_a(Glossarist::Figure)
+      expect(figure.id).to eq("fig-mixed-reflection")
+      expect(figure.caption["eng"]).to eq("Mixed reflection")
+      expect(figure.images.first.src).to eq("mixed-reflection.svg")
+    end
+
+    it "#tables returns Table instances with parsed content" do
+      store.load_directory(nvr_dataset_dir)
+      table = store.tables.first
+      expect(table).to be_a(Glossarist::Table)
+      expect(table.id).to eq("tbl-si-units")
+      expect(table.content["headers"]).to eq(%w[Unit Symbol])
+    end
+
+    it "#formulas returns Formula instances with parsed expression" do
+      store.load_directory(nvr_dataset_dir)
+      formula = store.formulas.first
+      expect(formula).to be_a(Glossarist::Formula)
+      expect(formula.id).to eq("fml-wave-eq")
+      expect(formula.expression["eng"]).to include("nabla")
+    end
+
+    it "returns empty arrays when the subdirectory is absent" do
+      minimal = File.join(tmpdir, "minimal")
+      FileUtils.mkdir_p(File.join(minimal, "concepts"))
+      store.load_directory(minimal)
+      expect(store.figures).to eq([])
+      expect(store.tables).to eq([])
+      expect(store.formulas).to eq([])
+    end
+
+    it "lazy-loads on first access (memoized)" do
+      store.load_directory(nvr_dataset_dir)
+      expect(store.figures).to be(store.figures) # same object on second call
+    end
+
+    it "end-to-end: transform_document emits gloss:Figure subjects" do
+      require "glossarist/transforms/concept_to_gloss_transform"
+      store.load_directory(nvr_dataset_dir)
+      turtle = Glossarist::Transforms::ConceptToGlossTransform
+        .transform_document([], figures: store.figures,
+                                tables: store.tables,
+                                formulas: store.formulas)
+      expect(turtle).to include("figure/fig-mixed-reflection")
+      expect(turtle).to include("table/tbl-si-units")
+      expect(turtle).to include("formula/fml-wave-eq")
+    end
+  end
 end
