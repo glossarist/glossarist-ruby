@@ -33,18 +33,19 @@ RSpec.describe Glossarist::SchemaMigration::CliPipeline do
 
   describe "#initialize" do
     it "expands the source directory path" do
-      pipeline = described_class.new("relative/path", output: "/out",
+      # Use a relative path so the test is cross-platform — Windows would
+      # prepend a drive letter to absolute paths.
+      pipeline = described_class.new("relative/path", output: "out",
                                                    target_version: "1")
       expect(pipeline.source_dir).to eq(File.expand_path("relative/path"))
     end
 
-    it "exposes accessors for source_dir, output, target_version, dry_run" do
-      pipeline = described_class.new("/src", output: "/out",
-                                                   target_version: "1",
-                                                   cross_references: "x.yaml",
-                                                   dry_run: true)
-      expect(pipeline.source_dir).to eq("/src")
-      expect(pipeline.output).to eq("/out")
+    it "exposes accessors for output, target_version, dry_run" do
+      pipeline = described_class.new("src", output: "out",
+                                               target_version: "1",
+                                               cross_references: "x.yaml",
+                                               dry_run: true)
+      expect(pipeline.output).to eq("out")
       expect(pipeline.target_version).to eq("1")
       expect(pipeline.cross_references).to eq("x.yaml")
       expect(pipeline.dry_run).to be true
