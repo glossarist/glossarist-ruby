@@ -39,6 +39,7 @@ module Glossarist
     autoload :GlossConcept,           "#{__dir__}/rdf/gloss_concept"
     autoload :GlossDocument,          "#{__dir__}/rdf/gloss_concept"
     autoload :GlossFigure,            "#{__dir__}/rdf/gloss_figure"
+    autoload :GlossFigureImage,       "#{__dir__}/rdf/gloss_figure_image"
     autoload :GlossTable,             "#{__dir__}/rdf/gloss_table"
     autoload :GlossFormula,           "#{__dir__}/rdf/gloss_formula"
     autoload :V3,                     "#{__dir__}/rdf/v3"

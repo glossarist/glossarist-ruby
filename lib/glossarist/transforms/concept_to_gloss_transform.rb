@@ -387,6 +387,18 @@ desig_index)
           image: figure.images.first&.src,
           caption: localized_pick(figure.caption),
           description: localized_pick(figure.description),
+          images: Array(figure.images).map { |img| build_gloss_figure_image(img) },
+        )
+      end
+
+      def build_gloss_figure_image(image)
+        Rdf::GlossFigureImage.new(
+          src: image.src,
+          format: image.format,
+          role: image.role,
+          # FigureImage doesn't carry byte_size — emit nil so the RDF layer
+          # skips dcat:byteSize rather than emitting a spurious "0".
+          byte_size: nil,
         )
       end
 

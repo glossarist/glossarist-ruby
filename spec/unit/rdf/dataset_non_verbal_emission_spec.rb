@@ -8,6 +8,8 @@ RSpec.describe "Dataset-level non-verbal entity RDF emission (K1)" do
   let(:transform) { Glossarist::Transforms::ConceptToGlossTransform }
   let(:gloss_uri) { Glossarist::Rdf::Namespaces::GlossaristNamespace.uri }
   let(:dcterms_uri) { Glossarist::Rdf::Namespaces::DctermsNamespace.uri }
+  let(:foaf_uri) { Glossarist::Rdf::Namespaces::FoafNamespace.uri }
+  let(:dcat_uri) { Glossarist::Rdf::Namespaces::DcatNamespace.uri }
 
   def parse_graph(turtle)
     graph = RDF::Graph.new
@@ -138,6 +140,57 @@ RSpec.describe "Dataset-level non-verbal entity RDF emission (K1)" do
       graph = parse_graph(turtle)
       latex = graph.query([nil, RDF::URI("#{gloss_uri}latexForm"), nil])
       expect(latex).to be_empty
+    end
+  end
+
+  describe "GlossFigureImage (K2 foaf:Image) emission" do
+    let(:figure) do
+      Glossarist::Figure.new(
+        id: "fig-multi-variant",
+        identifier: "Figure 1",
+        caption: { "eng" => "Multi-variant figure" },
+      ).tap do |f|
+        f.images = [
+          Glossarist::FigureImage.new(src: "diag.svg", format: "svg",
+                                      role: "vector"),
+          Glossarist::FigureImage.new(src: "diag.png", format: "png",
+                                      role: "raster"),
+        ]
+      end
+    end
+
+    it "emits one foaf:Image subject per image variant" do
+      turtle = transform.transform_document([], figures: [figure])
+      graph = parse_graph(turtle)
+      image_subjects = graph.query([nil, RDF.type,
+                                    RDF::URI("#{foaf_uri}Image")]).map(&:subject)
+                                                       .map(&:to_s)
+      expect(image_subjects).to include("image/diag.svg", "image/diag.png")
+    end
+
+    it "emits dcterms:format on each foaf:Image subject" do
+      turtle = transform.transform_document([], figures: [figure])
+      graph = parse_graph(turtle)
+      formats = graph.query([RDF::URI("image/diag.svg"),
+                             RDF::URI("#{dcterms_uri}format"), nil])
+                     .map(&:object).map(&:to_s)
+      expect(formats).to eq(["svg"])
+    end
+
+    it "emits gloss:imageRole for the variant's role" do
+      turtle = transform.transform_document([], figures: [figure])
+      graph = parse_graph(turtle)
+      roles = graph.query([RDF::URI("image/diag.png"),
+                           RDF::URI("#{gloss_uri}imageRole"), nil])
+                   .map(&:object).map(&:to_s)
+      expect(roles).to eq(["raster"])
+    end
+
+    it "omits dcat:byteSize when the source model has no byte size" do
+      turtle = transform.transform_document([], figures: [figure])
+      graph = parse_graph(turtle)
+      byte_size = graph.query([nil, RDF::URI("#{dcat_uri}byteSize"), nil])
+      expect(byte_size).to be_empty
     end
   end
 
