@@ -61,7 +61,7 @@ Designation inheritance hierarchy (MECE):
 
 ### Dataset Loading
 
-- **`GlossaryStore`** (`glossary_store.rb`) — the dataset abstraction. Backed by `Lutaml::Store::PackageStore`, handles loading/saving from directories and ZIPs, concept CRUD, metadata, bibliography, images, and stats. Format detection is model-driven via `ConceptDocument.for_version`. **All callers that need to load concepts from a dataset should use GlossaryStore.**
+- **`GlossaryStore`** (`glossary_store.rb`) — the dataset abstraction. Backed by `Lutaml::Store::PackageStore`, handles loading/saving from directories and ZIPs, concept CRUD, metadata, bibliography, images, dataset-level non-verbal entities (`#figures`, `#tables`, `#formulas` lazy-loaded from `figures/`/`tables/`/`formulas/` subdirectories), and stats. Format detection is model-driven via `ConceptDocument.for_version`. **All callers that need to load concepts from a dataset should use GlossaryStore.**
 - **`ConceptCollector`** (`concept_collector.rb`) — legacy scanner with hand-rolled format detection (file-system heuristics, not model-driven). Being replaced by GlossaryStore. Do not add new callers.
 - **`ConceptManager`** (`concept_manager.rb`) — legacy file I/O used by `ManagedConceptCollection`. Being replaced by GlossaryStore. Do not add new callers.
 - **`ManagedConceptCollection`** (`managed_concept_collection.rb`) — legacy collection that loads via ConceptManager. Being replaced by GlossaryStore.
@@ -132,7 +132,8 @@ The `exe/glossarist` executable uses Thor. Commands:
 
 - **`ConceptToTbxTransform`** (`transforms/concept_to_tbx_transform.rb`) — converts ManagedConcept to TBX-XML using the tbx gem (ISO 30042:2019). Produces `Tbx::ConceptEntry` per concept or `Tbx::Document` for full export.
 - **`ConceptToSkosTransform`** (`transforms/concept_to_skos_transform.rb`) — converts ManagedConcept to SKOS RDF using `Glossarist::Rdf::SkosConcept`. Has `transform` (single) and `transform_document` (batch, returns `SkosVocabulary`). Produces JSON-LD and Turtle via the unified `rdf` DSL.
-- **SKOS/RDF models** (`lib/glossarist/rdf/`) — `SkosConcept`, `SkosVocabulary` (ConceptScheme container), `LocalizedLiteral` (language-tagged value), namespace classes.
+- **`ConceptToGlossTransform`** (`transforms/concept_to_gloss_transform.rb`) — converts ManagedConcept and dataset-level non-verbal entities to ontology-faithful RDF using `Glossarist::Rdf::Gloss*` view classes. `transform_document(concepts, figures:, tables:, formulas:)` and `to_turtle`/`to_jsonld` accept figures/tables/formulas kwargs (backward compatible — empty defaults). Uses a `DESIGNATION_BUILDERS` registry keyed by exact Designation subclass (OCP) instead of a case/when switch.
+- **SKOS/RDF models** (`lib/glossarist/rdf/`) — `GlossConcept`, `GlossLocalizedConcept`, `GlossDesignation` and subclasses, `GlossFigure`/`GlossTable`/`GlossFormula`/`GlossFigureImage` (dataset-level non-verbal entities per concept-model v3.1.0 K1/K2 shapes), `SkosConcept`, `SkosVocabulary`, `LocalizedLiteral`, namespace classes. `EmitsExtraTriples` is autoloaded from `lutaml_ext.rb` via the immediate parent namespace file (`rdf.rb`); `LutamlTurtleTransformExt` is prepended into `Lutaml::Turtle::Transform` so the framework asks each instance for extra triples.
 - TBX, Turtle, JSON-LD, JSONL export all write a single document file; JSON writes per-concept files.
 
 ### Dependencies
@@ -142,14 +143,28 @@ The `exe/glossarist` executable uses Thor. Commands:
 - `relaton` (>= 2.0.0, < 3) — bibliography database integration
 - `thor` — CLI commands
 
-## Gemfile Notes
+## Dependencies
 
-The Gemfile overrides relaton gems from git branches for lutaml-model 0.8 compatibility:
-- 5 repos use `fix/lutaml-model-0.8` branches (relaton-bib, relaton-iso, relaton-3gpp, relaton-bipm, relaton-bsi)
-- 5 repos use `lutaml-integration` branches (relaton-calconnect, relaton-ccsds, relaton-cen, relaton-iec, relaton-itu)
-- Released 2.0.0 gems have untyped lutaml-model attributes that fail with 0.8+
-- relaton-bib 2.1.0 is released but sub-gems pin `~> 2.0.0`, blocking 2.1.0 adoption until upstream updates constraints
-- Remove git overrides once relaton gems release versions with lutaml-model 0.8 support
+- `relaton` (>= 2.0.0, < 3) — bibliography database integration. Upstream
+  shipped 2.1.0 with lutaml-model 0.8 compatibility, so the historical
+  git-branch overrides are no longer needed and the Gemfile pins the
+  released gem directly.
+- `lutaml-model` (~> 0.8.5), `lutaml-store` (~> 0.2.0) — serialization
+  framework (YAML/XML/JSON-LD/Turtle) and package store.
+- `tbx` — ISO 30042:2019 TBX model classes.
+- `thor` — CLI commands.
+- `rdf-turtle` (~> 3.3), `shacl` (~> 0.4) — Turtle emission + SHACL
+  validation against vendored concept-model shapes.
+
+## SchemaMigration module split
+
+`SchemaMigration` is a thin facade over three single-concern modules:
+
+- `SchemaMigration::V0ToV1` — hash-to-hash transform (IEV legacy YAML → V1 shape). Single `#migrate` entry point.
+- `SchemaMigration::V2ToV3` — model-to-model transform (`V2::ManagedConcept` → `V3::ManagedConcept`). Class methods `migrate_concept` / `concept_version`.
+- `SchemaMigration::CliPipeline` — file I/O + dispatch + output writing for `glossarist upgrade`. Single `#run` entry point; output can be a directory of YAML files or a `.gcr` ZIP package.
+
+The facade preserves the historical class-method API (`SchemaMigration.new`, `.migrate_concept`, `.concept_version`, `.upgrade_directory`) so existing callers don't break. Adding V3→V4 later means adding a new module under `SchemaMigration::`, not editing these.
 
 ## Schema Version Subclasses Are NOT Duplication
 
@@ -169,8 +184,6 @@ Do not attempt to "parameterize" or "collapse" these into the base class:
 See `TODO.improve/` for detailed plans.
 
 1. **Migrate callers to GlossaryStore** — ConceptCollector (8 call sites) and ConceptManager (1 call site) duplicate format detection with file-system heuristics. GlossaryStore is model-driven, framework-aligned, and handles both directory and ZIP. All callers should go through GlossaryStore.
-
-2. **Split SchemaMigration into focused modules** — Currently handles V0→V1 hash migration, V2→V3 model migration, and a CLI pipeline at three different abstraction levels. Each should be its own module.
 
 ### Rejected candidates (do not re-suggest)
 
