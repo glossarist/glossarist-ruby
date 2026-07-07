@@ -19,7 +19,7 @@ All model classes use `Lutaml::Model::Serializable` for serialization.
 
 ### Core Model Hierarchy
 
-- **`ManagedConceptCollection`** (`managed_concept_collection.rb`) — top-level enumerable collection of ManagedConcepts. Entry point for loading/saving glossaries via `ConceptManager`.
+- **`ManagedConceptCollection`** (`managed_concept_collection.rb`) — legacy enumerable collection of ManagedConcepts. File loading delegates to GlossaryStore via `#load_from_files`; the class is retained as an in-memory accumulator for `STS::Importer` and the legacy `ConceptSet` path. New callers should use GlossaryStore directly.
 - **`ManagedConcept`** (`managed_concept.rb`) — a managed concept with `ManagedConceptData` (groups, localized_concepts map, sources), related concepts, dates, and status. Delegates localization via `add_l10n`/`localization(lang)`.
 - **`Concept`** (`concept.rb`) — base concept with `ConceptData` (definition, terms/designations, notes, examples, sources, dates, language_code). Parent of `LocalizedConcept`.
 - **`LocalizedConcept`** (`localized_concept.rb`) — extends `Concept` with `classification`, `entry_status`, `review_type`.
@@ -62,9 +62,9 @@ Designation inheritance hierarchy (MECE):
 ### Dataset Loading
 
 - **`GlossaryStore`** (`glossary_store.rb`) — the dataset abstraction. Backed by `Lutaml::Store::PackageStore`, handles loading/saving from directories and ZIPs, concept CRUD, metadata, bibliography, images, dataset-level non-verbal entities (`#figures`, `#tables`, `#formulas` lazy-loaded from `figures/`/`tables/`/`formulas/` subdirectories), and stats. Format detection is model-driven via `ConceptDocument.for_version`. **All callers that need to load concepts from a dataset should use GlossaryStore.**
-- **`ConceptCollector`** (`concept_collector.rb`) — legacy scanner with hand-rolled format detection (file-system heuristics, not model-driven). Being replaced by GlossaryStore. Do not add new callers.
-- **`ConceptManager`** (`concept_manager.rb`) — legacy file I/O used by `ManagedConceptCollection`. Being replaced by GlossaryStore. Do not add new callers.
-- **`ManagedConceptCollection`** (`managed_concept_collection.rb`) — legacy collection that loads via ConceptManager. Being replaced by GlossaryStore.
+- **`ConceptCollector`** (`concept_collector.rb`) — legacy scanner with hand-rolled format detection. No production callers; retained for ABI compatibility. Use GlossaryStore.
+- **`ConceptManager`** (`concept_manager.rb`) — legacy file I/O used by `ManagedConceptCollection#load_from_files`. No direct production callers; retained for the legacy collection path. Use GlossaryStore.
+- **`ManagedConceptCollection`** (`managed_concept_collection.rb`) — legacy collection. File loading delegates to GlossaryStore; retained as an in-memory accumulator for `STS::Importer`. `ConceptSet` now uses GlossaryStore directly (previously went through this collection).
 
 ### YAML Serialization
 
@@ -183,7 +183,7 @@ Do not attempt to "parameterize" or "collapse" these into the base class:
 
 See `TODO.improve/` for detailed plans.
 
-1. **Migrate callers to GlossaryStore** — ConceptCollector (8 call sites) and ConceptManager (1 call site) duplicate format detection with file-system heuristics. GlossaryStore is model-driven, framework-aligned, and handles both directory and ZIP. All callers should go through GlossaryStore.
+1. **Phase out `ManagedConceptCollection` entirely** — `ConceptSet` now loads via GlossaryStore directly (PR #212). The only remaining user is `STS::Importer`, which uses the collection as an in-memory accumulator after loading via GlossaryStore/GcrPackage. Migrating STS::Importer to a plain Array would close the legacy chapter.
 
 ### Rejected candidates (do not re-suggest)
 
