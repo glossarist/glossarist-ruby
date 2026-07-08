@@ -17,7 +17,19 @@ module Glossarist
     attribute :repository, :string
     attribute :license, :string
     attribute :tags, :string, collection: true
-    attribute :translations, :hash, default: -> { {} }
+    attribute :translations, :hash, default: -> {}
+    # Dataset-register fields (concept-browser Deployments). These were
+    # previously dropped during GCR packaging, causing downstream
+    # consumers (e.g. concept-browser's lineage-series renderer) to lose
+    # year/ref/urn/status needed for timeline sorting and identity.
+    attribute :ref, :string
+    attribute :ref_aliases, :string, collection: true
+    attribute :year, :integer
+    attribute :urn, :string
+    attribute :urn_aliases, :string, collection: true
+    attribute :status, :string
+    attribute :supersedes, :string
+    attribute :source_repo, :string
 
     key_value do
       map %i[id shortname], to: :shortname
@@ -35,6 +47,14 @@ module Glossarist
       map "license", to: :license
       map "tags", to: :tags
       map "translations", to: :translations
+      map "ref", to: :ref
+      map "ref_aliases", to: :ref_aliases
+      map "year", to: :year
+      map "urn", to: :urn
+      map "urn_aliases", to: :urn_aliases
+      map "status", to: :status
+      map "supersedes", to: :supersedes
+      map "source_repo", to: :source_repo
     end
 
     def self.from_file(path)
