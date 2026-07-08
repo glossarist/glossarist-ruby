@@ -91,13 +91,14 @@ RSpec.describe Glossarist::GcrPackage do
     end
 
     it "includes register.yaml when provided" do
-      register = { "name" => "Test", "schema_version" => "1" }
+      register = { "shortname" => "test", "schema_version" => "1", "year" => 2024 }
       create_test_gcr(register: register)
 
       Zip::File.open(gcr_path) do |zf|
         expect(zf.find_entry("register.yaml")).not_to be_nil
         rd = Glossarist::RegisterData.from_yaml(zf.find_entry("register.yaml").get_input_stream.read)
-        expect(rd.name).to eq("Test")
+        expect(rd.shortname).to eq("test")
+        expect(rd.year).to eq(2024)
       end
     end
   end

@@ -52,8 +52,8 @@ module Glossarist
       new(
         shortname: options[:shortname] || rd&.shortname,
         version: options[:version] || rd&.version,
-        title: options[:title] || rd&.name,
-        description: options[:description] || rd&.description,
+        title: options[:title],
+        description: options[:description],
         owner: options[:owner],
         tags: options[:tags] || [],
         concept_count: concepts.length,
