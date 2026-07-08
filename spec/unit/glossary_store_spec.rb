@@ -80,7 +80,7 @@ RSpec.describe Glossarist::GlossaryStore do
                encoding: "utf-8")
 
     File.write(File.join(dir, "register.yaml"),
-               "---\nname: Test Glossary\nsubregisters:\n  eng:\n",
+               "---\nshortname: test-glossary\nsubregisters:\n  eng:\n",
                encoding: "utf-8")
 
     File.write(File.join(dir, "metadata.yaml"), <<~YAML, encoding: "utf-8")
@@ -118,7 +118,7 @@ RSpec.describe Glossarist::GlossaryStore do
     it "loads register data from register.yaml" do
       store.load_directory(glossary_dir)
       expect(store.register_data).to be_a(Glossarist::RegisterData)
-      expect(store.register_data.name).to eq("Test Glossary")
+      expect(store.register_data.shortname).to eq("test-glossary")
     end
 
     it "loads bibliography from bibliography.yaml" do

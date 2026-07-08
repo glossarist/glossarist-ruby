@@ -8,8 +8,7 @@ RSpec.describe Glossarist::RegisterData do
     let(:yaml) do
       <<~YAML
         ---
-        name: Geolexica for Intelligent Transport Systems
-        description: Vocabulary for ITS
+        shortname: tc204
         subregisters:
           eng:
       YAML
@@ -17,16 +16,64 @@ RSpec.describe Glossarist::RegisterData do
 
     it "parses YAML into typed attributes" do
       rd = described_class.from_yaml(yaml)
-      expect(rd.name).to eq("Geolexica for Intelligent Transport Systems")
-      expect(rd.description).to eq("Vocabulary for ITS")
+      expect(rd.shortname).to eq("tc204")
       expect(rd.subregisters).to eq({ "eng" => nil })
     end
 
     it "round-trips through YAML" do
       rd = described_class.from_yaml(yaml)
       reloaded = described_class.from_yaml(rd.to_yaml)
-      expect(reloaded.name).to eq(rd.name)
-      expect(reloaded.description).to eq(rd.description)
+      expect(reloaded.shortname).to eq(rd.shortname)
+    end
+  end
+
+  describe "identity and lifecycle fields" do
+    let(:yaml) do
+      <<~YAML
+        ---
+        id: isotc204-ed3
+        ref: ISO 14812 (Edition 3, draft)
+        year: 2026
+        urn: urn:iso:std:iso:14812:ed3
+        status: current
+        supersedes: isotc204-2025
+        source_repo: https://github.com/ISO-TC204/iso14812
+        ref_aliases:
+          - ISO 14812 Ed3
+        urn_aliases:
+          - urn:iso:std:iso:14812:ed3*
+      YAML
+    end
+
+    it "preserves all fields through round-trip" do
+      rd = described_class.from_yaml(yaml)
+      expect(rd.ref).to eq("ISO 14812 (Edition 3, draft)")
+      expect(rd.year).to eq(2026)
+      expect(rd.urn).to eq("urn:iso:std:iso:14812:ed3")
+      expect(rd.status).to eq("current")
+      expect(rd.supersedes).to eq("isotc204-2025")
+      expect(rd.source_repo).to eq("https://github.com/ISO-TC204/iso14812")
+      expect(rd.ref_aliases).to eq(["ISO 14812 Ed3"])
+      expect(rd.urn_aliases).to eq(["urn:iso:std:iso:14812:ed3*"])
+    end
+
+    it "does not coerce localized name/description hashes to strings" do
+      # Source register.yaml may carry name: as a localized hash. The gem
+      # must NOT serialize this — it would produce lossy .to_s coercion.
+      # Display metadata belongs in the deployment's site-config.yml.
+      yaml_with_localized_name = <<~YAML
+        ---
+        id: test
+        name:
+          eng: Test Vocabulary
+        description:
+          eng: A test.
+        year: 2024
+      YAML
+      rd = described_class.from_yaml(yaml_with_localized_name)
+      reloaded = described_class.from_yaml(rd.to_yaml)
+      expect(reloaded.year).to eq(2024)
+      expect(reloaded.to_yaml).not_to include('{"eng"=>')
     end
   end
 
@@ -48,10 +95,10 @@ RSpec.describe Glossarist::RegisterData do
 
     it "loads from a YAML file" do
       path = File.join(tmpdir, "register.yaml")
-      File.write(path, "---\nname: Test\nshortname: test\n")
+      File.write(path, "---\nshortname: test\nyear: 2024\n")
       rd = described_class.from_file(path)
-      expect(rd.name).to eq("Test")
       expect(rd.shortname).to eq("test")
+      expect(rd.year).to eq(2024)
     end
 
     it "returns nil for missing file" do
@@ -64,7 +111,7 @@ RSpec.describe Glossarist::RegisterData do
       path = File.expand_path("../../isotc204-glossary/register.yaml", __dir__)
       skip "isotc204 fixture not found" unless File.exist?(path)
       rd = described_class.from_file(path)
-      expect(rd.name).to include("Intelligent Transport Systems")
+      expect(rd.shortname).to eq("isotc204")
       expect(rd.subregisters).to include("eng")
     end
 
@@ -72,7 +119,7 @@ RSpec.describe Glossarist::RegisterData do
       path = File.expand_path("../../isotc211-glossary/register.yaml", __dir__)
       skip "isotc211 fixture not found" unless File.exist?(path)
       rd = described_class.from_file(path)
-      expect(rd.name).to include("ISO/TC 211")
+      expect(rd.shortname).to eq("isotc211")
       expect(rd.subregisters.keys.length).to be >= 10
     end
   end

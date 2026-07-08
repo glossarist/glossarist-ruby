@@ -39,13 +39,12 @@ RSpec.describe Glossarist::GcrMetadata do
       expect(metadata.statistics.concepts_with_sources).to eq(1)
     end
 
-    it "uses register data for title/description" do
-      register = Glossarist::RegisterData.new(
-        name: "My Dataset",
-        description: "A dataset",
-      )
+    it "uses options for title/description when provided" do
       metadata = described_class.from_concepts(concepts,
-                                               register_data: register)
+                                               options: {
+                                                 title: "My Dataset",
+                                                 description: "A dataset",
+                                               })
 
       expect(metadata.title).to eq("My Dataset")
       expect(metadata.description).to eq("A dataset")

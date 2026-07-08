@@ -4,8 +4,6 @@ module Glossarist
   class RegisterData < Lutaml::Model::Serializable
     attribute :key, :string, default: -> { "register" }
     attribute :shortname, :string
-    attribute :name, :string
-    attribute :description, :string
     attribute :schema_version, :string
     attribute :version, :string
     attribute :owner, :string
@@ -18,10 +16,10 @@ module Glossarist
     attribute :license, :string
     attribute :tags, :string, collection: true
     attribute :translations, :hash, default: -> {}
-    # Dataset-register fields (concept-browser Deployments). These were
-    # previously dropped during GCR packaging, causing downstream
-    # consumers (e.g. concept-browser's lineage-series renderer) to lose
-    # year/ref/urn/status needed for timeline sorting and identity.
+
+    # Identity and lifecycle fields. These MUST round-trip through GCR
+    # packaging so consumers (concept-browser's lineage-series renderer,
+    # manifest year propagation, status badge logic) see them.
     attribute :ref, :string
     attribute :ref_aliases, :string, collection: true
     attribute :year, :integer
@@ -31,10 +29,15 @@ module Glossarist
     attribute :supersedes, :string
     attribute :source_repo, :string
 
+    # Display name + description are deliberately NOT serialized in the GCR.
+    # They are localized (hash) values in source register.yaml and the gem
+    # can't coerce them to a stable wire form without lossy .to_s coercion.
+    # Display metadata belongs in the deployment's site-config.yml, which
+    # is the SSOT for per-dataset title/description overrides. The GCR
+    # carries identity (ref, urn, year, status) only.
+
     key_value do
       map %i[id shortname], to: :shortname
-      map "name", to: :name
-      map "description", to: :description
       map "schema_version", to: :schema_version
       map "version", to: :version
       map "owner", to: :owner
@@ -47,6 +50,7 @@ module Glossarist
       map "license", to: :license
       map "tags", to: :tags
       map "translations", to: :translations
+
       map "ref", to: :ref
       map "ref_aliases", to: :ref_aliases
       map "year", to: :year
