@@ -7,6 +7,7 @@ module Glossarist
               values: Glossarist::GlossaryDefinition::CONCEPT_SOURCE_TYPES
     attribute :origin, Citation
     attribute :modification, :string
+    attribute :sourced_from, Citation, collection: true
 
     key_value do
       map :id, to: :id
@@ -14,6 +15,7 @@ module Glossarist
       map :status, to: :status
       map :type, to: :type
       map :modification, to: :modification
+      map :sourced_from, to: :sourced_from
     end
   end
 end

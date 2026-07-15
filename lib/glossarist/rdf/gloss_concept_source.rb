@@ -9,6 +9,7 @@ module Glossarist
       attribute :type, :string
       attribute :modification, :string
       attribute :origin, GlossCitation
+      attribute :sourced_from, GlossCitation, collection: true
 
       rdf do
         namespace Namespaces::GlossaristNamespace
@@ -25,6 +26,7 @@ module Glossarist
                                  to: :modification
 
         members :origin, link: "gloss:sourceOrigin"
+        members :sourced_from, link: "gloss:sourcedFrom"
       end
 
       def self.deterministic_id(source)
@@ -32,6 +34,9 @@ module Glossarist
         origin = source.origin
         if origin
           parts << origin.source << origin.id << origin.version << origin.link
+        end
+        Array(source.sourced_from).each do |sf|
+          parts << sf&.source << sf&.id << sf&.version << sf&.link
         end
         Digest::MD5.hexdigest(parts.compact.join("|"))[0..11]
       end
