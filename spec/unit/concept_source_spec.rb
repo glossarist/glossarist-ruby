@@ -85,4 +85,83 @@ RSpec.describe Glossarist::ConceptSource do
       expect(subject.status).to eq("identical")
     end
   end
+
+  describe "#sourced_from" do
+    it "defaults to nil when not provided" do
+      source = described_class.new(type: "authoritative")
+      expect(source.sourced_from).to be_nil
+    end
+
+    it "round-trips through to_yaml and from_yaml" do
+      source = described_class.new(
+        type: "lineage",
+        status: "identical",
+        origin: Glossarist::Citation.new(ref: Glossarist::Citation::Ref.new(
+          source: "OIML", id: "G 18", version: "2010",
+        )),
+        sourced_from: [
+          Glossarist::Citation.new(ref: Glossarist::Citation::Ref.new(
+            source: "OIML", id: "B 3", version: "2003",
+          )),
+        ],
+      )
+      yaml = source.to_yaml
+      restored = described_class.from_yaml(yaml)
+      expect(restored.sourced_from.length).to eq(1)
+      expect(restored.sourced_from.first.ref.source).to eq("OIML")
+      expect(restored.sourced_from.first.ref.id).to eq("B 3")
+    end
+
+    it "round-trips multiple sourced_from entries" do
+      yaml = <<~YAML
+        ---
+        type: lineage
+        status: modified
+        modification: merged definitions from B 3 and B 4
+        origin:
+          ref:
+            source: OIML
+            id: 'G 18'
+            version: '2010'
+        sourced_from:
+        - ref:
+            source: OIML
+            id: 'B 3'
+            version: '2003'
+        - ref:
+            source: OIML
+            id: 'B 4'
+            version: '2005'
+      YAML
+      restored = described_class.from_yaml(yaml)
+      expect(restored.sourced_from.length).to eq(2)
+      expect(restored.sourced_from[0].ref.id).to eq("B 3")
+      expect(restored.sourced_from[1].ref.id).to eq("B 4")
+    end
+
+    it "preserves locality in sourced_from entries" do
+      yaml = <<~YAML
+        ---
+        type: lineage
+        status: identical
+        origin:
+          ref:
+            source: OIML
+            id: 'G 18'
+            version: '2010'
+        sourced_from:
+        - ref:
+            source: OIML
+            id: 'V 1'
+            version: '2000'
+          locality:
+            type: clause
+            reference_from: '3.1'
+      YAML
+      restored = described_class.from_yaml(yaml)
+      expect(restored.sourced_from.length).to eq(1)
+      expect(restored.sourced_from.first.locality.type).to eq("clause")
+      expect(restored.sourced_from.first.locality.reference_from).to eq("3.1")
+    end
+  end
 end
