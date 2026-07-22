@@ -23,7 +23,7 @@ data:
   related:
     # Associative cross-reference
     - type: see
-      content: "open system"
+      content: { eng: "open system" }
       ref:
         source: "IEC"
         id: "102-03-05"

@@ -61,7 +61,7 @@ RSpec.describe Glossarist::Validation::Rules::RefShapeRule do
 
     it "flags RelatedConcept with empty ref" do
       concept_ref = Glossarist::ConceptRef.new
-      related = [Glossarist::RelatedConcept.new(content: "test", type: "broader",
+      related = [Glossarist::RelatedConcept.new(content: { "eng" => "test" }, type: "broader",
                                                 ref: concept_ref)]
       concept = make_concept(sources: [], related: related)
 
@@ -73,7 +73,7 @@ RSpec.describe Glossarist::Validation::Rules::RefShapeRule do
     it "passes for RelatedConcept with valid ref" do
       concept_ref = Glossarist::ConceptRef.new(source: "ISO/TS 14812",
                                                id: "section-3-1")
-      related = [Glossarist::RelatedConcept.new(content: "test", type: "broader",
+      related = [Glossarist::RelatedConcept.new(content: { "eng" => "test" }, type: "broader",
                                                 ref: concept_ref)]
       concept = make_concept(sources: [], related: related)
 

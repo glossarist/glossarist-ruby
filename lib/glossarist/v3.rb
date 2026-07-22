@@ -9,6 +9,7 @@ module Glossarist
     autoload :DetailedDefinition, "glossarist/v3/detailed_definition"
     autoload :ConceptRef, "glossarist/v3/concept_ref"
     autoload :RelatedConcept, "glossarist/v3/related_concept"
+    autoload :PartitiveHyperedge, "glossarist/v3/partitive_hyperedge"
     autoload :ConceptData, "glossarist/v3/concept_data"
     autoload :LocalizedConcept, "glossarist/v3/localized_concept"
     autoload :ManagedConceptData, "glossarist/v3/managed_concept_data"
@@ -23,6 +24,7 @@ module Glossarist
     Configuration.register_model(LocalizedConcept, id: :localized_concept)
     Configuration.register_model(ConceptRef, id: :concept_ref)
     Configuration.register_model(RelatedConcept, id: :related_concept)
+    Configuration.register_model(PartitiveHyperedge, id: :partitive_hyperedge)
     Configuration.register_model(ManagedConceptData, id: :managed_concept_data)
     Configuration.register_model(ManagedConcept, id: :managed_concept)
     Configuration.register_model(ConceptDocument, id: :concept_document)

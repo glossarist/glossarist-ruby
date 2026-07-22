@@ -123,7 +123,7 @@ RSpec.describe "Tags attribute" do
           tags: ["general"],
           localized_concepts: { "eng" => "l10n-uuid" },
         },
-        related: [{ type: "broader", content: "Parent" }],
+        related: [{ type: "broader", content: { "eng" => "Parent" } }],
         schema_version: "3",
       )
       yaml = concept.to_yaml

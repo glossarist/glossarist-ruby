@@ -31,13 +31,13 @@ data:
 related:
   # ── Hierarchical (ISO 10241-1 / ISO 25964 BT/NT) ──────────────────────
   - type: broader
-    content: "complex system"
+    content: { eng: "complex system" }
     ref:
       source: "IEC"
       id: "102-03-02"
 
   - type: narrower
-    content: "subsystem"
+    content: { eng: "subsystem" }
     ref:
       source: "IEC"
       id: "102-03-03"
@@ -45,13 +45,13 @@ related:
   # ── ISO 25964 Generic Hierarchy (BTG/NTG) ─────────────────────────────
   # "is a kind of" — generic/specific relationship
   - type: broader_generic
-    content: "physical system"
+    content: { eng: "physical system" }
     ref:
       source: "IEC"
       id: "102-01-01"
 
   - type: narrower_generic
-    content: "closed system"
+    content: { eng: "closed system" }
     ref:
       source: "IEC"
       id: "102-03-04"
@@ -59,13 +59,13 @@ related:
   # ── ISO 25964 Partitive Hierarchy (BTP/NTP) ───────────────────────────
   # "is a part of" — whole/part relationship (transitive)
   - type: broader_partitive
-    content: "larger assembly"
+    content: { eng: "larger assembly" }
     ref:
       source: "IEC"
       id: "102-05-01"
 
   - type: narrower_partitive
-    content: "system component"
+    content: { eng: "system component" }
     ref:
       source: "IEC"
       id: "102-05-02"
@@ -73,26 +73,26 @@ related:
   # ── ISO 25964 Instantial Hierarchy (BTI/NTI) ───────────────────────────
   # "is an instance of" — class/instance relationship
   - type: broader_instantial
-    content: "thermodynamic system (class)"
+    content: { eng: "thermodynamic system (class)" }
     ref:
       source: "IEC"
       id: "102-06-01"
 
   - type: narrower_instantial
-    content: "specific Carnot engine"
+    content: { eng: "specific Carnot engine" }
     ref:
       source: "IEC"
       id: "102-06-02"
 
   # ── Equivalence (ISO 10241-1 / ISO 25964 / SKOS) ───────────────────────
   - type: equivalent
-    content: "system (general systems theory)"
+    content: { eng: "system (general systems theory)" }
     ref:
       source: "ISO"
       id: "10241-1"
 
   - type: exact_match
-    content: "exact cross-vocabulary match (SKOS skos:exactMatch)"
+    content: { eng: "exact cross-vocabulary match (SKOS skos:exactMatch)" }
     ref:
       source: "VIM"
       id: "JCGM-200"
@@ -103,77 +103,77 @@ related:
       text: "system (general systems theory)"
 
   - type: broad_match
-    content: "related broader concept in another vocabulary"
+    content: { eng: "related broader concept in another vocabulary" }
     ref:
       source: "ISO"
       id: "1087-1"
 
   - type: narrow_match
-    content: "related narrower concept in another vocabulary"
+    content: { eng: "related narrower concept in another vocabulary" }
     ref:
       source: "ISO"
       id: "1087-2"
 
   - type: related_match
-    content: "related concept in another vocabulary"
+    content: { eng: "related concept in another vocabulary" }
     ref:
       source: "IEC"
       id: "60050-151"
 
   # ── Comparative (ISO 10241-1) ─────────────────────────────────────────
   - type: compare
-    content: "closed system"
+    content: { eng: "closed system" }
     ref:
       source: "IEC"
       id: "102-03-04"
 
   - type: contrast
-    content: "environment"
+    content: { eng: "environment" }
     ref:
       source: "IEC"
       id: "102-03-06"
 
   # ── Associative (ISO 10241-1 / ISO 25964 RT) ─────────────────────────
   - type: see
-    content: "open system"
+    content: { eng: "open system" }
     ref:
       source: "IEC"
       id: "102-03-05"
 
   # ── Associative Subtypes (ISO 25964 / TBX) ────────────────────────────
   - type: related_concept
-    content: "boundary of a system"
+    content: { eng: "boundary of a system" }
     ref:
       source: "IEC"
       id: "102-04-01"
 
   - type: related_concept_broader
-    content: "system boundary (broader sense)"
+    content: { eng: "system boundary (broader sense)" }
     ref:
       source: "IEC"
       id: "102-04-02"
 
   - type: related_concept_narrower
-    content: "permeable boundary (narrower sense)"
+    content: { eng: "permeable boundary (narrower sense)" }
     ref:
       source: "IEC"
       id: "102-04-03"
 
   # ── Spatiotemporal (ISO 25964 / TBX) ──────────────────────────────────
   - type: sequentially_related_concept
-    content: "next process step"
+    content: { eng: "next process step" }
     ref:
       source: "IEC"
       id: "102-07-01"
 
   - type: spatially_related_concept
-    content: "adjacent region"
+    content: { eng: "adjacent region" }
     ref:
       source: "IEC"
       id: "102-07-02"
 
   - type: temporally_related_concept
-    content: "preceding state"
+    content: { eng: "preceding state" }
     ref:
       source: "IEC"
       id: "102-07-03"
@@ -185,13 +185,13 @@ related:
       id: "102-03-00"
 
   - type: superseded_by
-    content: "replaced by newer concept"
+    content: { eng: "replaced by newer concept" }
     ref:
       source: "IEC"
       id: "102-03-10"
 
   - type: deprecates
-    content: "old deprecated term"
+    content: { eng: "old deprecated term" }
     ref:
       source: "IEC"
       id: "102-03-11"
@@ -199,7 +199,7 @@ related:
   # ── Lexical (ISO 12620 / TBX) ─────────────────────────────────────────
   # false_friend is language-specific — see 06-related-localized-fra.yaml
   - type: homograph
-    content: "same spelling, different meaning"
+    content: { eng: "same spelling, different meaning" }
     ref:
       source: "IEC"
       id: "102-08-01"

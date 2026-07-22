@@ -130,8 +130,42 @@ module Glossarist
           domains: build_gloss_domains(managed_concept.data&.domains,
                                        identifier),
           dates: build_gloss_dates(managed_concept.dates, identifier),
+          hyperedges: build_gloss_hyperedges(v3_hyperedges(managed_concept),
+                                             identifier),
           **rel_targets,
         )
+      end
+
+      # Hyperedges are a V3-only attribute. The transform accepts both
+      # V1/V2 and V3 concepts; for V1/V2 concepts the hyperedge list
+      # is always empty.
+      def v3_hyperedges(managed_concept)
+        return [] unless managed_concept.is_a?(V3::ManagedConcept)
+
+        managed_concept.partitive_hyperedges
+      end
+
+      def build_gloss_hyperedges(hyperedges, identifier)
+        return [] unless hyperedges
+
+        Array(hyperedges).map do |he|
+          Rdf::GlossHyperedge.new(
+            identifier: identifier.to_s,
+            comprehensive_id: he.comprehensive.id.to_s,
+            comprehensive_uri: hyperedge_concept_uri(he.comprehensive),
+            part_uris: Array(he.parts).map { |p| hyperedge_concept_uri(p) },
+            enumeration: he.enumeration,
+            markers: Array(he.markers),
+            content: he.content,
+          )
+        end
+      end
+
+      def hyperedge_concept_uri(ref)
+        return nil unless ref.is_a?(Glossarist::ConceptRef)
+
+        Glossarist::Rdf::Namespaces::GlossaristNamespace.uri +
+          "concept/#{ref.id}"
       end
 
       def build_gloss_localized_concept(l10n, concept_id)

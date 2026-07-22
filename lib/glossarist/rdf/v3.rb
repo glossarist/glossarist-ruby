@@ -29,6 +29,7 @@ module Glossarist
         GlossFigureImage
         GlossTable
         GlossFormula
+        GlossHyperedge
       ].freeze
 
       VIEW_CLASS_NAMES.each do |name|

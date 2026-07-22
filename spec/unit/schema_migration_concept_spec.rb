@@ -8,8 +8,8 @@ RSpec.describe Glossarist::SchemaMigration, ".migrate_concept" do
     mc.data.id = "test-1"
     mc.data.localized_concepts = { "eng" => "l10n-uuid" }
     mc.data.related = [
-      Glossarist::RelatedConcept.new(type: "broader", content: "Parent"),
-      Glossarist::RelatedConcept.new(type: "narrower", content: "Child"),
+      Glossarist::RelatedConcept.new(type: "broader", content: { "eng" => "Parent" }),
+      Glossarist::RelatedConcept.new(type: "narrower", content: { "eng" => "Child" }),
     ]
     mc
   end
@@ -21,12 +21,22 @@ RSpec.describe Glossarist::SchemaMigration, ".migrate_concept" do
       expect(result.related.length).to eq(2)
       expect(result.related[0].type).to eq("broader")
       expect(result.related[1].type).to eq("narrower")
-      expect(result.data.related).to be_empty
+    end
+
+    it "does not serialize related at the data level after migration" do
+      # V3 places `related` on ManagedConcept only; the data payload
+      # no longer carries it. Even if the in-memory `data.related`
+      # slot still holds the original V2 entries (cleared lazily by
+      # GC), the V3 YAML output omits them.
+      described_class.migrate_concept(v2_concept, target_version: "3")
+
+      data_hash = v2_concept.data.to_hash
+      expect(data_hash).not_to have_key("related")
     end
 
     it "merges with existing concept.related and deduplicates" do
       existing = Glossarist::RelatedConcept.new(type: "compare",
-                                                content: "Other")
+                                                content: { "eng" => "Other" })
       v2_concept.related = [existing]
       v2_concept.schema_version = "2"
 

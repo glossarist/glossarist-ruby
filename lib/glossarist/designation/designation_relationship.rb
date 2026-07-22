@@ -3,7 +3,7 @@
 module Glossarist
   module Designation
     class DesignationRelationship < Lutaml::Model::Serializable
-      attribute :content, :string
+      attribute :content, :hash
       attribute :type, :string,
                 values: Glossarist::GlossaryDefinition::DESIGNATION_RELATIONSHIP_TYPES
       attribute :target, :string

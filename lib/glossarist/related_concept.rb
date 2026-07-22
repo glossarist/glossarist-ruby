@@ -2,7 +2,7 @@
 
 module Glossarist
   class RelatedConcept < Lutaml::Model::Serializable
-    attribute :content, :string
+    attribute :content, :hash
     attribute :type, :string,
               values: Glossarist::GlossaryDefinition::RELATED_CONCEPT_TYPES
     attribute :ref, ConceptRef

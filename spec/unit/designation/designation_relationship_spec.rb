@@ -7,14 +7,14 @@ RSpec.describe Glossarist::Designation::DesignationRelationship do
     it "preserves type, content, and target" do
       original = described_class.new(
         type: "abbreviated_form_for",
-        content: "World Wide Web",
+        content: { "eng" => "World Wide Web" },
         target: "World Wide Web",
       )
       yaml = original.to_yaml
       restored = described_class.from_yaml(yaml)
 
       expect(restored.type).to eq("abbreviated_form_for")
-      expect(restored.content).to eq("World Wide Web")
+      expect(restored.content).to eq("eng" => "World Wide Web")
       expect(restored.target).to eq("World Wide Web")
     end
 

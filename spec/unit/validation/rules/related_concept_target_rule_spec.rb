@@ -18,7 +18,7 @@ RSpec.describe Glossarist::Validation::Rules::RelatedConceptTargetRule do
 
   def make_concept_with_related(ref:)
     mc = make_managed_concept(id: "x")
-    mc.related = [Glossarist::RelatedConcept.new(content: "test",
+    mc.related = [Glossarist::RelatedConcept.new(content: { "eng" => "test" },
                                                  type: "broader", ref: ref)]
     mc
   end

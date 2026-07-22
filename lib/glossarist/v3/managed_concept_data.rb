@@ -2,6 +2,20 @@
 
 module Glossarist
   module V3
+    # V3 ManagedConceptData — the data payload inside a V3::ManagedConcept.
+    #
+    # V3 placement rule (MECE): `related` lives ONLY on V3::ManagedConcept,
+    # not on its data payload. V2 placed `related` inside data; the
+    # V2→V3 migration (SchemaMigration::V2ToV3) moves it to the concept
+    # level. Keeping `related` writable on V3 data would re-open the
+    # trap where writing to `data.related` bypasses
+    # `ManagedConcept.detect_schema_version` (which keys off
+    # `concept.related`).
+    #
+    # The base class Glossarist::ManagedConceptData still declares
+    # `related` for V1/V2 compatibility; V3 overrides that with an
+    # empty attribute via `attribute :related, nil` so the slot is
+    # inert and serializes nothing.
     class ManagedConceptData < Glossarist::ManagedConceptData
       attribute :sources, V3::ConceptSource, collection: true
       attribute :localizations, V3::LocalizedConcept,
@@ -17,7 +31,6 @@ module Glossarist
                                 with: { from: :domains_from_yaml, to: :domains_to_yaml }
         map :tags, to: :tags
         map :sources, to: :sources
-        map :related, to: :related
         map :localizations, to: :localizations,
                             with: { from: :localizations_from_yaml, to: :localizations_to_yaml }
       end
@@ -34,3 +47,4 @@ module Glossarist
     end
   end
 end
+
