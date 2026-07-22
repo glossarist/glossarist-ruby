@@ -24,7 +24,7 @@ RSpec.describe Glossarist::Concept do
             "id" => "123",
             "related" => [
               {
-                "content" => "Test content",
+                "content" => { "eng" => "Test content" },
                 "type" => "supersedes",
               },
             ],
@@ -36,7 +36,7 @@ RSpec.describe Glossarist::Concept do
 
       expect(retval).to be_kind_of(Glossarist::Concept)
       expect(retval.data.id).to eq("123")
-      expect(retval.data.related.first.content).to eq("Test content")
+      expect(retval.data.related.first.content).to eq("eng" => "Test content")
       expect(retval.data.related.first.type).to eq("supersedes")
     end
   end

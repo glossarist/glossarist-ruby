@@ -12,7 +12,7 @@ RSpec.describe Glossarist::Validation::Rules::RelatedConceptRule do
   let(:valid_types) { Glossarist::GlossaryDefinition::RELATED_CONCEPT_TYPES }
 
   def make_related(type:, ref_id: "1.1")
-    rc = Glossarist::RelatedConcept.new(type: type, content: ref_id)
+    rc = Glossarist::RelatedConcept.new(type: type, content: { "eng" => ref_id })
     rc.ref = Glossarist::ConceptRef.new(id: ref_id)
     rc
   end

@@ -70,7 +70,7 @@ RSpec.describe "Schema rules" do
     it "flags invalid related concept type" do
       mc = make_managed_concept(id: "1", langs: { eng: {} })
       mc.related = [Glossarist::RelatedConcept.new(type: "invalid",
-                                                   content: "x")]
+                                                   content: { "eng" => "x" })]
       ctx = make_context(mc)
       expect(rule).to be_applicable(ctx)
       issues = rule.check(ctx)
@@ -81,7 +81,7 @@ RSpec.describe "Schema rules" do
     it "passes for valid related concept type" do
       mc = make_managed_concept(id: "1", langs: { eng: {} })
       mc.related = [Glossarist::RelatedConcept.new(type: "supersedes",
-                                                   content: "x")]
+                                                   content: { "eng" => "x" })]
       ctx = make_context(mc)
       expect(rule.check(ctx)).to be_empty
     end

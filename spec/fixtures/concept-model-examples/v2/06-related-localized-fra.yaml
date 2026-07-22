@@ -25,7 +25,7 @@ data:
   # Language-specific: false_friend only exists in French
   related:
     - type: false_friend
-      content: "measure (English, musical sense)"
+      content: { eng: "measure (English, musical sense)" }
       ref:
         text: "measure"
 

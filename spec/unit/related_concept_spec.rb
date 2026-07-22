@@ -9,7 +9,7 @@ RSpec.describe Glossarist::RelatedConcept do
   subject { described_class.from_yaml(attributes) }
   let(:attributes) do
     {
-      content: "Test content",
+      content: { "eng" => "Test content" },
       type: :supersedes,
       ref: {
         source: "Test source",
@@ -22,7 +22,8 @@ RSpec.describe Glossarist::RelatedConcept do
     it "will convert related concept to yaml" do
       expected_yaml = <<~YAML
         ---
-        content: Test content
+        content:
+          eng: Test content
         type: supersedes
         ref:
           source: Test source
@@ -36,131 +37,131 @@ RSpec.describe Glossarist::RelatedConcept do
   describe "relationship types" do
     Glossarist::GlossaryDefinition::RELATED_CONCEPT_TYPES.each do |rel_type|
       it "accepts #{rel_type} relationship type" do
-        rc = described_class.new(type: rel_type, content: "test")
+        rc = described_class.new(type: rel_type, content: { "eng" => "test" })
         expect(rc.type).to eq(rel_type)
       end
     end
 
     it "accepts close_match type" do
-      rc = described_class.new(type: "close_match", content: "similar concept")
+      rc = described_class.new(type: "close_match", content: { "eng" => "similar concept" })
       expect(rc.type).to eq("close_match")
     end
 
     it "accepts broader_generic type (ISO 25964 BTG)" do
-      rc = described_class.new(type: "broader_generic", content: "Vehicle")
+      rc = described_class.new(type: "broader_generic", content: { "eng" => "Vehicle" })
       expect(rc.type).to eq("broader_generic")
     end
 
     it "accepts narrower_generic type (ISO 25964 NTG)" do
-      rc = described_class.new(type: "narrower_generic", content: "Car")
+      rc = described_class.new(type: "narrower_generic", content: { "eng" => "Car" })
       expect(rc.type).to eq("narrower_generic")
     end
 
     it "accepts broader_partitive type (ISO 25964 BTP)" do
-      rc = described_class.new(type: "broader_partitive", content: "Engine")
+      rc = described_class.new(type: "broader_partitive", content: { "eng" => "Engine" })
       expect(rc.type).to eq("broader_partitive")
     end
 
     it "accepts narrower_partitive type (ISO 25964 NTP)" do
-      rc = described_class.new(type: "narrower_partitive", content: "Piston")
+      rc = described_class.new(type: "narrower_partitive", content: { "eng" => "Piston" })
       expect(rc.type).to eq("narrower_partitive")
     end
 
     it "accepts broader_instantial type (ISO 25964 BTI)" do
-      rc = described_class.new(type: "broader_instantial", content: "Mammal")
+      rc = described_class.new(type: "broader_instantial", content: { "eng" => "Mammal" })
       expect(rc.type).to eq("broader_instantial")
     end
 
     it "accepts narrower_instantial type (ISO 25964 NTI)" do
-      rc = described_class.new(type: "narrower_instantial", content: "Fido")
+      rc = described_class.new(type: "narrower_instantial", content: { "eng" => "Fido" })
       expect(rc.type).to eq("narrower_instantial")
     end
 
     it "accepts broad_match type (SKOS mapping)" do
       rc = described_class.new(type: "broad_match",
-                               content: "Vehicle (other vocab)")
+                               content: { "eng" => "Vehicle (other vocab)" })
       expect(rc.type).to eq("broad_match")
     end
 
     it "accepts narrow_match type (SKOS mapping)" do
       rc = described_class.new(type: "narrow_match",
-                               content: "Electric car (other vocab)")
+                               content: { "eng" => "Electric car (other vocab)" })
       expect(rc.type).to eq("narrow_match")
     end
 
     it "accepts related_match type (SKOS mapping)" do
       rc = described_class.new(type: "related_match",
-                               content: "Automobile (other vocab)")
+                               content: { "eng" => "Automobile (other vocab)" })
       expect(rc.type).to eq("related_match")
     end
 
     it "accepts related_concept type (TBX associative)" do
-      rc = described_class.new(type: "related_concept", content: "school")
+      rc = described_class.new(type: "related_concept", content: { "eng" => "school" })
       expect(rc.type).to eq("related_concept")
     end
 
     it "accepts related_concept_broader type (TBX)" do
       rc = described_class.new(type: "related_concept_broader",
-                               content: "education")
+                               content: { "eng" => "education" })
       expect(rc.type).to eq("related_concept_broader")
     end
 
     it "accepts related_concept_narrower type (TBX)" do
       rc = described_class.new(type: "related_concept_narrower",
-                               content: "primary school")
+                               content: { "eng" => "primary school" })
       expect(rc.type).to eq("related_concept_narrower")
     end
 
     it "accepts sequentially_related type (TBX)" do
       rc = described_class.new(type: "sequentially_related",
-                               content: "next step")
+                               content: { "eng" => "next step" })
       expect(rc.type).to eq("sequentially_related")
     end
 
     it "accepts spatially_related type (TBX)" do
       rc = described_class.new(type: "spatially_related",
-                               content: "adjacent room")
+                               content: { "eng" => "adjacent room" })
       expect(rc.type).to eq("spatially_related")
     end
 
     it "accepts temporally_related type (TBX)" do
       rc = described_class.new(type: "temporally_related",
-                               content: "preceding event")
+                               content: { "eng" => "preceding event" })
       expect(rc.type).to eq("temporally_related")
     end
 
     it "accepts homograph type" do
-      rc = described_class.new(type: "homograph", content: "port (harbor)")
+      rc = described_class.new(type: "homograph", content: { "eng" => "port (harbor)" })
       expect(rc.type).to eq("homograph")
     end
 
     it "accepts false_friend type" do
-      rc = described_class.new(type: "false_friend", content: "realize")
+      rc = described_class.new(type: "false_friend", content: { "eng" => "realize" })
       expect(rc.type).to eq("false_friend")
     end
 
     it "accepts deprecated_by type" do
-      rc = described_class.new(type: "deprecated_by", content: "old term")
+      rc = described_class.new(type: "deprecated_by", content: { "eng" => "old term" })
       expect(rc.type).to eq("deprecated_by")
     end
 
     it "accepts has_part type" do
-      rc = described_class.new(type: "has_part", content: "component")
+      rc = described_class.new(type: "has_part", content: { "eng" => "component" })
       expect(rc.type).to eq("has_part")
     end
 
     it "accepts is_part_of type" do
-      rc = described_class.new(type: "is_part_of", content: "assembly")
+      rc = described_class.new(type: "is_part_of", content: { "eng" => "assembly" })
       expect(rc.type).to eq("is_part_of")
     end
 
     it "accepts has_version type" do
-      rc = described_class.new(type: "has_version", content: "2024 edition")
+      rc = described_class.new(type: "has_version", content: { "eng" => "2024 edition" })
       expect(rc.type).to eq("has_version")
     end
 
     it "accepts references type" do
-      rc = described_class.new(type: "references", content: "related doc")
+      rc = described_class.new(type: "references", content: { "eng" => "related doc" })
       expect(rc.type).to eq("references")
     end
   end

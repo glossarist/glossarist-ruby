@@ -5,6 +5,7 @@ module Glossarist
     class ManagedConcept < Glossarist::ManagedConcept
       attribute :data, V3::ManagedConceptData, default: -> { V3::ManagedConceptData.new }
       attribute :related, V3::RelatedConcept, collection: true
+      attribute :partitive_hyperedges, V3::PartitiveHyperedge, collection: true
       attribute :dates, V3::ConceptDate, collection: true
       attribute :date_accepted, V3::ConceptDate
       attribute :sources, V3::ConceptSource, collection: true
@@ -12,6 +13,7 @@ module Glossarist
       key_value do
         map :data, to: :data
         map :related, to: :related
+        map :partitive_hyperedges, to: :partitive_hyperedges
         map :dates, to: :dates
         map %i[date_accepted dateAccepted],
             with: { from: :date_accepted_from_yaml, to: :date_accepted_to_yaml }

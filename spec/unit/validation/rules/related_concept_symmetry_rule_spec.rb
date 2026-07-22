@@ -14,7 +14,7 @@ RSpec.describe Glossarist::Validation::Rules::RelatedConceptSymmetryRule do
   end
 
   def make_related(type, ref_id)
-    rc = Glossarist::RelatedConcept.new(type: type, content: ref_id)
+    rc = Glossarist::RelatedConcept.new(type: type, content: { "eng" => ref_id })
     rc.ref = Glossarist::ConceptRef.new(source: "test", id: ref_id)
     rc
   end

@@ -49,7 +49,7 @@ RSpec.describe Glossarist::ConceptRef do
     it "false_friend ref with text round-trips through YAML" do
       rc = Glossarist::RelatedConcept.new(
         type: "false_friend",
-        content: "measure (English, musical sense)",
+        content: { "eng" => "measure (English, musical sense)" },
       )
       rc.ref = described_class.new(text: "measure")
 

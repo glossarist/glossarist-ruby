@@ -186,3 +186,18 @@ concept_date:
     - retired
     - review
     - review_decision
+
+partitive_enumeration:
+  # Whether a PartitiveHyperedge's parts array constitutes the complete
+  # decomposition of the comprehensive (closed) or only a partial one
+  # (open). Default: closed.
+  value:
+    - closed
+    - open
+
+plurality_marker:
+  # Diagram notation flags from VIM concept-relationship diagrams.
+  # Orthogonal to enumeration — both may be set on the same hyperedge.
+  value:
+    - double   # close-set double line at receiver; several parts involved
+    - dashed   # broken/dashed line; plurality is uncertain

@@ -38,11 +38,25 @@ module Glossarist
       end
 
       def self.step_v2_to_v3(concept)
-        if concept.data&.related&.any?
-          concept.related ||= []
-          concept.related = (concept.related + concept.data.related).uniq
-          concept.data.related = []
-        end
+        # V2 placed `related` inside ManagedConceptData; V3 places it
+        # on ManagedConcept itself. Move any data-level related entries
+        # up to the concept level. V3::ManagedConceptData no longer
+        # serializes `related`, so we don't need to clear the moved-from
+        # slot — the V3 output naturally omits it.
+        data_related = concept.data&.related
+        return step_v2_to_v3_hyperedge_note if data_related.nil? || data_related.empty?
+
+        concept.related ||= []
+        concept.related = (concept.related + data_related).uniq
+        "3"
+      end
+
+      # Hyperedges: V2 has no hyperedge concept. V2's binary
+      # `broader_partitive` / `narrower_partitive` edges migrate as
+      # `related` entries (see step_v2_to_v3). Hyperedges are a V3-only
+      # construct and require no migration logic — concepts upgraded
+      # from V2 to V3 simply have no hyperedges.
+      def self.step_v2_to_v3_hyperedge_note
         "3"
       end
     end

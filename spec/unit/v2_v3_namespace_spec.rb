@@ -85,8 +85,8 @@ RSpec.describe "V2/V3 namespace architecture" do
         "identifier" => "test-1",
         "localized_concepts" => { "eng" => "l10n-uuid" },
         "related" => [
-          { "type" => "broader", "content" => "Parent concept" },
-          { "type" => "narrower", "content" => "Child concept" },
+          { "type" => "broader", "content" => { "eng" => "Parent concept" } },
+          { "type" => "narrower", "content" => { "eng" => "Child concept" } },
         ],
       }
       mcd = described_class.of_yaml(yaml)
@@ -99,7 +99,7 @@ RSpec.describe "V2/V3 namespace architecture" do
       mcd = described_class.new
       mcd.id = "test-1"
       mcd.related = [
-        Glossarist::RelatedConcept.new(type: "broader", content: "Parent"),
+        Glossarist::RelatedConcept.new(type: "broader", content: { "eng" => "Parent" }),
       ]
       hash = mcd.to_hash
       expect(hash).to have_key("related")
@@ -112,14 +112,14 @@ RSpec.describe "V2/V3 namespace architecture" do
       expect(described_class).to be < Glossarist::ManagedConceptData
     end
 
-    it "maps related in key_value" do
+    it "does NOT serialize related at the data level (V3 MECE rule)" do
+      # V3 places `related` ONLY on ManagedConcept. The data payload
+      # must not carry or serialize it — otherwise detect_schema_version
+      # (which keys off concept.related) is bypassed.
       mcd = described_class.new
       mcd.id = "test-1"
-      mcd.related = [
-        Glossarist::V3::RelatedConcept.new(type: "broader", content: "Parent"),
-      ]
       hash = mcd.to_hash
-      expect(hash).to have_key("related")
+      expect(hash).not_to have_key("related")
     end
   end
 
@@ -139,7 +139,7 @@ RSpec.describe "V2/V3 namespace architecture" do
           "identifier" => "test-1",
           "localized_concepts" => { "eng" => "l10n-uuid" },
           "related" => [
-            { "type" => "broader", "content" => "Parent" },
+            { "type" => "broader", "content" => { "eng" => "Parent" } },
           ],
         },
         "id" => "concept-uuid",
@@ -177,7 +177,7 @@ RSpec.describe "V2/V3 namespace architecture" do
           "localized_concepts" => { "eng" => "l10n-uuid" },
         },
         "related" => [
-          { "type" => "broader", "content" => "Parent" },
+          { "type" => "broader", "content" => { "eng" => "Parent" } },
         ],
         "schema_version" => "3",
         "id" => "concept-uuid",
@@ -245,8 +245,8 @@ RSpec.describe "V2/V3 namespace architecture" do
           "identifier" => "test-1",
           "localized_concepts" => { "eng" => "l10n-uuid" },
           "related" => [
-            { "type" => "broader", "content" => "Parent" },
-            { "type" => "narrower", "content" => "Child" },
+            { "type" => "broader", "content" => { "eng" => "Parent" } },
+            { "type" => "narrower", "content" => { "eng" => "Child" } },
           ],
         },
         "id" => "concept-uuid",
@@ -272,7 +272,7 @@ RSpec.describe "V2/V3 namespace architecture" do
           "identifier" => "test-1",
           "localized_concepts" => { "eng" => "l10n-uuid" },
           "related" => [
-            { "type" => "broader", "content" => "Parent" },
+            { "type" => "broader", "content" => { "eng" => "Parent" } },
           ],
         },
         "id" => "concept-uuid",

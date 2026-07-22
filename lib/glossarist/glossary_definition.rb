@@ -33,5 +33,11 @@ module Glossarist
                                                 "relationship_type")&.freeze
 
     ISO12620_TERM_TYPES = config.dig("iso12620", "term_type").freeze
+
+    PARTITIVE_ENUMERATION_VALUES =
+      config.dig("partitive_enumeration", "value").freeze
+
+    PLURALITY_MARKER_VALUES =
+      config.dig("plurality_marker", "value").freeze
   end
 end

@@ -67,7 +67,7 @@ RSpec.describe Glossarist::ManagedConcept, "schema versioning" do
       mc = described_class.of_yaml({
                                      "data" => { "id" => "test" },
                                      "related" => [{ "type" => "broader",
-                                                     "content" => "Parent" }],
+                                                     "content" => { "eng" => "Parent" } }],
                                    })
       expect(described_class.detect_schema_version(mc)).to eq("3")
     end

@@ -35,6 +35,36 @@ All model classes use `Lutaml::Model::Serializable` for serialization.
 - **`ConceptReference`** (`concept_reference.rb`) — a typed reference to another concept. Local refs use `concept_id` alone; external refs use `source` (URN prefix) + `concept_id` or a direct `urn` field. Has `local?`/`external?` predicates. No `to_gcr_hash` or `from_urn` — model-driven architecture uses lutaml-model for serialization; URN construction/parsing belongs in `UrnResolver`.
 - **`RelatedConcept`** (`related_concept.rb`) — a concept with a typed relationship. Relationship types cover ISO 10241-1 (deprecates/supersedes/superseded_by/compare/contrast/see), ISO 25964/SKOS (broader/narrower/broader_generic/narrower_generic/broader_partitive/narrower_partitive/broader_instantial/narrower_instantial/equivalent/close_match/broad_match/narrow_match/related_match), ISO 12620/TBX (homograph/false_friend/related_concept/related_concept_broader/related_concept_narrower/sequentially_related_concept/spatially_related_concept/temporally_related_concept), and designation-level (abbreviated_form_for/short_form_for). Types are defined in `config.yml` under `related_concept.type`.
 
+#### V3 `related` placement (MECE)
+
+In V3, `related` lives **only** on `V3::ManagedConcept#related`.
+`V3::ManagedConceptData` does NOT declare or serialize `related`.
+V2 placed `related` inside data; the `SchemaMigration::V2ToV3#step_v2_to_v3`
+migration moves any data-level entries up to the concept level. The
+V3 output never carries `related` at the data level.
+
+This consolidation closes the legacy trap where writing to
+`data.related` bypassed `ManagedConcept.detect_schema_version` (which
+keys off `concept.related`).
+
+### PartitiveHyperedge (V3 only)
+
+`PartitiveHyperedge` (`v3/partitive_hyperedge.rb`) — a one-to-many partitive decomposition. One comprehensive concept is related to one or more parts as a SINGLE relationship. Captures invariants that binary `RelatedConcept` edges cannot:
+
+- which comprehensive owns which parts (set membership)
+- diagram notation flags (`PluralityMarker`: `double`, `dashed`)
+- enumeration completeness (`PartitiveEnumeration`: `closed`, `open`)
+
+Wired into `V3::ManagedConcept#partitive_hyperedges`. NOT on `ManagedConceptData` (relationships live at the concept level for MECE consistency with `related`).
+
+Enum values are SSOT-loaded from `config.yml` via `GlossaryDefinition::PARTITIVE_ENUMERATION_VALUES` and `PLURALITY_MARKER_VALUES`. The `values:` option on each attribute documents the enum; the model's `initialize` override enforces them at construction (lutaml-model 0.8.17 does not enforce `values:` on assignment). Construction also rejects empty comprehensive, empty parts, self-loops, and duplicate marker values.
+
+Semantic checks (defaulted-enumeration warning, defensive walk) live in `Validation::Rules::PartitiveHyperedgeRule` (auto-registered by `Validation::Rules`).
+
+RDF emission: `Rdf::GlossHyperedge` view class (per-hyperedge `gloss:PartitiveHyperedge` subject with `gloss:comprehensive`, `gloss:part+`, `gloss:enumeration`, `gloss:hasPluralityMarker*`, `gloss:hyperedgeContent?`), wired into `Transforms::ConceptToGlossTransform` and emitted as `gloss:hasHyperedge` link from `GlossConcept`.
+
+Binary `broader_partitive`/`narrower_partitive` `RelatedConcept` edges and `PartitiveHyperedge` coexist — no automatic consolidation. See `concept-model/TODO.hyperedge/00-design-overview.md`.
+
 ### Reference Resolution
 
 - **`ReferenceExtractor`** (`reference_extractor.rb`) — extracts `ConceptReference` and `AssetReference` objects from `{{...}}` mentions and `image::...[]` references in concept text fields.

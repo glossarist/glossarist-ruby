@@ -12,7 +12,7 @@ RSpec.describe Glossarist::Validation::Rules::RelatedConceptCycleRule do
   end
 
   def make_related(type, ref_id, source: nil)
-    rc = Glossarist::RelatedConcept.new(type: type, content: ref_id)
+    rc = Glossarist::RelatedConcept.new(type: type, content: { "eng" => ref_id })
     rc.ref = Glossarist::ConceptRef.new(source: source, id: ref_id)
     rc
   end

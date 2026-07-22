@@ -57,25 +57,25 @@ RSpec.describe Glossarist::ManagedConcept do
   describe "#related=" do
     it "sets the related concepts" do
       subject.related = [Glossarist::RelatedConcept.of_yaml({
-                                                              "type" => "supersedes", "content" => "Example content"
+                                                              "type" => "supersedes", "content" => { "eng" => "Example content" }
                                                             })]
 
       expect(subject.related.first.type).to eq("supersedes")
-      expect(subject.related.first.content).to eq("Example content")
+      expect(subject.related.first.content).to eq("eng" => "Example content")
     end
 
     it "generates dynamic *_concepts methods for all relationship types" do
       subject.related = [
         Glossarist::RelatedConcept.new(type: "broader_generic",
-                                       content: "Vehicle"),
+                                       content: { "eng" => "Vehicle" }),
         Glossarist::RelatedConcept.new(type: "broader_partitive",
-                                       content: "Engine"),
-        Glossarist::RelatedConcept.new(type: "narrower", content: "Truck"),
+                                       content: { "eng" => "Engine" }),
+        Glossarist::RelatedConcept.new(type: "narrower", content: { "eng" => "Truck" }),
       ]
 
-      expect(subject.broader_generic_concepts.map(&:content)).to eq(["Vehicle"])
-      expect(subject.broader_partitive_concepts.map(&:content)).to eq(["Engine"])
-      expect(subject.narrower_concepts.map(&:content)).to eq(["Truck"])
+      expect(subject.broader_generic_concepts.map(&:content)).to eq([{ "eng" => "Vehicle" }])
+      expect(subject.broader_partitive_concepts.map(&:content)).to eq([{ "eng" => "Engine" }])
+      expect(subject.narrower_concepts.map(&:content)).to eq([{ "eng" => "Truck" }])
       expect(subject.broader_concepts).to be_empty
     end
   end
