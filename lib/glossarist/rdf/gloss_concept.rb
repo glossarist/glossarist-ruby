@@ -11,7 +11,7 @@ module Glossarist
       attribute :sources, GlossConceptSource, collection: true
       attribute :domains, GlossConceptReference, collection: true
       attribute :dates, GlossConceptDate, collection: true
-      attribute :hyperedges, GlossHyperedge, collection: true
+      attribute :partitive_relations, GlossPartitiveRelation, collection: true
 
       RelationshipPredicates::CONCEPT_REL_PREDICATES.each_key do |type|
         attribute :"#{type}_targets", :string, collection: true
@@ -42,8 +42,8 @@ module Glossarist
                 link: "gloss:hasDomain"
         members :dates,
                 link: "gloss:hasDate"
-        members :hyperedges,
-                link: "gloss:hasPartitiveHyperedge"
+        members :partitive_relations,
+                link: "gloss:hasPartitiveRelation"
 
         RelationshipPredicates::CONCEPT_REL_PREDICATES.each do |type, (ns, name)|
           predicate name, namespace: ns, to: :"#{type}_targets",

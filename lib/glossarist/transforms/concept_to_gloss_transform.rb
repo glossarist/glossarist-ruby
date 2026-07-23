@@ -130,42 +130,64 @@ module Glossarist
           domains: build_gloss_domains(managed_concept.data&.domains,
                                        identifier),
           dates: build_gloss_dates(managed_concept.dates, identifier),
-          hyperedges: build_gloss_hyperedges(v3_hyperedges(managed_concept),
-                                             identifier),
+          partitive_relations: build_gloss_partitive_relations(
+            v3_partitive_relations(managed_concept), identifier,
+          ),
           **rel_targets,
         )
       end
 
-      # Hyperedges are a V3-only attribute. The transform accepts both
-      # V1/V2 and V3 concepts; for V1/V2 concepts the hyperedge list
-      # is always empty.
-      def v3_hyperedges(managed_concept)
+      # PartitiveRelations are a V3-only attribute. The transform
+      # accepts both V1/V2 and V3 concepts; for V1/V2 concepts the
+      # relation list is always empty.
+      def v3_partitive_relations(managed_concept)
         return [] unless managed_concept.is_a?(V3::ManagedConcept)
 
-        managed_concept.partitive_hyperedges
+        managed_concept.partitive_relations
       end
 
-      def build_gloss_hyperedges(hyperedges, identifier)
-        return [] unless hyperedges
+      def build_gloss_partitive_relations(relations, identifier)
+        return [] unless relations
 
-        Array(hyperedges).map do |he|
-          Rdf::GlossHyperedge.new(
+        Array(relations).map do |rel|
+          Rdf::GlossPartitiveRelation.new(
             identifier: identifier.to_s,
-            comprehensive_id: he.comprehensive.id.to_s,
-            comprehensive_uri: hyperedge_concept_uri(he.comprehensive),
-            part_uris: Array(he.parts).map { |p| hyperedge_concept_uri(p) },
-            enumeration: he.enumeration,
-            markers: Array(he.markers),
-            content: he.content,
+            comprehensive_uri: partitive_concept_uri(rel.comprehensive),
+            partitive_member_ids: Array(rel.partitives).map do |m|
+              partitive_member_uri(m)
+            end,
+            completeness: rel.completeness,
+            has_plurality: build_gloss_plurality(rel.plurality),
+            criterion: rel.criterion,
           )
         end
       end
 
-      def hyperedge_concept_uri(ref)
+      def build_gloss_plurality(plurality)
+        return nil unless plurality
+
+        Rdf::GlossTypeSharedPlurality.new(
+          is_shared: plurality.is_shared,
+          is_uncertain: plurality.is_uncertain,
+          shared_type_uri: partitive_concept_uri(plurality.shared_type),
+        )
+      end
+
+      def partitive_concept_uri(ref)
         return nil unless ref.is_a?(Glossarist::ConceptRef)
 
         Glossarist::Rdf::Namespaces::GlossaristNamespace.uri +
-          "concept/#{ref.id}"
+          "concept/#{ref.id || ref.text}"
+      end
+
+      def partitive_member_uri(member)
+        return nil unless member.is_a?(V3::PartitiveMember)
+
+        ref = member.ref
+        return nil unless ref.is_a?(Glossarist::ConceptRef)
+
+        Glossarist::Rdf::Namespaces::GlossaristNamespace.uri +
+          "concept/#{ref.id || ref.text}"
       end
 
       def build_gloss_localized_concept(l10n, concept_id)
