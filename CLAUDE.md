@@ -47,23 +47,35 @@ This consolidation closes the legacy trap where writing to
 `data.related` bypassed `ManagedConcept.detect_schema_version` (which
 keys off `concept.related`).
 
-### PartitiveHyperedge (V3 only)
+### PartitiveRelation (V3 only)
 
-`PartitiveHyperedge` (`v3/partitive_hyperedge.rb`) — a one-to-many partitive decomposition. One comprehensive concept is related to one or more parts as a SINGLE relationship. Captures invariants that binary `RelatedConcept` edges cannot:
+`PartitiveRelation` (`v3/partitive_relation.rb`) — an ISO 704 / ISO 1087-1 / ISO 12620 partitive relation. One comprehensive concept (superordinate concept partitive) is connected to two or more partitive concepts (subordinate concepts partitive) which fitted together constitute the comprehensive.
 
-- which comprehensive owns which parts (set membership)
-- diagram notation flags (`PluralityMarker`: `double`, `dashed`)
-- enumeration completeness (`PartitiveEnumeration`: `closed`, `open`)
+Each PartitiveRelation carries:
 
-Wired into `V3::ManagedConcept#partitive_hyperedges`. NOT on `ManagedConceptData` (relationships live at the concept level for MECE consistency with `related`).
+- `comprehensive` — ConceptRef to the superordinate concept partitive (the whole)
+- `partitives` — `PartitiveMember [2..*]` (ISO 704 "two or more"); each member wraps a ConceptRef plus optional `MemberCertainty` (`confirmed` default, `possible`)
+- `completeness` — `complete` (default; the encoded partitives constitute the whole) or `partial` (others exist beyond those encoded). ISO 704 rake backline notation.
+- `plurality` — optional `TypeSharedPlurality` block (ISO 704 close-set double line promoted to data: `is_shared`, `is_uncertain`, `shared_type`). Replaces the prior opaque `markers` field.
+- `criterion` — optional localized string hash (`{ "eng" => "physical structure" }`). ISO 12620 coordinate-concept coherence: partitives within one relation share the comprehensive AND the criterion.
 
-Enum values are SSOT-loaded from `config.yml` via `GlossaryDefinition::PARTITIVE_ENUMERATION_VALUES` and `PLURALITY_MARKER_VALUES`. The `values:` option on each attribute documents the enum; the model's `initialize` override enforces them at construction (lutaml-model 0.8.17 does not enforce `values:` on assignment). Construction also rejects empty comprehensive, empty parts, self-loops, and duplicate marker values.
+Wired into `V3::ManagedConcept#partitive_relations`. NOT on `ManagedConceptData` (relationships live at the concept level for MECE consistency with `related`).
 
-Semantic checks (defaulted-enumeration warning, defensive walk) live in `Validation::Rules::PartitiveHyperedgeRule` (auto-registered by `Validation::Rules`).
+Enum values are SSOT-loaded from `config.yml` via `GlossaryDefinition::COMPLETENESS_VALUES` and `MEMBER_CERTAINTY_VALUES`. The `values:` option on each attribute documents the enum; the model's `validate!` method enforces structural invariants after construction (empty comprehensive, <2 partitives, self-loops, incoherent plurality, invalid enum values).
 
-RDF emission: `Rdf::GlossHyperedge` view class (per-hyperedge `gloss:PartitiveHyperedge` subject with `gloss:comprehensive`, `gloss:part+`, `gloss:enumeration`, `gloss:hasPluralityMarker*`, `gloss:hyperedgeContent?`), wired into `Transforms::ConceptToGlossTransform` and emitted as `gloss:hasHyperedge` link from `GlossConcept`.
+Semantic checks (≥2 partitives cardinality, duplicate comprehensive+criterion detection, criterion-absent warning, ExternalConcept shape) live in `Validation::Rules::PartitiveRelationRule` (auto-registered by `Validation::Rules`, code GLS-221).
 
-Binary `broader_partitive`/`narrower_partitive` `RelatedConcept` edges and `PartitiveHyperedge` coexist — no automatic consolidation. See `concept-model/TODO.hyperedge/00-design-overview.md`.
+RDF emission: `Rdf::GlossPartitiveRelation` view class with companion `GlossPartitiveMember` and `GlossTypeSharedPlurality`. Wired into `Transforms::ConceptToGlossTransform` and emitted as `gloss:hasPartitiveRelation` link from `GlossConcept`.
+
+Binary `broader_partitive`/`narrower_partitive`/`has_part`/`is_part_of` `RelatedConcept` edges and `PartitiveRelation` coexist — no automatic consolidation. Use a binary edge for pairwise relationships; use a PartitiveRelation when membership is jointly significant (≥2 partitives + completeness/plurality/criterion metadata).
+
+#### ExternalConcept
+
+`status: external` is a value of `ConceptStatus` (not a separate class). A concept with `status: external` is referenced from this dataset but defined elsewhere — ISO 704 "parenthetic term" semantic role. Required fields (definition, sources) are relaxed; at least one designation is still required. Resolves to another dataset's concept via `provided_by` when a defining dataset is loaded.
+
+#### Relationship type extensions
+
+Two new values in `RelatedConceptType`: `provides` (real concept → external concept) and `provided_by` (external concept → real concept). Inverse pair, established at the collection level.
 
 ### Reference Resolution
 

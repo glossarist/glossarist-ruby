@@ -175,7 +175,7 @@ module Glossarist
       return "3" if concept.sources&.any?
       return "3" if concept.data&.domains&.any?
       return "3" if concept.is_a?(V3::ManagedConcept) &&
-                     concept.partitive_hyperedges&.any?
+                     concept.partitive_relations&.any?
       return "3" if localization_has_references?(concept)
 
       "2"

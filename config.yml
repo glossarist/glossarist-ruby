@@ -101,6 +101,12 @@ related_concept:
     - version_of
     - current_version
     - current_version_of
+    # ExternalConcept resolution (Glossarist extension)
+    # Real concept `provides` substance for an external concept;
+    # external concept `provided_by` real concept. Inverse pair.
+    # Established at the collection level when both datasets are loaded.
+    - provides
+    - provided_by
 
 iso12620:
   term_type:
@@ -178,6 +184,10 @@ concept:
     - valid
     - superseded
     - retired
+    # Glossarist extension: concept referenced from this dataset but
+    # defined elsewhere. Resolves via `provided_by` when a defining
+    # dataset is loaded. ISO 704 "parenthetic term" semantic role.
+    - external
 
 concept_date:
   type:
@@ -187,17 +197,23 @@ concept_date:
     - review
     - review_decision
 
-partitive_enumeration:
-  # Whether a PartitiveHyperedge's parts array constitutes the complete
-  # decomposition of the comprehensive (closed) or only a partial one
-  # (open). Default: closed.
-  value:
-    - closed
-    - open
+# PartitiveRelation redesign (TODO.partitive-relation-v2)
+# Replaces partitive_enumeration + plurality_marker.
 
-plurality_marker:
-  # Diagram notation flags from VIM concept-relationship diagrams.
-  # Orthogonal to enumeration — both may be set on the same hyperedge.
+completeness:
+  # Whether the encoded partitives fitted together constitute the
+  # whole comprehensive concept (complete) or only some of it
+  # (partial — other partitives exist but are not encoded).
+  # ISO 704: rake backline ending with a tooth = complete;
+  # backline continuing without a tooth = partial.
+  # Default: complete.
   value:
-    - double   # close-set double line at receiver; several parts involved
-    - dashed   # broken/dashed line; plurality is uncertain
+    - complete
+    - partial
+
+member_certainty:
+  # Per-partitive certainty. Glossarist extension beyond ISO 704
+  # notation. Defaults to confirmed when omitted.
+  value:
+    - confirmed
+    - possible

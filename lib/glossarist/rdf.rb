@@ -42,7 +42,10 @@ module Glossarist
     autoload :GlossFigureImage,       "#{__dir__}/rdf/gloss_figure_image"
     autoload :GlossTable,             "#{__dir__}/rdf/gloss_table"
     autoload :GlossFormula,           "#{__dir__}/rdf/gloss_formula"
-    autoload :GlossHyperedge,         "#{__dir__}/rdf/gloss_hyperedge"
+    autoload :GlossPartitiveRelation, "#{__dir__}/rdf/gloss_partitive_relation"
+    autoload :GlossPartitiveMember,   "#{__dir__}/rdf/gloss_partitive_member"
+    autoload :GlossTypeSharedPlurality,
+             "#{__dir__}/rdf/gloss_type_shared_plurality"
     autoload :V3,                     "#{__dir__}/rdf/v3"
   end
 end
