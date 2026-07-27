@@ -157,20 +157,9 @@ module Glossarist
               partitive_member_uri(m)
             end,
             completeness: rel.completeness,
-            has_plurality: build_gloss_plurality(rel.plurality),
             criterion: rel.criterion,
           )
         end
-      end
-
-      def build_gloss_plurality(plurality)
-        return nil unless plurality
-
-        Rdf::GlossTypeSharedPlurality.new(
-          is_shared: plurality.is_shared,
-          is_uncertain: plurality.is_uncertain,
-          shared_type_uri: partitive_concept_uri(plurality.shared_type),
-        )
       end
 
       def partitive_concept_uri(ref)

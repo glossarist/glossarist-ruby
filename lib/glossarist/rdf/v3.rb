@@ -31,7 +31,6 @@ module Glossarist
         GlossFormula
         GlossPartitiveRelation
         GlossPartitiveMember
-        GlossTypeSharedPlurality
       ].freeze
 
       VIEW_CLASS_NAMES.each do |name|

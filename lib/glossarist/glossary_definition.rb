@@ -35,9 +35,8 @@ module Glossarist
     ISO12620_TERM_TYPES = config.dig("iso12620", "term_type").freeze
 
     # PartitiveRelation redesign (TODO.partitive-relation-v2).
-    # Replaces PARTITIVE_ENUMERATION_VALUES + PLURALITY_MARKER_VALUES.
     COMPLETENESS_VALUES = config.dig("completeness", "value").freeze
 
-    MEMBER_CERTAINTY_VALUES = config.dig("member_certainty", "value").freeze
+    MULTIPLICITY_VALUES = config.dig("multiplicity", "value").freeze
   end
 end

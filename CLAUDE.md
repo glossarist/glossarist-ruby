@@ -54,20 +54,21 @@ keys off `concept.related`).
 Each PartitiveRelation carries:
 
 - `comprehensive` — ConceptRef to the superordinate concept partitive (the whole)
-- `partitives` — `PartitiveMember [2..*]` (ISO 704 "two or more"); each member wraps a ConceptRef plus optional `MemberCertainty` (`confirmed` default, `possible`)
+- `partitives` — `PartitiveMember [2..*]` (ISO 704 "two or more"). Each member wraps a ConceptRef plus ISO 704:2022 notation metadata:
+  - `multiplicity` — one of `compulsory` (1 solid line, default), `optional` (1 dashed line), `compulsory_multiple` (2 solid lines), `optional_multiple` (2 dashed lines), `at_least_one` (1 solid + 1 dashed line)
+  - `is_delimiting` — boolean (default false). A delimiting part behaves like a delimiting characteristic: it distinguishes the comprehensive from coordinate concepts. Rendered as a bold 3x-width line in the diagram. Orthogonal to multiplicity.
 - `completeness` — `complete` (default; the encoded partitives constitute the whole) or `partial` (others exist beyond those encoded). ISO 704 rake backline notation.
-- `plurality` — optional `TypeSharedPlurality` block (ISO 704 close-set double line promoted to data: `is_shared`, `is_uncertain`, `shared_type`). Replaces the prior opaque `markers` field.
 - `criterion` — optional localized string hash (`{ "eng" => "physical structure" }`). ISO 12620 coordinate-concept coherence: partitives within one relation share the comprehensive AND the criterion.
 
 Wired into `V3::ManagedConcept#partitive_relations`. NOT on `ManagedConceptData` (relationships live at the concept level for MECE consistency with `related`).
 
-Enum values are SSOT-loaded from `config.yml` via `GlossaryDefinition::COMPLETENESS_VALUES` and `MEMBER_CERTAINTY_VALUES`. The `values:` option on each attribute documents the enum; the model's `validate!` method enforces structural invariants after construction (empty comprehensive, <2 partitives, self-loops, incoherent plurality, invalid enum values).
+Enum values are SSOT-loaded from `config.yml` via `GlossaryDefinition::COMPLETENESS_VALUES` and `MULTIPLICITY_VALUES`. The `values:` option on each attribute documents the enum; the model's `validate!` method enforces structural invariants after construction (empty comprehensive, <2 partitives, self-loops, invalid enum values).
 
-Semantic checks (≥2 partitives cardinality, duplicate comprehensive+criterion detection, criterion-absent warning, ExternalConcept shape) live in `Validation::Rules::PartitiveRelationRule` (auto-registered by `Validation::Rules`, code GLS-221).
+Semantic checks (≥2 partitives cardinality, duplicate comprehensive+criterion detection, criterion-absent warning, non-default multiplicity warning, ExternalConcept shape) live in `Validation::Rules::PartitiveRelationRule` (auto-registered by `Validation::Rules`, code GLS-221).
 
-RDF emission: `Rdf::GlossPartitiveRelation` view class with companion `GlossPartitiveMember` and `GlossTypeSharedPlurality`. Wired into `Transforms::ConceptToGlossTransform` and emitted as `gloss:hasPartitiveRelation` link from `GlossConcept`.
+RDF emission: `Rdf::GlossPartitiveRelation` view class with companion `GlossPartitiveMember`. Wired into `Transforms::ConceptToGlossTransform` and emitted as `gloss:hasPartitiveRelation` link from `GlossConcept`.
 
-Binary `broader_partitive`/`narrower_partitive`/`has_part`/`is_part_of` `RelatedConcept` edges and `PartitiveRelation` coexist — no automatic consolidation. Use a binary edge for pairwise relationships; use a PartitiveRelation when membership is jointly significant (≥2 partitives + completeness/plurality/criterion metadata).
+Binary `broader_partitive`/`narrower_partitive`/`has_part`/`is_part_of` `RelatedConcept` edges and `PartitiveRelation` coexist — no automatic consolidation. Use a binary edge for pairwise relationships; use a PartitiveRelation when membership is jointly significant (≥2 partitives + completeness/multiplicity/delimiting/criterion metadata).
 
 #### ExternalConcept
 

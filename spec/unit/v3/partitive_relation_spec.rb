@@ -17,18 +17,16 @@ RSpec.describe Glossarist::V3::PartitiveRelation do
   end
 
   describe "construction" do
-    it "accepts comprehensive, partitives, completeness, plurality, criterion" do
+    it "accepts comprehensive, partitives, completeness, criterion" do
       rel = described_class.new(
         comprehensive: comprehensive,
         partitives: partitives,
         completeness: "complete",
-        plurality: Glossarist::V3::TypeSharedPlurality.new(is_shared: true),
         criterion: { "eng" => "physical structure" },
       )
       expect(rel.comprehensive.id).to eq("1.1")
       expect(rel.partitives.length).to eq(2)
       expect(rel.completeness).to eq("complete")
-      expect(rel.plurality.is_shared).to be(true)
       expect(rel.criterion).to eq("eng" => "physical structure")
     end
 
@@ -89,18 +87,6 @@ RSpec.describe Glossarist::V3::PartitiveRelation do
       )
       expect { rel.validate! }.to raise_error(ArgumentError, /completeness/)
     end
-
-    it "raises on incoherent plurality (is_uncertain without is_shared)" do
-      rel = described_class.new(
-        comprehensive: comprehensive,
-        partitives: partitives,
-        plurality: Glossarist::V3::TypeSharedPlurality.new(
-          is_shared: false, is_uncertain: true,
-        ),
-      )
-      expect { rel.validate! }
-        .to raise_error(ArgumentError, /is_uncertain requires is_shared/)
-    end
   end
 
   describe "round-trip YAML" do
@@ -118,19 +104,28 @@ RSpec.describe Glossarist::V3::PartitiveRelation do
       expect(restored.criterion).to eq("eng" => "physical structure")
     end
 
-    it "round-trips a partial relation with plurality" do
+    it "round-trips a partial relation with mixed multiplicity members" do
+      members = [
+        Glossarist::V3::PartitiveMember.new(
+          ref: Glossarist::V3::ConceptRef.new(source: "VIM", id: "1.2"),
+          multiplicity: "compulsory",
+          is_delimiting: true,
+        ),
+        Glossarist::V3::PartitiveMember.new(
+          ref: Glossarist::V3::ConceptRef.new(source: "VIM", id: "1.3"),
+          multiplicity: "optional",
+        ),
+      ]
       rel = described_class.new(
         comprehensive: comprehensive,
-        partitives: partitives,
+        partitives: members,
         completeness: "partial",
-        plurality: Glossarist::V3::TypeSharedPlurality.new(
-          is_shared: true, is_uncertain: true,
-        ),
       )
       restored = described_class.from_yaml(rel.to_yaml).validate!
       expect(restored).to be_partial
-      expect(restored.plurality.is_shared).to be(true)
-      expect(restored.plurality.is_uncertain).to be(true)
+      expect(restored.partitives.first).to be_delimiting
+      expect(restored.partitives.first).to be_compulsory
+      expect(restored.partitives.last).to be_optional
     end
   end
 
@@ -147,6 +142,8 @@ RSpec.describe Glossarist::V3::PartitiveRelation do
           - ref:
               source: VIM
               id: '112-02-10'
+            multiplicity: compulsory
+            is_delimiting: true
           - ref:
               source: VIM
               id: '112-03-26'
@@ -163,6 +160,7 @@ RSpec.describe Glossarist::V3::PartitiveRelation do
       expect(rel_list.first.comprehensive.id).to eq("112-02-09")
       expect(rel_list.first.partitives.map { |m| m.ref.id })
         .to eq(%w[112-02-10 112-03-26])
+      expect(rel_list.first.partitives.first).to be_delimiting
       expect(rel_list.first.completeness).to eq("complete")
       expect(rel_list.first.criterion).to eq("eng" => "measurement result composition")
     end

@@ -12,10 +12,13 @@ module Glossarist
     # within one relation are coordinate concepts: they share the
     # comprehensive AND share the criterion of subdivision.
     #
-    # Glossarist extensions beyond ISO notation:
-    #   - Per-partitive certainty (MemberCertainty)
-    #   - plurality.shared_type (the type the partitives share)
-    #   - criterion as a structured field (not just diagrammatic)
+    # Per-partitive metadata (ISO 704:2022):
+    #   - multiplicity (compulsory, optional, compulsory_multiple,
+    #     optional_multiple, at_least_one) — encodes the diagram
+    #     line notation as data
+    #   - is_delimiting — orthogonal flag; a delimiting part behaves
+    #     like a delimiting characteristic (distinguishes the
+    #     comprehensive from coordinate concepts)
     #
     # Replaces the prior PartitiveHyperedge class. The "hyperedge"
     # framing was graph-theoretic; ISO calls this a *relation*.
@@ -27,14 +30,12 @@ module Glossarist
       attribute :completeness, :string,
                 values: Glossarist::GlossaryDefinition::COMPLETENESS_VALUES,
                 default: -> { DEFAULT_COMPLETENESS }
-      attribute :plurality, TypeSharedPlurality
       attribute :criterion, :hash
 
       key_value do
         map :comprehensive, to: :comprehensive
         map :partitives, to: :partitives
         map :completeness, to: :completeness
-        map :plurality, to: :plurality
         map :criterion, to: :criterion
       end
 
@@ -43,7 +44,6 @@ module Glossarist
         validate_partitives!
         validate_self_loop!
         validate_completeness!
-        validate_plurality!
         self
       end
 
@@ -109,10 +109,6 @@ module Glossarist
                 "#{completeness.inspect}; must be one of " \
                 "#{GlossaryDefinition::COMPLETENESS_VALUES.join(', ')}"
         end
-      end
-
-      def validate_plurality!
-        plurality&.validate!
       end
     end
   end

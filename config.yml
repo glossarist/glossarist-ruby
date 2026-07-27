@@ -211,9 +211,18 @@ completeness:
     - complete
     - partial
 
-member_certainty:
-  # Per-partitive certainty. Glossarist extension beyond ISO 704
-  # notation. Defaults to confirmed when omitted.
+multiplicity:
+  # ISO 704:2022 partitive member multiplicity. Encodes the diagram
+  # line notation as structured data:
+  #   compulsory          — 1 solid line (must exist in every instance)
+  #   optional            — 1 dashed line (exists in some instances only)
+  #   compulsory_multiple — 2 solid lines (multiple must exist)
+  #   optional_multiple   — 2 dashed lines (multiple may exist)
+  #   at_least_one        — 1 solid + 1 dashed line (at least one must exist)
+  # Default: compulsory.
   value:
-    - confirmed
-    - possible
+    - compulsory
+    - optional
+    - compulsory_multiple
+    - optional_multiple
+    - at_least_one
