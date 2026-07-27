@@ -30,7 +30,7 @@ RSpec.describe Glossarist::V3::PartitiveMember do
     end
 
     it "accepts all 5 multiplicity values" do
-      %w[compulsory optional compulsory_multiple optional_multiple at_least_one].each do |m|
+      %w[compulsory optional compulsory_multiple optional_multiple compulsory_at_least_one].each do |m|
         member = described_class.new(ref: ref, multiplicity: m)
         expect(member.multiplicity).to eq(m)
       end

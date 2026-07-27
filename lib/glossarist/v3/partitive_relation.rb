@@ -14,7 +14,7 @@ module Glossarist
     #
     # Per-partitive metadata (ISO 704:2022):
     #   - multiplicity (compulsory, optional, compulsory_multiple,
-    #     optional_multiple, at_least_one) — encodes the diagram
+    #     optional_multiple, compulsory_at_least_one) — encodes the diagram
     #     line notation as data
     #   - is_delimiting — orthogonal flag; a delimiting part behaves
     #     like a delimiting characteristic (distinguishes the
