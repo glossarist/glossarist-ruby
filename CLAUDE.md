@@ -55,7 +55,7 @@ Each PartitiveRelation carries:
 
 - `comprehensive` — ConceptRef to the superordinate concept partitive (the whole)
 - `partitives` — `PartitiveMember [2..*]` (ISO 704 "two or more"). Each member wraps a ConceptRef plus ISO 704:2022 notation metadata:
-  - `multiplicity` — one of `compulsory` (1 solid line, default), `optional` (1 dashed line), `compulsory_multiple` (2 solid lines), `optional_multiple` (2 dashed lines), `at_least_one` (1 solid + 1 dashed line)
+  - `multiplicity` — one of `compulsory` (1 solid line, default), `optional` (1 dashed line), `compulsory_multiple` (2 solid lines), `optional_multiple` (2 dashed lines), `compulsory_at_least_one` (1 solid + 1 dashed line)
   - `is_delimiting` — boolean (default false). A delimiting part behaves like a delimiting characteristic: it distinguishes the comprehensive from coordinate concepts. Rendered as a bold 3x-width line in the diagram. Orthogonal to multiplicity.
 - `completeness` — `complete` (default; the encoded partitives constitute the whole) or `partial` (others exist beyond those encoded). ISO 704 rake backline notation.
 - `criterion` — optional localized string hash (`{ "eng" => "physical structure" }`). ISO 12620 coordinate-concept coherence: partitives within one relation share the comprehensive AND the criterion.
