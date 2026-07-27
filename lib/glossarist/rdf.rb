@@ -44,8 +44,6 @@ module Glossarist
     autoload :GlossFormula,           "#{__dir__}/rdf/gloss_formula"
     autoload :GlossPartitiveRelation, "#{__dir__}/rdf/gloss_partitive_relation"
     autoload :GlossPartitiveMember,   "#{__dir__}/rdf/gloss_partitive_member"
-    autoload :GlossTypeSharedPlurality,
-             "#{__dir__}/rdf/gloss_type_shared_plurality"
     autoload :V3,                     "#{__dir__}/rdf/v3"
   end
 end

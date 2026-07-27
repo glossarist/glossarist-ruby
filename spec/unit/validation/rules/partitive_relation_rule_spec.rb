@@ -10,21 +10,24 @@ RSpec.describe Glossarist::Validation::Rules::PartitiveRelationRule do
 
   let(:dataset_context) { make_dataset_context(tmpdir) }
 
+  def make_member(id, multiplicity: "compulsory", is_delimiting: false)
+    Glossarist::V3::PartitiveMember.new(
+      ref: Glossarist::V3::ConceptRef.new(source: "VIM", id: id),
+      multiplicity: multiplicity,
+      is_delimiting: is_delimiting,
+    )
+  end
+
   def make_relation(comprehensive_id:, partitive_ids:, completeness: "complete",
-                    criterion: nil, plurality: nil)
+                    criterion: nil)
     comp = Glossarist::V3::ConceptRef.new(source: "VIM", id: comprehensive_id)
-    parts = partitive_ids.map do |pid|
-      Glossarist::V3::PartitiveMember.new(
-        ref: Glossarist::V3::ConceptRef.new(source: "VIM", id: pid),
-      )
-    end
+    parts = partitive_ids.map { |pid| make_member(pid) }
     kwargs = {
       comprehensive: comp,
       partitives: parts,
       completeness: completeness,
     }
     kwargs[:criterion] = criterion if criterion
-    kwargs[:plurality] = plurality if plurality
     Glossarist::V3::PartitiveRelation.new(**kwargs)
   end
 
@@ -103,22 +106,24 @@ RSpec.describe Glossarist::Validation::Rules::PartitiveRelationRule do
       .to be true
   end
 
-  it "errors when plurality.is_uncertain without is_shared" do
+  it "warns when a member has non-default multiplicity" do
     mc = make_v3_concept
+    comp = Glossarist::V3::ConceptRef.new(source: "VIM", id: "1.1")
+    parts = [
+      make_member("1.2", multiplicity: "optional"),
+      make_member("1.3"),
+    ]
     mc.partitive_relations = [
-      make_relation(
-        comprehensive_id: "1.1",
-        partitive_ids: %w[1.2 1.3],
+      Glossarist::V3::PartitiveRelation.new(
+        comprehensive: comp,
+        partitives: parts,
         criterion: { "eng" => "c" },
-        plurality: Glossarist::V3::TypeSharedPlurality.new(
-          is_shared: false, is_uncertain: true,
-        ),
       ),
     ]
     cc = make_concept_context(mc, collection_context: dataset_context,
                               file_name: "c.yaml")
     issues = rule.check(cc)
-    expect(issues.any? { |i| i.message.include?("is_uncertain requires") })
+    expect(issues.any? { |i| i.message.include?("non-default multiplicity") })
       .to be true
   end
 end

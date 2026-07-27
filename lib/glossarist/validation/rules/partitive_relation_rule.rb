@@ -14,9 +14,8 @@ module Glossarist
       #     ISO 12620 coordinate-concept coherence)
       #   - warning when a relation has no criterion (cannot
       #     distinguish from siblings sharing the comprehensive)
-      #   - error when plurality.is_uncertain is set without
-      #     plurality.is_shared: true (broken-line qualifies
-      #     close-set double line)
+      #   - warning when multiplicity is not the default compulsory
+      #     (encourages explicit statement of optional/multiple)
       #   - error when ExternalConcept (status: external) lacks
       #     at least one designation
       #
@@ -47,7 +46,7 @@ module Glossarist
           relations.each_with_index do |rel, idx|
             check_cardinality(rel, idx, fname, issues)
             check_criterion_present(rel, idx, fname, issues)
-            check_plurality_coherence(rel, idx, fname, issues)
+            check_member_multiplicity(rel, idx, fname, issues)
           end
 
           check_duplicate_decomposition(relations, fname, issues)
@@ -86,18 +85,30 @@ module Glossarist
           )
         end
 
-        def check_plurality_coherence(rel, idx, fname, issues)
-          plural = rel.plurality
-          return unless plural
-          return unless plural.is_uncertain
-          return if plural.is_shared
+        def check_member_multiplicity(rel, idx, fname, issues)
+          rel.partitives.each_with_index do |member, mi|
+            unless member.compulsory?
+              issues << issue(
+                "partitive_relation #{idx + 1}.partitives[#{mi}] has " \
+                "non-default multiplicity '#{member.multiplicity}'; " \
+                "ISO 704 diagram uses dashed/multiple-line notation for " \
+                "this — confirm the optionality is intentional",
+                severity: "warning",
+                location: fname,
+              )
+            end
 
-          issues << issue(
-            "partitive_relation #{idx + 1}.plurality: is_uncertain requires " \
-            "is_shared: true (ISO 704 broken line qualifies the close-set " \
-            "double line claim)",
-            location: fname,
-          )
+            next unless member.delimiting?
+
+            issues << issue(
+              "partitive_relation #{idx + 1}.partitives[#{mi}] is marked " \
+              "delimiting (ISO 704 bold 3x-width line); behaves like a " \
+              "delimiting characteristic distinguishing the comprehensive " \
+              "from coordinate concepts",
+              severity: "info",
+              location: fname,
+            )
+          end
         end
 
         def check_duplicate_decomposition(relations, fname, issues)
