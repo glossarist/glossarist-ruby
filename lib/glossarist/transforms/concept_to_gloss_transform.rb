@@ -131,7 +131,7 @@ module Glossarist
                                        identifier),
           dates: build_gloss_dates(managed_concept.dates, identifier),
           partitive_relations: build_gloss_partitive_relations(
-            v3_partitive_relations(managed_concept), identifier,
+            v3_partitive_relations(managed_concept), identifier
           ),
           **rel_targets,
         )
@@ -150,33 +150,54 @@ module Glossarist
         return [] unless relations
 
         Array(relations).map do |rel|
+          source_members = Array(rel.partitives)
+          gloss_members = source_members.map { |m| build_gloss_partitive_member(m) }
+          member_uris = source_members
+            .select { |m| m.is_a?(V3::PartitiveMember) && m.ref.is_a?(Glossarist::ConceptRef) }
+            .map { |m| concept_ref_uri(m.ref) }
+
           Rdf::GlossPartitiveRelation.new(
             identifier: identifier.to_s,
-            comprehensive_uri: partitive_concept_uri(rel.comprehensive),
-            partitive_member_ids: Array(rel.partitives).map do |m|
-              partitive_member_uri(m)
-            end,
+            comprehensive_uri: concept_ref_uri(rel.comprehensive),
+            partitive_member_ids: member_uris,
+            partitive_members: gloss_members,
             completeness: rel.completeness,
             criterion: rel.criterion,
           )
         end
       end
 
-      def partitive_concept_uri(ref)
-        return nil unless ref.is_a?(Glossarist::ConceptRef)
-
-        Glossarist::Rdf::Namespaces::GlossaristNamespace.uri +
-          "concept/#{ref.id || ref.text}"
-      end
-
-      def partitive_member_uri(member)
-        return nil unless member.is_a?(V3::PartitiveMember)
+      def build_gloss_partitive_member(member)
+        return Rdf::GlossPartitiveMember.new unless member.is_a?(V3::PartitiveMember)
 
         ref = member.ref
+        ref_attrs = if ref.is_a?(Glossarist::ConceptRef)
+                      { ref_id: ref.id, ref_source: ref.source, ref_text: ref.text }
+                    else
+                      {}
+                    end
+
+        Rdf::GlossPartitiveMember.new(
+          **ref_attrs,
+          presence: member.presence,
+          count: member.count,
+          is_delimiting: member.is_delimiting,
+        )
+      end
+
+      # Single SSOT for ConceptRef → concept URI. Handles all four
+      # ref shapes (source+id, id-only, source+text, text-only) and
+      # mirrors GlossCitation.slug's `[source, id].compact.join("/")`
+      # convention so external ConceptRefs don't collide with local
+      # ones of the same id.
+      def concept_ref_uri(ref)
         return nil unless ref.is_a?(Glossarist::ConceptRef)
 
+        slug = [ref.source, ref.id || ref.text].compact.reject(&:empty?)
+        return nil if slug.empty?
+
         Glossarist::Rdf::Namespaces::GlossaristNamespace.uri +
-          "concept/#{ref.id || ref.text}"
+          "concept/#{slug.join('/')}"
       end
 
       def build_gloss_localized_concept(l10n, concept_id)

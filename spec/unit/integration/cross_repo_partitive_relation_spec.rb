@@ -3,7 +3,7 @@
 require "spec_helper"
 
 # Cross-repo integration: verifies that a PartitiveRelation YAML
-# fixture authored against the concept-model v2 schema round-trips
+# fixture authored against the concept-model v3 schema round-trips
 # through glossarist-ruby's V3::ManagedConcept.
 #
 # Fixtures are inline (not loaded from ../concept-model) because the
@@ -52,7 +52,7 @@ RSpec.describe "Cross-repo partitive relation integration" do
         criterion:
           eng: quantity system decomposition
     YAML
-    "with-plurality" => <<~YAML,
+    "with-member-dimensions" => <<~YAML,
       ---
       identifier: '112-02-09'
       partitive_relations:
@@ -63,17 +63,19 @@ RSpec.describe "Cross-repo partitive relation integration" do
         - ref:
             source: VIM
             id: '112-02-10'
+          presence: required
+          count: multiple
+          is_delimiting: true
         - ref:
             source: VIM
             id: '112-03-26'
+          presence: optional
+          count: exactly_one
         completeness: complete
-        plurality:
-          is_shared: true
-          is_uncertain: true
         criterion:
           eng: measurement result composition
     YAML
-    "plain" => <<~YAML
+    "plain" => <<~YAML,
       ---
       identifier: '113-01-01'
       partitive_relations:
@@ -103,5 +105,16 @@ RSpec.describe "Cross-repo partitive relation integration" do
       expect(rel).to be_coordinate
       rel.validate!
     end
+  end
+
+  it "with-member-dimensions preserves presence/count/is_delimiting" do
+    mc = Glossarist::V3::ManagedConcept.from_yaml(YAML_FIXTURES["with-member-dimensions"])
+    members = mc.partitive_relations.first.partitives
+    expect(members.first.presence).to eq("required")
+    expect(members.first.count).to eq("multiple")
+    expect(members.first.is_delimiting).to be(true)
+    expect(members.last.presence).to eq("optional")
+    expect(members.last.count).to eq("exactly_one")
+    expect(members.last.is_delimiting).to be(false)
   end
 end

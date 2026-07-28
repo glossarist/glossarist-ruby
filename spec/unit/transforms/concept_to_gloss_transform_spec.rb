@@ -609,4 +609,124 @@ RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
       expect(described_class::ISO).to eq(Glossarist::Rdf::Namespaces::IsoThesNamespace.uri)
     end
   end
+
+  # ── V3 PartitiveRelation emission ─────────────────────────────────────
+
+  describe "V3 partitive relation emission" do
+    let(:partitive_concept) do
+      rel = Glossarist::V3::PartitiveRelation.new(
+        comprehensive: Glossarist::V3::ConceptRef.new(source: "VIM", id: "112-02-09"),
+        partitives: [
+          Glossarist::V3::PartitiveMember.new(
+            ref: Glossarist::V3::ConceptRef.new(source: "VIM", id: "112-02-10"),
+            presence: "required", count: "multiple", is_delimiting: true
+          ),
+          Glossarist::V3::PartitiveMember.new(
+            ref: Glossarist::V3::ConceptRef.new(source: "VIM", id: "112-03-26"),
+            presence: "optional", count: "exactly_one"
+          ),
+        ],
+        completeness: "complete",
+        criterion: { "eng" => "physical structure" },
+      ).validate!
+      Glossarist::V3::ManagedConcept.new(
+        data: Glossarist::V3::ManagedConceptData.new(id: "112-02-09"),
+      ).tap { |mc| mc.partitive_relations = [rel] }
+    end
+
+    let(:partitive_turtle) { described_class.new(partitive_concept).to_turtle }
+
+    let(:partitive_graph) do
+      g = RDF::Graph.new
+      RDF::Turtle::Reader.new(partitive_turtle) { |r| r.each_statement { |s| g << s } }
+      g
+    end
+
+    it "emits gloss:hasPartitiveRelation link from the parent concept" do
+      concept_subj = partitive_graph
+        .query([nil, RDF.type, RDF::URI("#{gloss}Concept")]).first.subject
+      links = partitive_graph.query([concept_subj,
+                                     RDF::URI("#{gloss}hasPartitiveRelation"), nil])
+      expect(links.count).to eq(1)
+    end
+
+    it "emits a gloss:PartitiveRelation subject" do
+      types = partitive_graph.query([nil, RDF.type, RDF::URI("#{gloss}PartitiveRelation")])
+      expect(types.count).to eq(1)
+    end
+
+    it "emits gloss:PartitiveMember subjects for each member" do
+      members = partitive_graph.query([nil, RDF.type, RDF::URI("#{gloss}PartitiveMember")])
+      expect(members.count).to eq(2)
+    end
+
+    it "preserves presence/count/is_delimiting on member subjects" do
+      members = partitive_graph.query([nil, RDF.type, RDF::URI("#{gloss}PartitiveMember")]).map(&:subject)
+      delimiting_member = members.find do |m|
+        partitive_graph.query([m, RDF::URI("#{gloss}refId"), nil]).first&.object&.to_s == "112-02-10"
+      end
+      expect(delimiting_member).not_to be_nil
+      expect(partitive_graph.query([delimiting_member, RDF::URI("#{gloss}presence"), nil]).first.object.to_s).to eq("required")
+      expect(partitive_graph.query([delimiting_member, RDF::URI("#{gloss}count"), nil]).first.object.to_s).to eq("multiple")
+      expect(partitive_graph.query([delimiting_member, RDF::URI("#{gloss}isDelimiting"), nil]).first.object.value).to eq("true")
+    end
+
+    it "includes external source in the concept URI (not just id)" do
+      # member with id=112-02-10 has source=VIM, so the URI must contain VIM
+      # before the id. Regression test for the source-dropped bug
+      # where the URI used to be just concept/<id>.
+      has_partitive = partitive_graph.query([nil, RDF::URI("#{gloss}hasPartitive"), nil])
+      targets = has_partitive.map { |stmt| stmt.object.to_s }
+      target_with_member_id = targets.find { |t| t.include?("112-02-10") }
+      expect(target_with_member_id).not_to be_nil
+      expect(target_with_member_id).to include("VIM")
+      expect(targets.none? { |t| t.end_with?("concept/112-02-10") }).to be(true)
+    end
+
+    it "produces deterministic Turtle across runs (regression for object_id bug)" do
+      t1 = described_class.new(partitive_concept).to_turtle
+      t2 = described_class.new(partitive_concept).to_turtle
+      expect(t1).to eq(t2)
+    end
+
+    it "produces deterministic Turtle across process instances" do
+      # Two separate transform instances with the same source concept
+      # must produce identical output. This is the regression test for
+      # the object_id non-determinism bug — same data, different Ruby
+      # object identities, must still hash to the same subject URI.
+      t1 = described_class.new(partitive_concept).to_turtle
+
+      # rebuild an equivalent concept from scratch
+      rel2 = Glossarist::V3::PartitiveRelation.new(
+        comprehensive: Glossarist::V3::ConceptRef.new(source: "VIM", id: "112-02-09"),
+        partitives: [
+          Glossarist::V3::PartitiveMember.new(
+            ref: Glossarist::V3::ConceptRef.new(source: "VIM", id: "112-02-10"),
+            presence: "required", count: "multiple", is_delimiting: true
+          ),
+          Glossarist::V3::PartitiveMember.new(
+            ref: Glossarist::V3::ConceptRef.new(source: "VIM", id: "112-03-26"),
+            presence: "optional", count: "exactly_one"
+          ),
+        ],
+        completeness: "complete",
+        criterion: { "eng" => "physical structure" },
+      ).validate!
+      mc2 = Glossarist::V3::ManagedConcept.new(
+        data: Glossarist::V3::ManagedConceptData.new(id: "112-02-09"),
+      )
+      mc2.partitive_relations = [rel2]
+
+      t2 = described_class.new(mc2).to_turtle
+      expect(t1).to eq(t2)
+    end
+
+    it "does not emit PartitiveRelation for V2 concepts" do
+      v2_concept = Glossarist::ManagedConcept.new(data: { id: "v2-x" })
+      turtle = described_class.new(v2_concept).to_turtle
+      graph = RDF::Graph.new
+      RDF::Turtle::Reader.new(turtle) { |r| r.each_statement { |s| graph << s } }
+      expect(graph.query([nil, RDF.type, RDF::URI("#{gloss}PartitiveRelation")])).to be_empty
+    end
+  end
 end

@@ -109,11 +109,11 @@ RSpec.describe Glossarist::V3::PartitiveRelation do
         Glossarist::V3::PartitiveMember.new(
           ref: Glossarist::V3::ConceptRef.new(source: "VIM", id: "1.2"),
           presence: "required", count: "exactly_one",
-          is_delimiting: true,
+          is_delimiting: true
         ),
         Glossarist::V3::PartitiveMember.new(
           ref: Glossarist::V3::ConceptRef.new(source: "VIM", id: "1.3"),
-          presence: "optional", count: "exactly_one",
+          presence: "optional", count: "exactly_one"
         ),
       ]
       rel = described_class.new(
@@ -142,11 +142,14 @@ RSpec.describe Glossarist::V3::PartitiveRelation do
           - ref:
               source: VIM
               id: '112-02-10'
-            multiplicity: compulsory
+            presence: required
+            count: multiple
             is_delimiting: true
           - ref:
               source: VIM
               id: '112-03-26'
+            presence: optional
+            count: exactly_one
           completeness: complete
           criterion:
             eng: measurement result composition
@@ -161,6 +164,10 @@ RSpec.describe Glossarist::V3::PartitiveRelation do
       expect(rel_list.first.partitives.map { |m| m.ref.id })
         .to eq(%w[112-02-10 112-03-26])
       expect(rel_list.first.partitives.first).to be_delimiting
+      expect(rel_list.first.partitives.first).to be_required
+      expect(rel_list.first.partitives.first.count).to eq("multiple")
+      expect(rel_list.first.partitives.last).to be_optional
+      expect(rel_list.first.partitives.last).not_to be_delimiting
       expect(rel_list.first.completeness).to eq("complete")
       expect(rel_list.first.criterion).to eq("eng" => "measurement result composition")
     end

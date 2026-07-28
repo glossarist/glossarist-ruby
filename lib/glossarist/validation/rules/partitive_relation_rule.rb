@@ -14,14 +14,19 @@ module Glossarist
       #     ISO 12620 coordinate-concept coherence)
       #   - warning when a relation has no criterion (cannot
       #     distinguish from siblings sharing the comprehensive)
-      #   - warning when multiplicity is not the default compulsory
-      #     (encourages explicit statement of optional/multiple)
+      #   - warning when a member's presence or count deviates from
+      #     the defaults (required / exactly_one) — encourages an
+      #     explicit choice rather than an accidental non-default
       #   - error when ExternalConcept (status: external) lacks
       #     at least one designation
       #
       # The model constructor already rejects empty comprehensive,
-      # empty partitives list, self-loops, invalid enum values.
+      # empty partitives list, self-loops, invalid enum values, and
+      # the optional + at_least_one combination.
       class PartitiveRelationRule < Base
+        DEFAULT_PRESENCE = "required"
+        DEFAULT_COUNT = "exactly_one"
+
         def code = "GLS-221"
         def category = :schema
         def severity = "error"
@@ -46,7 +51,7 @@ module Glossarist
           relations.each_with_index do |rel, idx|
             check_cardinality(rel, idx, fname, issues)
             check_criterion_present(rel, idx, fname, issues)
-            check_member_multiplicity(rel, idx, fname, issues)
+            check_member_dimensions(rel, idx, fname, issues)
           end
 
           check_duplicate_decomposition(relations, fname, issues)
@@ -85,28 +90,28 @@ module Glossarist
           )
         end
 
-        def check_member_multiplicity(rel, idx, fname, issues)
+        # Warns once per member when presence or count deviates from
+        # the model defaults. The warning is intentionally generic —
+        # it fires for required+multiple (non-default count) just as
+        # for optional+exactly_one (non-default presence). Both are
+        # legal; the warning encourages an explicit, reviewed choice
+        # rather than an accidental non-default.
+        def check_member_dimensions(rel, idx, fname, issues)
           rel.partitives.each_with_index do |member, mi|
-            unless member.required? && member.count == "exactly_one"
-              issues << issue(
-                "partitive_relation #{idx + 1}.partitives[#{mi}] has " \
-                "non-default presence='#{member.presence}' count='#{member.count}' " \
-                "the " \
-                "optionality is intentional",
-                severity: "warning",
-                location: fname,
-              )
-            end
-
-            next unless member.delimiting?
+            non_default = []
+            non_default << "presence='#{member.presence}'" if member.presence != DEFAULT_PRESENCE
+            non_default << "count='#{member.count}'" if member.count != DEFAULT_COUNT
+            next if non_default.empty?
 
             issues << issue(
-              "partitive_relation #{idx + 1}.partitives[#{mi}] is marked " \
-              "delimiting (ISO 704 bold 3x-width line); behaves like a " \
-              "delimiting characteristic distinguishing the comprehensive " \
-              "from coordinate concepts",
-              severity: "info",
+              "partitive_relation #{idx + 1}.partitives[#{mi}] uses " \
+              "non-default #{non_default.join(' ')} " \
+              "(defaults: presence=#{DEFAULT_PRESENCE}, count=#{DEFAULT_COUNT}) " \
+              "— confirm the dimensions are intentional",
+              severity: "warning",
               location: fname,
+              suggestion: "Non-default dimensions are valid; this warning " \
+                          "exists to catch accidental drift from the model defaults.",
             )
           end
         end
