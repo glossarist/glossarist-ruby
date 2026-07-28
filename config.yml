@@ -212,17 +212,25 @@ completeness:
     - partial
 
 multiplicity:
-  # ISO 704:2022 partitive member multiplicity. Encodes the diagram
-  # line notation as structured data:
-  #   compulsory          — 1 solid line (must exist in every instance)
-  #   optional            — 1 dashed line (exists in some instances only)
-  #   compulsory_multiple — 2 solid lines (multiple must exist)
-  #   optional_multiple   — 2 dashed lines (multiple may exist)
-  #   compulsory_at_least_one        — 1 solid + 1 dashed line (at least one must exist)
-  # Default: compulsory.
-  value:
-    - compulsory
+  # MECE decomposition of ISO 704:2022 partitive member multiplicity.
+  # Two orthogonal dimensions replace the prior flat 5-value enum.
+  #
+  # presence (line style):
+  #   required — solid line (must exist)
+  #   optional — dashed line (may exist)
+  #
+  # count (line count):
+  #   exactly_one  — 1 line (exactly one instance)
+  #   at_least_one — 1 solid + 1 dashed (at least one instance)
+  #   multiple     — 2 lines (multiple instances)
+  #
+  # Valid combinations (5): required+exactly_one, optional+exactly_one,
+  # required+multiple, optional+multiple, required+at_least_one.
+  # Invalid: optional+at_least_one (collapses to optional+multiple).
+  presence:
+    - required
     - optional
-    - compulsory_multiple
-    - optional_multiple
-    - compulsory_at_least_one
+  count:
+    - exactly_one
+    - at_least_one
+    - multiple

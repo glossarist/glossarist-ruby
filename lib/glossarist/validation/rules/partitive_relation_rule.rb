@@ -87,12 +87,12 @@ module Glossarist
 
         def check_member_multiplicity(rel, idx, fname, issues)
           rel.partitives.each_with_index do |member, mi|
-            unless member.compulsory?
+            unless member.required? && member.count == "exactly_one"
               issues << issue(
                 "partitive_relation #{idx + 1}.partitives[#{mi}] has " \
-                "non-default multiplicity '#{member.multiplicity}'; " \
-                "ISO 704 diagram uses dashed/multiple-line notation for " \
-                "this — confirm the optionality is intentional",
+                "non-default presence='#{member.presence}' count='#{member.count}' " \
+                "(ISO 704 name: #{member.iso704_name}); confirm the " \
+                "optionality is intentional",
                 severity: "warning",
                 location: fname,
               )
