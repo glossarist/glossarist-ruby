@@ -91,7 +91,7 @@ module Glossarist
               issues << issue(
                 "partitive_relation #{idx + 1}.partitives[#{mi}] has " \
                 "non-default presence='#{member.presence}' count='#{member.count}' " \
-                "(ISO 704 name: #{member.iso704_name}); confirm the " \
+                "the " \
                 "optionality is intentional",
                 severity: "warning",
                 location: fname,
