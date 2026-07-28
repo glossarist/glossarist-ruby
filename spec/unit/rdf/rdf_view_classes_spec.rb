@@ -636,3 +636,197 @@ RSpec.describe Glossarist::Rdf::GlossConcept do
     expect(broader.count).to eq(1)
   end
 end
+
+# ── GlossPartitiveMember ────────────────────────────────────────────────
+
+RSpec.describe Glossarist::Rdf::GlossPartitiveMember do
+  include_context "rdf graph helpers"
+
+  it "emits gloss:PartitiveMember type" do
+    m = described_class.new(ref_source: "VIM", ref_id: "112-02-10",
+                            presence: "required", count: "exactly_one")
+    graph = parse_turtle(described_class.to_turtle(m))
+    types = graph.query([nil, RDF.type, RDF::URI("#{gloss}PartitiveMember")])
+    expect(types).not_to be_empty
+  end
+
+  it "emits all dimension predicates" do
+    m = described_class.new(ref_source: "VIM", ref_id: "1.2",
+                            presence: "optional", count: "multiple",
+                            is_delimiting: true)
+    graph = parse_turtle(described_class.to_turtle(m))
+    subj = graph.query([nil, RDF.type, RDF::URI("#{gloss}PartitiveMember")]).first.subject
+    expect(graph.query([subj, RDF::URI("#{gloss}refSource"), nil]).first.object.to_s).to eq("VIM")
+    expect(graph.query([subj, RDF::URI("#{gloss}refId"), nil]).first.object.to_s).to eq("1.2")
+    expect(graph.query([subj, RDF::URI("#{gloss}presence"), nil]).first.object.to_s).to eq("optional")
+    expect(graph.query([subj, RDF::URI("#{gloss}count"), nil]).first.object.to_s).to eq("multiple")
+    expect(graph.query([subj, RDF::URI("#{gloss}isDelimiting"), nil]).first.object.value).to eq("true")
+  end
+
+  it "emits refText when ref_id is absent (external concept form)" do
+    m = described_class.new(ref_text: "quantum field theory")
+    graph = parse_turtle(described_class.to_turtle(m))
+    subj = graph.query([nil, RDF.type, RDF::URI("#{gloss}PartitiveMember")]).first.subject
+    text_stmt = graph.query([subj, RDF::URI("#{gloss}refText"), nil])
+    expect(text_stmt.count).to eq(1)
+    expect(text_stmt.first.object.to_s).to eq("quantum field theory")
+  end
+
+  it "produces a deterministic subject (same content → same URI)" do
+    attrs = { ref_source: "VIM", ref_id: "1.2", presence: "required",
+              count: "exactly_one", is_delimiting: true }
+    t1 = described_class.to_turtle(described_class.new(**attrs))
+    t2 = described_class.to_turtle(described_class.new(**attrs))
+    expect(t1).to eq(t2)
+  end
+
+  it "produces different subjects when dimensions differ" do
+    base = { ref_source: "VIM", ref_id: "1.2" }
+    t_required = described_class.to_turtle(described_class.new(**base, presence: "required", count: "exactly_one"))
+    t_optional = described_class.to_turtle(described_class.new(**base, presence: "optional", count: "exactly_one"))
+    expect(t_required).not_to eq(t_optional)
+  end
+
+  describe ".deterministic_id" do
+    it "uses human-readable SOURCE:ID when both are present" do
+      m = described_class.new(ref_source: "VIM", ref_id: "1.2")
+      expect(described_class.deterministic_id(m)).to eq("VIM:1.2")
+    end
+
+    it "falls back to MD5 when source and id are empty" do
+      m = described_class.new(ref_text: "external concept name")
+      expect(described_class.deterministic_id(m)).to match(/^[0-9a-f]{12}$/)
+    end
+
+    it "is stable across instances with the same content" do
+      m1 = described_class.new(ref_source: "VIM", ref_id: "1.2", presence: "optional")
+      m2 = described_class.new(ref_source: "VIM", ref_id: "1.2", presence: "optional")
+      expect(described_class.deterministic_id(m1)).to eq(described_class.deterministic_id(m2))
+    end
+  end
+end
+
+# ── GlossPartitiveRelation ─────────────────────────────────────────────
+
+RSpec.describe Glossarist::Rdf::GlossPartitiveRelation do
+  include_context "rdf graph helpers"
+
+  let(:member_a) do
+    Glossarist::Rdf::GlossPartitiveMember.new(
+      ref_source: "VIM", ref_id: "112-02-10",
+      presence: "required", count: "exactly_one", is_delimiting: true
+    )
+  end
+
+  let(:member_b) do
+    Glossarist::Rdf::GlossPartitiveMember.new(
+      ref_source: "VIM", ref_id: "112-03-26",
+      presence: "optional", count: "exactly_one"
+    )
+  end
+
+  let(:relation) do
+    described_class.new(
+      identifier: "112-02-09",
+      comprehensive_uri: "concept/VIM/112-02-09",
+      partitive_member_ids: %w[concept/VIM/112-02-10 concept/VIM/112-03-26],
+      partitive_members: [member_a, member_b],
+      completeness: "complete",
+      criterion: { "eng" => "physical structure" },
+    )
+  end
+
+  it "emits gloss:PartitiveRelation type" do
+    graph = parse_turtle(described_class.to_turtle(relation))
+    types = graph.query([nil, RDF.type, RDF::URI("#{gloss}PartitiveRelation")])
+    expect(types).not_to be_empty
+  end
+
+  it "emits comprehensive, completeness, and hasPartitive predicates" do
+    graph = parse_turtle(described_class.to_turtle(relation))
+    subj = graph.query([nil, RDF.type, RDF::URI("#{gloss}PartitiveRelation")]).first.subject
+    expect(graph.query([subj, RDF::URI("#{gloss}comprehensive"), nil])).not_to be_empty
+    expect(graph.query([subj, RDF::URI("#{gloss}completeness"), nil])).not_to be_empty
+    expect(graph.query([subj, RDF::URI("#{gloss}hasPartitive"), nil])).not_to be_empty
+  end
+
+  it "links to typed partitive members via gloss:hasPartitiveMember" do
+    graph = parse_turtle(described_class.to_turtle(relation))
+    subj = graph.query([nil, RDF.type, RDF::URI("#{gloss}PartitiveRelation")]).first.subject
+    member_links = graph.query([subj, RDF::URI("#{gloss}hasPartitiveMember"), nil])
+    expect(member_links.count).to eq(2)
+
+    member_subjects = member_links.map(&:object)
+    member_types = member_subjects.flat_map do |ms|
+      graph.query([ms, RDF.type, nil]).map { |x| x.object.to_s }
+    end
+    expect(member_types).to include("#{gloss}PartitiveMember")
+  end
+
+  it "preserves per-member dimensions in the emitted graph" do
+    graph = parse_turtle(described_class.to_turtle(relation))
+    member_subj_a = graph.query([nil, RDF.type, RDF::URI("#{gloss}PartitiveMember")])
+      .map(&:subject)
+      .find { |s| graph.query([s, RDF::URI("#{gloss}refId"), nil]).first&.object&.to_s == "112-02-10" }
+    expect(member_subj_a).not_to be_nil
+    expect(graph.query([member_subj_a, RDF::URI("#{gloss}isDelimiting"), nil]).first.object.value).to eq("true")
+    expect(graph.query([member_subj_a, RDF::URI("#{gloss}presence"), nil]).first.object.to_s).to eq("required")
+  end
+
+  it "produces a deterministic subject across instances with the same content" do
+    attrs = {
+      identifier: "112-02-09",
+      comprehensive_uri: "concept/VIM/112-02-09",
+      partitive_member_ids: %w[concept/VIM/112-02-10],
+      partitive_members: [member_a],
+      completeness: "complete",
+      criterion: { "eng" => "physical structure" },
+    }
+    t1 = described_class.to_turtle(described_class.new(**attrs))
+    t2 = described_class.to_turtle(described_class.new(**attrs))
+    expect(t1).to eq(t2)
+  end
+
+  it "produces different subjects when criterion differs" do
+    base = {
+      identifier: "112-02-09",
+      comprehensive_uri: "concept/VIM/112-02-09",
+      partitive_member_ids: [],
+      completeness: "complete",
+    }
+    t1 = described_class.to_turtle(described_class.new(**base, criterion: { "eng" => "physical" }))
+    t2 = described_class.to_turtle(described_class.new(**base, criterion: { "eng" => "functional" }))
+    expect(t1).not_to eq(t2)
+  end
+
+  describe ".deterministic_id" do
+    it "is stable for identical content" do
+      attrs = {
+        identifier: "X",
+        comprehensive_uri: "concept/X",
+        partitive_member_ids: [],
+        partitive_members: [],
+        completeness: "complete",
+        criterion: nil,
+      }
+      id1 = described_class.deterministic_id(described_class.new(**attrs))
+      id2 = described_class.deterministic_id(described_class.new(**attrs))
+      expect(id1).to eq(id2)
+    end
+
+    it "is insensitive to criterion hash ordering" do
+      base = {
+        identifier: "X", comprehensive_uri: "concept/X",
+        partitive_member_ids: [], partitive_members: [],
+        completeness: "complete"
+      }
+      id1 = described_class.deterministic_id(
+        described_class.new(**base, criterion: { "eng" => "x", "fra" => "y" }),
+      )
+      id2 = described_class.deterministic_id(
+        described_class.new(**base, criterion: { "fra" => "y", "eng" => "x" }),
+      )
+      expect(id1).to eq(id2)
+    end
+  end
+end
