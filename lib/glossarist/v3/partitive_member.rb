@@ -74,20 +74,6 @@ module Glossarist
         is_delimiting == true
       end
 
-      # Derived ISO 704 name for display. Returns the flat-enum
-      # name that corresponds to this (presence, count) pair.
-      def iso704_name
-        case [presence, count]
-        when ["required", "exactly_one"] then "compulsory"
-        when ["optional", "exactly_one"] then "optional"
-        when ["required", "multiple"] then "compulsory_multiple"
-        when ["optional", "multiple"] then "optional_multiple"
-        when ["required", "at_least_one"] then "compulsory_at_least_one"
-        else raise ArgumentError,
-                     "invalid combination presence=#{presence} count=#{count}"
-        end
-      end
-
       private
 
       def validate_ref!

@@ -33,32 +33,6 @@ RSpec.describe Glossarist::V3::PartitiveMember do
     end
   end
 
-  describe "#iso704_name (derived)" do
-    it "maps required + exactly_one to compulsory" do
-      member = described_class.new(ref: ref)
-      expect(member.iso704_name).to eq("compulsory")
-    end
-
-    it "maps optional + exactly_one to optional" do
-      member = described_class.new(ref: ref, presence: "optional")
-      expect(member.iso704_name).to eq("optional")
-    end
-
-    it "maps required + multiple to compulsory_multiple" do
-      member = described_class.new(ref: ref, count: "multiple")
-      expect(member.iso704_name).to eq("compulsory_multiple")
-    end
-
-    it "maps optional + multiple to optional_multiple" do
-      member = described_class.new(ref: ref, presence: "optional", count: "multiple")
-      expect(member.iso704_name).to eq("optional_multiple")
-    end
-
-    it "maps required + at_least_one to compulsory_at_least_one" do
-      member = described_class.new(ref: ref, count: "at_least_one")
-      expect(member.iso704_name).to eq("compulsory_at_least_one")
-    end
-  end
 
   describe "#validate!" do
     it "raises on empty ref" do
@@ -120,7 +94,6 @@ RSpec.describe Glossarist::V3::PartitiveMember do
       expect(restored.presence).to eq("optional")
       expect(restored.count).to eq("multiple")
       expect(restored.is_delimiting).to be(true)
-      expect(restored.iso704_name).to eq("optional_multiple")
     end
   end
 
@@ -131,7 +104,6 @@ RSpec.describe Glossarist::V3::PartitiveMember do
         is_delimiting: true,
       )
       expect(member).to be_required
-      expect(member.iso704_name).to eq("compulsory")
       expect(member).to be_delimiting
     end
 
@@ -142,7 +114,6 @@ RSpec.describe Glossarist::V3::PartitiveMember do
         is_delimiting: false,
       )
       expect(member).to be_optional
-      expect(member.iso704_name).to eq("optional")
       expect(member).not_to be_delimiting
     end
   end
