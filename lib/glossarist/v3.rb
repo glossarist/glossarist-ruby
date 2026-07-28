@@ -11,6 +11,13 @@ module Glossarist
     autoload :RelatedConcept, "glossarist/v3/related_concept"
     autoload :PartitiveRelation, "glossarist/v3/partitive_relation"
     autoload :PartitiveMember, "glossarist/v3/partitive_member"
+    # Multiplicity is a derived-view utility module (SSOT for the
+    # ISO 704:2022 (presence, count) → name mapping), not a Lutaml
+    # model — so it is autoloaded but NOT registered via
+    # Configuration.register_model. Used by renderers/viewers to
+    # display the ISO name; the PartitiveMember model itself only
+    # carries the orthogonal presence + count dimensions.
+    autoload :Multiplicity, "glossarist/v3/multiplicity"
     autoload :ConceptData, "glossarist/v3/concept_data"
     autoload :LocalizedConcept, "glossarist/v3/localized_concept"
     autoload :ManagedConceptData, "glossarist/v3/managed_concept_data"
