@@ -10,10 +10,11 @@ RSpec.describe Glossarist::Validation::Rules::PartitiveRelationRule do
 
   let(:dataset_context) { make_dataset_context(tmpdir) }
 
-  def make_member(id, multiplicity: "compulsory", is_delimiting: false)
+  def make_member(id, presence: "required", count: "exactly_one", is_delimiting: false)
     Glossarist::V3::PartitiveMember.new(
       ref: Glossarist::V3::ConceptRef.new(source: "VIM", id: id),
-      multiplicity: multiplicity,
+      presence: presence,
+      count: count,
       is_delimiting: is_delimiting,
     )
   end
@@ -106,11 +107,11 @@ RSpec.describe Glossarist::Validation::Rules::PartitiveRelationRule do
       .to be true
   end
 
-  it "warns when a member has non-default multiplicity" do
+  it "warns when a member has non-default presence" do
     mc = make_v3_concept
     comp = Glossarist::V3::ConceptRef.new(source: "VIM", id: "1.1")
     parts = [
-      make_member("1.2", multiplicity: "optional"),
+      make_member("1.2", presence: "optional"),
       make_member("1.3"),
     ]
     mc.partitive_relations = [
@@ -123,7 +124,7 @@ RSpec.describe Glossarist::Validation::Rules::PartitiveRelationRule do
     cc = make_concept_context(mc, collection_context: dataset_context,
                               file_name: "c.yaml")
     issues = rule.check(cc)
-    expect(issues.any? { |i| i.message.include?("non-default multiplicity") })
+    expect(issues.any? { |i| i.message.include?("non-default presence") })
       .to be true
   end
 end

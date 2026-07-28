@@ -37,6 +37,10 @@ module Glossarist
     # PartitiveRelation redesign (TODO.partitive-relation-v2).
     COMPLETENESS_VALUES = config.dig("completeness", "value").freeze
 
-    MULTIPLICITY_VALUES = config.dig("multiplicity", "value").freeze
+    PARTITIVE_PRESENCE_VALUES =
+      config.dig("multiplicity", "presence").freeze
+
+    PARTITIVE_COUNT_VALUES =
+      config.dig("multiplicity", "count").freeze
   end
 end

@@ -108,12 +108,12 @@ RSpec.describe Glossarist::V3::PartitiveRelation do
       members = [
         Glossarist::V3::PartitiveMember.new(
           ref: Glossarist::V3::ConceptRef.new(source: "VIM", id: "1.2"),
-          multiplicity: "compulsory",
+          presence: "required", count: "exactly_one",
           is_delimiting: true,
         ),
         Glossarist::V3::PartitiveMember.new(
           ref: Glossarist::V3::ConceptRef.new(source: "VIM", id: "1.3"),
-          multiplicity: "optional",
+          presence: "optional", count: "exactly_one",
         ),
       ]
       rel = described_class.new(
@@ -124,7 +124,7 @@ RSpec.describe Glossarist::V3::PartitiveRelation do
       restored = described_class.from_yaml(rel.to_yaml).validate!
       expect(restored).to be_partial
       expect(restored.partitives.first).to be_delimiting
-      expect(restored.partitives.first).to be_compulsory
+      expect(restored.partitives.first).to be_required
       expect(restored.partitives.last).to be_optional
     end
   end

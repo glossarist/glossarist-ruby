@@ -12,10 +12,9 @@ module Glossarist
     # within one relation are coordinate concepts: they share the
     # comprehensive AND share the criterion of subdivision.
     #
-    # Per-partitive metadata (ISO 704:2022):
-    #   - multiplicity (compulsory, optional, compulsory_multiple,
-    #     optional_multiple, compulsory_at_least_one) — encodes the diagram
-    #     line notation as data
+    # Per-partitive metadata (ISO 704:2022, MECE decomposition):
+    #   - presence (required, optional) — line style: solid vs dashed
+    #   - count (exactly_one, at_least_one, multiple) — line count
     #   - is_delimiting — orthogonal flag; a delimiting part behaves
     #     like a delimiting characteristic (distinguishes the
     #     comprehensive from coordinate concepts)
