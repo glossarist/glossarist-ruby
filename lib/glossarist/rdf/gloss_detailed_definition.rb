@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require "digest"
 require "lutaml/model"
 
 module Glossarist
@@ -24,7 +23,7 @@ module Glossarist
       end
 
       def self.deterministic_id(definition)
-        Digest::MD5.hexdigest(definition.content.to_s)[0..11]
+        DeterministicSlug.from_parts(definition.content)
       end
     end
   end

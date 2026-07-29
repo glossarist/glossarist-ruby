@@ -41,8 +41,8 @@ RSpec.describe "Deterministic subject IDs (B2)" do
     expect(ids1).to eq(ids2)
   end
 
-  it "uses Digest::MD5 for definition subjects (12 hex chars)" do
+  it "uses SHA-256 (truncated to 16 hex chars) for definition subjects" do
     ttl = emit_turtle
-    expect(ttl).to match(%r{definition/[0-9a-f]{12}})
+    expect(ttl).to match(%r{definition/[0-9a-f]{16}})
   end
 end

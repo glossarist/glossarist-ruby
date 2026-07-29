@@ -32,7 +32,7 @@ module Glossarist
 
       def self.slug(citation)
         slug = [citation.source, citation.id].compact.join("/")
-        slug = Digest::MD5.hexdigest(citation.source || "")[0..11] if slug.empty?
+        slug = DeterministicSlug.from_parts(citation.source) if slug.empty?
         slug
       end
     end

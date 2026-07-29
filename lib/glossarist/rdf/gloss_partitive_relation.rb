@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require "digest"
 require "lutaml/model"
 
 module Glossarist
@@ -38,12 +37,12 @@ module Glossarist
       end
 
       def self.deterministic_id(rel)
-        parts = [rel.identifier, rel.comprehensive_uri, rel.completeness]
-        parts << criterion_fingerprint(rel.criterion)
+        parts = [rel.identifier, rel.comprehensive_uri, rel.completeness,
+                 criterion_fingerprint(rel.criterion)]
         Array(rel.partitive_members).each do |m|
           parts << GlossPartitiveMember.deterministic_id(m)
         end
-        Digest::MD5.hexdigest(parts.compact.join("|"))[0..11]
+        DeterministicSlug.from_parts(*parts)
       end
 
       def self.criterion_fingerprint(criterion)

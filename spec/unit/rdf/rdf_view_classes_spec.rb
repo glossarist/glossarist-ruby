@@ -82,10 +82,10 @@ RSpec.describe Glossarist::Rdf::GlossCitation do
     expect(slug).to eq("ISO/10241-1")
   end
 
-  it "falls back to MD5 hash when source and id are empty" do
+  it "falls back to SHA-256 hash when source and id are empty" do
     cit = described_class.new(text: "Some citation text")
     slug = described_class.slug(cit)
-    expect(slug).to match(/^[0-9a-f]{12}$/)
+    expect(slug).to match(/^[0-9a-f]{16}$/)
   end
 
   it "emits locality when present" do
@@ -693,9 +693,9 @@ RSpec.describe Glossarist::Rdf::GlossPartitiveMember do
       expect(described_class.deterministic_id(m)).to eq("VIM:1.2")
     end
 
-    it "falls back to MD5 when source and id are empty" do
+    it "falls back to SHA-256 when source and id are empty" do
       m = described_class.new(ref_text: "external concept name")
-      expect(described_class.deterministic_id(m)).to match(/^[0-9a-f]{12}$/)
+      expect(described_class.deterministic_id(m)).to match(/^[0-9a-f]{16}$/)
     end
 
     it "is stable across instances with the same content" do

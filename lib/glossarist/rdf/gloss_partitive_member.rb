@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require "digest"
 require "lutaml/model"
 
 module Glossarist
@@ -48,9 +47,10 @@ module Glossarist
         readable = [member.ref_source, member.ref_id].compact.reject(&:empty?)
         return readable.join(":") unless readable.empty?
 
-        parts = [member.ref_source, member.ref_id, member.ref_text,
-                 member.presence, member.count, member.is_delimiting]
-        Digest::MD5.hexdigest(parts.compact.join("|"))[0..11]
+        DeterministicSlug.from_parts(
+          member.ref_source, member.ref_id, member.ref_text,
+          member.presence, member.count, member.is_delimiting
+        )
       end
     end
   end

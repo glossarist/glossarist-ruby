@@ -38,7 +38,7 @@ module Glossarist
         Array(source.sourced_from).each do |sf|
           parts << sf&.source << sf&.id << sf&.version << sf&.link
         end
-        Digest::MD5.hexdigest(parts.compact.join("|"))[0..11]
+        DeterministicSlug.from_parts(*parts)
       end
     end
   end
