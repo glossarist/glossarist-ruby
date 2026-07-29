@@ -17,6 +17,7 @@ module Glossarist
     autoload :LutamlTurtleTransformExt, "#{__dir__}/rdf/lutaml_ext"
 
     autoload :Namespaces,             "#{__dir__}/rdf/namespaces"
+    autoload :DeterministicSlug,      "#{__dir__}/rdf/deterministic_slug"
     autoload :LocalizedLiteral,       "#{__dir__}/rdf/localized_literal"
     autoload :RelationshipPredicates, "#{__dir__}/rdf/relationship_predicates"
     autoload :GlossLocality,          "#{__dir__}/rdf/gloss_locality"

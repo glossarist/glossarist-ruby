@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "lutaml/model"
-require "digest"
 
 module Glossarist
   module Rdf
@@ -47,7 +46,7 @@ module Glossarist
 
       def self.slug(ref)
         slug = [ref.source, ref.id].compact.join("/")
-        slug = Digest::MD5.hexdigest(ref.text || "")[0..11] if slug.empty?
+        slug = DeterministicSlug.from_parts(ref.text) if slug.empty?
         slug
       end
     end
