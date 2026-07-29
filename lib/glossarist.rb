@@ -85,6 +85,7 @@ module Glossarist
   autoload :VERSION,                  "glossarist/version"
   autoload :GlossaryDefinition,       "glossarist/glossary_definition"
   autoload :GlossaryStore,            "glossarist/glossary_store"
+  autoload :Tasks,                    "glossarist/tasks"
 
   LANG_CODES = %w[eng ara deu fra spa ita jpn kor pol por srp swe zho rus fin
                   dan nld msa nob nno].freeze
