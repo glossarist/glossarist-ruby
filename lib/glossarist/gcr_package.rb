@@ -228,7 +228,7 @@ module Glossarist
       require "glossarist/transforms/concept_to_gloss_transform"
 
       if formats.include?("jsonld") || formats.include?("turtle")
-        transform = Transforms::ConceptToGlossTransform.new(nil, opts)
+        transform = Transforms::ConceptToGlossTransform.new(nil, **opts)
 
         if formats.include?("jsonld")
           zip_file.get_output_stream("compiled/#{name}.jsonld") do |f|
@@ -247,7 +247,7 @@ module Glossarist
 
       zip_file.get_output_stream("compiled/#{name}.jsonl") do |f|
         concepts.each do |concept|
-          transform = Transforms::ConceptToGlossTransform.new(concept, opts)
+          transform = Transforms::ConceptToGlossTransform.new(concept, **opts)
           f.write(transform.to_jsonl_line)
           f.write("\n")
         end

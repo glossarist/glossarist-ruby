@@ -12,6 +12,7 @@ module Glossarist
       attribute :domains, GlossConceptReference, collection: true
       attribute :dates, GlossConceptDate, collection: true
       attribute :partitive_relations, GlossPartitiveRelation, collection: true
+      attribute :generic_relations, GlossGenericRelation, collection: true
 
       RelationshipPredicates::CONCEPT_REL_PREDICATES.each_key do |type|
         attribute :"#{type}_targets", :string, collection: true
@@ -44,6 +45,8 @@ module Glossarist
                 link: "gloss:hasDate"
         members :partitive_relations,
                 link: "gloss:hasPartitiveRelation"
+        members :generic_relations,
+                link: "gloss:hasGenericRelation"
 
         RelationshipPredicates::CONCEPT_REL_PREDICATES.each do |type, (ns, name)|
           predicate name, namespace: ns, to: :"#{type}_targets",

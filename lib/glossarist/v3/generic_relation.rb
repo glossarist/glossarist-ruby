@@ -13,18 +13,12 @@ module Glossarist
     # (5.1 measurement standard has 6 criterion groups).
     #
     # See docs/design/generic-relation.md (concept-model repo).
+    #
+    # The `key_value` mapping is inherited from AbstractNaryRelation
+    # (single SSOT). Only the typed member collection is narrowed
+    # here.
     class GenericRelation < AbstractNaryRelation
       attribute :members, GenericMember, collection: true
-
-      key_value do
-        map :comprehensive, to: :comprehensive
-        map :members, to: :members
-        map :completeness, to: :completeness
-        map :criterion, to: :criterion
-        map :sources, to: :sources
-        map :notes, to: :notes
-        map :status, to: :status
-      end
     end
   end
 end

@@ -610,13 +610,195 @@ RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
     end
   end
 
-  # TODO: V3 partitive relation emission needs to be updated for per-file
-  # relation storage (see docs/design/relations-as-files.md in concept-model).
-  # The transform currently expects bundled `partitive_relations` on
-  # ManagedConcept — that wire format is removed.
+  # V3 partitive + generic relation emission (per-file storage).
+  #
+  # Relations are passed in as a `relations:` parameter, not read from
+  # the concept. The transform dispatches by class — PartitiveRelation
+  # → gloss:PartitiveRelation, GenericRelation → gloss:GenericRelation.
   describe "V3 partitive relation emission (per-file)" do
-    pending "rewrite for per-file relation storage (TODO.general-rels/05)" do
-      skip "transform needs rewrite for per-file relations"
+    let(:partitive_concept) do
+      rel = Glossarist::V3::PartitiveRelation.new(
+        comprehensive: Glossarist::V3::ConceptRef.new(source: "VIM", id: "112-02-09"),
+        members: [
+          Glossarist::V3::PartitiveMember.new(
+            ref: Glossarist::V3::ConceptRef.new(source: "VIM", id: "112-02-10"),
+            presence: "required", count: "multiple", is_delimiting: true
+          ),
+          Glossarist::V3::PartitiveMember.new(
+            ref: Glossarist::V3::ConceptRef.new(source: "VIM", id: "112-03-26"),
+            presence: "optional", count: "exactly_one"
+          ),
+        ],
+        completeness: "complete",
+        criterion: { "eng" => "physical structure" },
+      ).validate!
+      Glossarist::V3::ManagedConcept.new(
+        data: Glossarist::V3::ManagedConceptData.new(id: "112-02-09"),
+      ).tap { |mc| mc.partitive_relations = [rel] }
+    end
+
+    let(:partitive_turtle) do
+      Glossarist::Transforms::ConceptToGlossTransform.new(
+        partitive_concept,
+        relations: Glossarist::V3::RelationLoader.load_for_concept(
+          nil, "112-02-09"
+        ), # placeholder
+      ).to_turtle
+    end
+
+    # Helper: build a transform with explicit relations list
+    def render_turtle(concept, relations)
+      Glossarist::Transforms::ConceptToGlossTransform.new(
+        concept, relations: relations
+      ).to_turtle
+    end
+
+    it "emits gloss:hasPartitiveRelation link from the parent concept" do
+      mc = Glossarist::V3::ManagedConcept.new(
+        data: Glossarist::V3::ManagedConceptData.new(id: "112-02-09"),
+      )
+      rel = Glossarist::V3::PartitiveRelation.new(
+        comprehensive: Glossarist::V3::ConceptRef.new(source: "VIM", id: "112-02-09"),
+        members: [
+          Glossarist::V3::PartitiveMember.new(
+            ref: Glossarist::V3::ConceptRef.new(source: "VIM", id: "112-02-10"),
+          ),
+          Glossarist::V3::PartitiveMember.new(
+            ref: Glossarist::V3::ConceptRef.new(source: "VIM", id: "112-03-26"),
+          ),
+        ],
+        criterion: { "eng" => "physical structure" },
+      ).validate!
+
+      t = render_turtle(mc, [rel])
+      graph = RDF::Graph.new
+      RDF::Turtle::Reader.new(t) { |r| r.each_statement { |s| graph << s } }
+      concept_subj = graph.query([nil, RDF.type, RDF::URI("#{gloss}Concept")])
+        .first.subject
+      links = graph.query([concept_subj,
+                           RDF::URI("#{gloss}hasPartitiveRelation"), nil])
+      expect(links.count).to eq(1)
+    end
+
+    it "emits a gloss:PartitiveRelation subject with full dimensions" do
+      mc = Glossarist::V3::ManagedConcept.new(
+        data: Glossarist::V3::ManagedConceptData.new(id: "112-02-09"),
+      )
+      rel = Glossarist::V3::PartitiveRelation.new(
+        comprehensive: Glossarist::V3::ConceptRef.new(source: "VIM", id: "112-02-09"),
+        members: [
+          Glossarist::V3::PartitiveMember.new(
+            ref: Glossarist::V3::ConceptRef.new(source: "VIM", id: "112-02-10"),
+            presence: "required", count: "multiple", is_delimiting: true
+          ),
+          Glossarist::V3::PartitiveMember.new(
+            ref: Glossarist::V3::ConceptRef.new(source: "VIM", id: "112-03-26"),
+            presence: "optional", count: "exactly_one"
+          ),
+        ],
+        criterion: { "eng" => "physical structure" },
+      ).validate!
+
+      t = render_turtle(mc, [rel])
+      graph = RDF::Graph.new
+      RDF::Turtle::Reader.new(t) { |r| r.each_statement { |s| graph << s } }
+      types = graph.query([nil, RDF.type, RDF::URI("#{gloss}PartitiveRelation")])
+      expect(types.count).to eq(1)
+      members = graph.query([nil, RDF.type, RDF::URI("#{gloss}PartitiveMember")])
+      expect(members.count).to eq(2)
+    end
+
+    it "produces deterministic Turtle across runs (regression for object_id bug)" do
+      mc = Glossarist::V3::ManagedConcept.new(
+        data: Glossarist::V3::ManagedConceptData.new(id: "112-02-09"),
+      )
+      rel = Glossarist::V3::PartitiveRelation.new(
+        comprehensive: Glossarist::V3::ConceptRef.new(source: "VIM", id: "112-02-09"),
+        members: [
+          Glossarist::V3::PartitiveMember.new(
+            ref: Glossarist::V3::ConceptRef.new(source: "VIM", id: "112-02-10"),
+          ),
+          Glossarist::V3::PartitiveMember.new(
+            ref: Glossarist::V3::ConceptRef.new(source: "VIM", id: "112-03-26"),
+          ),
+        ],
+        criterion: { "eng" => "physical structure" },
+      ).validate!
+
+      t1 = render_turtle(mc, [rel])
+      t2 = render_turtle(mc, [rel])
+      expect(t1).to eq(t2)
+    end
+
+    it "emits gloss:GenericRelation for GenericRelation" do
+      mc = Glossarist::V3::ManagedConcept.new(
+        data: Glossarist::V3::ManagedConceptData.new(id: "5.1"),
+      )
+      rel = Glossarist::V3::GenericRelation.new(
+        comprehensive: Glossarist::V3::ConceptRef.new(source: "OIML", id: "5.1"),
+        members: [
+          Glossarist::V3::GenericMember.new(
+            ref: Glossarist::V3::ConceptRef.new(source: "OIML", id: "5.13"),
+          ),
+          Glossarist::V3::GenericMember.new(
+            ref: Glossarist::V3::ConceptRef.new(source: "OIML", id: "3.2"),
+          ),
+        ],
+        criterion: { "eng" => "by realization medium" },
+      ).validate!
+
+      t = render_turtle(mc, [rel])
+      graph = RDF::Graph.new
+      RDF::Turtle::Reader.new(t) { |r| r.each_statement { |s| graph << s } }
+      types = graph.query([nil, RDF.type, RDF::URI("#{gloss}GenericRelation")])
+      expect(types.count).to eq(1)
+      members = graph.query([nil, RDF.type, RDF::URI("#{gloss}GenericMember")])
+      expect(members.count).to eq(2)
+    end
+
+    it "dispatches relations by class — PartitiveRelation + GenericRelation together" do
+      mc = Glossarist::V3::ManagedConcept.new(
+        data: Glossarist::V3::ManagedConceptData.new(id: "5.1"),
+      )
+      partitive = Glossarist::V3::PartitiveRelation.new(
+        comprehensive: Glossarist::V3::ConceptRef.new(source: "OIML", id: "5.1"),
+        members: [
+          Glossarist::V3::PartitiveMember.new(
+            ref: Glossarist::V3::ConceptRef.new(source: "OIML", id: "a"),
+          ),
+          Glossarist::V3::PartitiveMember.new(
+            ref: Glossarist::V3::ConceptRef.new(source: "OIML", id: "b"),
+          ),
+        ],
+        criterion: { "eng" => "physical" },
+      ).validate!
+      generic = Glossarist::V3::GenericRelation.new(
+        comprehensive: Glossarist::V3::ConceptRef.new(source: "OIML", id: "5.1"),
+        members: [
+          Glossarist::V3::GenericMember.new(
+            ref: Glossarist::V3::ConceptRef.new(source: "OIML", id: "5.13"),
+          ),
+          Glossarist::V3::GenericMember.new(
+            ref: Glossarist::V3::ConceptRef.new(source: "OIML", id: "3.2"),
+          ),
+        ],
+        criterion: { "eng" => "by realization medium" },
+      ).validate!
+
+      t = render_turtle(mc, [partitive, generic])
+      graph = RDF::Graph.new
+      RDF::Turtle::Reader.new(t) { |r| r.each_statement { |s| graph << s } }
+      expect(graph.query([nil, RDF.type, RDF::URI("#{gloss}PartitiveRelation")]).count).to eq(1)
+      expect(graph.query([nil, RDF.type, RDF::URI("#{gloss}GenericRelation")]).count).to eq(1)
+    end
+
+    it "does not emit PartitiveRelation for V2 concepts" do
+      v2_concept = Glossarist::ManagedConcept.new(data: { id: "v2-x" })
+      t = render_turtle(v2_concept, [])
+      graph = RDF::Graph.new
+      RDF::Turtle::Reader.new(t) { |r| r.each_statement { |s| graph << s } }
+      expect(graph.query([nil, RDF.type, RDF::URI("#{gloss}PartitiveRelation")])).to be_empty
+      expect(graph.query([nil, RDF.type, RDF::URI("#{gloss}GenericRelation")])).to be_empty
     end
   end
 end

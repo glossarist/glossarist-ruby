@@ -3,14 +3,17 @@
 module Glossarist
   module Validation
     module Rules
-      # Validates semantic invariants of PartitiveRelation entries
-      # that the model constructor does NOT enforce. Specifically:
+      # Validates semantic invariants of n-ary relation entries
+      # (PartitiveRelation, GenericRelation) that the model constructor
+      # does NOT enforce. The relations are passed in via the
+      # ConceptContext (per-file storage — see Glossarist::V3::RelationLoader).
       #
-      #   - error when a relation has fewer than 2 partitives
-      #     (ISO 704: "two or more"; single binary should use
+      # Checks:
+      #   - error when a relation has fewer than 2 members
+      #     (ISO 704: "two or more"; single binary should use a
       #     has_part edge instead)
       #   - error when two relations share the same comprehensive
-      #     AND the same non-nil criterion (duplicate decomposition;
+      #     AND the same non-empty criterion (duplicate decomposition;
       #     ISO 12620 coordinate-concept coherence)
       #   - warning when a relation has no criterion (cannot
       #     distinguish from siblings sharing the comprehensive)
@@ -21,7 +24,7 @@ module Glossarist
       #     at least one designation
       #
       # The model constructor already rejects empty comprehensive,
-      # empty partitives list, self-loops, invalid enum values, and
+      # empty members list, self-loops, invalid enum values, and
       # the optional + at_least_one combination.
       class PartitiveRelationRule < Base
         DEFAULT_PRESENCE = "required"
@@ -36,17 +39,16 @@ module Glossarist
           concept = context.concept
           return false unless concept.is_a?(V3::ManagedConcept)
 
-          concept.partitive_relations&.any? || external?(concept)
+          context.relations&.any? || external?(concept)
         end
 
         def check(context)
           concept = context.concept
           fname = context.file_name
+          relations = context.relations
           issues = []
 
           return issues unless concept.is_a?(V3::ManagedConcept)
-
-          relations = Array(concept.partitive_relations)
 
           relations.each_with_index do |rel, idx|
             check_cardinality(rel, idx, fname, issues)
@@ -67,10 +69,10 @@ module Glossarist
         end
 
         def check_cardinality(rel, idx, fname, issues)
-          return if rel.partitives.length >= 2
+          return if rel.members.length >= 2
 
           issues << issue(
-            "partitive_relation #{idx + 1} has fewer than 2 partitives " \
+            "relation #{idx + 1} has fewer than 2 members " \
             "(ISO 704 requires two or more); a single binary has_part edge " \
             "should be used instead",
             location: fname,
@@ -81,7 +83,7 @@ module Glossarist
           return if rel.criterion && !rel.criterion.empty?
 
           issues << issue(
-            "partitive_relation #{idx + 1} has no criterion; cannot verify " \
+            "relation #{idx + 1} has no criterion; cannot verify " \
             "distinctness from sibling relations sharing the comprehensive " \
             "(ISO 12620 coordinate-concept coherence)",
             severity: "warning",
@@ -97,14 +99,14 @@ module Glossarist
         # legal; the warning encourages an explicit, reviewed choice
         # rather than an accidental non-default.
         def check_member_dimensions(rel, idx, fname, issues)
-          rel.partitives.each_with_index do |member, mi|
+          rel.members.each_with_index do |member, mi|
             non_default = []
             non_default << "presence='#{member.presence}'" if member.presence != DEFAULT_PRESENCE
             non_default << "count='#{member.count}'" if member.count != DEFAULT_COUNT
             next if non_default.empty?
 
             issues << issue(
-              "partitive_relation #{idx + 1}.partitives[#{mi}] uses " \
+              "relation #{idx + 1}.members[#{mi}] uses " \
               "non-default #{non_default.join(' ')} " \
               "(defaults: presence=#{DEFAULT_PRESENCE}, count=#{DEFAULT_COUNT}) " \
               "— confirm the dimensions are intentional",
@@ -129,7 +131,7 @@ module Glossarist
             next if idxs.length == 1
 
             issues << issue(
-              "duplicate PartitiveRelation for comprehensive " \
+              "duplicate relation for comprehensive " \
               "#{key.first.inspect} with criterion #{key.last.inspect} " \
               "(relations ##{idxs.map { |i| i + 1 }.join(', ')}); " \
               "two relations sharing comprehensive AND criterion are the " \

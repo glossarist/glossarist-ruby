@@ -33,18 +33,20 @@ module Glossarist
         Designation::Symbol => :build_gloss_symbol,
       }.freeze
 
-      def self.transform(managed_concept, options = {})
-        new(managed_concept, options).build
+      def self.transform(managed_concept, relations: [], **options)
+        new(managed_concept, relations: relations, **options).build
       end
 
-      def self.transform_document(concepts, figures: [], tables: [],
+      def self.transform_document(concepts, relations: [], figures: [], tables: [],
                                   formulas: [], **options)
-        new(nil, options).build_document(concepts, figures: figures,
-                                                   tables: tables, formulas: formulas)
+        new(nil, relations: relations, **options).build_document(
+          concepts, figures: figures, tables: tables, formulas: formulas
+        )
       end
 
-      def initialize(managed_concept, options = {})
+      def initialize(managed_concept, relations: [], **options)
         @concept = managed_concept
+        @relations = Array(relations)
         @options = options
       end
 
@@ -63,7 +65,7 @@ module Glossarist
         Rdf::GlossDocument.to_turtle(doc)
       end
 
-      def to_turtle(concepts_or_concept = nil, figures: [], tables: [],
+      def to_turtle(concepts_or_concept = nil, relations: nil, figures: [], tables: [],
                     formulas: [])
         if concepts_or_concept.is_a?(Array)
           build_document(concepts_or_concept, figures: figures,
@@ -72,12 +74,12 @@ module Glossarist
           target = concepts_or_concept || @concept
           return "" unless target
 
-          gc = build_gloss_concept(target)
+          gc = build_gloss_concept(target, relations: relations)
           Rdf::GlossConcept.to_turtle(gc)
         end
       end
 
-      def to_jsonld(concepts_or_concept = nil, figures: [], tables: [],
+      def to_jsonld(concepts_or_concept = nil, relations: nil, figures: [], tables: [],
                     formulas: [])
         if concepts_or_concept.is_a?(Array)
           gloss_concepts = concepts_or_concept.map do |c|
@@ -94,7 +96,7 @@ module Glossarist
           target = concepts_or_concept || @concept
           return "" unless target
 
-          gc = build_gloss_concept(target)
+          gc = build_gloss_concept(target, relations: relations)
           Rdf::GlossConcept.to_jsonld(gc)
         end
       end
@@ -108,9 +110,10 @@ module Glossarist
 
       private
 
-      attr_reader :concept, :options
+      attr_reader :concept, :relations, :options
 
-      def build_gloss_concept(managed_concept)
+      def build_gloss_concept(managed_concept, relations: nil)
+        relation_list = relations || @relations
         identifier = managed_concept.data&.id || managed_concept.identifier
 
         localizations = managed_concept.localizations.each_value.map do |l10n|
@@ -131,26 +134,32 @@ module Glossarist
                                        identifier),
           dates: build_gloss_dates(managed_concept.dates, identifier),
           partitive_relations: build_gloss_partitive_relations(
-            v3_partitive_relations(managed_concept), identifier
+            partitive_relations_to_emit(relation_list), identifier
+          ),
+          generic_relations: build_gloss_generic_relations(
+            generic_relations_to_emit(relation_list), identifier
           ),
           **rel_targets,
         )
       end
 
-      # PartitiveRelations are a V3-only attribute. The transform
-      # accepts both V1/V2 and V3 concepts; for V1/V2 concepts the
-      # relation list is always empty.
-      def v3_partitive_relations(managed_concept)
-        return [] unless managed_concept.is_a?(V3::ManagedConcept)
+      # N-ary relations are passed in via the `relations:` parameter
+      # (per-file storage — see Glossarist::V3::RelationLoader). The
+      # transform partitions them by class and dispatches each class
+      # to its dedicated Gloss* RDF view.
+      def partitive_relations_to_emit(relations)
+        Array(relations).grep(V3::PartitiveRelation)
+      end
 
-        managed_concept.partitive_relations
+      def generic_relations_to_emit(relations)
+        Array(relations).grep(V3::GenericRelation)
       end
 
       def build_gloss_partitive_relations(relations, identifier)
         return [] unless relations
 
         Array(relations).map do |rel|
-          source_members = Array(rel.partitives)
+          source_members = Array(rel.members)
           gloss_members = source_members.map { |m| build_gloss_partitive_member(m) }
           member_uris = source_members
             .select { |m| m.is_a?(V3::PartitiveMember) && m.ref.is_a?(Glossarist::ConceptRef) }
@@ -161,6 +170,27 @@ module Glossarist
             comprehensive_uri: concept_ref_uri(rel.comprehensive),
             partitive_member_ids: member_uris,
             partitive_members: gloss_members,
+            completeness: rel.completeness,
+            criterion: rel.criterion,
+          )
+        end
+      end
+
+      def build_gloss_generic_relations(relations, identifier)
+        return [] unless relations
+
+        Array(relations).map do |rel|
+          source_members = Array(rel.members)
+          gloss_members = source_members.map { |m| build_gloss_generic_member(m) }
+          member_uris = source_members
+            .select { |m| m.is_a?(V3::GenericMember) && m.ref.is_a?(Glossarist::ConceptRef) }
+            .map { |m| concept_ref_uri(m.ref) }
+
+          Rdf::GlossGenericRelation.new(
+            identifier: identifier.to_s,
+            comprehensive_uri: concept_ref_uri(rel.comprehensive),
+            generic_member_ids: member_uris,
+            generic_members: gloss_members,
             completeness: rel.completeness,
             criterion: rel.criterion,
           )
@@ -185,19 +215,34 @@ module Glossarist
         )
       end
 
-      # Single SSOT for ConceptRef → concept URI. Handles all four
-      # ref shapes (source+id, id-only, source+text, text-only) and
-      # mirrors GlossCitation.slug's `[source, id].compact.join("/")`
-      # convention so external ConceptRefs don't collide with local
-      # ones of the same id.
-      def concept_ref_uri(ref)
-        return nil unless ref.is_a?(Glossarist::ConceptRef)
+      def build_gloss_generic_member(member)
+        return Rdf::GlossGenericMember.new unless member.is_a?(V3::GenericMember)
 
-        slug = [ref.source, ref.id || ref.text].compact.reject(&:empty?)
-        return nil if slug.empty?
+        ref = member.ref
+        ref_attrs = if ref.is_a?(Glossarist::ConceptRef)
+                      { ref_id: ref.id, ref_source: ref.source, ref_text: ref.text }
+                    else
+                      {}
+                    end
+
+        Rdf::GlossGenericMember.new(
+          **ref_attrs,
+          presence: member.presence,
+          count: member.count,
+          is_delimiting: member.is_delimiting,
+        )
+      end
+
+      # Single SSOT for ConceptRef → concept URI. Uses
+      # Glossarist::ConceptRef.qualified_id for the [source, id] string
+      # so external ConceptRefs don't collide with local ones of the
+      # same id.
+      def concept_ref_uri(ref)
+        qualified = Glossarist::ConceptRef.qualified_id(ref)
+        return nil if qualified.nil?
 
         Glossarist::Rdf::Namespaces::GlossaristNamespace.uri +
-          "concept/#{slug.join('/')}"
+          "concept/#{qualified.split(':', 2).join('/')}"
       end
 
       def build_gloss_localized_concept(l10n, concept_id)

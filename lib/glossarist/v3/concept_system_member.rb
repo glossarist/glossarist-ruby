@@ -17,10 +17,10 @@ module Glossarist
 
       attribute :ref, ConceptRef
       attribute :presence, :string,
-                values: Glossarist::GlossaryDefinition::PARTITIVE_PRESENCE_VALUES,
+                values: Glossarist::GlossaryDefinition::MEMBER_PRESENCE_VALUES,
                 default: -> { DEFAULT_PRESENCE }
       attribute :count, :string,
-                values: Glossarist::GlossaryDefinition::PARTITIVE_COUNT_VALUES,
+                values: Glossarist::GlossaryDefinition::MEMBER_COUNT_VALUES,
                 default: -> { DEFAULT_COUNT }
       attribute :is_delimiting, :boolean, default: -> { false }
 
@@ -29,6 +29,16 @@ module Glossarist
         map :presence, to: :presence
         map :count, to: :count
         map :is_delimiting, to: :is_delimiting
+      end
+
+      def initialize(*)
+        if instance_of?(ConceptSystemMember)
+          raise NotImplementedError,
+                "ConceptSystemMember is abstract; instantiate " \
+                "PartitiveMember or GenericMember instead"
+        end
+
+        super
       end
 
       def validate!
@@ -59,29 +69,28 @@ module Glossarist
               "(source, id, or text required)"
       end
 
+      # Delegates the MECE combination check to Multiplicity (the SSOT).
+      # Multiplicity.multiplicity_from_pair raises ArgumentError on the
+      # invalid (optional + at_least_one) combo with the canonical message.
+      # The returned name is discarded — only the validation side matters.
       def validate_presence_count!
-        unless Glossarist::GlossaryDefinition::PARTITIVE_PRESENCE_VALUES
-                 .include?(presence)
+        unless Glossarist::GlossaryDefinition::MEMBER_PRESENCE_VALUES
+            .include?(presence)
           raise ArgumentError,
                 "#{self.class.name}#presence has invalid value " \
                 "#{presence.inspect}; must be one of " \
-                "#{GlossaryDefinition::PARTITIVE_PRESENCE_VALUES.join(', ')}"
+                "#{GlossaryDefinition::MEMBER_PRESENCE_VALUES.join(', ')}"
         end
 
-        unless Glossarist::GlossaryDefinition::PARTITIVE_COUNT_VALUES
-                 .include?(count)
+        unless Glossarist::GlossaryDefinition::MEMBER_COUNT_VALUES
+            .include?(count)
           raise ArgumentError,
                 "#{self.class.name}#count has invalid value " \
                 "#{count.inspect}; must be one of " \
-                "#{GlossaryDefinition::PARTITIVE_COUNT_VALUES.join(', ')}"
+                "#{GlossaryDefinition::MEMBER_COUNT_VALUES.join(', ')}"
         end
 
-        if presence == "optional" && count == "at_least_one"
-          raise ArgumentError,
-                "#{self.class.name} presence=optional + count=at_least_one is " \
-                "invalid — it collapses to optional + multiple (zero or more). " \
-                "Use presence: optional, count: multiple instead."
-        end
+        Multiplicity.multiplicity_from_pair(presence, count)
       end
     end
   end
