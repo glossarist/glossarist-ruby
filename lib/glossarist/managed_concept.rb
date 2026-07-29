@@ -165,7 +165,7 @@ module Glossarist
       @uuid = new_uuid
     end
 
-    def self.detect_schema_version(concept) # rubocop:disable Metrics/PerceivedComplexity
+    def self.detect_schema_version(concept, relations: nil) # rubocop:disable Metrics/PerceivedComplexity
       raw = concept.schema_version
       if raw && !%w[legacy nil].include?(raw.to_s)
         return raw.to_s
@@ -175,7 +175,7 @@ module Glossarist
       return "3" if concept.sources&.any?
       return "3" if concept.data&.domains&.any?
       return "3" if concept.is_a?(V3::ManagedConcept) &&
-                     concept.partitive_relations&.any?
+        relations&.any?
       return "3" if localization_has_references?(concept)
 
       "2"

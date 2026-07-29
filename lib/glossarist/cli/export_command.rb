@@ -154,7 +154,7 @@ module Glossarist
       def export_jsonld(concepts, name, output_dir)
         require "glossarist/transforms/concept_to_gloss_transform"
         transform = Transforms::ConceptToGlossTransform.new(nil,
-                                                            transform_options)
+                                                            **transform_options)
         File.write(File.join(output_dir, "#{name}.jsonld"),
                    transform.to_jsonld(concepts,
                                        figures: dataset_figures,
@@ -165,7 +165,7 @@ module Glossarist
       def export_turtle(concepts, name, output_dir)
         require "glossarist/transforms/concept_to_gloss_transform"
         transform = Transforms::ConceptToGlossTransform.new(nil,
-                                                            transform_options)
+                                                            **transform_options)
         File.write(File.join(output_dir, "#{name}.ttl"),
                    transform.to_turtle(concepts,
                                        figures: dataset_figures,
@@ -185,7 +185,7 @@ module Glossarist
         File.open(File.join(output_dir, "#{name}.jsonl"), "w") do |f|
           concepts.each do |concept|
             transform = Transforms::ConceptToGlossTransform.new(concept,
-                                                                transform_options)
+                                                                **transform_options)
             f.write(transform.to_jsonl_line)
             f.write("\n")
           end
@@ -223,7 +223,7 @@ module Glossarist
         concepts.each do |concept|
           id = concept.data&.id || concept.identifier
           transform = Transforms::ConceptToGlossTransform.new(concept,
-                                                              transform_options)
+                                                              **transform_options)
           File.write(File.join(dir, "#{id}.jsonld"), transform.to_jsonld)
         end
       end
@@ -233,7 +233,7 @@ module Glossarist
         concepts.each do |concept|
           id = concept.data&.id || concept.identifier
           transform = Transforms::ConceptToGlossTransform.new(concept,
-                                                              transform_options)
+                                                              **transform_options)
           File.write(File.join(dir, "#{id}.ttl"), transform.to_turtle)
         end
       end

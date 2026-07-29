@@ -830,3 +830,93 @@ RSpec.describe Glossarist::Rdf::GlossPartitiveRelation do
     end
   end
 end
+
+# ── GlossGenericRelation / GlossGenericMember ─────────────────────────
+
+RSpec.describe Glossarist::Rdf::GlossGenericRelation do
+  include_context "rdf graph helpers"
+
+  let(:member_a) do
+    Glossarist::Rdf::GlossGenericMember.new(
+      ref_source: "OIML", ref_id: "5.13",
+      presence: "required", count: "exactly_one"
+    )
+  end
+
+  let(:member_b) do
+    Glossarist::Rdf::GlossGenericMember.new(
+      ref_source: "OIML", ref_id: "3.2",
+      presence: "required", count: "multiple"
+    )
+  end
+
+  let(:relation) do
+    described_class.new(
+      identifier: "5.1",
+      comprehensive_uri: "concept/OIML/5.1",
+      generic_member_ids: %w[concept/OIML/5.13 concept/OIML/3.2],
+      generic_members: [member_a, member_b],
+      completeness: "complete",
+      criterion: { "eng" => "by realization medium" },
+    )
+  end
+
+  it "emits gloss:GenericRelation type" do
+    graph = parse_turtle(described_class.to_turtle(relation))
+    expect(graph.query([nil, RDF.type, RDF::URI("#{gloss}GenericRelation")])).not_to be_empty
+  end
+
+  it "links typed members via gloss:hasGenericMember" do
+    graph = parse_turtle(described_class.to_turtle(relation))
+    subj = graph.query([nil, RDF.type, RDF::URI("#{gloss}GenericRelation")]).first.subject
+    member_links = graph.query([subj, RDF::URI("#{gloss}hasGenericMember"), nil])
+    expect(member_links.count).to eq(2)
+
+    member_types = member_links.map(&:object).flat_map do |ms|
+      graph.query([ms, RDF.type, nil]).map { |x| x.object.to_s }
+    end
+    expect(member_types).to include("#{gloss}GenericMember")
+  end
+
+  it "preserves per-member dimensions in the emitted graph" do
+    graph = parse_turtle(described_class.to_turtle(relation))
+    member_subj = graph.query([nil, RDF.type, RDF::URI("#{gloss}GenericMember")])
+      .map(&:subject)
+      .find { |s| graph.query([s, RDF::URI("#{gloss}refId"), nil]).first&.object&.to_s == "3.2" }
+    expect(member_subj).not_to be_nil
+    expect(graph.query([member_subj, RDF::URI("#{gloss}count"), nil]).first.object.to_s)
+      .to eq("multiple")
+  end
+
+  it "produces a deterministic subject across instances" do
+    attrs = {
+      identifier: "5.1",
+      comprehensive_uri: "concept/OIML/5.1",
+      generic_member_ids: [],
+      generic_members: [],
+      completeness: "complete",
+      criterion: { "eng" => "by realization medium" },
+    }
+    t1 = described_class.to_turtle(described_class.new(**attrs))
+    t2 = described_class.to_turtle(described_class.new(**attrs))
+    expect(t1).to eq(t2)
+  end
+end
+
+RSpec.describe Glossarist::Rdf::GlossGenericMember do
+  include_context "rdf graph helpers"
+
+  it "emits gloss:GenericMember type" do
+    m = described_class.new(ref_source: "OIML", ref_id: "5.13",
+                            presence: "required", count: "exactly_one")
+    graph = parse_turtle(described_class.to_turtle(m))
+    expect(graph.query([nil, RDF.type, RDF::URI("#{gloss}GenericMember")])).not_to be_empty
+  end
+
+  it "produces deterministic subject" do
+    attrs = { ref_source: "OIML", ref_id: "5.13", presence: "required", count: "exactly_one" }
+    t1 = described_class.to_turtle(described_class.new(**attrs))
+    t2 = described_class.to_turtle(described_class.new(**attrs))
+    expect(t1).to eq(t2)
+  end
+end

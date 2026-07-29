@@ -4,8 +4,19 @@ require "zip"
 
 module Glossarist
   class GcrValidator
-    def initialize(on_progress: nil)
+    # N-ary relations live in per-file relation store (see
+    # Glossarist::V3::RelationLoader), not inside the GCR. For GCR
+    # validation, callers can pass a `relations:` hash keyed by
+    # concept_id; the validator passes the per-concept list to each
+    # concept's context. Without it, relations are not validated
+    # here — only the concepts themselves.
+    def initialize(on_progress: nil, relations: nil)
       @on_progress = on_progress
+      @relations = relations
+    end
+
+    def self.validate(zip_path, relations: nil, **opts)
+      new(**opts, relations: relations).validate(zip_path)
     end
 
     def validate(zip_path)
@@ -58,6 +69,7 @@ module Glossarist
           concept,
           file_name: concept.data&.id ? "concepts/#{concept.data.id}.yaml" : "concepts/concept-#{idx}.yaml",
           collection_context: context,
+          relations: relations_for_concept(concept),
         )
 
         concept_rules.each do |rule|
@@ -68,6 +80,12 @@ module Glossarist
 
         @on_progress&.call(idx + 1, total)
       end
+    end
+
+    def relations_for_concept(concept)
+      return [] unless @relations
+
+      @relations[concept.data&.id] || []
     end
 
     def validate_collection(context, result)

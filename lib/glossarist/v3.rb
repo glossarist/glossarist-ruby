@@ -32,8 +32,11 @@ module Glossarist
     Configuration.register_model(LocalizedConcept, id: :localized_concept)
     Configuration.register_model(ConceptRef, id: :concept_ref)
     Configuration.register_model(RelatedConcept, id: :related_concept)
-    Configuration.register_model(ConceptSystemMember, id: :concept_system_member)
-    Configuration.register_model(AbstractNaryRelation, id: :abstract_nary_relation)
+    # ConceptSystemMember and AbstractNaryRelation are abstract base
+    # classes — they are NOT registered as Lutaml models because they
+    # must not be instantiable directly. Concrete leaves
+    # (PartitiveRelation, GenericRelation, PartitiveMember,
+    # GenericMember) are registered below.
     Configuration.register_model(PartitiveRelation, id: :partitive_relation)
     Configuration.register_model(PartitiveMember, id: :partitive_member)
     Configuration.register_model(GenericRelation, id: :generic_relation)

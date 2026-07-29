@@ -59,6 +59,7 @@ RSpec.describe "Cross-repo per-file relation integration" do
     relations = Glossarist::V3::RelationLoader.load_all(concept_model_relations_dir)
     relations.values.flatten.each do |rel|
       next unless rel.is_a?(Glossarist::V3::PartitiveRelation)
+
       expect { rel.validate! }.not_to raise_error
     end
   end

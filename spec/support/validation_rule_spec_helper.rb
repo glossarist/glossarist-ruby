@@ -41,11 +41,12 @@ module ValidationRuleSpecHelper
     Glossarist::Validation::Rules::DatasetContext.new(tmpdir)
   end
 
-  def make_concept_context(concept, collection_context:, file_name: nil)
+  def make_concept_context(concept, collection_context:, file_name: nil, relations: nil)
     Glossarist::Validation::Rules::ConceptContext.new(
       concept,
       file_name: file_name || "concept-#{concept.data&.id}.yaml",
       collection_context: collection_context,
+      relations: relations,
     )
   end
 

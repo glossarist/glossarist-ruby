@@ -35,6 +35,16 @@ module Glossarist
         map :status, to: :status
       end
 
+      def initialize(*)
+        if instance_of?(AbstractNaryRelation)
+          raise NotImplementedError,
+                "AbstractNaryRelation is abstract; instantiate " \
+                "PartitiveRelation or GenericRelation instead"
+        end
+
+        super
+      end
+
       def validate!
         validate_comprehensive!
         validate_members!
@@ -61,7 +71,7 @@ module Glossarist
 
       def validate_comprehensive!
         return if comprehensive.is_a?(ConceptRef) &&
-                  (comprehensive.source || comprehensive.id || comprehensive.text)
+          (comprehensive.source || comprehensive.id || comprehensive.text)
 
         raise ArgumentError,
               "#{self.class.name}#comprehensive must be a non-empty " \
@@ -87,7 +97,7 @@ module Glossarist
         comp_key = [comprehensive.source, comprehensive.id]
         members.each do |member|
           next unless member.ref.is_a?(ConceptRef)
-          next unless [member.ref.source, member.ref.id] == comp_key
+          next unless comp_key == [member.ref.source, member.ref.id]
 
           raise ArgumentError,
                 "#{self.class.name}#members cannot include the comprehensive"
@@ -98,7 +108,7 @@ module Glossarist
         return if completeness.nil?
 
         unless Glossarist::GlossaryDefinition::COMPLETENESS_VALUES
-                 .include?(completeness)
+            .include?(completeness)
           raise ArgumentError,
                 "#{self.class.name}#completeness has invalid value " \
                 "#{completeness.inspect}; must be one of " \

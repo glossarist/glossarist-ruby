@@ -21,7 +21,8 @@ module Glossarist
         "generic_relation" => GenericRelation,
       }.freeze
 
-      LoadError = Class.new(::StandardError)
+      class LoadError < ::StandardError
+      end
 
       class << self
         # Load every relation file under `dir`. Returns a hash keyed
@@ -39,7 +40,7 @@ module Glossarist
         # Load a single relation file. Returns a typed instance
         # (PartitiveRelation, GenericRelation, etc.).
         def load_file(path)
-          new(File.dirname(File.dirname(path))).load_path(path)
+          new(File.dirname(path, 2)).load_path(path)
         end
       end
 
@@ -50,7 +51,7 @@ module Glossarist
       def load_all
         each_relation_path.with_object({}) do |path, h|
           rel = load_path(path)
-          comp_id = comprehensive_id_of(rel)
+          comp_id = Glossarist::ConceptRef.qualified_id(rel.comprehensive)
           (h[comp_id] ||= []) << rel
         end
       end
@@ -59,7 +60,7 @@ module Glossarist
         dir = @relations_dir.join(comprehensive_id.to_s)
         return [] unless dir.exist?
 
-        Dir.glob("#{dir}/*.yaml").sort.map { |p| load_path(Pathname.new(p)) }
+        Dir.glob("#{dir}/*.yaml").map { |p| load_path(Pathname.new(p)) }
       end
 
       def load_path(path)
@@ -72,7 +73,7 @@ module Glossarist
         klass = TYPE_TO_CLASS[doc["type"]]
         unless klass
           raise LoadError, "#{path} has unknown type #{doc['type'].inspect}; " \
-                            "expected one of #{TYPE_TO_CLASS.keys.join(', ')}"
+                           "expected one of #{TYPE_TO_CLASS.keys.join(', ')}"
         end
 
         klass.from_hash(doc)
@@ -84,15 +85,9 @@ module Glossarist
         return enum_for(:each_relation_path) unless block_given?
         return [] unless @relations_dir.exist?
 
-        Dir.glob("#{@relations_dir}/**/*.yaml").sort.each do |p|
+        Dir.glob("#{@relations_dir}/**/*.yaml").each do |p|
           yield Pathname.new(p)
         end
-      end
-
-      def comprehensive_id_of(relation)
-        ref = relation.comprehensive
-        return nil unless ref.is_a?(ConceptRef) && ref.id
-        [ref.source, ref.id].compact.join(":")
       end
     end
   end

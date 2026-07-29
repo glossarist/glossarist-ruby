@@ -17,18 +17,12 @@ module Glossarist
     # Per-file storage: lives at
     # relations/<comprehensive-id>/<criterion-slug>.yaml — see
     # docs/design/relations-as-files.md (concept-model repo).
+    #
+    # The `key_value` mapping is inherited from AbstractNaryRelation
+    # (single SSOT). Only the typed member collection is narrowed
+    # here.
     class PartitiveRelation < AbstractNaryRelation
       attribute :members, PartitiveMember, collection: true
-
-      key_value do
-        map :comprehensive, to: :comprehensive
-        map :members, to: :members
-        map :completeness, to: :completeness
-        map :criterion, to: :criterion
-        map :sources, to: :sources
-        map :notes, to: :notes
-        map :status, to: :status
-      end
     end
   end
 end

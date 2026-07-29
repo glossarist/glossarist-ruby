@@ -9,13 +9,21 @@ module Glossarist
       # rules examining the same concept share one extraction pass (DRY,
       # single source of truth). Rules ask the context for references rather
       # than instantiating their own ReferenceExtractor.
+      #
+      # In V3, n-ary relations (PartitiveRelation, GenericRelation) are
+      # per-file (see Glossarist::V3::RelationLoader). Each concept's
+      # relations are looked up via the relations lookup passed here.
+      # Pass an explicit `relations:` list when constructing the context
+      # — the loader does not run on demand so the validator behaviour
+      # is fully deterministic given the load.
       class ConceptContext
-        attr_reader :concept, :file_name, :collection_context
+        attr_reader :concept, :file_name, :collection_context, :relations
 
-        def initialize(concept, file_name:, collection_context:)
+        def initialize(concept, file_name:, collection_context:, relations: [])
           @concept = concept
           @file_name = file_name
           @collection_context = collection_context
+          @relations = Array(relations)
         end
 
         def concept_id
