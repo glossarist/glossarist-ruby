@@ -5,28 +5,24 @@ require "pathname"
 
 module Glossarist
   module V3
-    # RelationLoader — scans a directory for per-file n-ary relation
-    # files and returns typed instances.
+    # RelationLoader — scans a directory for per-file hyperedge files
+    # and returns typed instances.
     #
     # Files live at `relations/<comprehensive-id>/<criterion-slug>.yaml`.
-    # The `type` field on each file discriminates between
-    # PartitiveRelation, GenericRelation, and future n-ary types.
+    # The `type` field on each file discriminates which concrete
+    # hyperedge class to instantiate. Dispatch is via HyperedgeRegistry
+    # — adding a new hyperedge type requires no edit here.
     #
     # Usage:
     #   relations = RelationLoader.load_all("path/to/dataset/relations")
     #   partitive = RelationLoader.load_for_concept("path/to/dataset", "5-1")
     class RelationLoader
-      TYPE_TO_CLASS = {
-        "partitive_relation" => PartitiveRelation,
-        "generic_relation" => GenericRelation,
-      }.freeze
-
       class LoadError < ::StandardError
       end
 
       class << self
         # Load every relation file under `dir`. Returns a hash keyed
-        # by comprehensive id, value = array of typed relations.
+        # by comprehensive id, value = array of typed hyperedges.
         def load_all(dir)
           new(dir).load_all
         end
@@ -37,8 +33,8 @@ module Glossarist
           new(File.join(dataset_root, "relations")).load_for_comprehensive(comprehensive_id)
         end
 
-        # Load a single relation file. Returns a typed instance
-        # (PartitiveRelation, GenericRelation, etc.).
+        # Load a single relation file. Returns a typed hyperedge
+        # instance (PartitiveHyperedge, GenericHyperedge, etc.).
         def load_file(path)
           new(File.dirname(path, 2)).load_path(path)
         end
@@ -70,13 +66,20 @@ module Glossarist
           raise LoadError, "#{path} missing required `type` field"
         end
 
-        klass = TYPE_TO_CLASS[doc["type"]]
+        klass = HyperedgeRegistry.for_type_tag(doc["type"])
         unless klass
+          known = HyperedgeRegistry.all_classes.map { |c| c::TYPE_TAG }.join(", ")
           raise LoadError, "#{path} has unknown type #{doc['type'].inspect}; " \
-                           "expected one of #{TYPE_TO_CLASS.keys.join(', ')}"
+                           "expected one of #{known}"
         end
 
-        klass.from_hash(doc)
+        # Preserve the source $id so round-trip writes go to the same
+        # file path. Without this, write-back would derive a new path
+        # from comprehensive + criterion and could fragment files.
+        file_id = doc["$id"]
+        instance = klass.from_hash(doc)
+        instance.file_id = file_id if file_id && instance.respond_to?(:file_id=)
+        instance
       end
 
       private

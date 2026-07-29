@@ -54,8 +54,8 @@ RSpec.describe Glossarist::GlossaryStore, "#relations" do
     store.load(tmpdir)
     expect(store.relations.length).to eq(2)
     types = store.relations.map(&:class).map(&:name)
-    expect(types).to include("Glossarist::V3::PartitiveRelation")
-    expect(types).to include("Glossarist::V3::GenericRelation")
+    expect(types).to include("Glossarist::V3::PartitiveHyperedge")
+    expect(types).to include("Glossarist::V3::GenericHyperedge")
   end
 
   it "memoizes the result" do

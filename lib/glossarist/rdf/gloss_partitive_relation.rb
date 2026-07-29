@@ -4,7 +4,7 @@ require "lutaml/model"
 
 module Glossarist
   module Rdf
-    # RDF view for V3::PartitiveRelation. Inherits structure and
+    # RDF view for V3::PartitiveHyperedge. Inherits structure and
     # helpers from GlossNaryRelation. The `rdf do` block re-declares
     # the predicates because lutaml-model's `rdf` DSL replaces the
     # parent mapping (not extends).
@@ -17,7 +17,7 @@ module Glossarist
 
         subject { |r| "partitiveRelation/#{GlossPartitiveRelation.deterministic_id(r)}" }
 
-        types "gloss:PartitiveRelation"
+        types "gloss:PartitiveHyperedge"
 
         predicate :comprehensive, namespace: Namespaces::GlossaristNamespace,
                                   to: :comprehensive_uri, uri_reference: true

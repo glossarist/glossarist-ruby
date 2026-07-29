@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe Glossarist::V3::PartitiveRelation do
+RSpec.describe Glossarist::V3::PartitiveHyperedge do
   let(:comprehensive) { Glossarist::V3::ConceptRef.new(source: "VIM", id: "1.1") }
 
   let(:members) do

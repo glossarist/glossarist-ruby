@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe Glossarist::V3::ConceptSystemMember do
+RSpec.describe Glossarist::V3::HyperedgeMember do
   let(:ref) { Glossarist::V3::ConceptRef.new(source: "VIM", id: "1.2") }
 
   describe "abstract enforcement" do

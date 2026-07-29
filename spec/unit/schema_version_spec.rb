@@ -101,7 +101,7 @@ RSpec.describe Glossarist::ManagedConcept, "schema versioning" do
         mc = Glossarist::V3::ManagedConcept.new(
           data: Glossarist::V3::ManagedConceptData.new(id: "test"),
         )
-        rel = Glossarist::V3::PartitiveRelation.new(
+        rel = Glossarist::V3::PartitiveHyperedge.new(
           comprehensive: Glossarist::V3::ConceptRef.new(source: "VIM", id: "1.1"),
           members: [
             Glossarist::V3::PartitiveMember.new(

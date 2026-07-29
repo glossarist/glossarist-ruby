@@ -736,15 +736,15 @@ RSpec.describe Glossarist::Rdf::GlossPartitiveRelation do
     )
   end
 
-  it "emits gloss:PartitiveRelation type" do
+  it "emits gloss:PartitiveHyperedge type" do
     graph = parse_turtle(described_class.to_turtle(relation))
-    types = graph.query([nil, RDF.type, RDF::URI("#{gloss}PartitiveRelation")])
+    types = graph.query([nil, RDF.type, RDF::URI("#{gloss}PartitiveHyperedge")])
     expect(types).not_to be_empty
   end
 
   it "emits comprehensive, completeness, and hasPartitive predicates" do
     graph = parse_turtle(described_class.to_turtle(relation))
-    subj = graph.query([nil, RDF.type, RDF::URI("#{gloss}PartitiveRelation")]).first.subject
+    subj = graph.query([nil, RDF.type, RDF::URI("#{gloss}PartitiveHyperedge")]).first.subject
     expect(graph.query([subj, RDF::URI("#{gloss}comprehensive"), nil])).not_to be_empty
     expect(graph.query([subj, RDF::URI("#{gloss}completeness"), nil])).not_to be_empty
     expect(graph.query([subj, RDF::URI("#{gloss}hasPartitive"), nil])).not_to be_empty
@@ -752,7 +752,7 @@ RSpec.describe Glossarist::Rdf::GlossPartitiveRelation do
 
   it "links to typed partitive members via gloss:hasPartitiveMember" do
     graph = parse_turtle(described_class.to_turtle(relation))
-    subj = graph.query([nil, RDF.type, RDF::URI("#{gloss}PartitiveRelation")]).first.subject
+    subj = graph.query([nil, RDF.type, RDF::URI("#{gloss}PartitiveHyperedge")]).first.subject
     member_links = graph.query([subj, RDF::URI("#{gloss}hasPartitiveMember"), nil])
     expect(member_links.count).to eq(2)
 
@@ -861,14 +861,14 @@ RSpec.describe Glossarist::Rdf::GlossGenericRelation do
     )
   end
 
-  it "emits gloss:GenericRelation type" do
+  it "emits gloss:GenericHyperedge type" do
     graph = parse_turtle(described_class.to_turtle(relation))
-    expect(graph.query([nil, RDF.type, RDF::URI("#{gloss}GenericRelation")])).not_to be_empty
+    expect(graph.query([nil, RDF.type, RDF::URI("#{gloss}GenericHyperedge")])).not_to be_empty
   end
 
   it "links typed members via gloss:hasGenericMember" do
     graph = parse_turtle(described_class.to_turtle(relation))
-    subj = graph.query([nil, RDF.type, RDF::URI("#{gloss}GenericRelation")]).first.subject
+    subj = graph.query([nil, RDF.type, RDF::URI("#{gloss}GenericHyperedge")]).first.subject
     member_links = graph.query([subj, RDF::URI("#{gloss}hasGenericMember"), nil])
     expect(member_links.count).to eq(2)
 

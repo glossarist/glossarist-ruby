@@ -9,14 +9,17 @@ module Glossarist
     autoload :DetailedDefinition, "glossarist/v3/detailed_definition"
     autoload :ConceptRef, "glossarist/v3/concept_ref"
     autoload :RelatedConcept, "glossarist/v3/related_concept"
-    autoload :ConceptSystemMember, "glossarist/v3/concept_system_member"
-    autoload :AbstractNaryRelation, "glossarist/v3/abstract_nary_relation"
-    autoload :PartitiveRelation, "glossarist/v3/partitive_relation"
+    autoload :HyperedgeMember, "glossarist/v3/hyperedge_member"
+    autoload :AbstractHyperedge, "glossarist/v3/abstract_hyperedge"
+    autoload :HyperedgeRegistry, "glossarist/v3/hyperedge_registry"
+    autoload :HyperedgeIndex, "glossarist/v3/hyperedge_index"
+    autoload :PartitiveHyperedge, "glossarist/v3/partitive_hyperedge"
     autoload :PartitiveMember, "glossarist/v3/partitive_member"
-    autoload :GenericRelation, "glossarist/v3/generic_relation"
+    autoload :GenericHyperedge, "glossarist/v3/generic_hyperedge"
     autoload :GenericMember, "glossarist/v3/generic_member"
     autoload :DefinitionType, "glossarist/v3/definition_type"
     autoload :RelationLoader, "glossarist/v3/relation_loader"
+    autoload :HyperedgeWriter, "glossarist/v3/hyperedge_writer"
     autoload :Multiplicity, "glossarist/v3/multiplicity"
     autoload :ConceptData, "glossarist/v3/concept_data"
     autoload :LocalizedConcept, "glossarist/v3/localized_concept"
@@ -32,17 +35,24 @@ module Glossarist
     Configuration.register_model(LocalizedConcept, id: :localized_concept)
     Configuration.register_model(ConceptRef, id: :concept_ref)
     Configuration.register_model(RelatedConcept, id: :related_concept)
-    # ConceptSystemMember and AbstractNaryRelation are abstract base
-    # classes — they are NOT registered as Lutaml models because they
-    # must not be instantiable directly. Concrete leaves
-    # (PartitiveRelation, GenericRelation, PartitiveMember,
-    # GenericMember) are registered below.
-    Configuration.register_model(PartitiveRelation, id: :partitive_relation)
+    # HyperedgeMember and AbstractHyperedge are abstract base classes —
+    # they are NOT registered as Lutaml models because they must not be
+    # instantiable directly. Concrete leaves (PartitiveHyperedge,
+    # GenericHyperedge, PartitiveMember, GenericMember) are registered
+    # below and also auto-registered with HyperedgeRegistry.
+    Configuration.register_model(PartitiveHyperedge, id: :partitive_hyperedge)
     Configuration.register_model(PartitiveMember, id: :partitive_member)
-    Configuration.register_model(GenericRelation, id: :generic_relation)
+    Configuration.register_model(GenericHyperedge, id: :generic_hyperedge)
     Configuration.register_model(GenericMember, id: :generic_member)
     Configuration.register_model(ManagedConceptData, id: :managed_concept_data)
     Configuration.register_model(ManagedConcept, id: :managed_concept)
     Configuration.register_model(ConceptDocument, id: :concept_document)
+
+    # Eager-load concrete hyperedge leaves so HyperedgeRegistry
+    # auto-populates via AbstractHyperedge.inherited. Without this,
+    # autoload defers leaf definition until first reference, leaving
+    # the registry empty at boot.
+    PartitiveHyperedge
+    GenericHyperedge
   end
 end

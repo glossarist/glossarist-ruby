@@ -78,10 +78,43 @@ module Glossarist
     def save_directory(path, format: nil, formats: {})
       @package.save(path, transport: :directory, format: format,
                           formats: formats)
+      # Persist per-file hyperedges alongside concepts. The relations/
+      # subdirectory mirrors the load path (relations/<comp-id>/<slug>.yaml).
+      save_relations(File.join(path, "relations")) if @relations && !@relations.empty?
     end
 
     def save_zip(path, format: nil, formats: {})
       @package.save(path, transport: :zip, format: format, formats: formats)
+      # ZIP transport doesn't expose a writable filesystem path here —
+      # callers persisting to ZIP must use #save_relations separately
+      # against a staging dir before zipping. Documented limitation.
+    end
+
+    # Persist all loaded relations to the per-file store under `dir`.
+    # Each hyperedge becomes relations/<comp-id>/<slug>.yaml (one file
+    # per hyperedge, per concept-model per-file format).
+    def save_relations(dir)
+      return if @relations.nil? || @relations.empty?
+
+      V3::HyperedgeWriter.write_all(@relations, dir)
+    end
+
+    # Add a hyperedge to the in-memory list AND persist it immediately
+    # to its per-file location under <dataset_path>/relations/.
+    # Returns the written file path (or nil if dataset has no path).
+    def add_relation(hyperedge)
+      (@relations ||= []) << hyperedge
+      return nil unless @dataset_path
+
+      relations_dir = File.join(@dataset_path, "relations")
+      V3::HyperedgeWriter.write(hyperedge, relations_dir)
+    end
+
+    # Remove a hyperedge. Caller-supplied predicate selects which to
+    # remove. The per-file storage is NOT modified by this method —
+    # use #delete_relation_file to remove a single file.
+    def remove_relations_if(&predicate)
+      @relations&.reject!(&predicate)
     end
 
     # ── Concepts ──
@@ -202,9 +235,9 @@ module Glossarist
       @formulas ||= load_dataset_entities("formulas", Formula)
     end
 
-    # Per-file n-ary relations (PartitiveRelation, GenericRelation)
+    # Per-file n-ary relations (PartitiveHyperedge, GenericHyperedge)
     # discovered under `relations/<comprehensive-id>/<criterion-slug>.yaml`.
-    # Returns a flat Array<AbstractNaryRelation>; use #relations_for to
+    # Returns a flat Array<AbstractHyperedge>; use #relations_for to
     # filter by comprehensive id. Empty when the dataset has no
     # relations/ directory (V1/V2 datasets, or V3 datasets that only
     # carry concepts).
@@ -269,7 +302,7 @@ module Glossarist
     end
 
     # Loads per-file n-ary relations via V3::RelationLoader. Returns a
-    # flat Array<AbstractNaryRelation>. Empty when no relations/
+    # flat Array<AbstractHyperedge>. Empty when no relations/
     # directory exists. The loader handles V1/V2 datasets gracefully
     # (no relations directory → empty).
     def load_relations

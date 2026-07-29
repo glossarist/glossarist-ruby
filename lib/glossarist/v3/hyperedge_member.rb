@@ -2,7 +2,7 @@
 
 module Glossarist
   module V3
-    # ConceptSystemMember — abstract base shape for members of any
+    # HyperedgeMember — abstract base shape for members of any
     # n-ary concept-system relation (PartitiveMember, GenericMember,
     # future AssociativeMember, SequentialMember).
     #
@@ -11,7 +11,7 @@ module Glossarist
     #
     # Concrete leaf classes inherit and may add type-specific fields.
     # See docs/design/abstract-nary-relation.md (concept-model repo).
-    class ConceptSystemMember < Lutaml::Model::Serializable
+    class HyperedgeMember < Lutaml::Model::Serializable
       DEFAULT_PRESENCE = "required"
       DEFAULT_COUNT = "exactly_one"
 
@@ -32,9 +32,9 @@ module Glossarist
       end
 
       def initialize(*)
-        if instance_of?(ConceptSystemMember)
+        if instance_of?(HyperedgeMember)
           raise NotImplementedError,
-                "ConceptSystemMember is abstract; instantiate " \
+                "HyperedgeMember is abstract; instantiate " \
                 "PartitiveMember or GenericMember instead"
         end
 

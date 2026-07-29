@@ -613,8 +613,8 @@ RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
   # V3 partitive + generic relation emission (per-file storage).
   #
   # Relations are passed in as a `relations:` parameter, not read from
-  # the concept. The transform dispatches by class — PartitiveRelation
-  # → gloss:PartitiveRelation, GenericRelation → gloss:GenericRelation.
+  # the concept. The transform dispatches by class — PartitiveHyperedge
+  # → gloss:PartitiveHyperedge, GenericHyperedge → gloss:GenericHyperedge.
   describe "V3 partitive relation emission (per-file)" do
     # Helper: build a transform with explicit relations list
     def render_turtle(concept, relations)
@@ -627,7 +627,7 @@ RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
       mc = Glossarist::V3::ManagedConcept.new(
         data: Glossarist::V3::ManagedConceptData.new(id: "112-02-09"),
       )
-      rel = Glossarist::V3::PartitiveRelation.new(
+      rel = Glossarist::V3::PartitiveHyperedge.new(
         comprehensive: Glossarist::V3::ConceptRef.new(source: "VIM", id: "112-02-09"),
         members: [
           Glossarist::V3::PartitiveMember.new(
@@ -650,11 +650,11 @@ RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
       expect(links.count).to eq(1)
     end
 
-    it "emits a gloss:PartitiveRelation subject with full dimensions" do
+    it "emits a gloss:PartitiveHyperedge subject with full dimensions" do
       mc = Glossarist::V3::ManagedConcept.new(
         data: Glossarist::V3::ManagedConceptData.new(id: "112-02-09"),
       )
-      rel = Glossarist::V3::PartitiveRelation.new(
+      rel = Glossarist::V3::PartitiveHyperedge.new(
         comprehensive: Glossarist::V3::ConceptRef.new(source: "VIM", id: "112-02-09"),
         members: [
           Glossarist::V3::PartitiveMember.new(
@@ -672,7 +672,7 @@ RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
       t = render_turtle(mc, [rel])
       graph = RDF::Graph.new
       RDF::Turtle::Reader.new(t) { |r| r.each_statement { |s| graph << s } }
-      types = graph.query([nil, RDF.type, RDF::URI("#{gloss}PartitiveRelation")])
+      types = graph.query([nil, RDF.type, RDF::URI("#{gloss}PartitiveHyperedge")])
       expect(types.count).to eq(1)
       members = graph.query([nil, RDF.type, RDF::URI("#{gloss}PartitiveMember")])
       expect(members.count).to eq(2)
@@ -682,7 +682,7 @@ RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
       mc = Glossarist::V3::ManagedConcept.new(
         data: Glossarist::V3::ManagedConceptData.new(id: "112-02-09"),
       )
-      rel = Glossarist::V3::PartitiveRelation.new(
+      rel = Glossarist::V3::PartitiveHyperedge.new(
         comprehensive: Glossarist::V3::ConceptRef.new(source: "VIM", id: "112-02-09"),
         members: [
           Glossarist::V3::PartitiveMember.new(
@@ -700,11 +700,11 @@ RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
       expect(t1).to eq(t2)
     end
 
-    it "emits gloss:GenericRelation for GenericRelation" do
+    it "emits gloss:GenericHyperedge for GenericHyperedge" do
       mc = Glossarist::V3::ManagedConcept.new(
         data: Glossarist::V3::ManagedConceptData.new(id: "5.1"),
       )
-      rel = Glossarist::V3::GenericRelation.new(
+      rel = Glossarist::V3::GenericHyperedge.new(
         comprehensive: Glossarist::V3::ConceptRef.new(source: "OIML", id: "5.1"),
         members: [
           Glossarist::V3::GenericMember.new(
@@ -720,17 +720,17 @@ RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
       t = render_turtle(mc, [rel])
       graph = RDF::Graph.new
       RDF::Turtle::Reader.new(t) { |r| r.each_statement { |s| graph << s } }
-      types = graph.query([nil, RDF.type, RDF::URI("#{gloss}GenericRelation")])
+      types = graph.query([nil, RDF.type, RDF::URI("#{gloss}GenericHyperedge")])
       expect(types.count).to eq(1)
       members = graph.query([nil, RDF.type, RDF::URI("#{gloss}GenericMember")])
       expect(members.count).to eq(2)
     end
 
-    it "dispatches relations by class — PartitiveRelation + GenericRelation together" do
+    it "dispatches relations by class — PartitiveHyperedge + GenericHyperedge together" do
       mc = Glossarist::V3::ManagedConcept.new(
         data: Glossarist::V3::ManagedConceptData.new(id: "5.1"),
       )
-      partitive = Glossarist::V3::PartitiveRelation.new(
+      partitive = Glossarist::V3::PartitiveHyperedge.new(
         comprehensive: Glossarist::V3::ConceptRef.new(source: "OIML", id: "5.1"),
         members: [
           Glossarist::V3::PartitiveMember.new(
@@ -742,7 +742,7 @@ RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
         ],
         criterion: { "eng" => "physical" },
       ).validate!
-      generic = Glossarist::V3::GenericRelation.new(
+      generic = Glossarist::V3::GenericHyperedge.new(
         comprehensive: Glossarist::V3::ConceptRef.new(source: "OIML", id: "5.1"),
         members: [
           Glossarist::V3::GenericMember.new(
@@ -758,17 +758,17 @@ RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
       t = render_turtle(mc, [partitive, generic])
       graph = RDF::Graph.new
       RDF::Turtle::Reader.new(t) { |r| r.each_statement { |s| graph << s } }
-      expect(graph.query([nil, RDF.type, RDF::URI("#{gloss}PartitiveRelation")]).count).to eq(1)
-      expect(graph.query([nil, RDF.type, RDF::URI("#{gloss}GenericRelation")]).count).to eq(1)
+      expect(graph.query([nil, RDF.type, RDF::URI("#{gloss}PartitiveHyperedge")]).count).to eq(1)
+      expect(graph.query([nil, RDF.type, RDF::URI("#{gloss}GenericHyperedge")]).count).to eq(1)
     end
 
-    it "does not emit PartitiveRelation for V2 concepts" do
+    it "does not emit PartitiveHyperedge for V2 concepts" do
       v2_concept = Glossarist::ManagedConcept.new(data: { id: "v2-x" })
       t = render_turtle(v2_concept, [])
       graph = RDF::Graph.new
       RDF::Turtle::Reader.new(t) { |r| r.each_statement { |s| graph << s } }
-      expect(graph.query([nil, RDF.type, RDF::URI("#{gloss}PartitiveRelation")])).to be_empty
-      expect(graph.query([nil, RDF.type, RDF::URI("#{gloss}GenericRelation")])).to be_empty
+      expect(graph.query([nil, RDF.type, RDF::URI("#{gloss}PartitiveHyperedge")])).to be_empty
+      expect(graph.query([nil, RDF.type, RDF::URI("#{gloss}GenericHyperedge")])).to be_empty
     end
   end
 end

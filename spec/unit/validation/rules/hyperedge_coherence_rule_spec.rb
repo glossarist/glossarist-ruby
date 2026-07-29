@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe Glossarist::Validation::Rules::NaryRelationRule do
+RSpec.describe Glossarist::Validation::Rules::HyperedgeCoherenceRule do
   subject(:rule) { described_class.new }
 
   let(:tmpdir) { Dir.mktmpdir }
@@ -30,9 +30,9 @@ RSpec.describe Glossarist::Validation::Rules::NaryRelationRule do
     }
     kwargs[:criterion] = criterion if criterion
     if type == :generic
-      Glossarist::V3::GenericRelation.new(**kwargs)
+      Glossarist::V3::GenericHyperedge.new(**kwargs)
     else
-      Glossarist::V3::PartitiveRelation.new(**kwargs)
+      Glossarist::V3::PartitiveHyperedge.new(**kwargs)
     end
   end
 
@@ -87,7 +87,7 @@ RSpec.describe Glossarist::Validation::Rules::NaryRelationRule do
     # member). The validator checks the same invariant at the rule
     # semantic level — duplicates the model check on purpose so the
     # rule is meaningful even when validate! is skipped.
-    rel = Glossarist::V3::PartitiveRelation.new(
+    rel = Glossarist::V3::PartitiveHyperedge.new(
       comprehensive: Glossarist::V3::ConceptRef.new(source: "VIM", id: "1.1"),
       members: [
         make_member("1.2"),
@@ -113,7 +113,7 @@ RSpec.describe Glossarist::Validation::Rules::NaryRelationRule do
 
   it "warns when a member has non-default presence" do
     mc = make_v3_concept
-    rel = Glossarist::V3::PartitiveRelation.new(
+    rel = Glossarist::V3::PartitiveHyperedge.new(
       comprehensive: Glossarist::V3::ConceptRef.new(source: "VIM", id: "1.1"),
       members: [
         make_member("1.2", presence: "optional"),
@@ -126,7 +126,7 @@ RSpec.describe Glossarist::Validation::Rules::NaryRelationRule do
     expect(issues.any? { |i| i.message.include?("non-default") }).to be true
   end
 
-  it "validates GenericRelation indistinguishably from PartitiveRelation" do
+  it "validates GenericHyperedge indistinguishably from PartitiveHyperedge" do
     mc = make_v3_concept
     rel = make_relation(
       comprehensive_id: "5.1",

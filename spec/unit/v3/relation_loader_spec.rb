@@ -71,7 +71,7 @@ RSpec.describe Glossarist::V3::RelationLoader do
       write_file("relations/vim-112-02-09/foo.yaml", partitive_yaml)
       all = described_class.load_all(File.join(tmpdir, "relations"))
       rel = all["VIM:112-02-09"].first
-      expect(rel).to be_a(Glossarist::V3::PartitiveRelation)
+      expect(rel).to be_a(Glossarist::V3::PartitiveHyperedge)
       expect(rel.members.length).to eq(2)
     end
   end
@@ -83,7 +83,7 @@ RSpec.describe Glossarist::V3::RelationLoader do
 
       rels = described_class.load_for_concept(tmpdir, "vim-112-02-09")
       expect(rels.length).to eq(1)
-      expect(rels.first).to be_a(Glossarist::V3::PartitiveRelation)
+      expect(rels.first).to be_a(Glossarist::V3::PartitiveHyperedge)
     end
 
     it "returns empty for an unknown id" do
@@ -96,7 +96,7 @@ RSpec.describe Glossarist::V3::RelationLoader do
       write_file("relations/vim-112-02-09/x.yaml", partitive_yaml)
       path = File.join(tmpdir, "relations/vim-112-02-09/x.yaml")
       rel = described_class.load_file(path)
-      expect(rel).to be_a(Glossarist::V3::PartitiveRelation)
+      expect(rel).to be_a(Glossarist::V3::PartitiveHyperedge)
       expect(rel.comprehensive.id).to eq("112-02-09")
     end
 
@@ -112,10 +112,10 @@ RSpec.describe Glossarist::V3::RelationLoader do
         .to raise_error(Glossarist::V3::RelationLoader::LoadError, /unknown type/)
     end
 
-    it "loads generic relations as GenericRelation" do
+    it "loads generic relations as GenericHyperedge" do
       write_file("relations/oiml-5-1/z.yaml", generic_yaml)
       rel = described_class.load_file(File.join(tmpdir, "relations/oiml-5-1/z.yaml"))
-      expect(rel).to be_a(Glossarist::V3::GenericRelation)
+      expect(rel).to be_a(Glossarist::V3::GenericHyperedge)
     end
   end
 

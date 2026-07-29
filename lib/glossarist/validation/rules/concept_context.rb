@@ -10,7 +10,7 @@ module Glossarist
       # single source of truth). Rules ask the context for references rather
       # than instantiating their own ReferenceExtractor.
       #
-      # In V3, n-ary relations (PartitiveRelation, GenericRelation) are
+      # In V3, n-ary relations (PartitiveHyperedge, GenericHyperedge) are
       # per-file (see Glossarist::V3::RelationLoader). Each concept's
       # relations are looked up via the relations lookup passed here.
       # Pass an explicit `relations:` list when constructing the context

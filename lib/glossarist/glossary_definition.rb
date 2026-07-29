@@ -34,14 +34,14 @@ module Glossarist
 
     ISO12620_TERM_TYPES = config.dig("iso12620", "term_type").freeze
 
-    # PartitiveRelation redesign (TODO.partitive-relation-v2).
+    # PartitiveHyperedge redesign (TODO.partitive-relation-v2).
     COMPLETENESS_VALUES = config.dig("completeness", "value").freeze
 
     # Member presence/count values for any n-ary relation member
-    # (PartitiveMember, GenericMember — both inherit ConceptSystemMember).
+    # (PartitiveMember, GenericMember — both inherit HyperedgeMember).
     # The config key is `multiplicity:` because presence + count encode
     # ISO 704:2022 multiplicity in the MECE decomposition; the constants
-    # are named for their consumers (ConceptSystemMember fields).
+    # are named for their consumers (HyperedgeMember fields).
     MEMBER_PRESENCE_VALUES =
       config.dig("multiplicity", "presence").freeze
 
