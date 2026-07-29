@@ -234,3 +234,18 @@ multiplicity:
     - exactly_one
     - at_least_one
     - multiple
+
+definition_type:
+  # ISO 704:2022 §5.3 definition strategies.
+  # See docs/design/definition-types.md (in concept-model repo).
+  value:
+    - intensional
+    - extensional
+    - partitive
+    - translated
+
+relation_type:
+  # Wire discriminator for per-file n-ary relation files.
+  value:
+    - partitive_relation
+    - generic_relation

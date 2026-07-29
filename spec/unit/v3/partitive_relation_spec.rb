@@ -5,7 +5,7 @@ require "spec_helper"
 RSpec.describe Glossarist::V3::PartitiveRelation do
   let(:comprehensive) { Glossarist::V3::ConceptRef.new(source: "VIM", id: "1.1") }
 
-  let(:partitives) do
+  let(:members) do
     [
       Glossarist::V3::PartitiveMember.new(
         ref: Glossarist::V3::ConceptRef.new(source: "VIM", id: "1.2"),
@@ -17,28 +17,28 @@ RSpec.describe Glossarist::V3::PartitiveRelation do
   end
 
   describe "construction" do
-    it "accepts comprehensive, partitives, completeness, criterion" do
+    it "accepts comprehensive, members, completeness, criterion" do
       rel = described_class.new(
         comprehensive: comprehensive,
-        partitives: partitives,
+        members: members,
         completeness: "complete",
         criterion: { "eng" => "physical structure" },
       )
       expect(rel.comprehensive.id).to eq("1.1")
-      expect(rel.partitives.length).to eq(2)
+      expect(rel.members.length).to eq(2)
       expect(rel.completeness).to eq("complete")
       expect(rel.criterion).to eq("eng" => "physical structure")
     end
 
     it "defaults completeness to complete when omitted" do
-      rel = described_class.new(comprehensive: comprehensive, partitives: partitives)
+      rel = described_class.new(comprehensive: comprehensive, members: members)
       expect(rel.completeness).to eq("complete")
       expect(rel).to be_complete
       expect(rel).not_to be_partial
     end
 
-    it "is coordinate when it has 2+ partitives" do
-      rel = described_class.new(comprehensive: comprehensive, partitives: partitives)
+    it "is coordinate when it has 2+ members" do
+      rel = described_class.new(comprehensive: comprehensive, members: members)
       expect(rel).to be_coordinate
     end
   end
@@ -47,29 +47,29 @@ RSpec.describe Glossarist::V3::PartitiveRelation do
     it "raises on empty comprehensive" do
       rel = described_class.new(
         comprehensive: Glossarist::V3::ConceptRef.new,
-        partitives: partitives,
+        members: members,
       )
       expect { rel.validate! }.to raise_error(ArgumentError, /comprehensive/)
     end
 
-    it "raises on empty partitives" do
-      rel = described_class.new(comprehensive: comprehensive, partitives: [])
-      expect { rel.validate! }.to raise_error(ArgumentError, /at least one partitive/)
+    it "raises on empty members" do
+      rel = described_class.new(comprehensive: comprehensive, members: [])
+      expect { rel.validate! }.to raise_error(ArgumentError, /at least one.*member/)
     end
 
-    it "raises on single partitive (ISO 704 requires ≥2)" do
+    it "raises on single member (ISO 704 requires ≥2)" do
       rel = described_class.new(
         comprehensive: comprehensive,
-        partitives: [partitives.first],
+        members: [members.first],
       )
-      expect { rel.validate! }.to raise_error(ArgumentError, /≥2 partitives/)
+      expect { rel.validate! }.to raise_error(ArgumentError, />=2.*members/)
     end
 
     it "raises on self-loop" do
       same = Glossarist::V3::ConceptRef.new(source: "VIM", id: "1.1")
       rel = described_class.new(
         comprehensive: same,
-        partitives: [
+        members: [
           Glossarist::V3::PartitiveMember.new(ref: same),
           Glossarist::V3::PartitiveMember.new(
             ref: Glossarist::V3::ConceptRef.new(source: "VIM", id: "1.2"),
@@ -82,7 +82,7 @@ RSpec.describe Glossarist::V3::PartitiveRelation do
     it "raises on invalid completeness" do
       rel = described_class.new(
         comprehensive: comprehensive,
-        partitives: partitives,
+        members: members,
         completeness: "open",
       )
       expect { rel.validate! }.to raise_error(ArgumentError, /completeness/)
@@ -93,19 +93,19 @@ RSpec.describe Glossarist::V3::PartitiveRelation do
     it "round-trips a complete relation with criterion" do
       rel = described_class.new(
         comprehensive: comprehensive,
-        partitives: partitives,
+        members: members,
         completeness: "complete",
         criterion: { "eng" => "physical structure" },
       )
       restored = described_class.from_yaml(rel.to_yaml).validate!
       expect(restored.comprehensive.id).to eq("1.1")
-      expect(restored.partitives.map { |m| m.ref.id }).to eq(%w[1.2 1.3])
+      expect(restored.members.map { |m| m.ref.id }).to eq(%w[1.2 1.3])
       expect(restored.completeness).to eq("complete")
       expect(restored.criterion).to eq("eng" => "physical structure")
     end
 
     it "round-trips a partial relation with mixed multiplicity members" do
-      members = [
+      mixed = [
         Glossarist::V3::PartitiveMember.new(
           ref: Glossarist::V3::ConceptRef.new(source: "VIM", id: "1.2"),
           presence: "required", count: "exactly_one",
@@ -118,72 +118,45 @@ RSpec.describe Glossarist::V3::PartitiveRelation do
       ]
       rel = described_class.new(
         comprehensive: comprehensive,
-        partitives: members,
+        members: mixed,
         completeness: "partial",
       )
       restored = described_class.from_yaml(rel.to_yaml).validate!
       expect(restored).to be_partial
-      expect(restored.partitives.first).to be_delimiting
-      expect(restored.partitives.first).to be_required
-      expect(restored.partitives.last).to be_optional
+      expect(restored.members.first).to be_delimiting
+      expect(restored.members.first).to be_required
+      expect(restored.members.last).to be_optional
     end
   end
 
-  describe "integration with V3::ManagedConcept" do
-    let(:mc_yaml) do
+  describe "standalone relation file format" do
+    let(:file_yaml) do
       <<~YAML
         ---
-        identifier: '112-02-09'
-        partitive_relations:
-        - comprehensive:
+        $id: vim-1-1/physical-structure
+        type: partitive_relation
+        comprehensive:
+          source: VIM
+          id: '1.1'
+        members:
+        - ref:
             source: VIM
-            id: '112-02-09'
-          partitives:
-          - ref:
-              source: VIM
-              id: '112-02-10'
-            presence: required
-            count: multiple
-            is_delimiting: true
-          - ref:
-              source: VIM
-              id: '112-03-26'
-            presence: optional
-            count: exactly_one
-          completeness: complete
-          criterion:
-            eng: measurement result composition
+            id: '1.2'
+        - ref:
+            source: VIM
+            id: '1.3'
+        completeness: complete
+        criterion:
+          eng: physical structure
       YAML
     end
 
-    it "round-trips partitive_relations at the concept level" do
-      mc = Glossarist::V3::ManagedConcept.from_yaml(mc_yaml)
-      rel_list = mc.partitive_relations
-      expect(rel_list.length).to eq(1)
-      expect(rel_list.first.comprehensive.id).to eq("112-02-09")
-      expect(rel_list.first.partitives.map { |m| m.ref.id })
-        .to eq(%w[112-02-10 112-03-26])
-      expect(rel_list.first.partitives.first).to be_delimiting
-      expect(rel_list.first.partitives.first).to be_required
-      expect(rel_list.first.partitives.first.count).to eq("multiple")
-      expect(rel_list.first.partitives.last).to be_optional
-      expect(rel_list.first.partitives.last).not_to be_delimiting
-      expect(rel_list.first.completeness).to eq("complete")
-      expect(rel_list.first.criterion).to eq("eng" => "measurement result composition")
-    end
-  end
-
-  describe "schema_version detection" do
-    it "detects V3 from partitive_relations alone" do
-      mc = Glossarist::V3::ManagedConcept.new(
-        data: Glossarist::V3::ManagedConceptData.new(id: "x"),
-      )
-      rel = described_class.new(
-        comprehensive: comprehensive,
-        partitives: partitives,
-      ).validate!
-      mc.partitive_relations = [rel]
-      expect(Glossarist::ManagedConcept.detect_schema_version(mc)).to eq("3")
+    it "round-trips the per-file wire format" do
+      rel = described_class.from_yaml(file_yaml)
+      expect(rel.comprehensive.id).to eq("1.1")
+      expect(rel.members.map { |m| m.ref.id }).to eq(%w[1.2 1.3])
+      expect(rel.completeness).to eq("complete")
+      expect(rel.criterion).to eq("eng" => "physical structure")
     end
   end
 end
