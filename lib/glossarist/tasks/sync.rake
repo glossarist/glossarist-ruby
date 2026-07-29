@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-require_relative "../tasks/sync_model"
+# Glossarist::Tasks::SyncModel autoloads via lib/glossarist/tasks.rb
+# (the immediate-parent namespace file). No `require_relative` here.
 
 namespace :glossarist do
   namespace :sync do
