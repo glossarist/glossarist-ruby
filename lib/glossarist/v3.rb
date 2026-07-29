@@ -9,14 +9,14 @@ module Glossarist
     autoload :DetailedDefinition, "glossarist/v3/detailed_definition"
     autoload :ConceptRef, "glossarist/v3/concept_ref"
     autoload :RelatedConcept, "glossarist/v3/related_concept"
+    autoload :ConceptSystemMember, "glossarist/v3/concept_system_member"
+    autoload :AbstractNaryRelation, "glossarist/v3/abstract_nary_relation"
     autoload :PartitiveRelation, "glossarist/v3/partitive_relation"
     autoload :PartitiveMember, "glossarist/v3/partitive_member"
-    # Multiplicity is a derived-view utility module (SSOT for the
-    # ISO 704:2022 (presence, count) → name mapping), not a Lutaml
-    # model — so it is autoloaded but NOT registered via
-    # Configuration.register_model. Used by renderers/viewers to
-    # display the ISO name; the PartitiveMember model itself only
-    # carries the orthogonal presence + count dimensions.
+    autoload :GenericRelation, "glossarist/v3/generic_relation"
+    autoload :GenericMember, "glossarist/v3/generic_member"
+    autoload :DefinitionType, "glossarist/v3/definition_type"
+    autoload :RelationLoader, "glossarist/v3/relation_loader"
     autoload :Multiplicity, "glossarist/v3/multiplicity"
     autoload :ConceptData, "glossarist/v3/concept_data"
     autoload :LocalizedConcept, "glossarist/v3/localized_concept"
@@ -32,8 +32,12 @@ module Glossarist
     Configuration.register_model(LocalizedConcept, id: :localized_concept)
     Configuration.register_model(ConceptRef, id: :concept_ref)
     Configuration.register_model(RelatedConcept, id: :related_concept)
+    Configuration.register_model(ConceptSystemMember, id: :concept_system_member)
+    Configuration.register_model(AbstractNaryRelation, id: :abstract_nary_relation)
     Configuration.register_model(PartitiveRelation, id: :partitive_relation)
     Configuration.register_model(PartitiveMember, id: :partitive_member)
+    Configuration.register_model(GenericRelation, id: :generic_relation)
+    Configuration.register_model(GenericMember, id: :generic_member)
     Configuration.register_model(ManagedConceptData, id: :managed_concept_data)
     Configuration.register_model(ManagedConcept, id: :managed_concept)
     Configuration.register_model(ConceptDocument, id: :concept_document)

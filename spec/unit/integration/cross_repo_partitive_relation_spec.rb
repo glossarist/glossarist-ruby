@@ -3,118 +3,63 @@
 require "spec_helper"
 
 # Cross-repo integration: verifies that a PartitiveRelation YAML
-# fixture authored against the concept-model v3 schema round-trips
-# through glossarist-ruby's V3::ManagedConcept.
+# fixture authored against the concept-model v3 per-file relation
+# format round-trips through glossarist-ruby's V3::RelationLoader
+# and V3::PartitiveRelation.
 #
-# Fixtures are inline (not loaded from ../concept-model) because the
-# concept-model maintainer's TODO.partitive-relation-v2 plan item 09
-# ("Rewrite examples 20-23") hasn't landed yet. When it does, these
-# inline fixtures can be replaced with paths into the concept-model
-# repo's examples directory.
-RSpec.describe "Cross-repo partitive relation integration" do
-  YAML_FIXTURES = {
-    "closed-complete" => <<~YAML,
-      ---
-      identifier: '112-02-09'
-      partitive_relations:
-      - comprehensive:
-          source: VIM
-          id: '112-02-09'
-        partitives:
-        - ref:
-            source: VIM
-            id: '112-02-10'
-        - ref:
-            source: VIM
-            id: '112-03-26'
-        completeness: complete
-        criterion:
-          eng: measurement result composition
-    YAML
-    "partial" => <<~YAML,
-      ---
-      identifier: '112-01-03'
-      partitive_relations:
-      - comprehensive:
-          source: VIM
-          id: '112-01-03'
-        partitives:
-        - ref:
-            source: VIM
-            id: '112-01-04'
-        - ref:
-            source: VIM
-            id: '112-01-05'
-        - ref:
-            source: VIM
-            id: '112-01-22'
-        completeness: partial
-        criterion:
-          eng: quantity system decomposition
-    YAML
-    "with-member-dimensions" => <<~YAML,
-      ---
-      identifier: '112-02-09'
-      partitive_relations:
-      - comprehensive:
-          source: VIM
-          id: '112-02-09'
-        partitives:
-        - ref:
-            source: VIM
-            id: '112-02-10'
-          presence: required
-          count: multiple
-          is_delimiting: true
-        - ref:
-            source: VIM
-            id: '112-03-26'
-          presence: optional
-          count: exactly_one
-        completeness: complete
-        criterion:
-          eng: measurement result composition
-    YAML
-    "plain" => <<~YAML,
-      ---
-      identifier: '113-01-01'
-      partitive_relations:
-      - comprehensive:
-          source: EXAMPLE
-          id: '113-01-01'
-        partitives:
-        - ref:
-            source: EXAMPLE
-            id: '113-01-02'
-        - ref:
-            source: EXAMPLE
-            id: '113-01-03'
-        # completeness omitted → defaults to complete via schema default
-        criterion:
-          eng: simple decomposition
-    YAML
-  }.freeze
+# The concept-model examples live at:
+#   ../concept-model/schemas/v3/examples/relations/<id>/<slug>.yaml
+#
+# If the concept-model path is unavailable (e.g. running in an isolated
+# build), the spec is skipped.
+RSpec.describe "Cross-repo per-file relation integration" do
+  let(:concept_model_relations_dir) do
+    File.expand_path("../../../../concept-model/schemas/v3/examples/relations", __dir__)
+  end
 
-  YAML_FIXTURES.each do |label, yaml|
-    it "#{label} round-trips through V3::ManagedConcept" do
-      mc = Glossarist::V3::ManagedConcept.from_yaml(yaml)
-      rel_list = mc.partitive_relations
-      expect(rel_list.length).to eq(1)
-      rel = rel_list.first
-      expect(rel.partitives.length).to be >= 2
-      expect(rel).to be_coordinate
-      rel.validate!
+  let(:available) { File.directory?(concept_model_relations_dir) }
+
+  before do
+    skip "concept-model repo not present at expected path" unless available
+  end
+
+  it "loads every relation file via RelationLoader" do
+    relations = Glossarist::V3::RelationLoader.load_all(concept_model_relations_dir)
+    expect(relations).not_to be_empty
+
+    relations.each_value do |list|
+      list.each do |rel|
+        expect(rel).to be_a(Glossarist::V3::AbstractNaryRelation)
+        expect(rel.members.length).to be >= 2
+      end
     end
   end
 
-  it "with-member-dimensions preserves presence/count/is_delimiting" do
-    mc = Glossarist::V3::ManagedConcept.from_yaml(YAML_FIXTURES["with-member-dimensions"])
-    members = mc.partitive_relations.first.partitives
-    expect(members.first.presence).to eq("required")
-    expect(members.first.count).to eq("multiple")
-    expect(members.first.is_delimiting).to be(true)
-    expect(members.last.presence).to eq("optional")
-    expect(members.last.count).to eq("exactly_one")
-    expect(members.last.is_delimiting).to be(false)
+  it "loads the VIM measurement-result-composition PartitiveRelation" do
+    loader = Glossarist::V3::RelationLoader.new(concept_model_relations_dir)
+    relations = loader.load_for_comprehensive("vim-112-02-09")
+    expect(relations.length).to eq(1)
+    rel = relations.first
+    expect(rel).to be_a(Glossarist::V3::PartitiveRelation)
+    expect(rel.comprehensive.id).to eq("112-02-09")
+    expect(rel.members.map { |m| m.ref.id }).to eq(%w[112-02-10 112-03-26])
+    expect(rel.completeness).to eq("complete")
+    expect(rel.criterion).to eq("eng" => "measurement result composition")
+  end
+
+  it "loads a dual-criterion comprehensive (two distinct decompositions)" do
+    loader = Glossarist::V3::RelationLoader.new(concept_model_relations_dir)
+    relations = loader.load_for_comprehensive("example-116-01-01")
+    expect(relations.length).to eq(2)
+    criteria = relations.map { |r| r.criterion["eng"] }.sort
+    expect(criteria).to eq(["functional subsystem", "physical structure"])
+  end
+
+  it "every loaded PartitiveRelation passes validate!" do
+    relations = Glossarist::V3::RelationLoader.load_all(concept_model_relations_dir)
+    relations.values.flatten.each do |rel|
+      next unless rel.is_a?(Glossarist::V3::PartitiveRelation)
+      expect { rel.validate! }.not_to raise_error
+    end
   end
 end

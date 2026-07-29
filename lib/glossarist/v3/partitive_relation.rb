@@ -8,106 +8,26 @@ module Glossarist
     # concepts (subordinate concepts partitive) which fitted together
     # constitute the comprehensive.
     #
-    # Shown as a rake or bracket in source diagrams. All partitives
-    # within one relation are coordinate concepts: they share the
-    # comprehensive AND share the criterion of subdivision.
+    # Inherits structure and validations from AbstractNaryRelation.
+    # The `comprehensive` field denotes the whole concept.
     #
-    # Per-partitive metadata (ISO 704:2022, MECE decomposition):
-    #   - presence (required, optional) — line style: solid vs dashed
-    #   - count (exactly_one, at_least_one, multiple) — line count
-    #   - is_delimiting — orthogonal flag; a delimiting part behaves
-    #     like a delimiting characteristic (distinguishes the
-    #     comprehensive from coordinate concepts)
+    # Wire field `members` is uniform across all n-ary relation types
+    # (was: `partitives` — renamed in the v3 clean break).
     #
-    # Replaces the prior PartitiveHyperedge class. The "hyperedge"
-    # framing was graph-theoretic; ISO calls this a *relation*.
-    class PartitiveRelation < Lutaml::Model::Serializable
-      DEFAULT_COMPLETENESS = "complete"
-
-      attribute :comprehensive, ConceptRef
-      attribute :partitives, PartitiveMember, collection: true
-      attribute :completeness, :string,
-                values: Glossarist::GlossaryDefinition::COMPLETENESS_VALUES,
-                default: -> { DEFAULT_COMPLETENESS }
-      attribute :criterion, :hash
+    # Per-file storage: lives at
+    # relations/<comprehensive-id>/<criterion-slug>.yaml — see
+    # docs/design/relations-as-files.md (concept-model repo).
+    class PartitiveRelation < AbstractNaryRelation
+      attribute :members, PartitiveMember, collection: true
 
       key_value do
         map :comprehensive, to: :comprehensive
-        map :partitives, to: :partitives
+        map :members, to: :members
         map :completeness, to: :completeness
         map :criterion, to: :criterion
-      end
-
-      def validate!
-        validate_comprehensive!
-        validate_partitives!
-        validate_self_loop!
-        validate_completeness!
-        self
-      end
-
-      def complete?
-        completeness == "complete"
-      end
-
-      def partial?
-        completeness == "partial"
-      end
-
-      # ISO 704: a partitive relation connects to two or more
-      # partitives. A single binary has_part edge is not a
-      # PartitiveRelation.
-      def coordinate?
-        partitives.length >= 2
-      end
-
-      private
-
-      def validate_comprehensive!
-        return if comprehensive.is_a?(ConceptRef) &&
-                  (comprehensive.source || comprehensive.id || comprehensive.text)
-
-        raise ArgumentError,
-              "PartitiveRelation#comprehensive must be a non-empty " \
-              "ConceptRef (source, id, or text required)"
-      end
-
-      def validate_partitives!
-        if partitives.empty?
-          raise ArgumentError, "PartitiveRelation requires at least one partitive"
-        end
-        unless coordinate?
-          raise ArgumentError,
-                "PartitiveRelation requires ≥2 partitives (ISO 704); a single " \
-                "binary has_part edge should be used instead"
-        end
-
-        partitives.each(&:validate!)
-      end
-
-      def validate_self_loop!
-        return unless comprehensive.is_a?(ConceptRef)
-
-        comp_key = [comprehensive.source, comprehensive.id]
-        partitives.each do |member|
-          next unless member.ref.is_a?(ConceptRef)
-          next unless [member.ref.source, member.ref.id] == comp_key
-
-          raise ArgumentError,
-                "PartitiveRelation#partitives cannot include the comprehensive"
-        end
-      end
-
-      def validate_completeness!
-        return if completeness.nil?
-
-        unless Glossarist::GlossaryDefinition::COMPLETENESS_VALUES
-                 .include?(completeness)
-          raise ArgumentError,
-                "PartitiveRelation#completeness has invalid value " \
-                "#{completeness.inspect}; must be one of " \
-                "#{GlossaryDefinition::COMPLETENESS_VALUES.join(', ')}"
-        end
+        map :sources, to: :sources
+        map :notes, to: :notes
+        map :status, to: :status
       end
     end
   end

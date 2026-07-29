@@ -42,5 +42,13 @@ module Glossarist
 
     PARTITIVE_COUNT_VALUES =
       config.dig("multiplicity", "count").freeze
+
+    # ISO 704:2022 §5.3 definition strategies.
+    DEFINITION_TYPE_VALUES =
+      config.dig("definition_type", "value").freeze
+
+    # Wire discriminator for per-file n-ary relation files.
+    RELATION_TYPE_VALUES =
+      config.dig("relation_type", "value").freeze
   end
 end
