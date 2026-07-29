@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe Glossarist::V3::GenericRelation do
+RSpec.describe Glossarist::V3::GenericHyperedge do
   let(:genus) { Glossarist::V3::ConceptRef.new(source: "VIML", id: "5.1") }
 
   let(:species) do

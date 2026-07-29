@@ -4,7 +4,7 @@ module Glossarist
   module Validation
     module Rules
       # Validates semantic invariants of n-ary relation entries
-      # (PartitiveRelation, GenericRelation) that the model constructor
+      # (PartitiveHyperedge, GenericHyperedge) that the model constructor
       # does NOT enforce. The relations are passed in via the
       # ConceptContext (per-file storage — see Glossarist::V3::RelationLoader).
       #
@@ -26,13 +26,13 @@ module Glossarist
       # The model constructor already rejects empty comprehensive,
       # empty members list, self-loops, invalid enum values, and
       # the optional + at_least_one combination.
-      class NaryRelationRule < Base
+      class HyperedgeCoherenceRule < Base
         DEFAULT_PRESENCE = "required"
         DEFAULT_COUNT = "exactly_one"
 
         # Stable identifier for downstream issue trackers / config.
         # Originally assigned when the rule was partitive-only; kept
-        # after the rename to GenericRelation + n-ary generalization
+        # after the rename to GenericHyperedge + n-ary generalization
         # so existing suppression configs continue to work.
         def code = "GLS-221"
         def category = :schema

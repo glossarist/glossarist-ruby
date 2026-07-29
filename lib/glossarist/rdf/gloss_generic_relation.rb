@@ -4,7 +4,7 @@ require "lutaml/model"
 
 module Glossarist
   module Rdf
-    # RDF view for V3::GenericRelation. Inherits structure and
+    # RDF view for V3::GenericHyperedge. Inherits structure and
     # helpers from GlossNaryRelation. The `rdf do` block re-declares
     # the predicates because lutaml-model's `rdf` DSL replaces the
     # parent mapping (not extends).
@@ -17,7 +17,7 @@ module Glossarist
 
         subject { |r| "genericRelation/#{GlossGenericRelation.deterministic_id(r)}" }
 
-        types "gloss:GenericRelation"
+        types "gloss:GenericHyperedge"
 
         predicate :comprehensive, namespace: Namespaces::GlossaristNamespace,
                                   to: :comprehensive_uri, uri_reference: true

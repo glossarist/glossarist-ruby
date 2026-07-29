@@ -3,24 +3,24 @@
 require "spec_helper"
 
 # Cross-cutting contract between the orthogonal-dimensions model
-# (ConceptSystemMember: presence + count + is_delimiting) and the
+# (HyperedgeMember: presence + count + is_delimiting) and the
 # derived display utility (Multiplicity: maps the dimensions to ISO
 # 704 names). Both PartitiveMember and GenericMember inherit from
-# ConceptSystemMember, so this contract applies to both.
+# HyperedgeMember, so this contract applies to both.
 #
 # The model is the SSOT for what dimensions are valid; the utility is
 # the SSOT for the (presence, count) → name mapping. They must agree
 # on the 5 valid combinations and the 1 invalid combination.
 
-RSpec.describe "Multiplicity ↔ ConceptSystemMember contract" do
+RSpec.describe "Multiplicity ↔ HyperedgeMember contract" do
   let(:ref) { Glossarist::V3::ConceptRef.new(source: "VIM", id: "1.2") }
 
   [Glossarist::V3::PartitiveMember, Glossarist::V3::GenericMember].each do |klass|
     describe "for #{klass.name}" do
       let(:member) { klass.new(ref: ref) }
 
-      it "inherits ConceptSystemMember" do
-        expect(member).to be_a(Glossarist::V3::ConceptSystemMember)
+      it "inherits HyperedgeMember" do
+        expect(member).to be_a(Glossarist::V3::HyperedgeMember)
       end
 
       describe "for each valid combination in NAME_BY_PAIR" do

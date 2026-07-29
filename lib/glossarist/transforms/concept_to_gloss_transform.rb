@@ -133,91 +133,66 @@ module Glossarist
           domains: build_gloss_domains(managed_concept.data&.domains,
                                        identifier),
           dates: build_gloss_dates(managed_concept.dates, identifier),
-          partitive_relations: build_gloss_partitive_relations(
-            partitive_relations_to_emit(relation_list), identifier
+          partitive_relations: build_gloss_hyperedges(
+            relation_list, V3::PartitiveHyperedge,
+            :build_gloss_partitive_member, :partitive_member_ids,
+            :partitive_members, Rdf::GlossPartitiveRelation, identifier,
           ),
-          generic_relations: build_gloss_generic_relations(
-            generic_relations_to_emit(relation_list), identifier
+          generic_relations: build_gloss_hyperedges(
+            relation_list, V3::GenericHyperedge,
+            :build_gloss_generic_member, :generic_member_ids,
+            :generic_members, Rdf::GlossGenericRelation, identifier,
           ),
           **rel_targets,
         )
       end
 
-      # N-ary relations are passed in via the `relations:` parameter
-      # (per-file storage — see Glossarist::V3::RelationLoader). The
-      # transform partitions them by class and dispatches each class
-      # to its dedicated Gloss* RDF view.
-      def partitive_relations_to_emit(relations)
-        Array(relations).grep(V3::PartitiveRelation)
+      # Type-blind hyperedge builder. Dispatches via HyperedgeRegistry;
+      # the only per-type data (member class, RDF view attribute names,
+      # RDF view class) is passed in. Adding a new hyperedge type means
+      # adding one entry to the calling sites above; no edit to this
+      # method.
+      def build_gloss_hyperedges(relations, hyperedge_class, member_builder,
+                                  member_ids_attr, members_attr,
+                                  gloss_relation_class, identifier)
+        Array(relations)
+          .select { |rel| rel.is_a?(hyperedge_class) }
+          .map { |rel| build_one_gloss_hyperedge(rel, member_builder, member_ids_attr, members_attr, gloss_relation_class, identifier) }
       end
 
-      def generic_relations_to_emit(relations)
-        Array(relations).grep(V3::GenericRelation)
-      end
+      def build_one_gloss_hyperedge(rel, member_builder, member_ids_attr,
+                                     members_attr, gloss_relation_class, identifier)
+        source_members = Array(rel.members)
+        gloss_members = source_members.map { |m| send(member_builder, m) }
+        member_uris = source_members
+          .select { |m| m.ref.is_a?(Glossarist::ConceptRef) }
+          .map { |m| concept_ref_uri(m.ref) }
 
-      def build_gloss_partitive_relations(relations, identifier)
-        return [] unless relations
-
-        Array(relations).map do |rel|
-          source_members = Array(rel.members)
-          gloss_members = source_members.map { |m| build_gloss_partitive_member(m) }
-          member_uris = source_members
-            .select { |m| m.is_a?(V3::PartitiveMember) && m.ref.is_a?(Glossarist::ConceptRef) }
-            .map { |m| concept_ref_uri(m.ref) }
-
-          Rdf::GlossPartitiveRelation.new(
-            identifier: identifier.to_s,
-            comprehensive_uri: concept_ref_uri(rel.comprehensive),
-            partitive_member_ids: member_uris,
-            partitive_members: gloss_members,
-            completeness: rel.completeness,
-            criterion: rel.criterion,
-          )
-        end
-      end
-
-      def build_gloss_generic_relations(relations, identifier)
-        return [] unless relations
-
-        Array(relations).map do |rel|
-          source_members = Array(rel.members)
-          gloss_members = source_members.map { |m| build_gloss_generic_member(m) }
-          member_uris = source_members
-            .select { |m| m.is_a?(V3::GenericMember) && m.ref.is_a?(Glossarist::ConceptRef) }
-            .map { |m| concept_ref_uri(m.ref) }
-
-          Rdf::GlossGenericRelation.new(
-            identifier: identifier.to_s,
-            comprehensive_uri: concept_ref_uri(rel.comprehensive),
-            generic_member_ids: member_uris,
-            generic_members: gloss_members,
-            completeness: rel.completeness,
-            criterion: rel.criterion,
-          )
-        end
+        gloss_relation_class.new(
+          identifier: identifier.to_s,
+          comprehensive_uri: concept_ref_uri(rel.comprehensive),
+          member_ids_attr => member_uris,
+          members_attr => gloss_members,
+          completeness: rel.completeness,
+          criterion: rel.criterion,
+        )
       end
 
       def build_gloss_partitive_member(member)
         return Rdf::GlossPartitiveMember.new unless member.is_a?(V3::PartitiveMember)
 
-        ref = member.ref
-        ref_attrs = if ref.is_a?(Glossarist::ConceptRef)
-                      { ref_id: ref.id, ref_source: ref.source, ref_text: ref.text }
-                    else
-                      {}
-                    end
-
-        Rdf::GlossPartitiveMember.new(
-          **ref_attrs,
-          presence: member.presence,
-          count: member.count,
-          is_delimiting: member.is_delimiting,
-        )
+        build_gloss_nary_member(Rdf::GlossPartitiveMember, member)
       end
 
       def build_gloss_generic_member(member)
         return Rdf::GlossGenericMember.new unless member.is_a?(V3::GenericMember)
 
+        build_gloss_nary_member(Rdf::GlossGenericMember, member)
+      end
+
+      # Shared member builder. Per-class metadata (the rdf view class
+      # is dispatched by the caller) keeps the duplication to one place.
+      def build_gloss_nary_member(gloss_member_class, member)
         ref = member.ref
         ref_attrs = if ref.is_a?(Glossarist::ConceptRef)
                       { ref_id: ref.id, ref_source: ref.source, ref_text: ref.text }
@@ -225,7 +200,7 @@ module Glossarist
                       {}
                     end
 
-        Rdf::GlossGenericMember.new(
+        gloss_member_class.new(
           **ref_attrs,
           presence: member.presence,
           count: member.count,

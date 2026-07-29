@@ -47,4 +47,3 @@ module Glossarist
     end
   end
 end
-

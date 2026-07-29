@@ -33,7 +33,6 @@ RSpec.describe Glossarist::V3::PartitiveMember do
     end
   end
 
-
   describe "#validate!" do
     it "raises on empty ref" do
       member = described_class.new(ref: Glossarist::V3::ConceptRef.new)

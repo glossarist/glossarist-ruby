@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
+require "digest"
+
 module Glossarist
   module V3
-    # AbstractNaryRelation — abstract base shape for all n-ary
-    # concept-system relations (PartitiveRelation, GenericRelation,
+    # AbstractHyperedge — abstract base shape for all n-ary
+    # concept-system relations (PartitiveHyperedge, GenericHyperedge,
     # future AssociativeRelation, SequentialRelation).
     #
     # Carries the shared fields: comprehensive, members[2..*],
@@ -11,11 +13,11 @@ module Glossarist
     #
     # Concrete leaves override `members` to specify the typed member
     # class. Shared validations live here.
-    class AbstractNaryRelation < Lutaml::Model::Serializable
+    class AbstractHyperedge < Lutaml::Model::Serializable
       DEFAULT_COMPLETENESS = "complete"
 
       attribute :comprehensive, ConceptRef
-      attribute :members, ConceptSystemMember, collection: true
+      attribute :members, HyperedgeMember, collection: true
       attribute :completeness, :string,
                 values: Glossarist::GlossaryDefinition::COMPLETENESS_VALUES,
                 default: -> { DEFAULT_COMPLETENESS }
@@ -24,6 +26,14 @@ module Glossarist
       attribute :notes, :hash
       attribute :status, :string,
                 values: Glossarist::GlossaryDefinition::CONCEPT_STATUSES
+
+      # Per-file identity — set by RelationLoader on parse, used by
+      # HyperedgeWriter on serialize. The wire field is `$id` (JSON
+      # Schema convention); the value is `<comp-id>/<criterion-slug>`.
+      # Not in key_value because lutaml::Model key_value does not
+      # natively express `$`-prefixed keys; handled via custom
+      # round-trip in HyperedgeWriter / RelationLoader.
+      attr_accessor :file_id
 
       key_value do
         map :comprehensive, to: :comprehensive
@@ -36,10 +46,10 @@ module Glossarist
       end
 
       def initialize(*)
-        if instance_of?(AbstractNaryRelation)
+        if instance_of?(AbstractHyperedge)
           raise NotImplementedError,
-                "AbstractNaryRelation is abstract; instantiate " \
-                "PartitiveRelation or GenericRelation instead"
+                "AbstractHyperedge is abstract; instantiate " \
+                "PartitiveHyperedge or GenericHyperedge instead"
         end
 
         super
@@ -67,7 +77,64 @@ module Glossarist
         members.length >= 2
       end
 
+      # Per-file identity derived from comprehensive + criterion.
+      # Format: `<comprehensive-id-dir>/<criterion-slug>` where the
+      # dir is `<source>-<id>` (downcased, kebab-case) and the slug
+      # is the English criterion (kebab-case) or a structural
+      # fallback. Stable across runs for the same content.
+      #
+      # Returns nil if comprehensive is empty.
+      def derived_file_id
+        return nil unless comprehensive.is_a?(ConceptRef) && comprehensive.id
+
+        comp_dir = comprehensive_dir_name
+        return nil unless comp_dir
+
+        slug = criterion_slug
+        "#{comp_dir}/#{slug}"
+      end
+
+      # File path under `relations/` directory. Uses #derived_file_id
+      # unless #file_id was explicitly set (e.g., by RelationLoader
+      # preserving the source path on parse).
+      def file_path(relations_dir)
+        id = file_id || derived_file_id
+        return nil unless id
+
+        File.join(relations_dir, "#{id}.yaml")
+      end
+
+      # Comprehensive concept as a directory-safe name:
+      # `<source>-<id>` lowercased, kebab-case, special chars
+      # (including dots) replaced with dashes. Matches the concept-model
+      # fixtures (vim-112-02-09, oiml-5-1, example-116-01-01).
+      def comprehensive_dir_name
+        return nil unless comprehensive.is_a?(ConceptRef)
+
+        parts = [comprehensive.source, comprehensive.id].compact.reject(&:empty?)
+        return nil if parts.empty?
+
+        parts.join("-").downcase.gsub(/[^a-z0-9\-]/, "-")
+             .gsub(/-{2,}/, "-").gsub(/\A-|-\z/, "")
+      end
+
+      # Kebab-case slug derived from the English criterion. Falls back
+      # to "decomposition-N" when no English criterion exists (N is
+      # derived from the criterion hash for stability).
+      def criterion_slug
+        eng = criterion.is_a?(Hash) ? (criterion["eng"] || criterion[:eng]) : nil
+        return "decomposition-#{criterion_hash}" if eng.nil? || eng.to_s.empty?
+
+        eng.to_s.downcase.gsub(/[^a-z0-9]+/, "-").gsub(/\A-|-\z/, "")
+      end
+
       private
+
+      def criterion_hash
+        return "0" unless criterion.is_a?(Hash) && !criterion.empty?
+
+        Digest::MD5.hexdigest(criterion.sort.to_h.inspect)[0..5]
+      end
 
       def validate_comprehensive!
         return if comprehensive.is_a?(ConceptRef) &&

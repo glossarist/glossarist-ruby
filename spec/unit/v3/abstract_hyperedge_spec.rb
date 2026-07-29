@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe Glossarist::V3::AbstractNaryRelation do
+RSpec.describe Glossarist::V3::AbstractHyperedge do
   let(:ref) { Glossarist::V3::ConceptRef.new(source: "VIM", id: "1.1") }
 
   describe "abstract enforcement" do
@@ -15,21 +15,21 @@ RSpec.describe Glossarist::V3::AbstractNaryRelation do
       # Concrete leaves are registered; abstract bases are NOT. The
       # public resolve_model API raises on unknown ids — that's how
       # we verify the absence.
-      expect { Glossarist::V3::Configuration.resolve_model(:abstract_nary_relation) }
+      expect { Glossarist::V3::Configuration.resolve_model(:abstract_hyperedge) }
         .to raise_error(StandardError)
-      expect { Glossarist::V3::Configuration.resolve_model(:concept_system_member) }
+      expect { Glossarist::V3::Configuration.resolve_model(:hyperedge_member) }
         .to raise_error(StandardError)
       # Sanity check: leaves ARE resolvable.
-      expect(Glossarist::V3::Configuration.resolve_model(:partitive_relation))
-        .to eq(Glossarist::V3::PartitiveRelation)
-      expect(Glossarist::V3::Configuration.resolve_model(:generic_relation))
-        .to eq(Glossarist::V3::GenericRelation)
+      expect(Glossarist::V3::Configuration.resolve_model(:partitive_hyperedge))
+        .to eq(Glossarist::V3::PartitiveHyperedge)
+      expect(Glossarist::V3::Configuration.resolve_model(:generic_hyperedge))
+        .to eq(Glossarist::V3::GenericHyperedge)
     end
   end
 
   describe "concrete subclasses" do
-    it "PartitiveRelation can be instantiated" do
-      expect(Glossarist::V3::PartitiveRelation.new(
+    it "PartitiveHyperedge can be instantiated" do
+      expect(Glossarist::V3::PartitiveHyperedge.new(
                comprehensive: ref,
                members: [Glossarist::V3::PartitiveMember.new(
                  ref: Glossarist::V3::ConceptRef.new(source: "VIM", id: "1.2"),
@@ -37,8 +37,8 @@ RSpec.describe Glossarist::V3::AbstractNaryRelation do
              )).to be_a(described_class)
     end
 
-    it "GenericRelation can be instantiated" do
-      expect(Glossarist::V3::GenericRelation.new(
+    it "GenericHyperedge can be instantiated" do
+      expect(Glossarist::V3::GenericHyperedge.new(
                comprehensive: ref,
                members: [Glossarist::V3::GenericMember.new(
                  ref: Glossarist::V3::ConceptRef.new(source: "VIM", id: "1.2"),
@@ -49,7 +49,7 @@ RSpec.describe Glossarist::V3::AbstractNaryRelation do
 
   describe "shared validations (inherited by leaves)" do
     it "validates comprehensive is non-empty" do
-      rel = Glossarist::V3::PartitiveRelation.new(
+      rel = Glossarist::V3::PartitiveHyperedge.new(
         comprehensive: Glossarist::V3::ConceptRef.new,
         members: [Glossarist::V3::PartitiveMember.new(ref: ref)],
       )
@@ -57,7 +57,7 @@ RSpec.describe Glossarist::V3::AbstractNaryRelation do
     end
 
     it "validates members has >=2 entries" do
-      rel = Glossarist::V3::PartitiveRelation.new(
+      rel = Glossarist::V3::PartitiveHyperedge.new(
         comprehensive: ref,
         members: [Glossarist::V3::PartitiveMember.new(ref: ref)],
       )
@@ -65,7 +65,7 @@ RSpec.describe Glossarist::V3::AbstractNaryRelation do
     end
 
     it "validates against self-loops" do
-      rel = Glossarist::V3::PartitiveRelation.new(
+      rel = Glossarist::V3::PartitiveHyperedge.new(
         comprehensive: ref,
         members: [
           Glossarist::V3::PartitiveMember.new(ref: ref),
@@ -78,7 +78,7 @@ RSpec.describe Glossarist::V3::AbstractNaryRelation do
     end
 
     it "validates completeness enum" do
-      rel = Glossarist::V3::PartitiveRelation.new(
+      rel = Glossarist::V3::PartitiveHyperedge.new(
         comprehensive: ref,
         members: [
           Glossarist::V3::PartitiveMember.new(
@@ -96,7 +96,7 @@ RSpec.describe Glossarist::V3::AbstractNaryRelation do
 
   describe "shared predicates" do
     let(:rel) do
-      Glossarist::V3::PartitiveRelation.new(
+      Glossarist::V3::PartitiveHyperedge.new(
         comprehensive: ref,
         members: [
           Glossarist::V3::PartitiveMember.new(
