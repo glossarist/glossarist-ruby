@@ -7,7 +7,7 @@ module Glossarist
       attribute :examples, V3::DetailedDefinition, collection: true,
                                                    initialize_empty: true
       attribute :type, :string,
-                values: Glossarist::GlossaryDefinition::DEFINITION_TYPE_VALUES,
+                values: DefinitionType::VALUES,
                 default: -> { DefinitionType::DEFAULT }
 
       key_value do

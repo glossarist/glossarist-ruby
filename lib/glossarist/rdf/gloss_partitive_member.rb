@@ -4,24 +4,11 @@ require "lutaml/model"
 
 module Glossarist
   module Rdf
-    # RDF view for V3::PartitiveMember. Emits a gloss:PartitiveMember
-    # subject carrying the ConceptRef target plus the ISO 704:2022
-    # orthogonal dimensions (presence, count, is_delimiting).
-    #
-    # Subject identity is content-derived so the same member in the
-    # same relation produces the same URI across runs (and across
-    # processes). Two members with identical ref + dimensions share a
-    # subject — that is intentional: it exposes model-level
-    # inconsistency if the same partitive concept is given different
-    # dimensions inside the same dataset.
-    class GlossPartitiveMember < Lutaml::Model::Serializable
-      attribute :ref_id, :string
-      attribute :ref_source, :string
-      attribute :ref_text, :string
-      attribute :presence, :string
-      attribute :count, :string
-      attribute :is_delimiting, :boolean
-
+    # RDF view for V3::PartitiveMember. Inherits attributes and
+    # deterministic_id from GlossNaryMember. The `rdf do` block
+    # re-declares the predicates because lutaml-model's `rdf` DSL
+    # replaces the parent mapping (not extends).
+    class GlossPartitiveMember < GlossNaryMember
       rdf do
         namespace Namespaces::GlossaristNamespace
 
@@ -41,16 +28,6 @@ module Glossarist
                           to: :count
         predicate :isDelimiting, namespace: Namespaces::GlossaristNamespace,
                                  to: :is_delimiting
-      end
-
-      def self.deterministic_id(member)
-        readable = [member.ref_source, member.ref_id].compact.reject(&:empty?)
-        return readable.join(":") unless readable.empty?
-
-        DeterministicSlug.from_parts(
-          member.ref_source, member.ref_id, member.ref_text,
-          member.presence, member.count, member.is_delimiting
-        )
       end
     end
   end

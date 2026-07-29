@@ -202,6 +202,30 @@ module Glossarist
       @formulas ||= load_dataset_entities("formulas", Formula)
     end
 
+    # Per-file n-ary relations (PartitiveRelation, GenericRelation)
+    # discovered under `relations/<comprehensive-id>/<criterion-slug>.yaml`.
+    # Returns a flat Array<AbstractNaryRelation>; use #relations_for to
+    # filter by comprehensive id. Empty when the dataset has no
+    # relations/ directory (V1/V2 datasets, or V3 datasets that only
+    # carry concepts).
+    def relations
+      @relations ||= load_relations
+    end
+
+    # Relations whose comprehensive concept matches `qualified_id`
+    # (e.g. "VIM:112-02-09"). Accepts either a qualified-id string or
+    # a ConceptRef — the lookup goes through ConceptRef.qualified_id.
+    def relations_for(qualified_id_or_ref)
+      target = if qualified_id_or_ref.is_a?(Glossarist::ConceptRef)
+                 Glossarist::ConceptRef.qualified_id(qualified_id_or_ref)
+               else
+                 qualified_id_or_ref.to_s
+               end
+      relations.select do |rel|
+        Glossarist::ConceptRef.qualified_id(rel.comprehensive) == target
+      end
+    end
+
     # ── Stats ──
 
     def stats
@@ -242,6 +266,19 @@ module Glossarist
       Dir.glob(File.join(dir, "*.{yaml,yml}")).filter_map do |path|
         klass.from_file(path)
       end
+    end
+
+    # Loads per-file n-ary relations via V3::RelationLoader. Returns a
+    # flat Array<AbstractNaryRelation>. Empty when no relations/
+    # directory exists. The loader handles V1/V2 datasets gracefully
+    # (no relations directory → empty).
+    def load_relations
+      return [] unless @dataset_path
+
+      relations_dir = File.join(@dataset_path, "relations")
+      return [] unless File.directory?(relations_dir)
+
+      V3::RelationLoader.load_all(relations_dir).values.flatten
     end
 
     def resolve_concept_document_class(metadata)

@@ -83,7 +83,8 @@ module Glossarist
 
       def each_relation_path
         return enum_for(:each_relation_path) unless block_given?
-        return [] unless @relations_dir.exist?
+
+        return unless @relations_dir.exist?
 
         Dir.glob("#{@relations_dir}/**/*.yaml").each do |p|
           yield Pathname.new(p)

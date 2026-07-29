@@ -4,22 +4,13 @@ require "lutaml/model"
 
 module Glossarist
   module Rdf
-    # RDF view for V3::GenericRelation. Emits a gloss:GenericRelation
-    # subject with comprehensive, completeness, criterion properties,
-    # plus hasGenericMember (typed subjects carrying the ISO 704:2022
-    # per-member dimensions).
-    #
-    # Mirror of GlossPartitiveRelation. The split exists because the
-    # gloss:PartitiveRelation vs gloss:GenericRelation type is part of
-    # the RDF vocabulary — SPARQL queries that filter by type can
-    # then discriminate genus/species from whole/parts decompositions.
-    class GlossGenericRelation < Lutaml::Model::Serializable
-      attribute :identifier, :string
-      attribute :comprehensive_uri, :string
+    # RDF view for V3::GenericRelation. Inherits structure and
+    # helpers from GlossNaryRelation. The `rdf do` block re-declares
+    # the predicates because lutaml-model's `rdf` DSL replaces the
+    # parent mapping (not extends).
+    class GlossGenericRelation < GlossNaryRelation
       attribute :generic_member_ids, :string, collection: true
       attribute :generic_members, GlossGenericMember, collection: true
-      attribute :completeness, :string
-      attribute :criterion, :hash
 
       rdf do
         namespace Namespaces::GlossaristNamespace
@@ -47,14 +38,6 @@ module Glossarist
           parts << GlossGenericMember.deterministic_id(m)
         end
         DeterministicSlug.from_parts(*parts)
-      end
-
-      def self.criterion_fingerprint(criterion)
-        return nil unless criterion.is_a?(Hash) && !criterion.empty?
-
-        criterion.sort_by { |k, _| k.to_s }
-          .map { |k, v| "#{k}=#{v}" }
-          .join(";")
       end
     end
   end
