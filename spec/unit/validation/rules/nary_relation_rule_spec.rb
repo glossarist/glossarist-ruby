@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe Glossarist::Validation::Rules::PartitiveRelationRule do
+RSpec.describe Glossarist::Validation::Rules::NaryRelationRule do
   subject(:rule) { described_class.new }
 
   let(:tmpdir) { Dir.mktmpdir }

@@ -4,18 +4,13 @@ require "lutaml/model"
 
 module Glossarist
   module Rdf
-    # RDF view for V3::PartitiveRelation. Emits a
-    # gloss:PartitiveRelation subject with comprehensive, completeness,
-    # criterion properties, plus hasPartitive (concept URIs, for graph
-    # traversal) and hasPartitiveMember (typed subjects carrying the
-    # ISO 704:2022 per-member dimensions).
-    class GlossPartitiveRelation < Lutaml::Model::Serializable
-      attribute :identifier, :string
-      attribute :comprehensive_uri, :string
+    # RDF view for V3::PartitiveRelation. Inherits structure and
+    # helpers from GlossNaryRelation. The `rdf do` block re-declares
+    # the predicates because lutaml-model's `rdf` DSL replaces the
+    # parent mapping (not extends).
+    class GlossPartitiveRelation < GlossNaryRelation
       attribute :partitive_member_ids, :string, collection: true
       attribute :partitive_members, GlossPartitiveMember, collection: true
-      attribute :completeness, :string
-      attribute :criterion, :hash
 
       rdf do
         namespace Namespaces::GlossaristNamespace
@@ -43,14 +38,6 @@ module Glossarist
           parts << GlossPartitiveMember.deterministic_id(m)
         end
         DeterministicSlug.from_parts(*parts)
-      end
-
-      def self.criterion_fingerprint(criterion)
-        return nil unless criterion.is_a?(Hash) && !criterion.empty?
-
-        criterion.sort_by { |k, _| k.to_s }
-          .map { |k, v| "#{k}=#{v}" }
-          .join(";")
       end
     end
   end

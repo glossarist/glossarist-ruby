@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
-# Glossarist::Tasks::SyncModel autoloads via lib/glossarist/tasks.rb
-# (the immediate-parent namespace file). No `require_relative` here.
+# Entry-point require triggers the autoload chain
+# (Glossarist → Tasks → SyncModel) defined in lib/glossarist.rb.
+# Internal-path requires are forbidden by the autoload rule.
+require "glossarist"
 
 namespace :glossarist do
   namespace :sync do

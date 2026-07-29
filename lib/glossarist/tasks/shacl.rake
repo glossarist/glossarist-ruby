@@ -3,7 +3,10 @@
 require "rdf/turtle"
 require "shacl"
 require "pathname"
-require "glossarist/validation/shacl_validator"
+# Entry-point require triggers the autoload chain
+# (Glossarist → Validation → ShaclValidator). Internal-path requires
+# are forbidden by the autoload rule.
+require "glossarist"
 
 namespace :glossarist do
   desc "Validate all .ttl outputs against concept-model SHACL shapes. " \

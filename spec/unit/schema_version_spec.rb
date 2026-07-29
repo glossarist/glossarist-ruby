@@ -95,6 +95,38 @@ RSpec.describe Glossarist::ManagedConcept, "schema versioning" do
       mc = described_class.of_yaml({ "data" => { "id" => "test" } })
       expect(described_class.detect_schema_version(mc)).to eq("2")
     end
+
+    context "with relations: kwarg (per-file storage)" do
+      it "detects v3 when relations are present even if no other v3 signals" do
+        mc = Glossarist::V3::ManagedConcept.new(
+          data: Glossarist::V3::ManagedConceptData.new(id: "test"),
+        )
+        rel = Glossarist::V3::PartitiveRelation.new(
+          comprehensive: Glossarist::V3::ConceptRef.new(source: "VIM", id: "1.1"),
+          members: [
+            Glossarist::V3::PartitiveMember.new(
+              ref: Glossarist::V3::ConceptRef.new(source: "VIM", id: "1.2"),
+            ),
+            Glossarist::V3::PartitiveMember.new(
+              ref: Glossarist::V3::ConceptRef.new(source: "VIM", id: "1.3"),
+            ),
+          ],
+        ).validate!
+        expect(described_class.detect_schema_version(mc, relations: [rel])).to eq("3")
+      end
+
+      it "still defaults to v2 when relations is empty" do
+        mc = Glossarist::V3::ManagedConcept.new(
+          data: Glossarist::V3::ManagedConceptData.new(id: "test"),
+        )
+        expect(described_class.detect_schema_version(mc, relations: [])).to eq("2")
+      end
+
+      it "still defaults to v2 when relations kwarg is omitted" do
+        mc = described_class.of_yaml({ "data" => { "id" => "test" } })
+        expect(described_class.detect_schema_version(mc)).to eq("2")
+      end
+    end
   end
 
   describe ".localization_has_references?" do

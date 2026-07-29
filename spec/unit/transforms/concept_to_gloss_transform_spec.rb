@@ -616,36 +616,6 @@ RSpec.describe Glossarist::Transforms::ConceptToGlossTransform do
   # the concept. The transform dispatches by class — PartitiveRelation
   # → gloss:PartitiveRelation, GenericRelation → gloss:GenericRelation.
   describe "V3 partitive relation emission (per-file)" do
-    let(:partitive_concept) do
-      rel = Glossarist::V3::PartitiveRelation.new(
-        comprehensive: Glossarist::V3::ConceptRef.new(source: "VIM", id: "112-02-09"),
-        members: [
-          Glossarist::V3::PartitiveMember.new(
-            ref: Glossarist::V3::ConceptRef.new(source: "VIM", id: "112-02-10"),
-            presence: "required", count: "multiple", is_delimiting: true
-          ),
-          Glossarist::V3::PartitiveMember.new(
-            ref: Glossarist::V3::ConceptRef.new(source: "VIM", id: "112-03-26"),
-            presence: "optional", count: "exactly_one"
-          ),
-        ],
-        completeness: "complete",
-        criterion: { "eng" => "physical structure" },
-      ).validate!
-      Glossarist::V3::ManagedConcept.new(
-        data: Glossarist::V3::ManagedConceptData.new(id: "112-02-09"),
-      ).tap { |mc| mc.partitive_relations = [rel] }
-    end
-
-    let(:partitive_turtle) do
-      Glossarist::Transforms::ConceptToGlossTransform.new(
-        partitive_concept,
-        relations: Glossarist::V3::RelationLoader.load_for_concept(
-          nil, "112-02-09"
-        ), # placeholder
-      ).to_turtle
-    end
-
     # Helper: build a transform with explicit relations list
     def render_turtle(concept, relations)
       Glossarist::Transforms::ConceptToGlossTransform.new(

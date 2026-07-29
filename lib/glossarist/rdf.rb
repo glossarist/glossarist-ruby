@@ -47,6 +47,8 @@ module Glossarist
     autoload :GlossPartitiveMember,   "#{__dir__}/rdf/gloss_partitive_member"
     autoload :GlossGenericRelation,   "#{__dir__}/rdf/gloss_generic_relation"
     autoload :GlossGenericMember,     "#{__dir__}/rdf/gloss_generic_member"
+    autoload :GlossNaryRelation,      "#{__dir__}/rdf/gloss_nary_relation"
+    autoload :GlossNaryMember,        "#{__dir__}/rdf/gloss_nary_member"
     autoload :V3,                     "#{__dir__}/rdf/v3"
   end
 end
