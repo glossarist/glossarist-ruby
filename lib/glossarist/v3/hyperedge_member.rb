@@ -3,14 +3,25 @@
 module Glossarist
   module V3
     # HyperedgeMember — abstract base shape for members of any
-    # n-ary concept-system relation (PartitiveMember, GenericMember,
+    # n-ary concept-system hyperedge (PartitiveMember, GenericMember,
     # future AssociativeMember, SequentialMember).
     #
-    # Carries the shared ISO 704:2022 MECE dimensions: presence × count,
-    # plus the orthogonal is_delimiting flag.
+    # Carries the shared ISO 704:2022 MECE dimensions on every member:
+    #   presence — required (default) | optional
+    #   count    — exactly_one (default) | at_least_one | multiple
     #
-    # Concrete leaf classes inherit and may add type-specific fields.
-    # See docs/design/abstract-nary-relation.md (concept-model repo).
+    # Type-specific extensions live on the leaves:
+    #   PartitiveMember — `is_delimiting` (Boolean): per ISO 704
+    #     §5.5.4.2.2, a part is or is not a delimiting part. Binary role.
+    #   GenericMember — `characteristic` (LocalizedString): per ISO 704
+    #     §5.5.4.2.1, each species carries a delimiting characteristic
+    #     text (e.g., "detecting movement by means of light sensors")
+    #     that distinguishes it from coordinate concepts under the
+    #     hyperedge's criterion of subdivision.
+    #
+    # The combination (optional, at_least_one) is invalid and collapses
+    # to (optional, multiple). Multiplicity is the SSOT for the
+    # validation; this class delegates to it.
     class HyperedgeMember < Lutaml::Model::Serializable
       DEFAULT_PRESENCE = "required"
       DEFAULT_COUNT = "exactly_one"
@@ -22,13 +33,11 @@ module Glossarist
       attribute :count, :string,
                 values: Glossarist::GlossaryDefinition::MEMBER_COUNT_VALUES,
                 default: -> { DEFAULT_COUNT }
-      attribute :is_delimiting, :boolean, default: -> { false }
 
       key_value do
         map :ref, to: :ref
         map :presence, to: :presence
         map :count, to: :count
-        map :is_delimiting, to: :is_delimiting
       end
 
       def initialize(*)
@@ -53,10 +62,6 @@ module Glossarist
 
       def optional?
         presence == "optional"
-      end
-
-      def delimiting?
-        is_delimiting == true
       end
 
       private

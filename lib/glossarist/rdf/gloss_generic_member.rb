@@ -8,7 +8,14 @@ module Glossarist
     # deterministic_id from GlossNaryMember. The `rdf do` block
     # re-declares the predicates because lutaml-model's `rdf` DSL
     # replaces the parent mapping (not extends).
+    #
+    # Carries `gloss:characteristic` — the delimiting characteristic
+    # text per ISO 704:2022 §5.5.4.2.1 (e.g., "detecting movement by
+    # means of light sensors"). Each species in a coordinate set has
+    # its own characteristic under the parent hyperedge's criterion.
     class GlossGenericMember < GlossNaryMember
+      attribute :characteristic, :hash
+
       rdf do
         namespace Namespaces::GlossaristNamespace
 
@@ -26,8 +33,8 @@ module Glossarist
                              to: :presence
         predicate :count, namespace: Namespaces::GlossaristNamespace,
                           to: :count
-        predicate :isDelimiting, namespace: Namespaces::GlossaristNamespace,
-                                 to: :is_delimiting
+        predicate :characteristic, namespace: Namespaces::GlossaristNamespace,
+                                   to: :characteristic
       end
     end
   end

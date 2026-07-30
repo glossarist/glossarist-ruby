@@ -8,7 +8,12 @@ module Glossarist
     # deterministic_id from GlossNaryMember. The `rdf do` block
     # re-declares the predicates because lutaml-model's `rdf` DSL
     # replaces the parent mapping (not extends).
+    #
+    # Carries `gloss:isDelimiting` — the binary role flag per
+    # ISO 704:2022 §5.5.4.2.2 (a part is or is not a delimiting part).
     class GlossPartitiveMember < GlossNaryMember
+      attribute :is_delimiting, :boolean
+
       rdf do
         namespace Namespaces::GlossaristNamespace
 
