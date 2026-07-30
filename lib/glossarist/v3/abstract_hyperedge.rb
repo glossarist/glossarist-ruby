@@ -114,8 +114,8 @@ module Glossarist
         parts = [comprehensive.source, comprehensive.id].compact.reject(&:empty?)
         return nil if parts.empty?
 
-        parts.join("-").downcase.gsub(/[^a-z0-9\-]/, "-")
-             .gsub(/-{2,}/, "-").gsub(/\A-|-\z/, "")
+        parts.join("-").downcase.gsub(/[^a-z0-9-]/, "-")
+          .gsub(/-{2,}/, "-").gsub(/\A-|-\z/, "")
       end
 
       # Kebab-case slug derived from the English criterion. Falls back

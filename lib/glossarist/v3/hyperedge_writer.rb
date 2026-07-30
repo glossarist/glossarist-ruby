@@ -45,8 +45,10 @@ module Glossarist
           hyperedge.is_a?(AbstractHyperedge)
 
         path = hyperedge.file_path(@relations_dir)
-        raise WriteError,
-              "cannot derive file path — comprehensive must be non-empty" unless path
+        unless path
+          raise WriteError,
+                "cannot derive file path — comprehensive must be non-empty"
+        end
 
         FileUtils.mkdir_p(File.dirname(path))
         File.write(path, serialize(hyperedge))
@@ -72,7 +74,7 @@ module Glossarist
         ordered["type"]        = hash.delete("type")
         ordered["status"]      = hash.delete("status") if hash.key?("status")
         ordered["comprehensive"] = hash.delete("comprehensive")
-        ordered["members"]     = hash.delete("members")
+        ordered["members"] = hash.delete("members")
         ordered["completeness"] = hash.delete("completeness") if hash.key?("completeness")
         ordered["criterion"]   = hash.delete("criterion") if hash.key?("criterion")
         ordered["sources"]     = hash.delete("sources") if hash.key?("sources")

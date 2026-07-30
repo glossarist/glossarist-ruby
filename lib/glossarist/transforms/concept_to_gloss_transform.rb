@@ -136,12 +136,12 @@ module Glossarist
           partitive_relations: build_gloss_hyperedges(
             relation_list, V3::PartitiveHyperedge,
             :build_gloss_partitive_member, :partitive_member_ids,
-            :partitive_members, Rdf::GlossPartitiveRelation, identifier,
+            :partitive_members, Rdf::GlossPartitiveRelation, identifier
           ),
           generic_relations: build_gloss_hyperedges(
             relation_list, V3::GenericHyperedge,
             :build_gloss_generic_member, :generic_member_ids,
-            :generic_members, Rdf::GlossGenericRelation, identifier,
+            :generic_members, Rdf::GlossGenericRelation, identifier
           ),
           **rel_targets,
         )
@@ -156,7 +156,7 @@ module Glossarist
                                   member_ids_attr, members_attr,
                                   gloss_relation_class, identifier)
         Array(relations)
-          .select { |rel| rel.is_a?(hyperedge_class) }
+          .grep(hyperedge_class)
           .map { |rel| build_one_gloss_hyperedge(rel, member_builder, member_ids_attr, members_attr, gloss_relation_class, identifier) }
       end
 
@@ -192,6 +192,8 @@ module Glossarist
 
       # Shared member builder. Per-class metadata (the rdf view class
       # is dispatched by the caller) keeps the duplication to one place.
+      # Per-type fields are dispatched by class — PartitiveMember
+      # carries `is_delimiting`; GenericMember carries `characteristic`.
       def build_gloss_nary_member(gloss_member_class, member)
         ref = member.ref
         ref_attrs = if ref.is_a?(Glossarist::ConceptRef)
@@ -200,11 +202,21 @@ module Glossarist
                       {}
                     end
 
+        type_attrs =
+          case member
+          when V3::PartitiveMember
+            { is_delimiting: member.is_delimiting }
+          when V3::GenericMember
+            { characteristic: member.characteristic }
+          else
+            {}
+          end
+
         gloss_member_class.new(
           **ref_attrs,
           presence: member.presence,
           count: member.count,
-          is_delimiting: member.is_delimiting,
+          **type_attrs,
         )
       end
 

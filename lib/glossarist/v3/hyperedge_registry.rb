@@ -15,10 +15,12 @@ module Glossarist
     # validator, RDF emitter, RelationLoader) — they all iterate or
     # resolve through this registry.
     module HyperedgeRegistry
-      # Mutable: register adds entries at load time. DO NOT freeze.
+      # rubocop:disable Style/MutableConstant — these MUST stay
+      # mutable; register() adds entries at load time.
       BY_WIRE_KEY = {}
       BY_TYPE_TAG = {}
       BY_RDF_TYPE = {}
+      # rubocop:enable Style/MutableConstant
 
       Mutex = ::Mutex.new
 
