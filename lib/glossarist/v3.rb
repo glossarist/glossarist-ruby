@@ -17,7 +17,13 @@ module Glossarist
     autoload :PartitiveMember, "glossarist/v3/partitive_member"
     autoload :GenericHyperedge, "glossarist/v3/generic_hyperedge"
     autoload :GenericMember, "glossarist/v3/generic_member"
+    autoload :SequentialHyperedge, "glossarist/v3/sequential_hyperedge"
+    autoload :SequentialMember, "glossarist/v3/sequential_member"
     autoload :DefinitionType, "glossarist/v3/definition_type"
+    autoload :ConceptType, "glossarist/v3/concept_type"
+    autoload :ConceptSystemType, "glossarist/v3/concept_system_type"
+    autoload :EquivalenceDegree, "glossarist/v3/equivalence_degree"
+    autoload :ConceptSystem, "glossarist/v3/concept_system"
     autoload :RelationLoader, "glossarist/v3/relation_loader"
     autoload :HyperedgeWriter, "glossarist/v3/hyperedge_writer"
     autoload :Multiplicity, "glossarist/v3/multiplicity"
@@ -44,9 +50,12 @@ module Glossarist
     Configuration.register_model(PartitiveMember, id: :partitive_member)
     Configuration.register_model(GenericHyperedge, id: :generic_hyperedge)
     Configuration.register_model(GenericMember, id: :generic_member)
+    Configuration.register_model(SequentialHyperedge, id: :sequential_hyperedge)
+    Configuration.register_model(SequentialMember, id: :sequential_member)
     Configuration.register_model(ManagedConceptData, id: :managed_concept_data)
     Configuration.register_model(ManagedConcept, id: :managed_concept)
     Configuration.register_model(ConceptDocument, id: :concept_document)
+    Configuration.register_model(ConceptSystem, id: :concept_system)
 
     # Eager-load concrete hyperedge leaves so HyperedgeRegistry
     # auto-populates via AbstractHyperedge.inherited. Without this,
@@ -54,5 +63,6 @@ module Glossarist
     # the registry empty at boot.
     PartitiveHyperedge
     GenericHyperedge
+    SequentialHyperedge
   end
 end
