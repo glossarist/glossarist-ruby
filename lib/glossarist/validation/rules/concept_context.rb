@@ -17,13 +17,21 @@ module Glossarist
       # — the loader does not run on demand so the validator behaviour
       # is fully deterministic given the load.
       class ConceptContext
-        attr_reader :concept, :file_name, :collection_context, :relations
+        attr_reader :concept, :file_name, :collection_context, :relations,
+                    :concept_resolver
 
-        def initialize(concept, file_name:, collection_context:, relations: [])
+        # `concept_resolver` is an optional callable that takes a
+        # ConceptRef and returns the resolved ManagedConcept (or nil).
+        # Rules that need cross-concept lookups (e.g.,
+        # ExternalConceptRule's dangling-external detection) use this.
+        # When nil, those rules no-op.
+        def initialize(concept, file_name:, collection_context:, relations: [],
+                       concept_resolver: nil)
           @concept = concept
           @file_name = file_name
           @collection_context = collection_context
           @relations = Array(relations)
+          @concept_resolver = concept_resolver
         end
 
         def concept_id

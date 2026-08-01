@@ -77,6 +77,54 @@ module Glossarist
         members.length >= 2
       end
 
+      # ── External-concept awareness ─────────────────────────────────
+      #
+      # ISO 704:2022 diagrams use parenthetical notation for external
+      # concepts — concepts referenced from this dataset but defined
+      # elsewhere (status: external). Detection requires concept
+      # resolution (looking up the referenced concept's status), so
+      # these methods take a resolver block: `->(ref) { store.concept(ref) }`.
+      #
+      # The model stays pure — it does NOT carry a store reference.
+      # Consumers inject the resolver at query time.
+
+      # True if the comprehensive resolves (via the supplied resolver)
+      # to a concept with status: external.
+      def external_comprehensive?(resolver = nil)
+        return false unless comprehensive.is_a?(ConceptRef)
+        return false unless resolver
+
+        concept = resolver.call(comprehensive)
+        concept_is_external?(concept)
+      end
+
+      # Array of members whose refs resolve to status: external.
+      # Empty when no resolver is supplied (detection is opt-in).
+      def external_members(resolver = nil)
+        return [] unless resolver
+
+        members.select do |m|
+          next false unless m.is_a?(HyperedgeMember)
+          next false unless m.ref.is_a?(ConceptRef)
+
+          concept = resolver.call(m.ref)
+          concept_is_external?(concept)
+        end
+      end
+
+      # True if any external comprehensive or member lacks a
+      # `provided_by` edge — i.e., the decomposition dangles. The
+      # resolver is used twice: once to detect externals, once to
+      # check each external's related edges.
+      def dangling_externals?(resolver = nil)
+        return false unless resolver
+
+        candidates = []
+        candidates << comprehensive if external_comprehensive?(resolver)
+        candidates.concat(external_members(resolver).map(&:ref))
+        candidates.any? { |ref| !has_provided_by?(ref, resolver) }
+      end
+
       # Per-file identity derived from comprehensive + criterion.
       # Format: `<comprehensive-id-dir>/<criterion-slug>` where the
       # dir is `<source>-<id>` (downcased, kebab-case) and the slug
@@ -129,6 +177,20 @@ module Glossarist
       end
 
       private
+
+      def concept_is_external?(concept)
+        concept.respond_to?(:status) && concept.status == "external"
+      end
+
+      # True if the concept referenced by `ref` has at least one
+      # `provided_by` edge in its related list. The resolver must
+      # return a concept with a `related` collection.
+      def has_provided_by?(ref, resolver)
+        concept = resolver.call(ref)
+        return false unless concept.respond_to?(:related)
+
+        Array(concept.related).any? { |r| r.respond_to?(:type) && r.type == "provided_by" }
+      end
 
       def criterion_hash
         return "0" unless criterion.is_a?(Hash) && !criterion.empty?
