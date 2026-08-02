@@ -33,7 +33,7 @@ RSpec.describe Glossarist::Validation::Rules::AsciidocXrefRule do
 
   it "flags an AsciiDoc xref that does not resolve against bibliography_index" do
     mc = make_managed_concept(id: "x", langs: {
-                                eng: { definition: [{ "content" => "See <<ISO_9000>> for context." }] },
+                                eng: { definition: [{ "content" => "See {{bib:ISO_9000}} for context." }] },
                               })
     cc = make_concept_context(mc, collection_context: dataset_context,
                                   file_name: "c.yaml")

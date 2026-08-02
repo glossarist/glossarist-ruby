@@ -301,25 +301,79 @@ RSpec.describe Glossarist::ReferenceExtractor do
     end
   end
 
-  describe "AsciiDoc cross-reference extraction" do
-    it "extracts <<anchor>> as BibliographicReference" do
+  describe "AsciiDoc cross-reference extraction (PROMPT-NOW P2 — deprecated)" do
+    # The `<<target, caption>>` syntax has been overloaded. Per
+    # PROMPT-NOW P2, this is now deprecated:
+    #   1. Warning.warn emits a deprecation notice.
+    #   2. The target is re-dispatched based on its shape:
+    #      - numeric id → local ConceptReference (legacy cite)
+    #      - fig/table/formula prefix → typed entity xref
+    #      - anything else → ConceptReference by designation
+    #   3. BibliographicReference is NEVER produced from `<<>>` —
+    #      bibliography is reached only via the new {{bib:id}} kind.
+
+    around do |ex|
+      original_stderr = $stderr
+      $stderr = StringIO.new
+      begin
+        ex.run
+      ensure
+        $stderr = original_stderr
+      end
+    end
+
+    it "emits a deprecation warning via Warning" do
+      warning_output = StringIO.new
+      original_warn = Warning.method(:warn)
+      Warning.define_singleton_method(:warn) { |msg| warning_output.puts(msg) }
+      begin
+        subject.extract_from_text("See <<ISO_9000>> for details.")
+        expect(warning_output.string).to include("deprecated")
+        expect(warning_output.string).to include("ISO_9000")
+        expect(warning_output.string).to include("{{cite:ISO_9000}}")
+      ensure
+        Warning.define_singleton_method(:warn, &original_warn)
+      end
+    end
+
+    it "re-parses <<fig:target>> as FigureReference" do
+      refs = subject.extract_from_text("See <<fig:diagram-1>> for details.")
+      fig_refs = refs.grep(Glossarist::FigureReference)
+      expect(fig_refs.size).to eq(1)
+      expect(fig_refs.first.entity_id).to eq("diagram-1")
+    end
+
+    it "re-parses <<numeric_id>> as ConceptReference (legacy cite)" do
+      refs = subject.extract_from_text("See <<103-01-02>> for details.")
+      concept_refs = refs.grep(Glossarist::ConceptReference)
+      expect(concept_refs.size).to eq(1)
+      expect(concept_refs.first.concept_id).to eq("103-01-02")
+    end
+
+    it "re-parses <<text>> as ConceptReference by designation" do
+      refs = subject.extract_from_text("See <<measure>> for details.")
+      concept_refs = refs.grep(Glossarist::ConceptReference)
+      expect(concept_refs.size).to eq(1)
+      expect(concept_refs.first.term).to eq("measure")
+    end
+
+    it "does NOT produce BibliographicReference from <<>>" do
+      # Bibliography is reached only via {{bib:id}}, never via <<>>
       refs = subject.extract_from_text("See <<ISO_9000>> for details.")
       bib_refs = refs.grep(Glossarist::BibliographicReference)
-      expect(bib_refs.size).to eq(1)
-      expect(bib_refs.first.anchor).to eq("ISO_9000")
+      expect(bib_refs).to be_empty
     end
 
-    it "extracts <<anchor,display text>> as BibliographicReference" do
-      refs = subject.extract_from_text("See <<ISO_9000,ISO 9000>> for details.")
-      bib_refs = refs.grep(Glossarist::BibliographicReference)
-      expect(bib_refs.size).to eq(1)
-      expect(bib_refs.first.anchor).to eq("ISO_9000")
+    it "deduplicates identical re-parsed refs" do
+      refs = subject.extract_from_text("See <<measure>> and <<measure>> again.")
+      concept_refs = refs.grep(Glossarist::ConceptReference)
+      expect(concept_refs.size).to eq(1)
     end
 
-    it "deduplicates identical anchors" do
-      refs = subject.extract_from_text("See <<ISO_9000>> and <<ISO_9000>> again.")
-      bib_refs = refs.grep(Glossarist::BibliographicReference)
-      expect(bib_refs.size).to eq(1)
+    it "preserves caption as display text on the re-parsed ref" do
+      refs = subject.extract_from_text("See <<measure, the measure>> for details.")
+      concept_refs = refs.grep(Glossarist::ConceptReference)
+      expect(concept_refs.first.term).to eq("the measure")
     end
   end
 

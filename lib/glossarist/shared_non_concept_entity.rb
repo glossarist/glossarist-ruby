@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
 module Glossarist
-  # Dataset-shared non-verbal entity — a NonVerbalEntity with a stable
+  # Dataset-shared non-concept entity — a NonConceptEntity with a stable
   # identity. Figure, Table, and Formula inherit from this; NonVerbRep
-  # (concept-local, positional) inherits from NonVerbalEntity directly.
+  # (concept-local, positional) inherits from NonConceptEntity directly.
   #
   # The +id+ is the stable identifier used for cross-referencing
   # (e.g. +figures/fig_A.23.yaml+ → +id: fig_A.23+). The +identifier+ is
   # the human-readable label (e.g. +"A.23"+) used for display and AsciiDoc
   # xref targets like +<<fig_A.23>>+.
-  class SharedNonVerbalEntity < NonVerbalEntity
+  class SharedNonConceptEntity < NonConceptEntity
     attribute :id, :string
     attribute :identifier, :string
 
@@ -26,4 +26,7 @@ module Glossarist
       [id].compact
     end
   end
+
+  # @deprecated Use SharedNonConceptEntity instead. Kept for one
+  #   release cycle to ease migration.
 end

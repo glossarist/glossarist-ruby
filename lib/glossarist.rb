@@ -40,8 +40,8 @@ module Glossarist
   autoload :ConceptEnricher, "glossarist/concept_enricher"
   autoload :Config,                   "glossarist/config"
   autoload :LocalizedString,          "glossarist/localized_string"
-  autoload :NonVerbalEntity,          "glossarist/non_verbal_entity"
-  autoload :SharedNonVerbalEntity,    "glossarist/shared_non_verbal_entity"
+  autoload :NonConceptEntity,         "glossarist/non_concept_entity"
+  autoload :SharedNonConceptEntity,   "glossarist/shared_non_concept_entity"
   autoload :NonVerbalReference,       "glossarist/non_verbal_reference"
   autoload :Figure,                   "glossarist/figure"
   autoload :FigureImage,              "glossarist/figure_image"
@@ -65,6 +65,8 @@ module Glossarist
   autoload :ManagedConcept,           "glossarist/managed_concept"
   autoload :ManagedConceptCollection, "glossarist/managed_concept_collection"
   autoload :ManagedConceptData,       "glossarist/managed_concept_data"
+  autoload :MentionParser,            "glossarist/mention_parser"
+  autoload :MentionKinds,             "glossarist/mention_parser"
   autoload :NonVerbRep,               "glossarist/non_verb_rep"
   autoload :Pronunciation,            "glossarist/pronunciation"
   autoload :RelatedConcept,           "glossarist/related_concept"
@@ -86,9 +88,34 @@ module Glossarist
   autoload :GlossaryDefinition,       "glossarist/glossary_definition"
   autoload :GlossaryStore,            "glossarist/glossary_store"
   autoload :Tasks,                    "glossarist/tasks"
+  autoload :Validators,               "glossarist/validators"
 
   LANG_CODES = %w[eng ara deu fra spa ita jpn kor pol por srp swe zho rus fin
                   dan nld msa nob nno].freeze
+
+  # @deprecated Use NonConceptEntity. Removed in next minor release.
+  def self.const_missing(name)
+    case name
+    when :NonVerbalEntity
+      warn "[glossarist] Glossarist::NonVerbalEntity is deprecated; " \
+           "use Glossarist::NonConceptEntity instead."
+      NonConceptEntity
+    when :SharedNonVerbalEntity
+      warn "[glossarist] Glossarist::SharedNonVerbalEntity is deprecated; " \
+           "use Glossarist::SharedNonConceptEntity instead."
+      SharedNonConceptEntity
+    else
+      super
+    end
+  end
+
+  # Parse a single {{...}} mention into a canonical Hash. Defined here
+  # (rather than via autoload) so calling Glossarist.parse_mention(str)
+  # triggers the MentionParser autoload chain transparently — method
+  # calls do not fire autoloads on their own.
+  def self.parse_mention(text)
+    MentionParser.parse_mention(text)
+  end
 
   SCHEMA_VERSION = "3"
   V3_SCHEMA_VERSION = "3"

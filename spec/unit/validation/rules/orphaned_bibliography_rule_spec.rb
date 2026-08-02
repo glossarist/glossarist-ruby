@@ -45,7 +45,7 @@ RSpec.describe Glossarist::Validation::Rules::OrphanedBibliographyRule do
     end
   end
 
-  context "with a bibliography entry that a concept cites via <<anchor>>" do
+  context "with a bibliography entry that a concept cites via {{bib:id}}" do
     let(:dataset_context) do
       File.write(File.join(tmpdir, "bibliography.yaml"), <<~YAML, encoding: "utf-8")
         ---
@@ -55,7 +55,7 @@ RSpec.describe Glossarist::Validation::Rules::OrphanedBibliographyRule do
       YAML
       ds = make_dataset_context(tmpdir)
       ds.add_concept(make_managed_concept(id: "x", langs: {
-                                            eng: { definition: [{ "content" => "See <<ISO_9000>> for context." }] },
+                                            eng: { definition: [{ "content" => "See {{bib:ISO_9000}} for context." }] },
                                           }))
       ds
     end
