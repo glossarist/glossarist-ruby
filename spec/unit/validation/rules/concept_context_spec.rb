@@ -9,7 +9,7 @@ RSpec.describe Glossarist::Validation::Rules::ConceptContext do
       "data" => {
         "language_code" => "eng",
         "terms" => [{ "type" => "expression", "designation" => "test" }],
-        "definition" => [{ "content" => "See {{urn:iec:std:iec:60050-102-01-01, equality}} and <<ISO_9000>>." }],
+        "definition" => [{ "content" => "See {{urn:iec:std:iec:60050-102-01-01, equality}} and {{bib:ISO_9000}}." }],
         "entry_status" => "valid",
       },
     )

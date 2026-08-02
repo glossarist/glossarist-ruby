@@ -7,7 +7,7 @@ module Glossarist
   # across concepts. The content is stored as structured data (rows/columns)
   # or as a markup string (HTML, Markdown, AsciiDoc). Caption, description,
   # and alt are localized for accessibility.
-  class Table < SharedNonVerbalEntity
+  class Table < SharedNonConceptEntity
     attribute :content, :hash
     attribute :format, :string
 

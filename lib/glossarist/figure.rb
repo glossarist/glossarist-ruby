@@ -13,7 +13,7 @@ module Glossarist
   # subfigures.
   #
   # Caption, description, and alt are localized (hash keyed by ISO 639 code).
-  class Figure < SharedNonVerbalEntity
+  class Figure < SharedNonConceptEntity
     attribute :images, FigureImage, collection: true
     attribute :subfigures, Figure, collection: true
 

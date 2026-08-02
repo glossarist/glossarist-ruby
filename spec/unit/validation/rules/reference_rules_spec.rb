@@ -59,7 +59,7 @@ RSpec.describe "Reference rules" do
 
     it "warns on unresolved bibliography reference" do
       mc = make_concept(id: "1", langs: {
-                          eng: { definition: [{ "content" => "See <<ISO_9999>>" }] },
+                          eng: { definition: [{ "content" => "See {{bib:ISO_9999}}" }] },
                         })
       ctx = make_context(mc)
       expect(rule).to be_applicable(ctx)

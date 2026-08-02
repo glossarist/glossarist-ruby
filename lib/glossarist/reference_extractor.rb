@@ -223,8 +223,56 @@ module Glossarist
       concept_refs + asset_refs
     end
 
-    def resolve_asciidoc_xref(target)
-      BibliographicReference.new(anchor: target.strip)
+    # AsciiDoc cross-reference: <<target>> or <<target, caption>>
+    #
+    # PROMPT-NOW P2: the `<<...,...>>` syntax has been overloaded for
+    # three different uses, only one of which is legitimate (non-concept
+    # entity xrefs). The other two (bibliography lookup, concept
+    # citation) bypass the unified resolution cascade.
+    #
+    # Behavior on encounter:
+    #   1. Emit a deprecation warning via Ruby's Warning module.
+    #   2. Re-parse to a typed reference based on the target's shape:
+    #      - explicit fig:/table:/formula: prefix → typed entity xref
+    #      - numeric id → local ConceptReference (legacy cite)
+    #      - anything else → ConceptReference (let the resolver handle it)
+    #   3. Do NOT treat as a bibliography lookup. Bibliography is reached
+    #      only via the new {{bib:id}} mention kind.
+    def resolve_asciidoc_xref(target, caption = nil)
+      target = target.to_s.strip
+      caption = caption.to_s.strip unless caption.nil?
+      warn_deprecated_xref(target, caption)
+
+      case target
+      when /\Afig(?:ure)?:/i   then resolve_non_verbal_mention("fig:", target, caption, FigureReference)
+      when /\Atable:/i          then resolve_non_verbal_mention("table:", target, caption, TableReference)
+      when /\Atbl:/i            then resolve_non_verbal_mention("tbl:", target, caption, TableReference)
+      when /\Aformula:/i        then resolve_non_verbal_mention("formula:", target, caption, FormulaReference)
+      when /\Aeq:/i             then resolve_non_verbal_mention("eq:", target, caption, FormulaReference)
+      when /\A\d[\d.-]*\z/      then resolve_local(caption || target, target)
+      else resolve_designation(target, caption)
+      end
+    end
+
+    def warn_deprecated_xref(target, caption)
+      return unless Warning.respond_to?(:warn)
+
+      suffix = ", #{caption}" if caption && !caption.empty?
+      Warning.warn(
+        "[glossarist] <<#{target}#{suffix}>> is deprecated. " \
+        "Use {{fig/table/formula:#{target}#{suffix}}} for non-concept entities, " \
+        "or {{cite:#{target}#{suffix}}} for concept citations.\n",
+      )
+    end
+
+    # {{bib:id}} → BibliographicReference. This is the explicit
+    # bibliography-lookup path (PROMPT-NOW P2). Replaces the old
+    # <<anchor>> bibliography shortcut which is now deprecated.
+    def resolve_bib_key(identifier, display)
+      cleaned = identifier.delete_prefix("bib:").strip
+      return nil if cleaned.empty?
+
+      BibliographicReference.new(anchor: cleaned)
     end
 
     def resolve_image_ref(path)
@@ -292,10 +340,13 @@ module Glossarist
     ) { |ext, content| ext.resolve_mention(content) }
 
     # AsciiDoc cross-references: <<anchor>> or <<anchor,display text>>
+    # Captures both target and caption so resolve_asciidoc_xref can
+    # re-dispatch (PROMPT-NOW P2 — <<>> is deprecated, re-parse to
+    # the right kind based on target).
     register_pattern(
       name: :asciidoc_xref,
-      regex: /<<([^,>\n]+?)(?:,[^>\n]*)?>>/,
-    ) { |ext, target| ext.resolve_asciidoc_xref(target) }
+      regex: /<<([^,>\n]+?)(?:,([^>\n]*))?>>/,
+    ) { |ext, target, caption| ext.resolve_asciidoc_xref(target, caption) }
 
     # Image references: image::path[] or image:path[]
     register_pattern(
@@ -305,6 +356,10 @@ module Glossarist
 
     register_identifier_resolver("cite:") do |ext, identifier, display|
       ext.resolve_cite_key(identifier, display)
+    end
+
+    register_identifier_resolver("bib:") do |ext, identifier, display|
+      ext.resolve_bib_key(identifier, display)
     end
 
     register_identifier_resolver("fig:") do |ext, identifier, display|

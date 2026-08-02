@@ -7,7 +7,7 @@ module Glossarist
   # shared across concepts. The mathematical expression is stored in a
   # notation format (LaTeX, MathML, AsciiMath). Caption, description, and
   # alt are localized for accessibility.
-  class Formula < SharedNonVerbalEntity
+  class Formula < SharedNonConceptEntity
     attribute :expression, :hash
     attribute :notation, :string
 
