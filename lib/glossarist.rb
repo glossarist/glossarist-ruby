@@ -65,8 +65,7 @@ module Glossarist
   autoload :ManagedConcept,           "glossarist/managed_concept"
   autoload :ManagedConceptCollection, "glossarist/managed_concept_collection"
   autoload :ManagedConceptData,       "glossarist/managed_concept_data"
-  autoload :MentionParser,            "glossarist/mention_parser"
-  autoload :MentionKinds,             "glossarist/mention_parser"
+  autoload :Mentions,                "glossarist/mentions"
   autoload :NonVerbRep,               "glossarist/non_verb_rep"
   autoload :Pronunciation,            "glossarist/pronunciation"
   autoload :RelatedConcept,           "glossarist/related_concept"
@@ -109,12 +108,11 @@ module Glossarist
     end
   end
 
-  # Parse a single {{...}} mention into a canonical Hash. Defined here
-  # (rather than via autoload) so calling Glossarist.parse_mention(str)
-  # triggers the MentionParser autoload chain transparently — method
-  # calls do not fire autoloads on their own.
-  def self.parse_mention(text)
-    MentionParser.parse_mention(text)
+  # Parse all {{kind:target}} mentions in text. Returns an array of
+  # segments (text + mention objects) per concept-model inline-mentions spec.
+  # @see Glossarist::Mentions::Parser.parse
+  def self.parse_mentions(text)
+    Mentions::Parser.parse(text)
   end
 
   SCHEMA_VERSION = "3"
