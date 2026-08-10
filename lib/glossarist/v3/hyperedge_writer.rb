@@ -68,7 +68,7 @@ module Glossarist
         hash = hyperedge.to_hash
         hash["$id"] = hyperedge.file_id || hyperedge.derived_file_id
         hash["type"] = hyperedge.class::TYPE_TAG
-        # Re-order for stable output.
+        strip_falsey_concept_ref_flags!(hash)
         ordered = {}
         ordered["$id"]         = hash.delete("$id")
         ordered["type"]        = hash.delete("type")
@@ -79,10 +79,27 @@ module Glossarist
         ordered["criterion"]   = hash.delete("criterion") if hash.key?("criterion")
         ordered["sources"]     = hash.delete("sources") if hash.key?("sources")
         ordered["notes"]       = hash.delete("notes") if hash.key?("notes")
-        ordered.merge!(hash) # any future fields append in declaration order
+        ordered.merge!(hash)
+        strip_falsey_concept_ref_flags!(ordered)
         ordered.compact!
 
         YAML.dump(ordered).gsub(/^---\s*\n/, "---\n")
+      end
+
+      # Recursively strip `external: false` and `ellipsis: false` from
+      # ConceptRef hashes inside the hyperedge's wire output. Keeps
+      # YAML clean — these flags only appear when true.
+      def strip_falsey_concept_ref_flags!(hash)
+        hash.each_value do |value|
+          case value
+          when Hash
+            value.delete("external") if value["external"] == false
+            value.delete("ellipsis") if value["ellipsis"] == false
+            strip_falsey_concept_ref_flags!(value)
+          when Array
+            value.each { |item| strip_falsey_concept_ref_flags!(item) if item.is_a?(Hash) }
+          end
+        end
       end
     end
   end
