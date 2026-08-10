@@ -81,6 +81,8 @@ RSpec.describe Glossarist::Concept do
           "ref" => {
             "source" => "Example Source",
             "id" => "12345",
+            "external" => false,
+            "ellipsis" => false,
           },
         },
       ]

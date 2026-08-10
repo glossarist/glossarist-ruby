@@ -28,6 +28,8 @@ RSpec.describe Glossarist::RelatedConcept do
         ref:
           source: Test source
           id: Test id
+          external: false
+          ellipsis: false
       YAML
 
       expect(subject.to_yaml).to eq(expected_yaml)

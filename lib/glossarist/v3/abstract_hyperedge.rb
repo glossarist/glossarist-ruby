@@ -89,8 +89,10 @@ module Glossarist
       # Consumers inject the resolver at query time.
 
       # True if the comprehensive resolves (via the supplied resolver)
-      # to a concept with status: external.
+      # to a concept with status: external. Also true when the
+      # comprehensive ConceptRef itself has external: true (inline form).
       def external_comprehensive?(resolver = nil)
+        return true if comprehensive.is_a?(ConceptRef) && comprehensive.external?
         return false unless comprehensive.is_a?(ConceptRef)
         return false unless resolver
 
@@ -98,8 +100,8 @@ module Glossarist
         concept_is_external?(concept)
       end
 
-      # Array of members whose refs resolve to status: external.
-      # Empty when no resolver is supplied (detection is opt-in).
+      # Array of members whose refs are marked external: true (inline
+      # form) OR resolve (via the supplied resolver) to status: external.
       def external_members(resolver = nil)
         return [] unless resolver
 
@@ -123,6 +125,33 @@ module Glossarist
         candidates << comprehensive if external_comprehensive?(resolver)
         candidates.concat(external_members(resolver).map(&:ref))
         candidates.any? { |ref| !has_provided_by?(ref, resolver) }
+      end
+
+      # ── Ellipsis / external inline helpers (no resolver needed) ──
+
+      # True if any member has a ConceptRef with external: true.
+      def has_external_members?
+        members.any? { |m| m.is_a?(HyperedgeMember) && m.ref&.external? }
+      end
+
+      # True if the comprehensive ConceptRef has external: true.
+      def has_external_comprehensive?
+        comprehensive.is_a?(ConceptRef) && comprehensive.external?
+      end
+
+      # True if any member has a ConceptRef with ellipsis: true.
+      def has_ellipsis_member?
+        members.any? { |m| m.is_a?(HyperedgeMember) && m.ref&.ellipsis? }
+      end
+
+      # Array of members whose refs are marked external: true.
+      def inline_external_members
+        members.select { |m| m.is_a?(HyperedgeMember) && m.ref&.external? }
+      end
+
+      # Array of members whose refs are marked ellipsis: true.
+      def ellipsis_members
+        members.select { |m| m.is_a?(HyperedgeMember) && m.ref&.ellipsis? }
       end
 
       # Per-file identity derived from comprehensive + criterion.
