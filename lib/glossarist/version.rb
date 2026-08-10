@@ -4,5 +4,5 @@
 #
 
 module Glossarist
-  VERSION = "2.13.11"
+  VERSION = "2.13.12"
 end
