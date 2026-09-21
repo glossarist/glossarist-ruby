@@ -60,8 +60,7 @@ RSpec.describe "Serialization and deserialization" do
           - date: '2023-01-01T00:00:00+00:00'
             type: accepted
           definition:
-          - content: processus par lequel les gaz atmosphériques absorbent le rayonnement
-              électromagnétique
+          - content: processus par lequel les gaz atmosphériques absorbent le rayonnement électromagnétique
           examples: []
           id: 1-FR
           notes: []

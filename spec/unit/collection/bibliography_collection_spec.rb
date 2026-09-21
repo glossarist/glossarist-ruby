@@ -25,7 +25,7 @@ RSpec.describe Glossarist::Collections::BibliographyCollection do
       # Lightweight processor stub: Relaton processors respond to #grammar_hash.
       # Use a Struct instead of instance_double per the global "no doubles" rule.
       processor = Struct.new(:grammar_hash).new("correct_hash")
-      allow(Relaton::Registry.instance).to receive(:by_type)
+      allow(Relaton::Db::Registry.instance).to receive(:by_type)
         .with("iso").and_return(processor)
 
       collection = described_class.new(concepts, nil, cache_dir)
