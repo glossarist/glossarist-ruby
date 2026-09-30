@@ -32,7 +32,10 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "lutaml-model", "~> 0.8.15"
-  spec.add_dependency "lutaml-store", "~> 0.2.0"
+  # relaton-3.0.0.pre.alpha.5 resolves lutaml-store ~> 0.3.2; a 0.2
+  # floor here made the pair unsolvable (2.14.0's activation
+  # conflict).
+  spec.add_dependency "lutaml-store", "~> 0.3"
   spec.add_dependency "paint", "~> 2.3"
   spec.add_dependency "rdf-turtle", "~> 3.3"
   spec.add_dependency "relaton", "~> 3.0.0.pre.alpha"
