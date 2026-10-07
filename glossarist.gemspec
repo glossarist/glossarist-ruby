@@ -41,10 +41,9 @@ Gem::Specification.new do |spec|
   spec.add_dependency "relaton", "~> 3.0.0.pre.alpha"
   spec.add_dependency "rubyzip", "~> 3.7"
   spec.add_dependency "shacl", "~> 0.4"
-  # sts 0.6 (ISO-STS transformer wave) must resolve alongside this gem;
-  # a ~> 0.5.6 cap broke every bundle pairing glossarist with
-  # metanorma-oiml.
-  spec.add_dependency "sts", ">= 0.5.6", "< 0.7"
+  # The STS importer follows the sts 0.6 model (IsoSts::Front has no
+  # std_meta); 0.5.x is not supported.
+  spec.add_dependency "sts", "~> 0.6"
   spec.add_dependency "table_tennis", "~> 0.0"
   spec.add_dependency "tbx", "~> 0.1"
   spec.add_dependency "thor"
