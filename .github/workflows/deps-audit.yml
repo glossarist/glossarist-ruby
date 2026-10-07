@@ -1,0 +1,39 @@
+name: deps-audit
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  freshness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: false
+      - name: Fail if temporary git pins linger in the Gemfile
+        run: |
+          if grep -nE 'github:|git: =>' Gemfile; then
+            echo "::error::Gemfile still pins a git source — flip it to a released gem"
+            exit 1
+          fi
+      - name: Report core dependency freshness
+        env:
+          CORE_GEMS: relaton lutaml-model lutaml-store sts
+        run: |
+          rm -f Gemfile.lock
+          bundle lock
+          {
+            echo "## Core dependency freshness"
+            echo
+            echo "| gem | fresh resolve | latest released (incl. prerelease) |"
+            echo "| --- | --- | --- |"
+            for g in $CORE_GEMS; do
+              locked=$(awk -v g="$g" '$1 == g { gsub(/[()]/, "", $2); print $2; exit }' Gemfile.lock)
+              latest=$(gem list "^${g}\$" --remote --pre | sed -n '1s/.*(\([^,)]*\).*/\1/p')
+              echo "| $g | ${locked:-unresolved} | ${latest:-unknown} |"
+            done
+          } | tee -a "${GITHUB_STEP_SUMMARY:-/dev/null}"

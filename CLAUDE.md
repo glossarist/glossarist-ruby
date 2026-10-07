@@ -181,23 +181,13 @@ The `exe/glossarist` executable uses Thor. Commands:
 
 ### Dependencies
 
-- `lutaml-model` (~> 0.8.5) — serialization framework (YAML/XML/JSON-LD/Turtle)
-- `tbx` — ISO 30042:2019 TBX model classes
-- `relaton` (>= 2.0.0, < 3) — bibliography database integration
+- `lutaml-model` (~> 0.8.15) — serialization framework (YAML/XML/JSON-LD/Turtle)
+- `lutaml-store` (~> 0.3) — package store backing GlossaryStore
+- `relaton` (~> 3.0.0.pre.alpha) — bibliography database integration (relaton-3 monogem prerelease line); resolves from released gems, no git pins
+- `sts` (~> 0.6) — ISO/NISO STS model for `Sts::Importer`
+- `tbx` (~> 0.1) — ISO 30042:2019 TBX model classes
+- `rdf-turtle` (~> 3.3), `shacl` (~> 0.4) — Turtle emission + SHACL validation against vendored concept-model shapes
 - `thor` — CLI commands
-
-## Dependencies
-
-- `relaton` (>= 2.0.0, < 3) — bibliography database integration. Upstream
-  shipped 2.1.0 with lutaml-model 0.8 compatibility, so the historical
-  git-branch overrides are no longer needed and the Gemfile pins the
-  released gem directly.
-- `lutaml-model` (~> 0.8.5), `lutaml-store` (~> 0.2.0) — serialization
-  framework (YAML/XML/JSON-LD/Turtle) and package store.
-- `tbx` — ISO 30042:2019 TBX model classes.
-- `thor` — CLI commands.
-- `rdf-turtle` (~> 3.3), `shacl` (~> 0.4) — Turtle emission + SHACL
-  validation against vendored concept-model shapes.
 
 ## SchemaMigration module split
 
