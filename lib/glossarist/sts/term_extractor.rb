@@ -235,11 +235,11 @@ module Glossarist
         NORMATIVE_STATUS_MAP[tig.normative_authorization&.value.to_s]
       end
 
-      def extract_source_ref # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+      def extract_source_ref
         front = @standard.front
         return nil unless front
 
-        meta = front.iso_meta || front.std_meta
+        meta = front.iso_meta
         return nil unless meta
 
         refs = meta.std_ref
@@ -253,14 +253,7 @@ module Glossarist
       end
 
       def extract_ref_text(ref)
-        case ref
-        when ::Sts::IsoSts::StdRef
-          normalize_whitespace(ref.content.join.to_s)
-        when ::Sts::NisoSts::StandardRef
-          normalize_whitespace(ref.value.to_s)
-        else
-          ""
-        end
+        normalize_whitespace(ref.content.join.to_s)
       end
 
       def normalize_whitespace(text)

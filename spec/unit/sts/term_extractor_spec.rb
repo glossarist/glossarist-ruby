@@ -37,7 +37,7 @@ RSpec.describe Glossarist::Sts::TermExtractor do
         expect(labels).to contain_exactly("3.1", "3.2")
       end
 
-      it "extracts source reference from std-meta" do
+      it "extracts source reference from iso-meta" do
         terms = subject.extract
         terms.each do |t|
           expect(t.source_ref).to eq("ISO 12345:2021")
