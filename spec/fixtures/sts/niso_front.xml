@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<standard xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:tbx="urn:iso:std:iso:30042:ed-2">
+  <front>
+    <std-meta>
+      <title-wrap xml:lang="en">
+        <main>NISO-Style Vocabulary</main>
+      </title-wrap>
+      <std-ref type="dated">ISO 99999:2024</std-ref>
+    </std-meta>
+  </front>
+  <body>
+    <sec id="sec_3">
+      <title>3 Terms and definitions</title>
+      <label>3</label>
+      <term-sec id="sec_3.1">
+        <label>3.1</label>
+        <tbx:termEntry id="term_3.1">
+          <tbx:langSet xml:lang="en">
+            <tbx:definition>mixed front definition</tbx:definition>
+            <tbx:tig id="tig_3.1-1">
+              <tbx:term>mixed front term</tbx:term>
+            </tbx:tig>
+          </tbx:langSet>
+        </tbx:termEntry>
+      </term-sec>
+    </sec>
+  </body>
+</standard>

@@ -6,14 +6,16 @@ module Glossarist
                                    keyword_init: true)
 
     class ImportResult
-      attr_reader :concepts, :conflicts, :source_files, :skipped_count
+      attr_reader :concepts, :conflicts, :source_files, :skipped_count,
+                  :warnings
 
       def initialize(concepts:, conflicts: [], source_files: [],
-skipped_count: 0)
+                     skipped_count: 0, warnings: [])
         @concepts = concepts
         @conflicts = conflicts
         @source_files = source_files
         @skipped_count = skipped_count
+        @warnings = warnings
       end
 
       def conflict?

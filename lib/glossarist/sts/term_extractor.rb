@@ -3,9 +3,13 @@
 module Glossarist
   module Sts
     class TermExtractor
+      attr_reader :warnings
+
       def initialize(xml_path)
+        @xml_path = xml_path
         raw = File.read(xml_path)
         @standard = ::Sts::IsoSts::Standard.from_xml(raw)
+        @warnings = []
         @source_ref = extract_source_ref
         @std_prefix = extract_std_prefix(@source_ref)
       end
@@ -240,7 +244,11 @@ module Glossarist
         return nil unless front
 
         meta = front.iso_meta
-        return nil unless meta
+        if meta.nil?
+          @warnings << "#{File.basename(@xml_path)}: front carries no " \
+                       "iso-meta; source_ref unavailable for its terms"
+          return nil
+        end
 
         refs = meta.std_ref
         return nil unless refs&.any?
