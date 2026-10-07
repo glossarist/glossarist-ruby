@@ -1,22 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <standard xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:tbx="urn:iso:std:iso:30042:ed-2">
   <front>
-    <std-meta>
-      <permissions>
-        <copyright-statement>All rights reserved</copyright-statement>
-        <copyright-holder>ISO</copyright-holder>
-        <copyright-year>2021</copyright-year>
-      </permissions>
+    <iso-meta>
       <title-wrap xml:lang="en">
         <main>Test Vocabulary</main>
         <full>Test Vocabulary</full>
       </title-wrap>
-      <proj-id>ISO 12345</proj-id>
       <content-language>en</content-language>
       <std-ref type="dated">ISO 12345:2021</std-ref>
       <std-ref type="undated">ISO 12345</std-ref>
       <doc-ref>ISO 12345:2021(en)</doc-ref>
-    </std-meta>
+    </iso-meta>
   </front>
   <body>
     <sec id="sec_1">
