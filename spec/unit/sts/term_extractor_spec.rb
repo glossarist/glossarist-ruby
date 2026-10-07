@@ -204,4 +204,26 @@ RSpec.describe Glossarist::Sts::TermExtractor do
       end
     end
   end
+
+  describe "warnings" do
+    let(:niso_fixture) do
+      File.expand_path("../../fixtures/sts/niso_front.xml", __dir__)
+    end
+
+    it "is empty for documents with an iso-meta front" do
+      subject = described_class.new(simple_fixture)
+      subject.extract
+      expect(subject.warnings).to eq([])
+    end
+
+    it "warns when the front carries no readable metadata" do
+      subject = described_class.new(niso_fixture)
+      terms = subject.extract
+      expect(terms.length).to eq(1)
+      expect(terms.first.source_ref).to be_nil
+      expect(subject.warnings).to contain_exactly(
+        /niso_front\.xml: front carries no iso-meta/,
+      )
+    end
+  end
 end

@@ -20,7 +20,7 @@ module Glossarist
       end
 
       def import_new(xml_files, output:, shortname: nil, version: nil, **opts)
-        raw_concepts = extract_all_concepts(xml_files)
+        raw_concepts, warnings = extract_all_concepts(xml_files)
         concepts, conflicts, skipped = dedup_concepts(raw_concepts)
 
         if output.end_with?(".gcr")
@@ -44,12 +44,13 @@ module Glossarist
           conflicts: conflicts,
           source_files: xml_files,
           skipped_count: skipped,
+          warnings: warnings,
         )
       end
 
       def import_into_existing(xml_files, dataset_path)
         existing = load_existing(dataset_path)
-        new_concepts = extract_all_concepts(xml_files)
+        new_concepts, warnings = extract_all_concepts(xml_files)
         index = build_concept_index(existing)
 
         result_state = apply_with_dedup(new_concepts, existing, index)
@@ -61,6 +62,7 @@ module Glossarist
           conflicts: result_state.conflicts,
           source_files: xml_files,
           skipped_count: result_state.skipped,
+          warnings: warnings,
         )
       end
 
@@ -102,11 +104,14 @@ module Glossarist
       end
 
       def extract_all_concepts(xml_files)
-        xml_files.flat_map do |path|
+        warnings = []
+        concepts = xml_files.flat_map do |path|
           extractor = TermExtractor.new(path)
+          warnings.concat(extractor.warnings)
           terms = extractor.extract
           terms.map { |t| @mapper.map(t) }
         end
+        [concepts, warnings]
       end
 
       def dedup_concepts(concepts) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity
