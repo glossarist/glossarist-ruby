@@ -17,7 +17,7 @@ module Glossarist
 
         subject { |r| "genericRelation/#{GlossGenericRelation.deterministic_id(r)}" }
 
-        types "gloss:GenericHyperedge"
+        types "gloss:GenericRelation"
 
         predicate :comprehensive, namespace: Namespaces::GlossaristNamespace,
                                   to: :comprehensive_uri, uri_reference: true
@@ -28,7 +28,7 @@ module Glossarist
         predicate :criterion, namespace: Namespaces::GlossaristNamespace,
                               to: :criterion
 
-        members :generic_members, link: "gloss:hasGenericMember"
+        members :generic_members, link: "gloss:hasMember"
       end
 
       def self.deterministic_id(rel)
