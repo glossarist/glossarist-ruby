@@ -17,7 +17,7 @@ module Glossarist
 
         subject { |r| "partitiveRelation/#{GlossPartitiveRelation.deterministic_id(r)}" }
 
-        types "gloss:PartitiveHyperedge"
+        types "gloss:PartitiveRelation"
 
         predicate :comprehensive, namespace: Namespaces::GlossaristNamespace,
                                   to: :comprehensive_uri, uri_reference: true
@@ -28,7 +28,7 @@ module Glossarist
         predicate :criterion, namespace: Namespaces::GlossaristNamespace,
                               to: :criterion
 
-        members :partitive_members, link: "gloss:hasPartitiveMember"
+        members :partitive_members, link: "gloss:hasMember"
       end
 
       def self.deterministic_id(rel)
