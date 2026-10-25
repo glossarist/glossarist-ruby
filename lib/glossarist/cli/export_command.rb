@@ -45,8 +45,7 @@ module Glossarist
 
         validate_outputs!(formats, output_dir, name) if validate?
       rescue ArgumentError => e
-        warn "Error: #{e.message}"
-        exit 1
+        raise Errors::CliError, e.message
       end
 
       private
@@ -248,10 +247,10 @@ module Glossarist
         files << File.join(output_dir, "#{name}.ttl") if File.exist?(File.join(output_dir, "#{name}.ttl"))
         files.concat(Dir.glob(File.join(output_dir, "concepts", "*.ttl")))
         report = validator.validate_files(files)
-        unless report.conformant?
-          warn report.to_s
-          exit 1
-        end
+        return if report.conformant?
+
+        warn report.to_s
+        raise Errors::CliError, "emitted Turtle failed SHACL validation"
       end
     end
   end

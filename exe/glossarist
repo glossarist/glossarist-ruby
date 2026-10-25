@@ -1,4 +1,10 @@
 #!/usr/bin/env ruby
 
 require_relative "../lib/glossarist"
-Glossarist::CLI.start(ARGV)
+
+begin
+  Glossarist::CLI.start(ARGV)
+rescue Glossarist::Errors::CliError => e
+  warn "Error: #{e.message}"
+  exit 1
+end
