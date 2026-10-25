@@ -22,8 +22,11 @@ module Glossarist
 
       map %i[date_accepted dateAccepted],
           with: { from: :date_accepted_from_yaml, to: :date_accepted_to_yaml }
-      map :uuid, to: :uuid, with: { to: :uuid_to_yaml, from: :uuid_from_yaml }
-      map :id, to: :id, with: { to: :id_to_yaml, from: :id_from_yaml }
+      # The concept's UUID serializes to the YAML "id" key (uuid_to_yaml),
+      # so reading must map "id" back to #uuid — not just #id — or a
+      # round-tripped document lazily derives a different, content-based
+      # UUID (#247). ManagedConcept already maps both keys this way.
+      map %i[id uuid], to: :uuid, with: { to: :uuid_to_yaml, from: :uuid_from_yaml }
       map :identifier, to: :id, with: { to: :id_to_yaml, from: :id_from_yaml }
     end
 
@@ -75,6 +78,7 @@ module Glossarist
 
     def uuid_from_yaml(model, value)
       model.uuid = value
+      model.id = value
     end
 
     def id_to_yaml(model, doc); end
