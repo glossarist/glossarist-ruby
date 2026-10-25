@@ -46,8 +46,8 @@ RSpec.describe Glossarist::Concept do
       expect { described_class.from_yaml(attrs.to_yaml) }.not_to raise_error
     end
 
-    it "generates a uuid if not given" do
-      concept = described_class.from_yaml(attrs.to_yaml)
+    it "generates a uuid if no id key is given" do
+      concept = described_class.from_yaml({ "data" => {} }.to_yaml)
 
       uuid = Glossarist::Utilities::UUID.uuid_v5(
         Glossarist::Utilities::UUID::OID_NAMESPACE,
@@ -55,6 +55,13 @@ RSpec.describe Glossarist::Concept do
       )
 
       expect(concept.uuid).to eq(uuid)
+    end
+
+    it "uses the id key as the uuid when given (#247)" do
+      concept = described_class.from_yaml(attrs.to_yaml)
+
+      expect(concept.uuid).to eq("123")
+      expect(concept.id).to eq("123")
     end
 
     it "assign a uuid if given" do

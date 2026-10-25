@@ -201,3 +201,20 @@ RSpec.describe Glossarist::LocalizedConcept do
     end
   end
 end
+
+describe "uuid round-trip (#247)" do
+  let(:uuid) { "243147a0-9415-55a9-90a3-c2a59d17ff26" }
+  let(:concept) do
+    Glossarist::LocalizedConcept.new.tap { |c| c.uuid = uuid }
+  end
+  let(:round_trip) { Glossarist::LocalizedConcept.from_yaml(concept.to_yaml) }
+
+  it "parses the serialized id key back into #uuid and #id" do
+    expect(round_trip.uuid).to eq(uuid)
+    expect(round_trip.id).to eq(uuid)
+  end
+
+  it "does not lazily re-derive the uuid" do
+    expect(round_trip.instance_variable_get(:@uuid)).to eq(uuid)
+  end
+end
