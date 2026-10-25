@@ -73,13 +73,26 @@ RSpec.describe Glossarist::CLI::ImportCommand do
       end.to output(/duplicate\(s\) detected/).to_stdout
     end
 
-    it "exits with error for invalid arguments" do
+    it "raises CliError for invalid arguments" do
       options = { output: File.join(@tmpdir, "test.gcr") }
       command = described_class.new([simple_fixture], options)
 
       expect do
         command.run
-      end.to output(/Error:.*shortname/).to_stderr.and raise_error(SystemExit)
+      end.to raise_error(Glossarist::Errors::CliError, /shortname/)
+    end
+
+    it "does not exit the host process on failure (#248)" do
+      options = { output: File.join(@tmpdir, "test.gcr") }
+      command = described_class.new([simple_fixture], options)
+
+      expect do
+        begin
+          command.run
+        rescue Glossarist::Errors::CliError
+          # expected
+        end
+      end.not_to raise_error(SystemExit)
     end
 
     it "uses on_duplicate option" do

@@ -26,8 +26,7 @@ module Glossarist
 
         puts "Created #{@options[:output]}"
       rescue ArgumentError => e
-        warn "Error: #{e.message}"
-        exit 1
+        raise Errors::CliError, e.message
       end
 
       private

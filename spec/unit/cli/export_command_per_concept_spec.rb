@@ -46,9 +46,9 @@ RSpec.describe Glossarist::CLI::ExportCommand, "#run with --per-concept" do
     expect(Dir.glob(File.join(tmpdir, "concepts", "*.ttl")).length).to be >= 1
   end
 
-  it "raises ArgumentError on per-concept tbx (unsupported)" do
+  it "raises CliError on per-concept tbx (unsupported)" do
     expect { run!(format: "tbx", per_concept: true, aggregate: false) }
-      .to raise_error(SystemExit)
+      .to raise_error(Glossarist::Errors::CliError)
   end
 
   it "accepts comma-separated --format" do
@@ -59,6 +59,6 @@ RSpec.describe Glossarist::CLI::ExportCommand, "#run with --per-concept" do
 
   it "rejects unknown formats" do
     expect { run!(format: "nope") }
-      .to raise_error(SystemExit)
+      .to raise_error(Glossarist::Errors::CliError)
   end
 end

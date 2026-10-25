@@ -22,7 +22,10 @@ module Glossarist
 
         $stderr.print "\r#{' ' * 60}\r" if text_output
         report(result)
-        exit(1) unless result.errors.empty? && !strict_failure?(result)
+        return if result.errors.empty? && !strict_failure?(result)
+
+        raise Errors::CliError,
+              "dataset invalid: #{result.errors.size} error(s)"
       end
 
       private

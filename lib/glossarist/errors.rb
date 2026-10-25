@@ -10,5 +10,6 @@ module Glossarist
              "glossarist/errors/invalid_language_code_error"
     autoload :CacheVersionMismatchError,
              "glossarist/errors/cache_version_mismatch_error"
+    autoload :CliError, "glossarist/errors/cli_error"
   end
 end

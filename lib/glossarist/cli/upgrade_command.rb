@@ -18,8 +18,7 @@ module Glossarist
         )
         report(result)
       rescue ArgumentError => e
-        warn "Error: #{e.message}"
-        exit 1
+        raise Errors::CliError, e.message
       end
 
       private
