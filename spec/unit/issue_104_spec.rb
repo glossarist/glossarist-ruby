@@ -36,12 +36,28 @@ RSpec.describe "Issue 104 YAML compatibility" do
         expect(model_class.from_yaml(concept.to_yaml).entry_status).to eq("valid")
       end
 
-      it "delegates the status setter to entry status" do
-        concept = model_class.new
-        concept.status = "valid"
+      it "writes the status only under data, never as a top-level key" do
+        output = YAML.safe_load(model_class.from_yaml(localized_yaml).to_yaml)
 
-        expect(concept.entry_status).to eq("valid")
-        expect(model_class.from_yaml(concept.to_yaml).entry_status).to eq("valid")
+        expect(output).not_to have_key("status")
+        expect(output["data"]["entry_status"]).to eq("valid")
+      end
+
+      it "keeps data.entry_status when the legacy status disagrees" do
+        yaml = { "status" => "valid",
+                 "data" => { "language_code" => "eng",
+                             "entry_status" => "superseded" } }.to_yaml
+
+        expect(model_class.from_yaml(yaml).entry_status).to eq("superseded")
+      end
+
+      it "delegates the status setter to entry status" do
+        concept = model_class.from_yaml(localized_yaml)
+        concept.status = "superseded"
+
+        expect(concept.entry_status).to eq("superseded")
+        expect(model_class.from_yaml(concept.to_yaml).entry_status)
+          .to eq("superseded")
       end
 
       it "preserves configured extensions through YAML round trips" do
