@@ -5,6 +5,7 @@ module Glossarist
     attribute :entry_status, :string
 
     key_value do
+      map :status, to: :entry_status, with: { from: :status_from_yaml }
       map :classification, to: :classification
       map %i[review_type reviewType], to: :review_type
     end
@@ -20,8 +21,6 @@ module Glossarist
       super
     end
 
-    alias_method :status=, :entry_status=
-
     def language_code
       data.language_code
     end
@@ -36,6 +35,12 @@ module Glossarist
 
     def entry_status=(value)
       data.entry_status = value
+    end
+
+    alias_method :status=, :entry_status=
+
+    def status_from_yaml(model, value)
+      model.entry_status = value
     end
 
     def all_sources
