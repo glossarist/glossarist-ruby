@@ -30,6 +30,19 @@ module Glossarist
       map :identifier, to: :id, with: { to: :id_to_yaml, from: :id_from_yaml }
     end
 
+    def self.of_yaml(hash, options = {})
+      if hash.is_a?(Hash)
+        extensions = hash.select do |key, _value|
+          Config.extension_attributes.include?(key.to_s)
+        end
+        unless extensions.empty?
+          existing = hash["extension_attributes"] || hash["extensionAttributes"] || {}
+          hash = hash.merge("extension_attributes" => existing.merge(extensions))
+        end
+      end
+      super
+    end
+
     def designations
       data.terms
     end
