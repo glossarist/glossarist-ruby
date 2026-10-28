@@ -136,16 +136,22 @@ module Glossarist
       concept_id = concept.is_a?(ManagedConcept) ? concept.data&.id : nil
       return [] unless concept_id
 
-      all_section_ids = collect_all_section_ids
-      all_section_ids.select { |sid| concept_id.start_with?("#{sid}-", "#{sid}.") }
+      all_section_ids
+        .select { |sid| concept_id.start_with?("#{sid}-", "#{sid}.") }
         .max_by(&:length)
         &.then { |sid| [sid] } || []
     end
 
-    def collect_all_section_ids
-      ids = []
-      walk_section_tree(sections, []) { |section, _| ids << section.id }
-      ids
+    # One flattened section-id list, computed once: derivation runs per
+    # concept without explicit section domains, and re-walking the whole
+    # section tree per concept is quadratic on large registers (ISO
+    # 10303-2: 7,363 concepts x 1,240 sections).
+    def all_section_ids
+      @all_section_ids ||= begin
+        ids = []
+        walk_section_tree(sections, []) { |section, _| ids << section.id }
+        ids
+      end
     end
   end
 end
