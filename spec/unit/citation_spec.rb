@@ -144,4 +144,54 @@ RSpec.describe Glossarist::Citation do
       end.to raise_error(Lutaml::Model::ValidationError)
     end
   end
+
+  describe "document identity and item path" do
+    let(:tech_citation) do
+      described_class.new(
+        ref: described_class::Ref.new(
+          source: "urn:iso:std:iso:10303:-2:ed-1:en:tech:ACTIVITY_MIM:tech:ACTIVITY_MIM",
+          id: "ACTIVITY_MIM",
+        ),
+      )
+    end
+
+    it "splits a tech URN into document identity and item path" do
+      expect(tech_citation.document_urn)
+        .to eq("urn:iso:std:iso:10303:-2:ed-1:en")
+      expect(tech_citation.item_path)
+        .to eq("tech:ACTIVITY_MIM:tech:ACTIVITY_MIM")
+    end
+
+    it "splits a term URN at its term segment" do
+      citation = described_class.new(
+        ref: described_class::Ref.new(
+          source: "urn:iso:std:iso:10241-1:ed-1:en:term:design",
+        ),
+      )
+      expect(citation.document_urn)
+        .to eq("urn:iso:std:iso:10241-1:ed-1:en")
+      expect(citation.item_path).to eq("term:design")
+    end
+
+    it "returns the full URN as document identity when it has no item path" do
+      citation = described_class.new(
+        ref: described_class::Ref.new(source: "urn:iso:std:iso:10303:-2:ed-1:en"),
+      )
+      expect(citation.document_urn).to eq("urn:iso:std:iso:10303:-2:ed-1:en")
+      expect(citation.item_path).to be_nil
+    end
+
+    it "returns no document identity for a non-URN source" do
+      citation = described_class.new(
+        ref: described_class::Ref.new(source: "ISO 9000", id: "9000"),
+      )
+      expect(citation.document_urn).to be_nil
+      expect(citation.item_path).to be_nil
+    end
+
+    it "returns no document identity without a ref" do
+      expect(described_class.new.document_urn).to be_nil
+      expect(described_class.new.item_path).to be_nil
+    end
+  end
 end

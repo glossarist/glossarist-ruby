@@ -14,6 +14,11 @@ module Glossarist
       end
     end
 
+    # Segments that begin the item path of an ISO URN (the "element"
+    # segments of ISO 6701-style URNs); everything before the first of
+    # these is the cited document's identity.
+    URN_ELEMENT_SEGMENTS = %w[tech term doc fig tab sec loc rem].freeze
+
     attribute :ref, Ref
     attribute :text, :string
     attribute :locality, Locality
@@ -38,6 +43,21 @@ module Glossarist
 
     def text
       @text || label
+    end
+
+    # The cited document's identity URN — the source URN minus its item
+    # path. For "urn:iso:std:iso:10303:-2:ed-1:en:tech:ACTIVITY_MIM"
+    # this is "urn:iso:std:iso:10303:-2:ed-1:en". Non-URN sources have
+    # no document identity.
+    def document_urn
+      split_urn_source&.first || urn_source
+    end
+
+    # The item path inside the cited document — the URN's element
+    # segments ("tech:ACTIVITY_MIM:tech:ACTIVITY_MIM"). Nil when the
+    # source is not a URN or carries no element segments.
+    def item_path
+      split_urn_source&.last
     end
 
     def locality_from_yaml(model, value)
@@ -69,6 +89,24 @@ module Glossarist
         doc["locality"]["reference_to"] =
           model.locality.reference_to
       end
+    end
+
+    private
+
+    def urn_source
+      source = ref&.source
+      source&.start_with?("urn:") ? source : nil
+    end
+
+    def split_urn_source
+      source = urn_source
+      return nil unless source
+
+      segments = source.split(":")
+      idx = segments.index { |s| URN_ELEMENT_SEGMENTS.include?(s) }
+      return nil unless idx
+
+      [segments[0...idx].join(":"), segments[idx..].join(":")]
     end
   end
 end
