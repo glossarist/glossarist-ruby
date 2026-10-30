@@ -29,6 +29,70 @@ Or install it yourself as:
 gem install glossarist
 ----
 
+== Configuration
+
+=== glossarist.yaml
+
+A dataset can carry attributes that are not part of the Glossarist model, such
+as the part and document of an ISO 10303 term. List them under
+`extension_attributes` in a `glossarist.yaml` file:
+
+[,yaml]
+----
+extension_attributes:
+  - part
+  - document
+----
+
+When a localized concept file has one of these keys at its top level, the
+value is kept under `extension_attributes` and written back there on save.
+Other unknown keys are dropped.
+
+[,ruby]
+----
+concept = Glossarist::LocalizedConcept.from_yaml(<<~YAML)
+  data:
+    language_code: eng
+  part: 2
+YAML
+
+concept.extension_attributes # => {"part" => 2}
+----
+
+The gem reads `glossarist.yaml` from the current working directory once, the
+first time the configuration is used. Run your script from the directory that
+holds the file, or register the attributes in code as shown below.
+
+=== Glossarist.configure
+
+The same settings can be made in code:
+
+[,ruby]
+----
+Glossarist.configure do |config|
+  # Replaces the list read from glossarist.yaml
+  config.register_extension_attributes(["part", "document"])
+
+  # Use your own subclasses for new concepts
+  config.register_class(:managed_concept, MyManagedConcept)
+  config.register_class(:localized_concept, MyLocalizedConcept)
+end
+----
+
+The registered `managed_concept` class is used by
+`ManagedConceptCollection#fetch_or_initialize`. The registered
+`localized_concept` class is used when `ManagedConcept#localized_concepts=` is
+given a list of localized concept hashes.
+
+The `generate_latex` command takes the same list with `--extra-attributes`.
+
+=== config.yml
+
+The allowed values of the model's enumerations, such as concept statuses,
+abbreviation types and relationship types, come from `config.yml` in the gem's
+root directory. The gem always reads its own copy, so a project cannot override
+these values with a file of its own.
+
 == Usage
 
 === Reading a Glossarist model V2 from files
