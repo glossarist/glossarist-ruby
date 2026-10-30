@@ -76,7 +76,7 @@ module Glossarist
     def load_from_files(path)
       store = GlossaryStore.new
       store.load(path)
-      store.concepts.each { |mc| store(mc) }
+      store.concepts.each { |mc| store(as_registered(mc)) }
       @localized_concepts_path = store.localized_concepts_dir_name || "localized_concept"
     end
 
@@ -115,6 +115,36 @@ module Glossarist
     end
 
     private
+
+    # GlossaryStore picks V2/V3 classes by schema version. A class
+    # registered through Config takes their place, as it did before.
+    def as_registered(concept)
+      klass = Config.class_for(:managed_concept)
+      registered = concept.is_a?(klass) ? concept : copy_into(klass, concept)
+      registered.data.localizations = Collections::LocalizationCollection.new(
+        concept.localizations.values.map { |l10n| as_registered_l10n(l10n) },
+      )
+      registered
+    end
+
+    def as_registered_l10n(localized_concept)
+      klass = Config.class_for(:localized_concept)
+      return localized_concept if localized_concept.is_a?(klass)
+
+      copy_into(klass, localized_concept)
+    end
+
+    # Values move across as they are, so nested V2/V3 data keeps its type;
+    # the registered class cannot re-parse V2 YAML itself.
+    def copy_into(klass, source)
+      klass.new.tap do |target|
+        klass.attributes.each_key do |name|
+          next unless source.respond_to?(name)
+
+          target.public_send(:"#{name}=", source.public_send(name))
+        end
+      end
+    end
 
     def file_key(concept)
       @file_key ? @file_key.call(concept) : concept.uuid

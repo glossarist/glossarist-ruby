@@ -73,16 +73,17 @@ Glossarist.configure do |config|
   # Replaces the list read from glossarist.yaml
   config.register_extension_attributes(["part", "document"])
 
-  # Use your own subclasses for new concepts
+  # Use your own subclasses of Glossarist::ManagedConcept and
+  # Glossarist::LocalizedConcept
   config.register_class(:managed_concept, MyManagedConcept)
   config.register_class(:localized_concept, MyLocalizedConcept)
 end
 ----
 
-The registered `managed_concept` class is used by
-`ManagedConceptCollection#fetch_or_initialize`. The registered
-`localized_concept` class is used when `ManagedConcept#localized_concepts=` is
-given a list of localized concept hashes.
+The registered classes are used for the concepts that
+`ManagedConceptCollection#load_from_files` loads, and for new concepts made by
+`ManagedConceptCollection#fetch_or_initialize` and by
+`ManagedConcept#localized_concepts=` given a list of localized concept hashes.
 
 The `generate_latex` command takes the same list with `--extra-attributes`.
 
