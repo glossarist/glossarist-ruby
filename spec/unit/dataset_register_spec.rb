@@ -105,6 +105,40 @@ RSpec.describe Glossarist::DatasetRegister do
     end
   end
 
+  describe "description given as a plain string" do
+    let(:yaml) do
+      <<~YAML
+        ---
+        id: test-dataset
+        description: >-
+          A compound register containing
+          terminology records.
+      YAML
+    end
+
+    it "loads the string unchanged" do
+      register = described_class.from_yaml(yaml)
+      expect(register.description).to eq(
+        "A compound register containing terminology records.",
+      )
+    end
+
+    it "round-trips the string" do
+      register = described_class.from_yaml(yaml)
+      reloaded = described_class.from_yaml(register.to_yaml)
+      expect(reloaded.description).to eq(register.description)
+    end
+  end
+
+  describe "description given as a localized hash" do
+    it "round-trips the hash" do
+      register = described_class.from_yaml(sample_yaml)
+      reloaded = described_class.from_yaml(register.to_yaml)
+      expect(reloaded.description).to eq({ "eng" => "A test dataset",
+                                           "fra" => "Un jeu de données test" })
+    end
+  end
+
   describe "section_by_id" do
     it "finds top-level section" do
       section = register.section_by_id("1")
