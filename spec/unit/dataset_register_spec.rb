@@ -128,6 +128,20 @@ RSpec.describe Glossarist::DatasetRegister do
       reloaded = described_class.from_yaml(register.to_yaml)
       expect(reloaded.description).to eq(register.description)
     end
+
+    it "accepts a string through the writer" do
+      register = described_class.new(id: "test-dataset")
+      register.description = "Plain text"
+      expect(described_class.from_yaml(register.to_yaml).description)
+        .to eq("Plain text")
+    end
+  end
+
+  describe "description given as an empty hash" do
+    it "leaves it out on save" do
+      register = described_class.from_yaml("id: test-dataset\ndescription: {}\n")
+      expect(register.to_yaml).not_to include("description")
+    end
   end
 
   describe "description given as a localized hash" do
