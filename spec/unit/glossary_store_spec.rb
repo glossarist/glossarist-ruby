@@ -276,6 +276,21 @@ RSpec.describe Glossarist::GlossaryStore do
     end
   end
 
+  describe "localizations of a loaded concepts/ layout" do
+    it "holds one localization per language document" do
+      store.load_directory(glossary_dir)
+      counts = store.concepts.to_h { |mc| [mc.uuid, mc.localizations.size] }
+      expect(counts).to eq("aaa-111" => 1, "bbb-222" => 2)
+    end
+
+    it "does not grow localizations when concepts are read again" do
+      store.load_directory(glossary_dir)
+      2.times { store.concepts }
+      expect(store.concept("bbb-222").localizations.map(&:language_code))
+        .to eq(%w[eng fra])
+    end
+  end
+
   describe "#concept" do
     it "retrieves a concept by UUID" do
       store.load_directory(glossary_dir)

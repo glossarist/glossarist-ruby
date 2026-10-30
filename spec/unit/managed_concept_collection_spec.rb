@@ -205,6 +205,43 @@ RSpec.describe Glossarist::ManagedConceptCollection do
       end
     end
 
+    context "concepts/ layout with one document per language" do
+      let(:dataset) do
+        <<~YAML
+          ---
+          data:
+            identifier: "1"
+            localized_concepts:
+              eng: l10n-eng
+              fra: l10n-fra
+          status: valid
+          schema_version: '3'
+          id: concept-1
+          ---
+          data:
+            language_code: eng
+            entry_status: valid
+          id: l10n-eng
+          ---
+          data:
+            language_code: fra
+            entry_status: valid
+          id: l10n-fra
+        YAML
+      end
+
+      it "loads each language document exactly once" do
+        Dir.mktmpdir do |dir|
+          FileUtils.mkdir_p(File.join(dir, "concepts"))
+          File.write(File.join(dir, "concepts", "concept-1.yaml"), dataset)
+          managed_concept_collection.load_from_files(dir)
+
+          l10ns = managed_concept_collection.flat_map { |mc| mc.localizations.values }
+          expect(l10ns.map(&:language_code)).to contain_exactly("eng", "fra")
+        end
+      end
+    end
+
     context "with classes registered in Config" do
       let(:managed_class) { Class.new(Glossarist::ManagedConcept) }
       let(:localized_class) { Class.new(Glossarist::LocalizedConcept) }

@@ -15,7 +15,13 @@ module Glossarist
 
       def store(lang_code, localized_concept)
         localized_concept.language_code ||= lang_code.to_s
-        push(localized_concept)
+        # One localization per language: storing the same language again
+        # replaces it, so a concept attached twice is not duplicated.
+        position = to_a.index do |l10n|
+          l10n.language_code == localized_concept.language_code
+        end
+        position ? collection[position] = localized_concept : push(localized_concept)
+        build_index_caches!
         localized_concept
       end
 
