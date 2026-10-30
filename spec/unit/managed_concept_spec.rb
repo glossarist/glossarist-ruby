@@ -40,6 +40,29 @@ RSpec.describe Glossarist::ManagedConcept do
     }
   end
 
+  describe "#add_localization" do
+    it "keeps one localization per language" do
+      mc = described_class.new
+      eng = Glossarist::LocalizedConcept.of_yaml("data" => { "language_code" => "eng" })
+      mc.add_localization(eng)
+      mc.add_localization(eng)
+
+      expect(mc.localizations.size).to eq(1)
+      expect(mc.localization("eng")).to be(eng)
+    end
+
+    it "replaces an earlier localization of the same language" do
+      mc = described_class.new
+      first = Glossarist::LocalizedConcept.of_yaml("data" => { "language_code" => "eng" })
+      second = Glossarist::LocalizedConcept.of_yaml("data" => { "language_code" => "eng" })
+      mc.add_localization(first)
+      mc.add_localization(second)
+
+      expect(mc.localizations.size).to eq(1)
+      expect(mc.localization("eng")).to be(second)
+    end
+  end
+
   describe "#id" do
     it "sets the id of the concept" do
       expect { subject.id = "1234" }
