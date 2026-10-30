@@ -41,9 +41,33 @@ module Glossarist
       map "languageOrder", to: :language_order
       map "ordering", to: :ordering
       map "sections", to: :sections
-      map "description", to: :description
+      map "description", to: :description,
+                         with: { from: :description_from_yaml,
+                                 to: :description_to_yaml }
       map "about", to: :about
       map "logo", to: :logo
+    end
+
+    # A register's description is a localized hash ({ "eng" => "..." }) or,
+    # in some datasets, a plain string. Keep whichever form was written.
+    # The :hash attribute cannot cast a string, so a string is stored as is.
+    # The :hash attribute cannot cast a string, so a plain-text description
+    # is stored as it is.
+    def description=(value)
+      if value.is_a?(String)
+        instance_variable_set(:@description, value)
+      else
+        super
+      end
+    end
+
+    def description_from_yaml(model, value)
+      model.description = value
+    end
+
+    def description_to_yaml(model, doc)
+      value = model.description
+      doc["description"] = value unless value.nil? || value.empty?
     end
 
     def section_by_id(target_id)
