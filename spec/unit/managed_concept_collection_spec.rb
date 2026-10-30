@@ -204,5 +204,58 @@ RSpec.describe Glossarist::ManagedConceptCollection do
         end.to change { managed_concept_collection.count }.by(4)
       end
     end
+
+    context "with classes registered in Config" do
+      let(:managed_class) { Class.new(Glossarist::ManagedConcept) }
+      let(:localized_class) { Class.new(Glossarist::LocalizedConcept) }
+      let(:default_load) do
+        described_class.new.tap do |collection|
+          collection.load_from_files(fixtures_path("concept_collection_v2"))
+        end
+      end
+
+      before do
+        @registered_classes = Glossarist::Config.instance.registered_classes.dup
+        Glossarist::Config.register_class(:managed_concept, managed_class)
+        Glossarist::Config.register_class(:localized_concept, localized_class)
+        managed_concept_collection.load_from_files(
+          fixtures_path("concept_collection_v2"),
+        )
+      end
+
+      after do
+        Glossarist::Config.instance
+          .instance_variable_set(:@registered_classes, @registered_classes)
+      end
+
+      it "builds managed concepts with the registered class" do
+        expect(managed_concept_collection.map(&:class).uniq)
+          .to eq([managed_class])
+      end
+
+      it "builds localizations with the registered class" do
+        classes = managed_concept_collection
+          .flat_map { |mc| mc.localizations.values.map(&:class) }.uniq
+
+        expect(classes).to eq([localized_class])
+      end
+
+      it "keeps the content of every concept" do
+        Glossarist::Config.instance
+          .instance_variable_set(:@registered_classes, @registered_classes)
+
+        expect(managed_concept_collection.map(&:to_yaml_hash))
+          .to eq(default_load.map(&:to_yaml_hash))
+      end
+
+      it "keeps the content of every localization" do
+        Glossarist::Config.instance
+          .instance_variable_set(:@registered_classes, @registered_classes)
+        hashes = ->(coll) { coll.flat_map { |mc| mc.localizations.values.map(&:to_yaml_hash) } }
+
+        expect(hashes.call(managed_concept_collection))
+          .to eq(hashes.call(default_load))
+      end
+    end
   end
 end
