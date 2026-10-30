@@ -348,17 +348,30 @@ module Glossarist
       end
     end
 
-    def legacy_managed_layout?(path)
-      concept_dir = File.join(path, "concept")
-      return false unless File.directory?(concept_dir)
-      return false if File.directory?(File.join(path, "concepts"))
+    # Directory holding the split concept/ + localized_concept/ layout:
+    # the dataset root, or its concepts/ directory (the layout
+    # glossarist-data-iev uses). nil when the dataset is not split.
+    def split_layout_root(path)
+      concepts = File.join(path, "concepts")
+      if File.directory?(concepts)
+        return split_concept_files?(concepts) ? concepts : nil
+      end
 
-      Dir.glob(File.join(concept_dir, "*.yaml")).any?
+      path if split_concept_files?(path)
+    end
+
+    def split_concept_files?(dir)
+      Dir.glob(File.join(dir, "concept", "*.yaml")).any?
+    end
+
+    def legacy_managed_layout?(path)
+      !split_layout_root(path).nil?
     end
 
     def load_legacy_managed(path)
-      concept_dir = File.join(path, "concept")
-      lc_dir = find_localized_concepts_dir(path)
+      root = split_layout_root(path)
+      concept_dir = File.join(root, "concept")
+      lc_dir = find_localized_concepts_dir(root)
       lc_index = build_lc_index(lc_dir) if lc_dir
 
       @v1_concepts = []
@@ -379,6 +392,32 @@ module Glossarist
       rescue Encoding::InvalidByteSequenceError => e
         raise Errors::LoadError.new(path: f, reason: e.message)
       end
+      load_grouped_beside_split(root) if File.basename(root) == "concepts"
+    end
+
+    # Grouped concepts/*.yaml files next to the split directories. A
+    # grouped file for an id the split layout already provides is a
+    # duplicate: the split files win and the file is reported, not
+    # loaded. Any other grouped file is loaded as usual.
+    def load_grouped_beside_split(root)
+      known = @v1_concepts.to_set { |mc| mc.data.id.to_s }
+      duplicates = []
+      Dir.glob(File.join(root, "*.yaml")).each do |f|
+        mc = read_grouped_concept(f)
+        next unless mc
+
+        if known.include?(mc.data.id.to_s)
+          duplicates << File.basename(f)
+        else
+          known << mc.data.id.to_s
+          @v1_concepts << mc
+        end
+      end
+      return if duplicates.empty?
+
+      warn "glossarist: ignored #{duplicates.length} grouped file(s) " \
+           "duplicating concept/ + localized_concept/ entries: " \
+           "#{duplicates.join(', ')}"
     end
 
     def load_legacy_localizations(managed_concept, lc_index, version = "3")
@@ -440,24 +479,28 @@ module Glossarist
     end
 
     def load_grouped_at_root(path)
-      @v1_concepts = []
-      Dir.glob(File.join(path, "*.yaml")).each do |f|
-        raw = File.read(f, encoding: "utf-8")
-        version = detect_version(raw)
-        doc_class = ConceptDocument.for_version(version)
-        doc = doc_class.from_yamls(raw)
-        mc = doc.concept
-        next unless mc&.data&.id
-
-        Array(doc.localizations).each { |l10n| mc.add_localization(l10n) }
-        @v1_concepts << mc
-      rescue Psych::SyntaxError => e
-        raise Errors::ParseError.new(filename: f, line: e.line)
-      rescue Lutaml::Model::InvalidFormatError => e
-        raise Errors::ParseError.new(filename: f, message: e.message)
-      rescue Encoding::InvalidByteSequenceError => e
-        raise Errors::LoadError.new(path: f, reason: e.message)
+      @v1_concepts = Dir.glob(File.join(path, "*.yaml")).filter_map do |f|
+        read_grouped_concept(f)
       end
+    end
+
+    # Parses one grouped (multi-document) concept file into a
+    # ManagedConcept with its localizations; nil when it has no id.
+    def read_grouped_concept(file)
+      raw = File.read(file, encoding: "utf-8")
+      doc_class = ConceptDocument.for_version(detect_version(raw))
+      doc = doc_class.from_yamls(raw)
+      mc = doc.concept
+      return unless mc&.data&.id
+
+      Array(doc.localizations).each { |l10n| mc.add_localization(l10n) }
+      mc
+    rescue Psych::SyntaxError => e
+      raise Errors::ParseError.new(filename: file, line: e.line)
+    rescue Lutaml::Model::InvalidFormatError => e
+      raise Errors::ParseError.new(filename: file, message: e.message)
+    rescue Encoding::InvalidByteSequenceError => e
+      raise Errors::LoadError.new(path: file, reason: e.message)
     end
 
     def detect_version(raw)
