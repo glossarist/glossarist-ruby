@@ -82,9 +82,10 @@ module Glossarist
           next unless s.is_a?(Hash)
 
           origin = {}
-          origin["ref"] = s["ref"] if s["ref"]
+          origin["ref"] = structured_ref(s["ref"]) if s["ref"]
           origin["clause"] = s["clause"] if s["clause"]
           origin["link"] = s["link"] if s["link"]
+          origin["original"] = s["original"] if s["original"]
 
           entry = { "type" => "authoritative", "origin" => origin }
           if s["relationship"]
@@ -98,6 +99,12 @@ module Glossarist
         end
 
         l10n_block["sources"] = sources if sources.any?
+      end
+
+      # A plain-text ref names the document only; the structured form
+      # carries that title as the ref's source.
+      def structured_ref(ref)
+        ref.is_a?(String) ? { "source" => ref } : ref
       end
 
       def migrate_dates(l10n_block)
