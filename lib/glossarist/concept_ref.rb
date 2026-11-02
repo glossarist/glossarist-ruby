@@ -4,10 +4,10 @@ module Glossarist
   # A typed reference to another concept, used inside n-ary relation
   # members and other internal pointer shapes.
   #
-  # The base ConceptRef carries `source`, `id`, `text`, `external`, and
-  # `ellipsis`. The richer `ConceptReference` (in
+  # The base ConceptRef carries `source`, `id`, `version`, `text`, `external`,
+  # and `ellipsis`. The richer `ConceptReference` (in
   # `glossarist/concept_reference.rb`) extends this with `term`, `urn`,
-  # `version`, `ref_type` for use in cross-vocabulary references and
+  # `ref_type` for use in cross-vocabulary references and
   # relevance contexts.
   #
   # A ConceptRef is identified by `source:id` for external references
@@ -30,6 +30,7 @@ module Glossarist
   class ConceptRef < Lutaml::Model::Serializable
     attribute :source, :string
     attribute :id, :string
+    attribute :version, :string
     attribute :text, :string
     attribute :external, :boolean, default: -> { false }
     attribute :ellipsis, :boolean, default: -> { false }
@@ -37,6 +38,7 @@ module Glossarist
     key_value do
       map :source, to: :source
       map :id, to: :id
+      map :version, to: :version
       map :text, to: :text
       map :external, to: :external
       map :ellipsis, to: :ellipsis

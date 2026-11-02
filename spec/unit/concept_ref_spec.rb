@@ -20,6 +20,21 @@ RSpec.describe Glossarist::ConceptRef do
     end
   end
 
+  describe "version attribute" do
+    it "round-trips a versioned related ref through RelatedConcept" do
+      related = Glossarist::RelatedConcept.of_yaml(
+        "type" => "supersedes",
+        "ref" => { "source" => "IEV", "id" => "112-01-11",
+                   "version" => "2010-01" },
+      )
+
+      expect(related.ref.version).to eq("2010-01")
+      expect(related.to_yaml).to include("version: 2010-01")
+      expect(Glossarist::RelatedConcept.from_yaml(related.to_yaml)
+               .ref.version).to eq("2010-01")
+    end
+  end
+
   describe "text attribute (for lexical relationship targets)" do
     it "holds designation text" do
       ref = described_class.new(text: "measure")

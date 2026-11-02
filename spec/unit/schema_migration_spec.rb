@@ -50,10 +50,41 @@ RSpec.describe Glossarist::SchemaMigration do
           expect(result["eng"]["sources"]).to eq([
                                                    {
                                                      "type" => "authoritative",
-                                                     "origin" => { "ref" => "ISO 9000",
+                                                     "origin" => { "ref" => { "source" => "ISO 9000" },
                                                                    "link" => "https://example.com" },
                                                    },
                                                  ])
+        end
+
+        it "wraps a plain-text ref, keeps original, and loads as a source" do
+          input = {
+            "termid" => "1",
+            "eng" => {
+              "authoritative_source" => [{
+                "ref" => "ISO/IEC Guide 99:2007", "clause" => "1.7",
+                "original" => "ISO/IEC Guide 99:2007, 1.7"
+              }],
+            },
+          }
+          entry = described_class.new(input).migrate["eng"]["sources"].first
+
+          expect(entry["origin"]["ref"])
+            .to eq("source" => "ISO/IEC Guide 99:2007")
+          expect(entry["origin"]["original"])
+            .to eq("ISO/IEC Guide 99:2007, 1.7")
+
+          source = Glossarist::ConceptSource.of_yaml(entry)
+          expect(source.origin.ref.source).to eq("ISO/IEC Guide 99:2007")
+          expect(source.origin.original).to eq("ISO/IEC Guide 99:2007, 1.7")
+        end
+
+        it "keeps an already structured ref unchanged" do
+          ref = { "source" => "IEV", "id" => "112-01-11" }
+          input = { "termid" => "1",
+                    "eng" => { "authoritative_source" => { "ref" => ref } } }
+          entry = described_class.new(input).migrate["eng"]["sources"].first
+
+          expect(entry["origin"]["ref"]).to eq(ref)
         end
 
         it "does not overwrite existing sources" do
@@ -274,7 +305,7 @@ RSpec.describe Glossarist::SchemaMigration do
                                                   "date" => "2010-01-01" }])
           # authoritative_source -> sources
           expect(result["eng"]["sources"]).to eq([{ "type" => "authoritative",
-                                                    "origin" => { "ref" => "ISO 9000" } }])
+                                                    "origin" => { "ref" => { "source" => "ISO 9000" } } }])
           # abbrev -> type
           expect(result["eng"]["terms"][0]["type"]).to eq("abbreviation")
           expect(result["eng"]["terms"][0]).not_to have_key("abbrev")
