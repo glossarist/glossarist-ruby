@@ -14,6 +14,14 @@ require "lutaml/store"
 # with FONTIST_YAML (lutaml-model 0.8.161 stopped auto-detecting yeptris).
 if ENV.fetch("FONTIST_YAML", "yeptris") == "yeptris"
   Lutaml::Model::Config.instance.set_adapter(:yaml, :yeptris)
+  # The yamls (multi-document stream) lane ships in newer lutaml-model
+  # (lutaml-model#1118); older releases validate!-reject the adapter type
+  # with ArgumentError — stay on the default stream adapter there.
+  begin
+    Lutaml::Model::Config.instance.set_adapter(:yamls, :yeptris)
+  rescue ArgumentError
+    nil
+  end
 end
 
 module Glossarist
