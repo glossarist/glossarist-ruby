@@ -45,7 +45,7 @@ Gem::Specification.new do |spec|
   # std_meta); 0.5.x is not supported.
   spec.add_dependency "sts", "~> 0.6"
   spec.add_dependency "table_tennis", "~> 0.0"
-  spec.add_dependency "yeptris", "~> 0.6"
+  spec.add_dependency "yeptris", "~> 0.6.59"
   spec.add_dependency "tbx", "~> 0.1"
   spec.add_dependency "thor"
 end
