@@ -8,6 +8,14 @@ require "thor"
 require "lutaml/model"
 require "lutaml/store"
 
+# glossarist datasets on disk are written in yeptris dump form (long plain
+# scalars unwrapped), so a silent fallback to Psych would reformat every
+# stored concept on the next save. Keep the native lane; hosts can override
+# with FONTIST_YAML (lutaml-model 0.8.161 stopped auto-detecting yeptris).
+if ENV.fetch("FONTIST_YAML", "yeptris") == "yeptris"
+  Lutaml::Model::Config.instance.set_adapter(:yaml, :yeptris)
+end
+
 module Glossarist
   autoload :Asset,                    "glossarist/asset"
   autoload :AssetReference,           "glossarist/asset_reference"
