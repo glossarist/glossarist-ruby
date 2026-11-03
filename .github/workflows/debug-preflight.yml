@@ -1,0 +1,28 @@
+name: debug-release-preflight
+
+on:
+  workflow_dispatch:
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+      - name: Replicate release preflight (stderr visible)
+        run: |
+          set -x
+          ruby -v
+          gem -v
+          bundle -v || true
+          if git ls-files --error-unmatch Gemfile.lock >/dev/null 2>&1; then
+            echo "Gemfile.lock is tracked"
+          else
+            echo "Gemfile.lock is untracked — removing for a fresh resolve."
+            rm -f Gemfile.lock
+          fi
+          bundle config set --local without 'test'
+          bundle install --jobs 4 --retry 3
+          bundle exec rake --version
