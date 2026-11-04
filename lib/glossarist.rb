@@ -10,13 +10,16 @@ require "lutaml/store"
 
 # glossarist datasets on disk are written in yeptris dump form (long plain
 # scalars unwrapped), so a silent fallback to Psych would reformat every
-# stored concept on the next save. Keep the native lane; hosts can override
-# with FONTIST_YAML (lutaml-model 0.8.161 stopped auto-detecting yeptris).
-if ENV.fetch("FONTIST_YAML", "yeptris") == "yeptris"
+# stored concept on the next save. Keep the native lane; hosts opt out via
+# LUTAML_YAML (the consumer-neutral switch, lutaml-model#1115) or its
+# legacy FONTIST_YAML spelling.
+native_lane = %w[LUTAML_YAML FONTIST_YAML].none? { |k| ENV.key?(k) } ||
+              %w[LUTAML_YAML FONTIST_YAML].any? { |k| ENV[k] == "yeptris" }
+if native_lane
   Lutaml::Model::Config.instance.set_adapter(:yaml, :yeptris)
-  # The yamls (multi-document stream) lane ships in newer lutaml-model
-  # (lutaml-model#1118); older releases validate!-reject the adapter type
-  # with ArgumentError — stay on the default stream adapter there.
+  # The yamls (multi-document stream) lane ships in lutaml-model 0.8.163+;
+  # older releases validate!-reject the adapter type with ArgumentError —
+  # stay on the default stream adapter there.
   begin
     Lutaml::Model::Config.instance.set_adapter(:yamls, :yeptris)
   rescue ArgumentError
