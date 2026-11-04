@@ -283,7 +283,10 @@ RSpec.describe "V2/V3 namespace architecture" do
       Glossarist::SchemaMigration.migrate_concept(concept)
 
       yaml_output = concept.to_yaml
-      parsed = YAML.safe_load(yaml_output, permitted_classes: [Date, Time])
+      # Ruby 4.0's Psych anchors legitimately-shared references in the
+      # emitted YAML, so the round-trip must allow aliases.
+      parsed = YAML.safe_load(yaml_output, permitted_classes: [Date, Time],
+                                             aliases: true)
 
       expect(parsed["related"]).not_to be_nil
       expect(parsed["related"].length).to eq(1)
