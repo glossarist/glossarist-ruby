@@ -9,22 +9,17 @@ require "lutaml/model"
 require "lutaml/store"
 
 # glossarist datasets on disk are written in yeptris dump form (long plain
-# scalars unwrapped), so a silent fallback to Psych would reformat every
-# stored concept on the next save. Keep the native lane; hosts opt out via
-# LUTAML_YAML (the consumer-neutral switch, lutaml-model#1115) or its
-# legacy FONTIST_YAML spelling.
-native_lane = %w[LUTAML_YAML FONTIST_YAML].none? { |k| ENV.key?(k) } ||
-              %w[LUTAML_YAML FONTIST_YAML].any? { |k| ENV[k] == "yeptris" }
-if native_lane
-  Lutaml::Model::Config.instance.set_adapter(:yaml, :yeptris)
-  # The yamls (multi-document stream) lane ships in lutaml-model 0.8.163+;
-  # older releases validate!-reject the adapter type with ArgumentError —
-  # stay on the default stream adapter there.
-  begin
-    Lutaml::Model::Config.instance.set_adapter(:yamls, :yeptris)
-  rescue ArgumentError
-    nil
-  end
+# scalars unwrapped), so a Psych fallback would reformat every stored
+# concept on the next save. glossarist always rides the native lane —
+# neither LUTAML_YAML nor FONTIST_YAML can flip it.
+Lutaml::Model::Config.instance.set_adapter(:yaml, :yeptris)
+# The yamls (multi-document stream) lane ships in lutaml-model 0.8.163+;
+# older releases validate!-reject the adapter type with ArgumentError —
+# stay on the default stream adapter there.
+begin
+  Lutaml::Model::Config.instance.set_adapter(:yamls, :yeptris)
+rescue ArgumentError
+  nil
 end
 
 module Glossarist
@@ -84,7 +79,7 @@ module Glossarist
   autoload :ManagedConcept,           "glossarist/managed_concept"
   autoload :ManagedConceptCollection, "glossarist/managed_concept_collection"
   autoload :ManagedConceptData,       "glossarist/managed_concept_data"
-  autoload :Mentions,                "glossarist/mentions"
+  autoload :Mentions, "glossarist/mentions"
   autoload :NonVerbRep,               "glossarist/non_verb_rep"
   autoload :Pronunciation,            "glossarist/pronunciation"
   autoload :RelatedConcept,           "glossarist/related_concept"
