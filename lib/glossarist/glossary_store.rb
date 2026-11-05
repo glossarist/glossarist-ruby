@@ -113,8 +113,8 @@ module Glossarist
     # Remove a hyperedge. Caller-supplied predicate selects which to
     # remove. The per-file storage is NOT modified by this method —
     # use #delete_relation_file to remove a single file.
-    def remove_relations_if(&predicate)
-      @relations&.reject!(&predicate)
+    def remove_relations_if(&)
+      @relations&.reject!(&)
     end
 
     # ── Concepts ──
@@ -388,7 +388,11 @@ module Glossarist
       rescue Psych::SyntaxError => e
         raise Errors::ParseError.new(filename: f, line: e.line)
       rescue Lutaml::Model::InvalidFormatError => e
-        raise Errors::ParseError.new(filename: f, message: e.message)
+        # A file whose stream parses to nothing is skipped, not fatal:
+        # lutaml-model raises for fully-invalid streams so the collection
+        # can keep loading the rest of the dataset.
+        warn "Skipping unparseable concept file #{f}: #{e.message[0, 80]}"
+        next
       rescue Encoding::InvalidByteSequenceError => e
         raise Errors::LoadError.new(path: f, reason: e.message)
       end
