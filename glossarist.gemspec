@@ -38,7 +38,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "lutaml-store", "~> 0.3"
   spec.add_dependency "paint", "~> 2.3"
   spec.add_dependency "rdf-turtle", "~> 3.3"
-  spec.add_dependency "relaton", "~> 3.0.0.pre.alpha"
+  spec.add_dependency "relaton", "~> 3.1"
   spec.add_dependency "rubyzip", "~> 3.7"
   spec.add_dependency "shacl", "~> 0.4"
   # The STS importer follows the sts 0.6 model (IsoSts::Front has no
