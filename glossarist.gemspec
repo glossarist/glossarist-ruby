@@ -32,20 +32,17 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "lutaml-model", "~> 0.8.15"
-  # relaton-3.0.0.pre.alpha.5 resolves lutaml-store ~> 0.3.2; a 0.2
-  # floor here made the pair unsolvable (2.14.0's activation
-  # conflict).
   spec.add_dependency "lutaml-store", "~> 0.3"
   spec.add_dependency "paint", "~> 2.3"
   spec.add_dependency "rdf-turtle", "~> 3.3"
-  spec.add_dependency "relaton", "~> 3.0.0.pre.alpha"
+  spec.add_dependency "relaton", "~> 3.1"
   spec.add_dependency "rubyzip", "~> 3.7"
   spec.add_dependency "shacl", "~> 0.4"
   # The STS importer follows the sts 0.6 model (IsoSts::Front has no
   # std_meta); 0.5.x is not supported.
   spec.add_dependency "sts", "~> 0.6"
   spec.add_dependency "table_tennis", "~> 0.0"
-  spec.add_dependency "yeptris", "~> 0.6.59"
   spec.add_dependency "tbx", "~> 0.1"
   spec.add_dependency "thor"
+  spec.add_dependency "yeptris", "~> 0.6.59"
 end
