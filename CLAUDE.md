@@ -183,7 +183,7 @@ The `exe/glossarist` executable uses Thor. Commands:
 
 - `lutaml-model` (~> 0.8.15) — serialization framework (YAML/XML/JSON-LD/Turtle)
 - `lutaml-store` (~> 0.3) — package store backing GlossaryStore
-- `relaton` (~> 3.0.0.pre.alpha) — bibliography database integration (relaton-3 monogem prerelease line); resolves from released gems, no git pins
+- `relaton` (~> 3.1) — bibliography database integration (relaton-3 monogem final line); resolves from released gems, no git pins
 - `sts` (~> 0.6) — ISO/NISO STS model for `Sts::Importer`
 - `tbx` (~> 0.1) — ISO 30042:2019 TBX model classes
 - `rdf-turtle` (~> 3.3), `shacl` (~> 0.4) — Turtle emission + SHACL validation against vendored concept-model shapes
