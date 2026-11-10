@@ -19,7 +19,7 @@ module Glossarist
           return [] if l10ns.empty?
 
           default = Config.default_language
-          return [] unless l10ns[default]
+          return [] if l10ns[default]
 
           [issue(
             "#{context.file_name}: no localization in the default " \

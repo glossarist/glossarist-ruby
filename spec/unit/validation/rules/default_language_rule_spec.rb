@@ -22,6 +22,7 @@ RSpec.describe Glossarist::Validation::Rules::DefaultLanguageRule do
     mc.uuid = "c-1"
     langs.each do |lang|
       mc.add_localization(Glossarist::LocalizedConcept.new(
+                            language_code: lang,
                             data: Glossarist::ConceptData.new(language_code: lang),
                           ))
     end
