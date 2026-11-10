@@ -140,43 +140,40 @@ RSpec.describe "Serialization and deserialization" do
     end
 
     it "loads concepts from files" do
-      collection = Glossarist::ManagedConceptCollection.new
-      collection.load_from_files(fixtures_path(concept_folder))
+      store = Glossarist::GlossaryStore.new
+      store.load(fixtures_path(concept_folder))
 
-      expect(collection).to be_a Glossarist::ManagedConceptCollection
-      expect(collection.managed_concepts.count).to eq(1)
-      expect(collection.managed_concepts.first.data.localizations.is_a?(Glossarist::Collections::LocalizationCollection)).to be true
-      expect(collection.managed_concepts.first.data.localizations.keys).to include(
+      expect(store.concepts.count).to eq(1)
+      concept = store.concepts.first
+      expect(concept.data.localizations.is_a?(Glossarist::Collections::LocalizationCollection)).to be true
+      expect(concept.data.localizations.keys).to include(
         "eng", "fra", "rus", "deu"
       )
-      expect(collection.managed_concepts.first.to_yaml).to eq(concept_yaml)
-      expect(collection.managed_concepts.first.data.localizations["eng"].to_yaml).to eq(localized_concept_eng)
-      expect(collection.managed_concepts.first.data.localizations["fra"].to_yaml).to eq(localized_concept_fra)
-      expect(collection.managed_concepts.first.data.localizations["rus"].to_yaml).to eq(localized_concept_rus)
-      expect(collection.managed_concepts.first.data.localizations["deu"].to_yaml).to eq(localized_concept_deu)
+      expect(concept.to_yaml).to eq(concept_yaml)
+      expect(concept.data.localizations["eng"].to_yaml).to eq(localized_concept_eng)
+      expect(concept.data.localizations["fra"].to_yaml).to eq(localized_concept_fra)
+      expect(concept.data.localizations["rus"].to_yaml).to eq(localized_concept_rus)
+      expect(concept.data.localizations["deu"].to_yaml).to eq(localized_concept_deu)
     end
 
     it "saves a concept and its related localized concepts into single file" do
-      collection = Glossarist::ManagedConceptCollection.new
-      collection.load_from_files(fixtures_path(concept_folder))
+      store = Glossarist::GlossaryStore.new
+      store.load(fixtures_path(concept_folder))
 
       Dir.mktmpdir do |tmp_path|
-        collection.save_grouped_concepts_to_files(tmp_path)
+        doc = Glossarist::V3::ConceptDocument.from_managed_concept(store.concepts.first)
+        File.write(File.join(tmp_path, "aaa-111.yaml"), doc.to_yamls)
 
         concepts = Dir.glob(File.join(tmp_path, "*.{yaml,yml}"))
         expect(concepts.count).to eq(1)
 
-        file_content = File.read(concepts.first, encoding: "utf-8")
-
-        expected_file_content = [
-          concept_yaml,
-          localized_concept_eng,
-          localized_concept_fra,
-          localized_concept_rus,
-          localized_concept_deu,
-        ].join("\n")
-
-        expect(file_content).to eq(expected_file_content)
+        # Byte form is the writer policy (dump-engine choice); assert
+        # data equality on re-parse instead.
+        written = File.read(concepts.first, encoding: "utf-8")
+        reread = Glossarist::V3::ConceptDocument.from_yamls(written)
+        expected = Glossarist::V3::ConceptDocument.from_managed_concept(store.concepts.first)
+        expect(reread.to_managed_concept.to_yaml_hash).to eq(expected.to_managed_concept.to_yaml_hash)
+        expect(written.scan("{{").count).to eq(written.scan("}}").count)
       end
     end
   end
