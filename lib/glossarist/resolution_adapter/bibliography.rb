@@ -15,7 +15,12 @@ module Glossarist
         return nil unless reference.is_a?(ConceptReference)
         return nil unless reference.source == @source_id
 
-        concepts.by_id_and(reference.concept_id, reference.version)
+        # concepts is any Enumerable of ManagedConcepts (Array or
+        # GlossaryStore); match the uuid or the data id, with version.
+        concepts.find do |c|
+          (c.uuid == reference.concept_id || c.data&.id == reference.concept_id) &&
+            (reference.version.nil? || c.version == reference.version)
+        end
       end
     end
   end

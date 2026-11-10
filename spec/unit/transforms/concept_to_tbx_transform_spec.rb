@@ -5,9 +5,9 @@ require "glossarist/transforms/concept_to_tbx_transform"
 
 RSpec.describe Glossarist::Transforms::ConceptToTbxTransform do
   let(:collection) do
-    c = Glossarist::ManagedConceptCollection.new
-    c.load_from_files(fixtures_path("concept_collection_v2"))
-    c
+    store = Glossarist::GlossaryStore.new
+    store.load(fixtures_path("concept_collection_v2"))
+    store.concepts
   end
 
   let(:concept) do

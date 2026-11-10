@@ -1,12 +1,17 @@
 # frozen_string_literal: true
 
 module Glossarist
+  # Deprecated: retained for ABI compatibility only. No internal callers
+  # remain — build concepts as a plain Array and persist through
+  # GlossaryStore. Removal is slated for the next major release.
   class ManagedConceptCollection
     include Enumerable
 
     attr_accessor :managed_concepts
 
     def initialize(file_key: nil)
+      warn "[glossarist] ManagedConceptCollection is deprecated; use a " \
+           "plain Array and GlossaryStore (removal slated for 3.0)"
       @managed_concepts = []
       @managed_concepts_ids = {}
       @file_key = file_key

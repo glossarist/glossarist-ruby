@@ -270,9 +270,7 @@ RSpec.describe Glossarist::ReferenceResolver do
     end
 
     let(:iso_collection) do
-      coll = Glossarist::ManagedConceptCollection.new
-      coll.store(iso_record)
-      coll
+      [iso_record]
     end
 
     it "returns nil without a bibliography adapter" do
@@ -354,8 +352,7 @@ RSpec.describe Glossarist::ReferenceResolver do
     it "classifies an external ref with matching bibliography adapter as 'internal-citation'" do
       record = Glossarist::ManagedConcept.of_yaml("data" => { "id" => "iso-7301" })
       record.version = "2024"
-      collection = Glossarist::ManagedConceptCollection.new
-      collection.store(record)
+      collection = [record]
 
       resolver = described_class.new
       resolver.register_bibliography("ISO", collection)

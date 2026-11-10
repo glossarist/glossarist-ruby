@@ -58,7 +58,7 @@ module Glossarist
         save_to_path(existing, dataset_path)
 
         ImportResult.new(
-          concepts: existing.managed_concepts,
+          concepts: existing,
           conflicts: result_state.conflicts,
           source_files: xml_files,
           skipped_count: result_state.skipped,
@@ -78,7 +78,7 @@ module Glossarist
           existing_mc = index[key]
 
           if existing_mc.nil?
-            existing.store(mc)
+            existing << mc
             index[key] = mc
           else
             state.conflicts << DuplicateConflict.new(
@@ -179,26 +179,26 @@ module Glossarist
       end
 
       def replace_in_collection(collection, old_mc, new_mc)
-        collection.managed_concepts.delete(old_mc)
-        collection.store(new_mc)
+        collection.delete(old_mc)
+        collection << new_mc
       end
 
       def load_existing(path)
-        collection = ManagedConceptCollection.new
+        collection = []
         if path.end_with?(".gcr")
           package = GcrPackage.load(path)
-          package.concepts.each { |mc| collection.store(mc) }
+          package.concepts.each { |mc| collection << mc }
         else
           GlossaryStore.new.tap do |s|
             s.load(path)
-          end.each_concept { |mc| collection.store(mc) }
+          end.each_concept { |mc| collection << mc }
         end
         collection
       end
 
       def save_to_path(collection, path)
         if path.end_with?(".gcr")
-          tmpdir = build_temp_dataset(collection.managed_concepts)
+          tmpdir = build_temp_dataset(collection)
           begin
             GC.start
             tmp_gcr = "#{path}.tmp.#{Process.pid}"
@@ -215,7 +215,7 @@ module Glossarist
             FileUtils.rm_f(tmp_gcr)
           end
         else
-          save_dataset(collection.managed_concepts, path)
+          save_dataset(collection, path)
         end
       end
 
