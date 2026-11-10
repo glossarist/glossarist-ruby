@@ -1,0 +1,212 @@
+= Glossarist dataset format specification
+
+This document specifies the V3 on-disk dataset format written and read by this gem (normative for what `GlossaryStore` accepts and emits). The concepts themselves are defined by the https://github.com/glossarist/concept-model[Glossarist concept model].
+
+== Dataset directory layout
+
+----
+dataset/
+├── metadata.yaml            # dataset metadata (optional but recommended)
+├── register.yaml            # register definition (shortname, subregisters)
+├── bibliography.yaml        # dataset bibliography (single wrapper key)
+├── concepts/
+│   └── <uuid>.yaml          # one concept document per file (multi-doc stream)
+├── relations/               # V3 n-ary relations, optional
+│   └── <comprehensive-id>/<slug>.yaml
+├── figures/                 # dataset-level non-verbal entities, optional
+│   └── <id>.yaml
+├── tables/
+│   └── <id>.yaml
+├── formulas/
+│   └── <id>.yaml
+└── images/                  # binary assets referenced by figures
+    └── <ref>.png|jpg|...
+----
+
+Layout detection is model-driven: `GlossaryStore#load_directory` dispatches to the V1 legacy reader, the legacy managed layout, the grouped-at-root layout, or the package layout above, based on what the directory contains. New datasets use the package layout.
+
+A dataset directory can be packaged as a `.gcr` (ZIP) file containing the same layout; `GlossaryStore#load_zip`/`save_zip` read and write it.
+
+== metadata.yaml
+
+A YAML mapping; the gem consumes:
+
+[,yaml]
+----
+shortname: my-glossary
+version: 1.0.0
+schema_version: "3"
+concept_count: 42
+----
+
+`schema_version` selects the document model (`"3"` → `V3::ConceptDocument`; anything else falls back by content). Unknown keys are preserved as metadata and round-tripped.
+
+== register.yaml
+
+A YAML mapping naming the register and its subregisters:
+
+[,yaml]
+----
+shortname: my-glossary
+subregisters:
+  eng:
+----
+
+Each subregister key is a language code; concepts belong to subregisters through their localizations.
+
+== Concept documents (concepts/<uuid>.yaml)
+
+A concept file is a **multi-document YAML stream**: document 0 is the concept, documents 1.. are its localizations. The filename stem is the concept's record `id` (a UUID, or a clause identifier for clause-keyed datasets such as `3.1.1.1.yaml`).
+
+[,yaml]
+----
+---
+id: 3a75582e-699c-4e08-b26a-3ebd6fb00102
+data:
+  identifier: 102-01-01
+  localized_concepts:
+    eng: 4b0e2358-79ba-5581-a8b9-17a34a2e1dce
+  sources: []
+---
+data:
+  identifier: 102-01-01
+  language_code: eng
+  terms:
+  - type: expression
+    normative_status: preferred
+    designation: concept
+  definition:
+  - content: A unit of thought formalized in {{concept:my-glossary:other-concept}}.
+  notes: []
+  examples: []
+  sources: []
+  date_accepted: '2023-01-01T00:00:00+00:00'
+id: 4b0e2358-79ba-5581-a8b9-17a34a2e1dce
+----
+
+Document 0 (`data:` payload):
+
+[cols="1m,1,2"]
+|===
+|Field |Type |Meaning
+
+|`id`
+|string
+|Record key; duplicated from the filename by the writer. Also seeds the concept `uuid` when the stream lacks one.
+
+|`data.identifier`
+|string
+|Human-facing concept identifier (term number).
+
+|`data.localized_concepts`
+|map lang → uuid
+|Links each language to its localization document.
+
+|`data.sources`, `data.domains`, `data.tags`, `data.figures`, `data.tables`, `data.formulas`
+|collections
+|Concept-level metadata references.
+
+|`related`
+|array
+|Concept-level `RelatedConcept`s (type + content). Lives at the concept level only in V3.
+|===
+
+Localization documents (`data:` payload = `ConceptData`):
+
+[cols="1m,1,2"]
+|===
+|Field |Type |Meaning
+
+|`language_code`
+|string (ISO 639)
+|Language of this localization.
+
+|`terms`
+|array of designations
+|`type` (`expression`, `abbreviation`, `symbol`, `letter_symbol`, `graphical_symbol`), `normative_status` (`preferred`, `admitted`, `deprecated`, `superseded`), `designation`, plus designation-specific fields.
+
+|`definition`
+|array
+|Each entry: `content` (rich text — see xref:rich-text.adoc[Rich text]), optional `sources`.
+
+|`notes`, `examples`
+|array
+|Same shape as `definition` entries.
+
+|`sources`
+|array
+|`origin` (citation) + `type` (`authoritative`, `clause`, ...).
+
+|`dates`
+|array
+|`type` (`accepted`, `amended`, ...) + `date` (ISO 8601).
+
+|`entry_status`, `review_type`, `classification`
+|string
+|Localization lifecycle fields.
+|===
+
+Both snake_case and camelCase keys are accepted on read; the writer emits snake_case.
+
+== Relations (relations/)
+
+One file per n-ary relation, named `<slug>.yaml` under the comprehensive concept's id:
+
+[,yaml]
+----
+---
+comprehensive:
+  ref: urn:my-glossary:concept:3a75582e-...
+partitives:
+- ref: urn:my-glossary:concept:4b0e2358-...
+  multiplicity: compulsory      # or optional / compulsory_multiple / ...
+  is_delimiting: false
+- ref: urn:my-glossary:concept:5c1f3469-...
+completeness: complete          # or partial
+criterion:
+  eng: physical structure
+----
+
+ISO 704 requires at least two partitives; `Validation::Rules` enforces structural invariants (GLS-2xx series).
+
+== bibliography.yaml
+
+The V3 wrapper-key form — a single mapping whose one key wraps an ordered array of typed entries:
+
+[,yaml]
+----
+bibliography:
+- id: iso-10241-1
+  type: citation
+  citation:
+    ref: ISO 10241-1
+    type: international-standard
+  bibdata:
+    ...relaton bibliography item...
+----
+
+`bibdata` carries a Relaton bibliography item; the wrapper form is glossarist's own wire shape and is not Relaton's format.
+
+== Non-verbal entities (figures/, tables/, formulas/)
+
+One typed document per file, referenced from concept data via `FigureReference`/`TableReference`/`FormulaReference`:
+
+[,yaml]
+----
+id: fig-1
+image: images/fig-1.png
+label: Figure 1
+----
+
+== Default language
+
+The dataset's primary language defaults to `"eng"`. It is customizable:
+
+* per dataset: `default_language: <ISO 639>` in `glossarist.yaml` in the working directory, or
+* programmatically: `Glossarist.config.default_language = "deu"`.
+
+`ManagedConcept#default_lang` returns the default-language localization, and validation rule GLS-311 requires a concept with localizations to carry one in that language.
+
+== Packaging (.gcr)
+
+`glossarist package <dataset>` produces a ZIP with `metadata.yaml`, `register.yaml`, `concepts/*.yaml` (plus the optional directories) and compiled export formats on request (`--compiled-formats tbx,jsonld,turtle,jsonl`). `glossarist validate` checks a dataset or `.gcr` against the validation rules; `glossarist upgrade` migrates V0/V1/V2 datasets to the current layout.

@@ -1,0 +1,55 @@
+= Rich text in concept content
+
+This document specifies what is allowed inside free-text content fields — `definition`/`notes`/`examples` `content`, designation `prefix`/`usage_info`/`field_of_application`, and related-concept `content` strings — and how they are parsed.
+
+== Content is a string
+
+Content fields are plain YAML scalars. Markup inside them is convention-based; the gem parses mentions (`{{...}}`) structurally and leaves everything else to renderers.
+
+== Inline mentions
+
+`{{...}}` delimits an inline mention. The grammar (enforced by `Glossarist::Mentions::Parser`):
+
+----
+{{ kind : target [ , label ] }}
+----
+
+* **kind** — one of: `concept`, `cite`, `fig`, `table`, `formula`, `bib`, `link`, `image`. Unknown kinds raise `Mentions::InvalidMentionError`.
+* **target** — kind-specific reference. For `concept`/`cite`/`bib`: `DATASET:ID` (optionally nested URN segments); for `link`: a URL; for `fig`/`table`/`formula`/`image`: a dataset-internal reference or path.
+* **label** — optional display text after the first comma (e.g. `{{cite:my-glossary:iso-10241,ISO 10241-1}}`).
+
+Mentions may appear anywhere in content. A mention token **must not be broken across lines by serialization**: glossarist's writer emits content without folding inside tokens (pinned by `spec/unit/mention_serialization_spec.rb`, glossarist#275).
+
+[,ruby]
+----
+Glossarist.parse_mentions("See {{concept:my-glossary:other-concept,other}}.")
+# => [{ kind: "concept", target: {dataset: "my-glossary", id: "other-concept"},
+#       label: "other", raw: "{{concept:...}}", start: 4, end: ... }, ...]
+----
+
+Text outside mentions is passed through verbatim; the parser returns `kind: "text"` segments for it.
+
+== Lightweight emphasis
+
+By convention, content carries GitHub-flavored *emphasis* markers that renderers honor:
+
+* `**bold**`
+* `*italic*`
+* `` `code` ``
+
+The gem itself does not parse these — they survive round-trips verbatim, and renderers (metanorma vocabulary rendering, concept-browser) convert them.
+
+== Stem expressions
+
+Mathematical content uses AsciiMath/LaTeX stem notation, `stem:[...]`, where the bracketed expression is rendered by the consumer's math engine (Plurimath family). Formulas referenced rather than inlined live in `formulas/` as dataset-level entities (see xref:data-format.adoc[the dataset format specification]).
+
+== What is not allowed
+
+* **Unbalanced mention delimiters** — a stray `{{` without `}}` is left as literal text by the parser but is reserved syntax; do not author it.
+* **Multi-line mentions** — a token must live on one line.
+* **HTML/XML markup** — not parsed, not rendered; use the emphasis conventions above.
+* **YAML anchors/aliases inside content** — aliases resolve on parse but make files dependent on emitter anchor naming; write content literally.
+
+== Round-trip contract
+
+Load → serialize preserves content byte-for-byte except for YAML scalar normalization (quoting style, line-wrapping outside tokens). Mention tokens, emphasis markers and stem expressions are never altered by the gem's writer.
