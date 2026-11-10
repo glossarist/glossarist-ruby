@@ -32,7 +32,9 @@ module Glossarist
 
     def to_managed_concept
       mc = concept
-      localizations.each { |l10n| mc.add_localization(l10n) }
+      # Files without a localizations key deserialize with a nil
+      # collection; treat that as empty.
+      (localizations || []).each { |l10n| mc.add_localization(l10n) }
       mc
     end
 
