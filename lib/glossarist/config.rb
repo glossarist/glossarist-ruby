@@ -22,7 +22,13 @@ module Glossarist
 
       @registered_classes = DEFAULT_CLASSES.dup
       @extension_attributes = @config["extension_attributes"] || []
+      @default_language = @config["default_language"] || "eng"
     end
+
+    # ISO 639 code of the dataset's primary language. Used by
+    # ManagedConcept#default_lang and the default-language validation
+    # rule; customizable via glossarist.yaml (`default_language:`).
+    attr_accessor :default_language
 
     def class_for(name)
       @registered_classes[name.to_sym]
@@ -43,6 +49,14 @@ module Glossarist
     class << self
       def class_for(name)
         instance.class_for(name)
+      end
+
+      def default_language
+        instance.default_language
+      end
+
+      def default_language=(lang)
+        instance.default_language = lang
       end
 
       def extension_attributes
