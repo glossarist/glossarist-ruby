@@ -141,7 +141,7 @@ module Glossarist
     end
 
     def default_lang
-      localization("eng") || localizations.values.first
+      localization(Config.default_language) || localizations.values.first
     end
 
     def all_sources
