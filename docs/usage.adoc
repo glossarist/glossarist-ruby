@@ -1,0 +1,134 @@
+= Creating and managing concepts programmatically
+
+This guide shows the in-memory API: building `ManagedConcept` objects, attaching localizations, and persisting them through `GlossaryStore`. For the on-disk format see xref:data-format.adoc[the dataset format specification]; for what may appear inside definition text see xref:rich-text.adoc[the rich-text specification].
+
+== Building a concept
+
+A `ManagedConcept` is the unit of a dataset. Its identity is the `uuid`; its language-independent metadata lives in `data` (`ManagedConceptData`); all language-dependent content lives in *localizations* (`LocalizedConcept`, keyed by ISO 639 code).
+
+[,ruby]
+----
+require "glossarist"
+
+concept = Glossarist::ManagedConcept.new(
+  data: Glossarist::ManagedConceptData.new(id: "102-01-01"),
+)
+concept.uuid = "3a75582e-699c-4e08-b26a-3ebd6fb00102"
+----
+
+== Adding a localization
+
+Each localization carries a `ConceptData` payload: designations, definitions, notes, examples, sources and dates.
+
+[,ruby]
+----
+l10n = Glossarist::LocalizedConcept.new(
+  language_code: "eng",
+  data: Glossarist::ConceptData.new(language_code: "eng"),
+)
+
+l10n.data.terms = [
+  Glossarist::Designation::Expression.new(
+    designation: "concept",
+    normative_status: "preferred",
+  ),
+]
+
+l10n.data.definition = [
+  Glossarist::DetailedDefinition.new(
+    content: "A {{concept:my-glossary:other-concept}} unit of thought.",
+  ),
+]
+
+l10n.data.examples = [
+  Glossarist::DetailedDefinition.new(content: "An example sentence."),
+]
+l10n.data.notes = [
+  Glossarist::DetailedDefinition.new(
+    content: "A note with a citation to {{cite:my-glossary:source-1,ISO 10241-1}}.",
+  ),
+]
+
+concept.add_localization(l10n)
+----
+
+`add_localization` stores one localization per language code; adding the same language twice replaces the first.
+
+The concept's *default language* localization is available through `concept.default_lang`. The default language is `"eng"` unless customized (see xref:data-format.adoc#default-language[Default language]).
+
+== Designations
+
+Designations are typed; use the subclass matching the designation kind:
+
+|===
+| Kind | Class | Extra fields
+
+| term / expression
+| `Designation::Expression`
+| `prefix`, `usage_info`, `field_of_application`, `grammar_info`
+
+| abbreviation
+| `Designation::Abbreviation` (subclass of Expression)
+| `acronym`, `initialism`, `truncation`
+
+| symbol
+| `Designation::Symbol`
+| —
+
+| letter symbol
+| `Designation::LetterSymbol`
+| `text`
+
+| graphical symbol
+| `Designation::GraphicalSymbol`
+| `text`, `image`
+|===
+
+All designations carry `normative_status` (`preferred`, `admitted`, `deprecated`, `superseded`) and may carry `sources`, `pronunciation`, `related` (designation-level relations such as `abbreviated_form_for`).
+
+== Relations
+
+Concept-level relationships are `RelatedConcept` objects on `concept.related`:
+
+[,ruby]
+----
+concept.related = [
+  Glossarist::RelatedConcept.new(
+    type: "broader",
+    content: { "eng" => "parent concept" },
+  ),
+]
+----
+
+The full relation-type vocabulary (ISO 10241-1, ISO 25964/SKOS, ISO 12620/TBX and designation-level types) is listed in `config.yml` under `related_concept.type`. N-ary partitive relations (`PartitiveRelation`) are covered in xref:data-format.adoc#partitive-relations[the dataset format specification].
+
+== Persisting
+
+`GlossaryStore` is the dataset abstraction — loading, saving, CRUD, validation and packaging all go through it.
+
+[,ruby]
+----
+store = Glossarist::GlossaryStore.new
+store.load_directory("path/to/dataset")   # or load_zip("dataset.gcr")
+
+store.concepts                            # all ManagedConcepts
+store.concept("3a75582e-...")             # fetch by uuid
+store.concept_exists?("3a75582e-...")
+store.add_concept(concept)
+store.remove_concept("3a75582e-...")
+
+store.save_directory("path/to/dataset")   # write back
+store.save_zip("dataset.gcr")             # .gcr package
+----
+
+== Validating
+
+[,ruby]
+----
+result = Glossarist::DatasetValidator.new.validate("path/to/dataset")
+result.valid?    # => true/false
+result.errors    # array of messages
+result.warnings
+----
+
+Validation rules are auto-registered from `lib/glossarist/validation/rules/`; the default-language presence check (GLS-311) uses the dataset's default language (xref:data-format.adoc#default-language[Default language]).

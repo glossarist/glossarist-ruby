@@ -1949,6 +1949,12 @@ end
 This gem is developed, maintained and funded by
 https://www.ribose.com[Ribose Inc.]
 
+== Further documentation
+
+* xref:docs/usage.adoc[Creating and managing concepts] — the in-memory API: `ManagedConcept`, localizations, designations, relations, persistence through `GlossaryStore`
+* xref:docs/data-format.adoc[Dataset format specification] — the V3 on-disk layout: concept documents, relations, bibliography, non-verbal entities, packaging
+* xref:docs/rich-text.adoc[Rich text] — what is allowed inside definition content: inline mentions, emphasis, stem expressions
+
 == License
 
 The gem is available as open source under the terms of the
