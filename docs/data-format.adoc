@@ -150,36 +150,37 @@ Both snake_case and camelCase keys are accepted on read; the writer emits snake_
 
 == Relations (relations/)
 
-One file per n-ary relation, named `<slug>.yaml` under the comprehensive concept's id:
+One file per n-ary relation (hyperedge), named `<criterion-slug>.yaml` under the comprehensive concept's id. The `type` field distinguishes the relation kind (`partitive_relation`, `generic_relation`, ...):
 
 [,yaml]
 ----
 ---
+type: partitive_relation
 comprehensive:
-  ref: urn:my-glossary:concept:3a75582e-...
-partitives:
-- ref: urn:my-glossary:concept:4b0e2358-...
-  multiplicity: compulsory      # or optional / compulsory_multiple / ...
+  source: VIM
+  id: '112-02-09'
+members:
+- ref:
+    source: VIM
+    id: '112-02-10'
+  presence: required          # or optional (ISO 704 line style)
+  count: exactly_one          # or at_least_one / multiple
   is_delimiting: false
-- ref: urn:my-glossary:concept:5c1f3469-...
+- ref:
+    source: VIM
+    id: '112-03-26'
 completeness: complete          # or partial
 criterion:
-  eng: physical structure
+  eng: measurement result composition
 ----
 
-ISO 704 requires at least two partitives; `Validation::Rules` enforces structural invariants (GLS-2xx series).
+ISO 704 requires at least two members per relation; `Validation::Rules` enforces structural invariants (GLS-2xx series).
 
-[WARNING]
+A single comprehensive concept can carry N hyperedges (one per criterion of subdivision), each in its own file under `relations/<comprehensive-id>/`. Legacy files with a `partitives:` key (member list with the `multiplicity` enum instead of the `presence`/`count` decomposition) are read for backward compatibility; the writer emits the `members` form above.
+
+[NOTE]
 --
-*Wire vocabulary transition.* The names above are the v3.2 wire format and are transitional. The concept-model ontology already carries the native form: `gloss:PartitiveHyperedge` / `gloss:ConceptSystemMember` with `gloss:hasMember` as the native property — the v3.2 shapes' `hasPartitiveRelation` path is a wire alias, and the ontology notes the equivalence in-tree. This gem's V3 layer is likewise hyperedge-native (`V3::AbstractHyperedge` -> `PartitiveHyperedge` / `GenericHyperedge`, per-file `relations/` written via `HyperedgeWriter`); the `partitives` / `PartitiveRelation` spelling here is the serialization alias.
-
-In flight, affecting this section:
-
-* hyperedge nativization — the hyperedge/member model becomes the documented primary form end to end
-* glossarist-js bridge removals (BRIDGES.md) — the JS translation layer between the legacy names and the native models goes away
-* the v3.3 wire rename of `partitives` -> `members` (path `hasPartitiveRelation` -> `hasMember`)
-
-Read this section as the v3.2 wire contract; the v3.3 wire renames the keys, not the semantics.
+*Remaining transition step.* The concept-model shapes' property path still reads `hasPartitiveRelation`; the v3.3 shape bump renames it to `hasMember` (the native ontology property). The wire keys and semantics shown here are current.
 --
 
 == bibliography.yaml
