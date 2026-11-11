@@ -169,6 +169,19 @@ criterion:
 
 ISO 704 requires at least two partitives; `Validation::Rules` enforces structural invariants (GLS-2xx series).
 
+[WARNING]
+--
+*Wire vocabulary transition.* The names above are the v3.2 wire format and are transitional. The concept-model ontology already carries the native form: `gloss:PartitiveHyperedge` / `gloss:ConceptSystemMember` with `gloss:hasMember` as the native property — the v3.2 shapes' `hasPartitiveRelation` path is a wire alias, and the ontology notes the equivalence in-tree. This gem's V3 layer is likewise hyperedge-native (`V3::AbstractHyperedge` -> `PartitiveHyperedge` / `GenericHyperedge`, per-file `relations/` written via `HyperedgeWriter`); the `partitives` / `PartitiveRelation` spelling here is the serialization alias.
+
+In flight, affecting this section:
+
+* hyperedge nativization — the hyperedge/member model becomes the documented primary form end to end
+* glossarist-js bridge removals (BRIDGES.md) — the JS translation layer between the legacy names and the native models goes away
+* the v3.3 wire rename of `partitives` -> `members` (path `hasPartitiveRelation` -> `hasMember`)
+
+Read this section as the v3.2 wire contract; the v3.3 wire renames the keys, not the semantics.
+--
+
 == bibliography.yaml
 
 The V3 wrapper-key form — a single mapping whose one key wraps an ordered array of typed entries:
